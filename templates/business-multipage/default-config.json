@@ -1,0 +1,111 @@
+{
+  "site": {
+    "name": "Mein Unternehmen",
+    "colors": {
+      "primary": "#2d5a27",
+      "secondary": "#e8f0e6",
+      "background": "#faf8f4",
+      "text": "#1a2218"
+    },
+    "branding": {
+      "logoText": "Mein Unternehmen"
+    },
+    "navigation": ["home", "about", "services", "contact"],
+    "footer": {
+      "text": "Ihr zuverlässiger Partner vor Ort.",
+      "legalLinks": [
+        { "label": "Impressum", "pageKey": "legal-imprint" },
+        { "label": "Datenschutz", "pageKey": "legal-privacy" }
+      ]
+    }
+  },
+  "pages": {
+    "home": {
+      "template": "home",
+      "slug": "",
+      "title": "Startseite",
+      "metaDescription": "Willkommen bei unserem Unternehmen",
+      "config": {
+        "hero": {
+          "headline": "Willkommen bei unserem Unternehmen",
+          "subtitle": "Ihr zuverlässiger Partner vor Ort.",
+          "imageUrl": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80",
+          "badge": "",
+          "ctaText": "Jetzt Anfrage senden",
+          "ctaLink": "kontakt"
+        },
+        "highlights": [
+          { "icon": "⭐", "value": "100+", "label": "Zufriedene Kunden" },
+          { "icon": "📅", "value": "5+", "label": "Jahre Erfahrung" }
+        ]
+      }
+    },
+    "about": {
+      "template": "about",
+      "slug": "ueber-uns",
+      "title": "Über uns",
+      "metaDescription": "Erfahren Sie mehr über unser Unternehmen",
+      "config": {
+        "title": "Über uns",
+        "story": "Wir sind ein engagiertes Unternehmen mit Leidenschaft für unsere Arbeit.",
+        "story2": "",
+        "team": [],
+        "imageUrl": ""
+      }
+    },
+    "services": {
+      "template": "services",
+      "slug": "leistungen",
+      "title": "Leistungen",
+      "metaDescription": "Unsere Dienstleistungen im Überblick",
+      "config": {
+        "title": "Unsere Leistungen",
+        "intro": "Entdecken Sie unser umfassendes Leistungsangebot.",
+        "items": [
+          { "icon": "⚙️", "title": "Service 1", "description": "Beschreibung der ersten Dienstleistung." },
+          { "icon": "🔧", "title": "Service 2", "description": "Beschreibung der zweiten Dienstleistung." }
+        ]
+      }
+    },
+    "contact": {
+      "template": "contact",
+      "slug": "kontakt",
+      "title": "Kontakt",
+      "metaDescription": "Nehmen Sie Kontakt mit uns auf",
+      "config": {
+        "title": "Kontakt",
+        "address": "",
+        "phone": "",
+        "email": "",
+        "hours": "",
+        "mapEmbedUrl": ""
+      }
+    },
+    "legal-imprint": {
+      "template": "legal-imprint",
+      "slug": "impressum",
+      "title": "Impressum",
+      "config": {
+        "companyName": "",
+        "legalForm": "",
+        "address": "",
+        "phone": "",
+        "email": "",
+        "vatId": "",
+        "registerCourt": "",
+        "registerNumber": "",
+        "ceo": ""
+      }
+    },
+    "legal-privacy": {
+      "template": "legal-privacy",
+      "slug": "datenschutz",
+      "title": "Datenschutz",
+      "config": {
+        "companyName": "",
+        "address": "",
+        "email": ""
+      }
+    }
+  }
+}

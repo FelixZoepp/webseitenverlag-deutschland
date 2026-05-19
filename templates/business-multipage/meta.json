@@ -1,0 +1,7 @@
+{
+  "id": "business-multipage",
+  "name": "Business Multi-Page",
+  "description": "Professionelle Multi-Page Website mit Startseite, Über uns, Leistungen, Kontakt und rechtlichen Seiten.",
+  "pages": ["home", "about", "services", "contact", "legal-imprint", "legal-privacy"],
+  "requiredPages": ["home"]
+}
