@@ -319,7 +319,7 @@ export const flagshipRestaurantSeed: FlagshipConfig = {
       headline: 'Man kommt wieder. [[Versprochen]].',
       quotes: [
         { text: 'Zum Jahrestag war der Tisch ungefragt mit Rosenblättern geschmückt – hausgemachtes Essen, schneller Service, wunderbare Atmosphäre. Wir kommen wieder.', initialen: 'EH', name: 'Eric H.', meta: 'Jahrestag im PANE VINO' },
-        { text: 'Samstagabend, volles Lokal – und trotzdem lief alles perfekt. So freundlich und kompetent wurden wir lange nicht bedient.', initialen: 'AF', name: 'Anton F.', meta: 'Erster Besuch, nicht der letzte' },
+        { text: 'Samstagabend, volles Lokal – und trotzdem lief alles perfekt. So aufmerksam wurden wir lange nicht bedient.', initialen: 'AF', name: 'Anton F.', meta: 'Erster Besuch, nicht der letzte' },
         { text: 'Ein gepflegtes, charmantes Lokal mit ausgezeichneter Küche – und einem Service, der sich rührend um unsere Gesellschaft gekümmert hat.', initialen: 'SL', name: 'Sergio L.', meta: 'Pranzo mit der Familie' },
       ],
     },
