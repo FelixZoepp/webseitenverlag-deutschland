@@ -1,13 +1,15 @@
 /**
- * Vertragslogik 24/24/3 (Mission §6/§9):
- *   - 24 Monate Erstlaufzeit
- *   - automatische Verlängerung um 24 Monate
- *   - 3 Monate Kündigungsfrist zum Laufzeitende
+ * Vertragslogik Hauptprodukt (Mission §6/§9) — Standard-Konditionen kommen
+ * AUSSCHLIESSLICH aus config/vertraege.ts (aktuell 24/12/3). Die Rechnung
+ * für Bestandsverträge liest immer die Vertragszeile, nie die Config.
  *
  * Alles Datums-Rechnen auf UTC-Kalendertagen (date-Spalten, keine Uhrzeiten).
+ * Konvention: `ende` ist der LETZTE Tag der Laufzeit (Kauf 01.08.2026 +
+ * 24 Monate → Laufzeitende 31.07.2028).
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { HAUPTPRODUKT_KONDITIONEN } from '@/config/vertraege'
 
 export interface VertragsKonditionen {
   laufzeit_monate: number
@@ -15,10 +17,11 @@ export interface VertragsKonditionen {
   kuendigungsfrist_monate: number
 }
 
+/** Einzige Quelle: config/vertraege.ts — hier nur auf DB-Spaltennamen gemappt. */
 export const STANDARD_KONDITIONEN: VertragsKonditionen = {
-  laufzeit_monate: 24,
-  verlaengerung_monate: 24,
-  kuendigungsfrist_monate: 3,
+  laufzeit_monate: HAUPTPRODUKT_KONDITIONEN.mindestlaufzeit_monate,
+  verlaengerung_monate: HAUPTPRODUKT_KONDITIONEN.verlaengerung_monate,
+  kuendigungsfrist_monate: HAUPTPRODUKT_KONDITIONEN.kuendigungsfrist_monate,
 }
 
 /** Monate auf ein ISO-Datum (yyyy-mm-dd) addieren, Monatsende-sicher (31.01. + 1M → 28./29.02.) */
@@ -34,13 +37,23 @@ export function heuteIso(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-/** Ende der Erstlaufzeit */
-export function vertragsende(beginn: string, laufzeitMonate: number): string {
-  return addiereMonate(beginn, laufzeitMonate)
+/** Einen Kalendertag von einem ISO-Datum abziehen (UTC-sicher). */
+function minusEinTag(isoDatum: string): string {
+  const [j, m, t] = isoDatum.split('-').map(Number)
+  return new Date(Date.UTC(j, m - 1, t - 1)).toISOString().slice(0, 10)
 }
 
 /**
- * Wirksames Vertragsende nach 24/24/3:
+ * Ende der Erstlaufzeit = LETZTER Tag der Laufzeit
+ * (Kauf 01.08.2026, 24 Monate → 31.07.2028).
+ */
+export function vertragsende(beginn: string, laufzeitMonate: number): string {
+  return minusEinTag(addiereMonate(beginn, laufzeitMonate))
+}
+
+/**
+ * Wirksames Vertragsende nach der Konditionen-Regel der VERTRAGSZEILE
+ * (laufzeit/verlaengerung/frist, Standard aktuell 24/12/3):
  * Kündigung wirkt zum aktuellen Laufzeitende, wenn sie spätestens
  * `kuendigungsfrist_monate` davor eingeht — sonst verlängert sich der
  * Vertrag um `verlaengerung_monate` (ggf. mehrfach, falls das Ende bereits

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth-helpers'
 
-/** Verträge (24/24/3) + offene manuelle Aufgaben für die Admin-Sicht. */
+/** Verträge (Konditionen je Vertragszeile) + offene manuelle Aufgaben für die Admin-Sicht. */
 export async function GET() {
   const auth = await requireAdmin()
   if (!auth.ok) return auth.response

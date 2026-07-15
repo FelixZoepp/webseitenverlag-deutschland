@@ -4,7 +4,7 @@ import { getStripe } from '@/lib/stripe'
 import { createManualTask, heuteIso, wirksamesKuendigungsdatum } from '@/lib/contracts'
 
 /**
- * Kündigung eines Vertrags (24/24/3) durch den Admin — z.B. wenn der Kunde
+ * Kündigung eines Vertrags (Konditionen aus der Vertragszeile) durch den Admin — z.B. wenn der Kunde
  * per Mail/Brief kündigt. Berechnet das wirksame Vertragsende nach
  * Kündigungsfrist, setzt den Vertrag auf GEKUENDIGT und versucht best-effort,
  * das Stripe-Abo zum Laufzeitende zu beenden.

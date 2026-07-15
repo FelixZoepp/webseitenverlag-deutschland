@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { FileSignature, AlertTriangle, Check, X, Loader2, Ban } from 'lucide-react'
+import { konditionenKurz } from '@/config/vertraege'
 
 interface Vertrag {
   id: string
@@ -149,7 +150,7 @@ export default function VertraegePage() {
       <div className="topbar fade-up">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
           <span className="tb-eyebrow">Abrechnung</span>
-          <span className="tb-heading">Verträge (24/24/3)</span>
+          <span className="tb-heading">Verträge ({konditionenKurz()})</span>
         </div>
         <div style={{ flex: 1 }} />
         <span style={{ fontSize: '12px', color: 'var(--za-fg-3)' }}>

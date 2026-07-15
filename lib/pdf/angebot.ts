@@ -1,6 +1,7 @@
 import { createDoc, docToBuffer, drawHeader, drawFooter, drawSectionTitle, drawKeyValue, drawSignatureLine, formatEuro, formatDate, BRAND } from './helpers'
 import { getPackage, type PackageTier } from '../packages'
 import { getUpsellModule } from '../upsells'
+import { HAUPTPRODUKT_KONDITIONEN } from '@/config/vertraege'
 
 export interface AngebotPDFData {
   angebotsNummer: string
@@ -133,7 +134,7 @@ export async function generateAngebotPDF(data: AngebotPDFData): Promise<Buffer> 
   doc.fontSize(9).font('Helvetica').fillColor('#6B7280')
     .text('Alle Preise verstehen sich netto zzgl. der gesetzlichen Umsatzsteuer.', { lineGap: 3 })
     .text('Die Vertragslaufzeit beginnt mit dem Datum der Unterschrift.')
-    .text('Kündigung ist zum Vertragsende mit einer Frist von 3 Monaten möglich.')
+    .text(`Kündigung ist zum Vertragsende mit einer Frist von ${HAUPTPRODUKT_KONDITIONEN.kuendigungsfrist_monate} Monaten möglich.`)
 
   // Signatur
   const sigY = Math.max(doc.y + 40, 660)

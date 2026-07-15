@@ -201,12 +201,13 @@ test.describe('Zero-Fulfillment-Journey (Stripe-Testmode)', () => {
 
       const { data: vertrag } = await db
         .from('contracts')
-        .select('status, paket, laufzeit_monate')
+        .select('status, paket, laufzeit_monate, verlaengerung_monate')
         .eq('customer_id', customerId)
         .eq('paket', 'business')
         .maybeSingle()
       expect(vertrag?.status).toBe('AKTIV')
       expect(vertrag?.laufzeit_monate).toBe(24)
+      expect(vertrag?.verlaengerung_monate).toBe(12)
 
       const { data: demo } = await db.from('demos').select('status').eq('id', demoId).single()
       expect(demo!.status).toBe('CONVERTED')

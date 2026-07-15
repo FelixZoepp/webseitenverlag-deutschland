@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { konditionenKurz } from '@/config/vertraege'
 import './admin.css'
 
 export const dynamic = 'force-dynamic'
@@ -74,7 +75,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </Link>
             <Link href="/admin/vertraege" className="sb-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="16" height="16"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>
-              Verträge (24/24/3)
+              Verträge ({konditionenKurz()})
             </Link>
           </div>
 

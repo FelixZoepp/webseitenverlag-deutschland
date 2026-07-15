@@ -5,6 +5,7 @@
 
 import Stripe from 'stripe'
 import { getPackage, PackageTier } from './packages'
+import { vertragsKonditionenText } from '@/config/vertraege'
 
 let stripeClient: Stripe | null = null
 
@@ -31,9 +32,21 @@ export async function createDemoCheckoutSession(params: {
 }): Promise<{ url: string; sessionId: string }> {
   const pkg = getPackage(params.paket)
 
+  // Vertragskonditionen transparent im Checkout (24/12/3 aus config/vertraege.ts).
+  // Consent-Checkbox (consent_collection) braucht eine in den Stripe-Settings
+  // hinterlegte AGB-URL — sonst lehnt die API die Session ab. Deshalb erst
+  // aktiv, wenn STRIPE_TOS_CONSENT=1 gesetzt ist (WARTELISTE).
+  const konditionen = vertragsKonditionenText()
+  const mitConsent = process.env.STRIPE_TOS_CONSENT === '1'
+
   const session = await getStripe().checkout.sessions.create({
     mode: 'subscription',
     locale: 'de',
+    custom_text: {
+      submit: { message: konditionen },
+      ...(mitConsent ? { terms_of_service_acceptance: { message: konditionen } } : {}),
+    },
+    ...(mitConsent ? { consent_collection: { terms_of_service: 'required' as const } } : {}),
     line_items: [
       {
         quantity: 1,

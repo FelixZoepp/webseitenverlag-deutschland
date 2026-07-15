@@ -1,6 +1,6 @@
 /**
  * Stripe-Webhook (Phase E, Mission §9):
- *   checkout.session.completed   → Auto-Provisioning + Vertrag (24/24/3)
+ *   checkout.session.completed   → Auto-Provisioning + Vertrag (Konditionen aus config/vertraege.ts)
  *   invoice.paid                 → Mahnstufe zurücksetzen, Site entsperren
  *   invoice.payment_failed       → Dunning (Stufe 1–3, Stufe 3 sperrt die Site)
  *   customer.subscription.updated→ Kündigung via Stripe (cancel_at_period_end)
@@ -234,7 +234,7 @@ async function handleCheckoutCompleted(supabase: SupabaseClient, session: Stripe
     })
     .eq('id', demoId)
 
-  // 5. Vertrag anlegen (24/24/3) — Fehler blockiert das Provisioning nicht,
+  // 5. Vertrag anlegen (Standard-Konditionen aus config/vertraege.ts) — Fehler blockiert das Provisioning nicht,
   //    sondern wird als manuelle Aufgabe sichtbar (Demo ist bereits CONVERTED,
   //    ein Stripe-Retry würde sonst doppelt provisionieren)
   const { data: existingContract } = stripeSubscriptionId
@@ -364,7 +364,7 @@ async function handleUpsellCheckout(supabase: SupabaseClient, session: Stripe.Ch
     }
 
     // Bestehenden AKTIV-Vertrag auf das neue Paket heben (Laufzeit bleibt),
-    // neue Subscription verknüpfen — KEIN zweiter 24/24/3-Vertrag.
+    // neue Subscription verknüpfen — KEIN zweiter Hauptprodukt-Vertrag.
     const { data: hauptVertrag } = await supabase
       .from('contracts')
       .select('id, stripe_subscription_id')
@@ -779,7 +779,7 @@ async function handleSubscriptionUpdated(supabase: SupabaseClient, subscription:
   await createManualTask(supabase, {
     typ: 'KUENDIGUNG',
     titel: `Kündigung über Stripe: ${kontakt.name}`,
-    beschreibung: `Subscription ${subscription.id} wurde auf cancel_at_period_end gesetzt. Vertraglich wirksames Ende nach 24/24/3: ${wirksamZum}. Prüfen, ob Stripe-Ende und Vertragsende zusammenpassen (Restlaufzeit ggf. nachberechnen).`,
+    beschreibung: `Subscription ${subscription.id} wurde auf cancel_at_period_end gesetzt. Vertraglich wirksames Ende nach den Konditionen der Vertragszeile (${contract.laufzeit_monate}/${contract.verlaengerung_monate}/${contract.kuendigungsfrist_monate}): ${wirksamZum}. Prüfen, ob Stripe-Ende und Vertragsende zusammenpassen (Restlaufzeit ggf. nachberechnen).`,
     customer_id: contract.customer_id,
     contract_id: contract.id,
     quelle: 'stripe-webhook',

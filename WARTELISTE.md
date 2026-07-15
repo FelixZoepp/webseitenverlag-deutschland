@@ -28,7 +28,8 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 - [ ] **KICKOFF_MODE entscheiden** (`auto` oder `call`, Env-Var): steuert, ob der Kickoff-Touchpoint automatisch läuft oder du persönlich anrufst. Ohne Env-Var: `auto`
 
 ## Später (vor Kunden-Go-Live)
-- [ ] AGB / Vertragswerk vom Anwalt prüfen lassen (24/24/3-Konditionen)
+- [ ] **AGB erstellen (Anwalt)**: Werte 24/12/3 absegnen + Vertrag als Dauerschuldverhältnis (laufende Leistung: Hosting, Pflege, Editor, Updates) ausgestalten, nicht als Werkvertrag. Hintergrund: 24-Monats-VERLÄNGERUNG per AGB ist im B2B nach § 307 BGB angreifbar, 12 Monate gelten als robust — deshalb Standard seit 2026-07-15 auf 24/12/3 (`config/vertraege.ts`)
+- [ ] **Stripe-Consent-Checkbox aktivieren** (`STRIPE_TOS_CONSENT=1`): Sobald die AGB stehen, AGB-URL in den Stripe-Settings (Dashboard → Einstellungen → Zahlungsseite) hinterlegen und dann die Env-Var setzen — erst dann verlangt der Checkout den AGB-Haken (`consent_collection`). Ohne hinterlegte URL lehnt die Stripe-API die Session ab, deshalb ist die Checkbox bis dahin deaktiviert; der Konditionen-Wortlaut steht aber immer unter dem Kaufen-Button (`custom_text.submit`)
 - [ ] Golden-Set: 10 echte Firmen in `test/golden_set.json` eintragen (5 mit Website, 3 nur Google-Eintrag, 2 ohne alles — aktuell Platzhalter mit `"platzhalter": true`; Check läuft mit `npm run ci:golden-set`)
 - [ ] Registrar-Zugang (Domains für Kunden), Google Business Profile API, Ads-Konto-Zugang — bis dahin läuft der Mock-Registrar (`REGISTRAR_PROVIDER=mock`, Neuregistrierungen werden simuliert)
 - [ ] DataForSEO-Zugang (`DATAFORSEO_LOGIN` + `DATAFORSEO_PASSWORD`) für echte Rank-Reports im SEO-Abo; ohne Keys liefert der technische SEO-Check einen Stub statt Sichtbarkeitsdaten
