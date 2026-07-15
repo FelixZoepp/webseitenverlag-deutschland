@@ -3,12 +3,12 @@
 Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 
 ## Sofort (für aktuellen Stand)
-- [ ] **Migrationen 013–020 in Supabase ausführen** (`013_demos.sql`, `014_stripe.sql`, `015_leads.sql`, `016_template_library.sql`, `017_demos_engine.sql`, `018_contracts.sql`, `019_portal.sql`, `020_phase_g.sql` — 017 nötig für Library-Demos, 018 für Verträge/Dunning, 019 für Wizard + Upsell-Käufe, 020 für Domains/SEO-Plan/GBP/Ads)
-- [ ] **Library seeden** (nach Migration 016): `npx tsx scripts/seed-library.ts` (Env: NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY)
-- [ ] **Vercel Env-Vars setzen**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `LEAD_NOTIFY_EMAIL`
+- [x] **Migrationen 013–020 in Supabase ausführen** (erledigt 2026-07-15 via Supabase MCP) (`013_demos.sql`, `014_stripe.sql`, `015_leads.sql`, `016_template_library.sql`, `017_demos_engine.sql`, `018_contracts.sql`, `019_portal.sql`, `020_phase_g.sql` — 017 nötig für Library-Demos, 018 für Verträge/Dunning, 019 für Wizard + Upsell-Käufe, 020 für Domains/SEO-Plan/GBP/Ads)
+- [x] **Library seeden** (erledigt 2026-07-15: 40 Sektionen, 8 Kompositionen, 15 Assets)
+- [ ] **Vercel Env-Vars setzen**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `LEAD_NOTIFY_EMAIL` (fehlen noch; `SUPABASE_SERVICE_ROLE_KEY` ist bereits gesetzt)
 - [ ] **Stripe-Webhook-Endpoint anlegen**: Dashboard → Webhooks → `https://<domain>/api/webhooks/stripe`, Events: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted` (alle 5 nötig für Verträge + Dunning, Phase E)
 - [ ] **Resend-Domain verifizieren** (für Zugangs-/Lead-Mails von eigener Domain)
-- [ ] **Migration 021 ausführen** (`021_monitoring.sql` — nutzungs_events für die tägliche Kosten-Summary; ohne Migration loggt lib/nutzung.ts nur Warnungen, nichts bricht)
+- [x] **Migration 021 ausführen** (erledigt 2026-07-15 via Supabase MCP)
 - [ ] **Slack-Webhooks anlegen** (optional, sonst Log-Stub): `SLACK_WEBHOOK_ERRORS` (#errors, Job-Fails) + `SLACK_WEBHOOK_MONEY` (#money, tägliche Kosten-Summary 6:30 Uhr)
 - [ ] **Sentry entscheiden**: bewusst NICHT eingebunden solange kein DSN existiert — Slack #errors + Vercel-Logs decken den Start ab. Wenn gewünscht: Sentry-Projekt anlegen, DSN liefern, dann bauen wir es ein
 - [ ] **Git-Remote anlegen + pushen**: Das Repo hat aktuell KEIN Remote. Der CI-Workflow (`.github/workflows/ci.yml` — Lint, Typecheck, Golden-Set, Lighthouse-Budgets) greift erst nach dem ersten Push zu GitHub. Bis dahin lokal: `npm run ci:golden-set` + `npm run ci:lighthouse`
