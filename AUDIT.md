@@ -59,7 +59,7 @@ Bestandsaufnahme des Ist-Zustands mit Einordnung **KEEP / REFACTOR / KILL** geme
 | K5 | Feature-Flags `qontoActive`, `easybillActive` in `lib/feature-flags.ts` | Tote Flags ohne Implementierung dahinter |
 | K6 | `lib/defaults.ts` | Existiert, wird nirgends importiert — tot |
 | K7 | `scripts/migrate-to-multipage.ts` | Einmal-Skript, erledigt |
-| K8 | `lib/template-renderer.ts` (535 LOC, Legacy-Single-Page) | **Vorsicht: 4 Importstellen** — erst in Phase C prüfen, ob alle Aufrufer auf `renderPremiumTemplate` umgestellt sind, dann _legacy. Bis dahin: nicht anfassen |
+| K8 | `lib/template-renderer.ts` (535 LOC, Legacy-Single-Page) | **Vorsicht: 4 Importstellen** — erst in Phase C prüfen, ob alle Aufrufer auf `renderPremiumTemplate` umgestellt sind, dann _legacy. Bis dahin: nicht anfassen. **Korrektur Phase C:** kein Drop-in-Tausch möglich — Datenformen inkompatibel (flaches `SiteConfig` vs. branchenspezifische Premium-Configs); alle 4 Aufrufer nutzen `renderTemplate` nur als Legacy-Fallback für Bestands-Sites (Premium läuft dort bereits über `renderPremiumTemplate`), und `config_versions` enthält Legacy-Configs, die der Rollback-Pfad rendern muss. Ablösung erst, wenn Bestands-Sites auf Library-Rendering migriert sind (Phase F/G) |
 
 ## Bekannte Lücken (aus Review 2026-07-15, hier bestätigt)
 
