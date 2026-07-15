@@ -20,6 +20,14 @@ interface Demo {
   created_at: string
   paket?: string | null
   payment_link_url?: string | null
+  kosten_cent?: number | null
+}
+
+/** Approved Branchen-Vorlagen aus der Branchen-Fabrik (F5) */
+interface FlagshipBranche {
+  branche_key: string
+  name: string
+  quality_status: string
 }
 
 const STATUS_STYLES: Record<string, { label: string; bg: string; fg: string }> = {
@@ -41,6 +49,9 @@ function templateName(id: string): string {
     const [, slug, stil] = id.split('.')
     return `Library · ${slug} · ${stil}`
   }
+  if (id.startsWith('flagship:')) {
+    return `Flagship · ${id.slice('flagship:'.length)}`
+  }
   return TEMPLATE_CATALOG.find((t) => t.id === id)?.name || id
 }
 
@@ -52,6 +63,7 @@ function formatDate(iso: string | null): string {
 export default function DemosPage() {
   const [demos, setDemos] = useState<Demo[]>([])
   const [loading, setLoading] = useState(true)
+  const [flagshipBranchen, setFlagshipBranchen] = useState<FlagshipBranche[]>([])
 
   // Form
   const [prospectName, setProspectName] = useState('')
@@ -81,6 +93,20 @@ export default function DemosPage() {
 
   useEffect(() => { loadDemos() }, [loadDemos])
 
+  // Approved Flagship-Vorlagen für die Template-Auswahl (F5)
+  useEffect(() => {
+    fetch('/api/admin/branchen')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.branchen) {
+          setFlagshipBranchen(
+            (data.branchen as FlagshipBranche[]).filter((b) => b.quality_status === 'approved')
+          )
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault()
     if (!prospectName.trim() || !templateId || generating) return
@@ -89,8 +115,18 @@ export default function DemosPage() {
     setWarning(null)
     try {
       const istLibrary = templateId.startsWith('library:')
+      const istFlagship = templateId.startsWith('flagship:')
       let payload: Record<string, unknown>
-      if (istLibrary) {
+      if (istFlagship) {
+        payload = {
+          engine: 'flagship',
+          prospectName: prospectName.trim(),
+          websiteUrl: websiteUrl.trim(),
+          branche: templateId.slice('flagship:'.length),
+          ort: ort.trim() || null,
+          notes: notes.trim() || null,
+        }
+      } else if (istLibrary) {
         const [, branche, stil] = templateId.split(':')
         payload = {
           engine: 'library',
@@ -278,6 +314,15 @@ export default function DemosPage() {
               <select value={templateId} onChange={(e) => setTemplateId(e.target.value)}
                 style={{ ...inputStyle, cursor: 'pointer' }} disabled={generating} required>
                 <option value="">— Template wählen —</option>
+                {flagshipBranchen.length > 0 && (
+                  <optgroup label="Branchen-Fabrik (Flagship)">
+                    {flagshipBranchen.map((b) => (
+                      <option key={`flagship:${b.branche_key}`} value={`flagship:${b.branche_key}`}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
                 <optgroup label="Library (Pipeline v2)">
                   {LIBRARY_BRANCHEN.map((b) =>
                     LIBRARY_STILE.map((s) => (
@@ -325,7 +370,9 @@ export default function DemosPage() {
             </button>
             {generating && (
               <span style={{ fontSize: '12px', color: 'var(--za-fg-3)' }}>
-                Website wird gescrapt und Inhalte werden erstellt — dauert ca. 30–60 Sekunden.
+                {templateId.startsWith('flagship:')
+                  ? 'Daten werden gesammelt und frische Bilder generiert — dauert ca. 1–3 Minuten.'
+                  : 'Website wird gescrapt und Inhalte werden erstellt — dauert ca. 30–60 Sekunden.'}
               </span>
             )}
           </div>
@@ -368,6 +415,12 @@ export default function DemosPage() {
                         · <Eye style={{ width: '11px', height: '11px' }} /> {demo.view_count}
                         {demo.last_viewed_at && ` (zuletzt ${formatDate(demo.last_viewed_at)})`}
                       </span>
+                      {typeof demo.kosten_cent === 'number' && demo.kosten_cent > 0 && (
+                        <span title="Asset-Generierungskosten dieser Demo (DoD: ≤ 1,50 €)"
+                          style={{ color: demo.kosten_cent > 150 ? '#b03030' : undefined }}>
+                          · {(demo.kosten_cent / 100).toFixed(2).replace('.', ',')} €
+                        </span>
+                      )}
                     </div>
                   </div>
 

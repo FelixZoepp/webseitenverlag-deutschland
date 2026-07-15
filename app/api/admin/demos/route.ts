@@ -7,10 +7,12 @@ import { scrapeProspectWebsite } from '@/lib/scrape-prospect'
 import { generateDemoConfig } from '@/lib/generate-demo'
 import { collectProspectData } from '@/lib/pipeline/prospect-data'
 import { generateLibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
+import { generiereFlagshipDemo } from '@/lib/pipeline/generate-flagship-demo'
 import { libraryPageKey, loadLibraryPage } from '@/lib/library/load'
 import { SEED_BRANCHEN, STILE, type Stil } from '@/lib/library/types'
 
-export const maxDuration = 120
+// F5: Flagship-Demos generieren Assets frisch (Hero + Paar, je ~30–90s)
+export const maxDuration = 300
 
 export async function GET() {
   const auth = await requireAdmin()
@@ -18,7 +20,7 @@ export async function GET() {
 
   const { data: demos, error } = await auth.data.supabase
     .from('demos')
-    .select('id, prospect_name, prospect_website, branche, template_id, share_token, status, notes, view_count, last_viewed_at, expires_at, created_at, paket, payment_link_url')
+    .select('id, prospect_name, prospect_website, branche, template_id, share_token, status, notes, view_count, last_viewed_at, expires_at, created_at, paket, payment_link_url, kosten_cent')
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -42,10 +44,65 @@ export async function POST(request: Request) {
   const templateId = typeof body?.templateId === 'string' ? body.templateId : ''
   const branche = typeof body?.branche === 'string' ? body.branche.trim() : null
   const notes = typeof body?.notes === 'string' ? body.notes.trim() : null
-  const engine = body?.engine === 'library' ? 'library' : 'premium'
+  const engine =
+    body?.engine === 'library' ? 'library' : body?.engine === 'flagship' ? 'flagship' : 'premium'
 
   if (!prospectName) {
     return NextResponse.json({ error: 'Firmenname fehlt' }, { status: 400 })
+  }
+
+  // ------------------------------------------------------------
+  // Engine "flagship": F5 — Demo aus approved Branchen-Vorlage (BF §6)
+  // ------------------------------------------------------------
+  if (engine === 'flagship') {
+    const ort = typeof body?.ort === 'string' ? body.ort.trim() : null
+    if (!branche) {
+      return NextResponse.json({ error: 'Branche fehlt (branche_key der Flagship-Vorlage)' }, { status: 400 })
+    }
+
+    const prospect = await collectProspectData({
+      firma: prospectName,
+      ort,
+      branche,
+      websiteUrl: websiteUrl || null,
+      notizen: notes,
+    })
+
+    let ergebnis
+    try {
+      ergebnis = await generiereFlagshipDemo(prospect, branche)
+    } catch (err) {
+      // Typischer Fall: Vorlage nicht approved → sauberer 400 mit Hinweis
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : 'Flagship-Demo fehlgeschlagen' },
+        { status: 400 }
+      )
+    }
+
+    const shareToken = randomBytes(24).toString('base64url')
+    const { data: demo, error } = await auth.data.supabase
+      .from('demos')
+      .insert({
+        prospect_name: prospectName,
+        prospect_website: websiteUrl || null,
+        branche,
+        template_id: `flagship:${branche}`,
+        engine: 'flagship',
+        config: ergebnis.config,
+        scraped_data: prospect,
+        share_token: shareToken,
+        notes,
+        status: 'GENERIERT',
+        kosten_cent: ergebnis.kostenCent,
+        asset_meta: ergebnis.assetMeta,
+      })
+      .select()
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    const warning = ergebnis.warnungen.length > 0 ? ergebnis.warnungen.join(' · ') : null
+    return NextResponse.json({ demo, warning, kosten_cent: ergebnis.kostenCent })
   }
 
   // ------------------------------------------------------------
