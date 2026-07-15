@@ -12,7 +12,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generiereAsset, generiereVideo, makePair } from '@/lib/assets/pipeline'
-import { baueAssetPrompt } from '@/lib/seeding/seed-branche'
+import { baueAssetPrompt, baueVideoPrompt } from '@/lib/seeding/seed-branche'
 import type { BranchenProfil } from '@/lib/seeding/schema'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 import type { ProspectData } from './prospect-data'
@@ -238,7 +238,8 @@ export async function generiereFlagshipDemo(
       try {
         const video = await generiereVideo({
           imageUrl: hero.publicUrl,
-          prompt: baueAssetPrompt(styleProfil, s.szenen.hero),
+          prompt: baueVideoPrompt(styleProfil),
+          durationSeconds: 6,
           kontext: `video:${kontext}`,
         })
         if (video.videoUrl) {

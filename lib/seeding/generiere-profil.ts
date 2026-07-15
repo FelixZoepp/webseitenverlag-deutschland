@@ -73,8 +73,10 @@ ${kategorie.funnel_modus === 'reservierung'
 
 STYLE-PROMPT-REGELN (für Bild-KI, englisch formulieren):
 - basis_stil: Fotorealismus, Kamera/Objektiv-Anmutung, Grundstimmung der Branche.
+- szenen.hero: CLOSE-UP oder halbnahe Einstellung, die das Kernmotiv der Branche zeigt. Das Hauptmotiv/die Hauptperson MUSS auf der RECHTEN Bildhälfte positioniert sein (der Text-Overlay liegt links). Beispiele: Friseur → Haarsträhnen unter warmem Licht, Nahaufnahme von hinten/seitlich; Reinigung → glänzende Oberfläche mit Reflexion; Restaurant → dampfendes Gericht, Gläser mit Kerzenlicht. KEINE Totalen, keine Frontalporträts.
 - signature_nachher = Ziel-Zustand (wird zuerst generiert), signature_vorher = Anweisung, DIESELBE Szene zu degradieren (verschmutzen, abdecken, leeren …).
 - Personen nur wenn personen_erlaubt, dann distanziert/seitlich/von hinten. negativ: Markenlogos, lesbarer Text, Uncanny-Gesichter.
+- video_bewegung (englisch, 1–2 Sätze): Beschreibt die SUBTILE, ruhige Bewegung für den Video-Hero. REGELN: (1) statische Kamera, KEIN Kameraschwenk; (2) nur natürliche Mikrobewegung passend zur Branche (Haare fallen/glänzen, Dampf steigt, Wasser fließt, Werkzeug vibriert, Blätter wehen, Stoff bewegt sich); (3) keine sprechenden/winkenden Personen; (4) Loop-tauglich (nahtloser Übergang). Beispiel Friseur: "subtle hair movement, light shimmer on strands, gentle steam from styling tools, completely static camera".
 
 QUALITÄTSREFERENZ (Flagship "${referenzKey}" — dieses Niveau an Konkretheit und Ton ist der Maßstab; Struktur teils anders, NICHT wörtlich kopieren):
 ${referenzJson}

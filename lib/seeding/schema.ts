@@ -80,6 +80,8 @@ export const StylePromptsSchema = z.object({
   personen_erlaubt: z.boolean(),
   /** Was NIE im Bild sein darf (Marken, Logos, Text …) */
   negativ: z.string().max(300).optional(),
+  /** Subtile Bewegungsbeschreibung für den Video-Hero (englisch, Higgsfield image-to-video) */
+  video_bewegung: z.string().min(10).max(300),
 })
 
 export const BranchenProfilSchema = z.object({

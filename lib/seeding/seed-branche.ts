@@ -11,7 +11,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { metaKategorie } from '@/config/branchen'
 import { FLAGSHIP_SEEDS } from '@/lib/flagship/seeds'
-import { generiereAsset, makePair } from '@/lib/assets/pipeline'
+import { generiereAsset, generiereVideo, makePair } from '@/lib/assets/pipeline'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 import type { BranchenProfil } from './schema'
 import type { StartBranche } from './branchen-start'
@@ -21,6 +21,8 @@ import { pruefeGates } from './gates'
 
 export interface SeedAssets {
   hero_id: string
+  hero_video_url?: string
+  hero_poster_url?: string
   paar_id: string
   paar_asset_ids: string[]
   galerie_ids: string[]
@@ -42,6 +44,28 @@ export function baueAssetPrompt(profil: BranchenProfil, szene: string): string {
   const teile = [s.basis_stil, szene, `Lighting: ${s.licht}`, `Materials: ${s.materialien}`]
   if (!s.personen_erlaubt) teile.push('no people')
   if (s.negativ) teile.push(`Avoid: ${s.negativ}`)
+  return teile.join('. ')
+}
+
+/**
+ * Video-Prompt für den Hero-Header: statische Kamera, subtile Bewegung,
+ * hochwertige Close-Up-Ästhetik (Higgsfield image-to-video Guideline).
+ */
+export function baueVideoPrompt(profil: BranchenProfil): string {
+  const s = profil.style_prompts
+  const teile = [
+    // Kamera-Anweisung: IMMER statisch, cinematic quality
+    'Cinematic 4K quality, completely static camera, no camera movement whatsoever, fixed tripod shot',
+    // Close-Up-Ästhetik
+    'Shallow depth of field, professional close-up composition, rich detail and texture',
+    // Branchenspezifische Mikrobewegung aus dem Profil
+    s.video_bewegung,
+    // Licht + Material für Konsistenz mit dem Standbild
+    `Lighting: ${s.licht}`,
+    // Loop + Qualitäts-Regeln
+    'Seamless loop feeling, subtle natural motion only, no abrupt changes',
+    'No text, no logos, no UI elements, no people looking at camera or speaking',
+  ]
   return teile.join('. ')
 }
 
@@ -78,8 +102,29 @@ async function generiereAssetGrundset(branche: StartBranche, profil: BranchenPro
     ),
   ])
 
+  // Video-Hero: Hero-Bild → Looping-Video (standardmäßig bei jedem Seeding)
+  let heroVideoUrl: string | undefined
+  let heroPosterUrl: string | undefined
+  try {
+    const video = await generiereVideo({
+      imageUrl: hero.publicUrl,
+      prompt: baueVideoPrompt(profil),
+      durationSeconds: 6,
+      kontext: `${kontext}:video`,
+    })
+    if (video.videoUrl) {
+      heroVideoUrl = video.videoUrl
+      heroPosterUrl = hero.publicUrl
+    }
+  } catch (e) {
+    // Video scheitert nie am Seeding — Warnung, statischer Hero bleibt
+    console.warn(`[seeding] Video-Hero fehlgeschlagen (${branche.branche_key}):`, (e as Error).message)
+  }
+
   return {
     hero_id: hero.id,
+    hero_video_url: heroVideoUrl,
+    hero_poster_url: heroPosterUrl,
     paar_id: paar.pairId,
     paar_asset_ids: [paar.nachher.id, paar.vorher.id],
     galerie_ids: galerie.map((g) => g.id),
@@ -143,6 +188,14 @@ export async function seedBranche(
     } catch (e) {
       // Seeding scheitert nie an Bildern (BF §2.3) — Warnung statt Abbruch
       assetWarnung = (e as Error).message
+    }
+  }
+
+  // Video-URL in die Vorlage schreiben (Preview zeigt dann den Video-Header)
+  if (assets?.hero_video_url) {
+    config.inhalte.hero.video = {
+      src: assets.hero_video_url,
+      poster: assets.hero_poster_url,
     }
   }
 
