@@ -12,6 +12,7 @@ Nicht gelöscht, sondern geparkt (Regel §0 Masterprompt). Vom Build ausgeschlos
 | `app/api/webhooks/docusign/` | DocuSign-Webhook (signiert → Vertrag aktiv) | `app/api/webhooks/stripe/` |
 | `app/api/admin/vertraege/` | Alter Vertragsabschluss (Angebot-PDF, SEPA, DocuSign, IBAN) | Demo → Payment-Link → Auto-Provisioning |
 | `app/admin/customers/new/` | Manueller Kunden-Anlage-Wizard mit IBAN-Eingabe | Demo-Maschine (`/admin/demos`) + Stripe-Webhook legt Kunden an |
+| `components/upgrade-checkout.tsx` | Alter Upgrade-Katalog (11 erfundene Module, 48-Monats-Vertrag, Fake-Testimonials) | `/dashboard/[siteId]/erweiterungen` auf Basis `config/upsells.ts` + Stripe-Checkout (Phase G) |
 
 Zugehörige tote Env-Vars: `DOCUSIGN_*`, `QONTO_API_ACTIVE`, `EASYBILL_API_ACTIVE` (Flags aus `lib/feature-flags.ts` entfernt).
 

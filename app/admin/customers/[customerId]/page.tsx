@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Trash2, Mail, Loader2, Zap, X, Check, Package, FileText, Clock, ChevronRight, Download, Building2, CreditCard, Image, Sparkles } from 'lucide-react'
+import { ArrowLeft, Trash2, Mail, Loader2, Zap, X, Check, Package, FileText, Clock, ChevronRight, Download, Building2, CreditCard, Image, Sparkles, Link2, Copy } from 'lucide-react'
 import { VERTRAGS_STATUS_LABELS, VERTRAGS_STATUS_COLORS, type VertragsStatus, type KundenDokument, type VertragsTimeline } from '@/types'
+import { UPSELL_PRODUCTS } from '@/config/upsells'
 
 interface UpsellModuleWithStatus {
   id: string
@@ -288,6 +289,7 @@ export default function CustomerDetailPage() {
       {/* ══════════════════════════════════════════════════════════ */}
       {activeTab === 'upsells' && (
         <div>
+          <ZahlungslinkPanel customerId={params.customerId as string} sites={sites} />
           {upsellsLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-gray-400" /></div>
           ) : (
@@ -452,6 +454,106 @@ function NextSteps({ status, customer }: { status: VertragsStatus; customer: Rec
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+/**
+ * Zahlungslink für Katalog-Upsells (Kaufweg 3, §10.4): erzeugt über
+ * /api/admin/upsell-payment-link eine Stripe-Checkout-URL zum Versenden.
+ */
+function ZahlungslinkPanel({ customerId, sites }: { customerId: string; sites: Record<string, unknown>[] }) {
+  const [productKey, setProductKey] = useState('')
+  const [siteId, setSiteId] = useState(sites.length === 1 ? String(sites[0].id) : '')
+  const [loading, setLoading] = useState(false)
+  const [url, setUrl] = useState<string | null>(null)
+  const [fehler, setFehler] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  async function handleCreate() {
+    if (!productKey) return
+    setLoading(true)
+    setUrl(null)
+    setFehler(null)
+    setCopied(false)
+    try {
+      const res = await fetch('/api/admin/upsell-payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_id: customerId,
+          product_key: productKey,
+          ...(siteId ? { site_id: siteId } : {}),
+        }),
+      })
+      const data = await res.json().catch(() => null)
+      if (res.ok && data?.url) setUrl(data.url)
+      else setFehler(data?.error || 'Zahlungslink konnte nicht erstellt werden')
+    } catch {
+      setFehler('Netzwerkfehler')
+    }
+    setLoading(false)
+  }
+
+  async function handleCopy() {
+    if (!url) return
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch { /* ignore */ }
+  }
+
+  const preisLabel = (key: string) => {
+    const p = UPSELL_PRODUCTS.find((x) => x.key === key)
+    if (!p) return ''
+    const teile: string[] = []
+    if (p.einmalCent > 0) teile.push(`${(p.einmalCent / 100).toFixed(0)} € einmalig`)
+    if (p.monatCent > 0) teile.push(`${(p.monatCent / 100).toFixed(0)} €/Monat`)
+    return teile.join(' + ')
+  }
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+      <h2 className="font-semibold text-gray-900 mb-1 flex items-center gap-2"><Link2 className="w-4 h-4" /> Zahlungslink erzeugen</h2>
+      <p className="text-xs text-gray-500 mb-4">Stripe-Checkout-Link für ein Katalog-Produkt — zum Versenden per Mail oder im Gespräch.</p>
+      <div className="flex flex-wrap items-end gap-3">
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Produkt</label>
+          <select value={productKey} onChange={(e) => setProductKey(e.target.value)}
+            className="text-sm border border-gray-200 rounded-md px-3 py-2 bg-white min-w-[260px]">
+            <option value="">— Produkt auswählen —</option>
+            {UPSELL_PRODUCTS.map((p) => (
+              <option key={p.key} value={p.key}>{p.name} ({preisLabel(p.key)})</option>
+            ))}
+          </select>
+        </div>
+        {sites.length > 0 && (
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Site (optional)</label>
+            <select value={siteId} onChange={(e) => setSiteId(e.target.value)}
+              className="text-sm border border-gray-200 rounded-md px-3 py-2 bg-white min-w-[180px]">
+              <option value="">— Keine Site —</option>
+              {sites.map((s) => (
+                <option key={String(s.id)} value={String(s.id)}>{String(s.name || s.id)}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        <button onClick={handleCreate} disabled={loading || !productKey}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Erzeuge...</> : <><Link2 className="w-4 h-4" /> Link erzeugen</>}
+        </button>
+      </div>
+      {url && (
+        <div className="mt-4 flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
+          <span className="text-xs font-mono text-gray-700 truncate flex-1">{url}</span>
+          <button onClick={handleCopy} className="flex items-center gap-1 text-xs text-blue-600 hover:underline flex-shrink-0">
+            {copied ? <><Check className="w-3 h-3" /> Kopiert</> : <><Copy className="w-3 h-3" /> Kopieren</>}
+          </button>
+        </div>
+      )}
+      {fehler && <p className="mt-3 text-sm text-red-600">{fehler}</p>}
     </div>
   )
 }

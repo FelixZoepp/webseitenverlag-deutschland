@@ -92,8 +92,8 @@ export default function SiteEditor({ site: initialSite, messages: initialMessage
   async function handleUpsellResponse(action: 'accept' | 'reject' | 'later') {
     if (!pendingUpsell) return
     if (action === 'accept') {
-      // Redirect to checkout page
-      window.location.href = `/dashboard/${site.id}/upgrade?upsell=${pendingUpsell.upsellId}`
+      // Weiter zum Upsell-Katalog (Kaufweg 2, §10.4)
+      window.location.href = `/dashboard/${site.id}/erweiterungen`
       return
     }
     setUpsellResponding(true)

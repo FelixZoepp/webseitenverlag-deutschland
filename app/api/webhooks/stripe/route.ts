@@ -26,6 +26,7 @@ import {
   wirksamesKuendigungsdatum,
 } from '@/lib/contracts'
 import { getUpsellProduct, istPlanUpgrade, planUpgradeTier } from '@/config/upsells'
+import { ADS_PRODUCT_KEY, generiereAdsEntwuerfe } from '@/lib/ads-starter'
 
 export const maxDuration = 60
 
@@ -474,13 +475,50 @@ async function handleUpsellCheckout(supabase: SupabaseClient, session: Stripe.Ch
 
   // Fulfillment
   if (produkt.fulfillment === 'va_manual') {
-    await createManualTask(supabase, {
+    const taskId = await createManualTask(supabase, {
       typ: 'SONSTIGES',
       titel: `Upsell einrichten: ${produkt.name} — ${kontakt.name}`,
       beschreibung: `Kunde hat "${produkt.name}" gekauft (Order ${order.id}). ${produkt.provisioning}. Nach Erledigung Order auf PROVISIONIERT setzen.`,
       customer_id: customerId,
       quelle: 'stripe-webhook',
     })
+
+    // GBP-Ersteinrichtung (Upsell #2): gbp_setups-Zeile mit Business-Daten für den VA,
+    // Status-Flow OFFEN → IN_ARBEIT → ZUGRIFF_ERTEILT → FERTIG in /admin/worklist.
+    if (productKey === 'gbp-einrichtung') {
+      const siteId = (order.site_id as string) || null
+      let daten: Record<string, unknown> = { firma: kontakt.name, email: kontakt.email }
+      if (siteId) {
+        const { data: site } = await supabase
+          .from('sites')
+          .select('name, config, pflichtangaben')
+          .eq('id', siteId)
+          .maybeSingle()
+        const cfg = (site?.config || {}) as Record<string, unknown>
+        const meta = ((cfg.meta as Record<string, unknown>) || {}) as Record<string, unknown>
+        const pflicht = (site?.pflichtangaben || {}) as Record<string, unknown>
+        daten = {
+          firma: meta.firma || site?.name || kontakt.name,
+          ort: meta.ort || pflicht.ort || null,
+          adresse: meta.adresse || pflicht.adresse || null,
+          telefon: meta.telefon || pflicht.telefon || null,
+          email: meta.email || pflicht.email || kontakt.email,
+          website: meta.website || null,
+          branche: cfg.branche || null,
+        }
+      }
+      const { error: gbpError } = await supabase.from('gbp_setups').insert({
+        customer_id: customerId,
+        site_id: siteId,
+        status: 'OFFEN',
+        daten,
+        manual_task_id: taskId,
+      })
+      if (gbpError) {
+        console.error(`[STRIPE] gbp_setups-Insert fehlgeschlagen: ${gbpError.message}`)
+      }
+    }
+
     console.log(`[STRIPE] Upsell ${productKey} → manual_task für VA (${customerId})`)
     return OK() // bleibt BEZAHLT, bis der VA fertig ist
   }
@@ -508,6 +546,55 @@ async function handleUpsellCheckout(supabase: SupabaseClient, session: Stripe.Ch
       quelle: 'stripe-webhook',
     })
     return OK()
+  }
+
+  // Google Ads Starter (Upsell #3): Kampagnen-Entwurf (Search + PMax) im
+  // Test-Modus aus dem Website-Content + manual_task für die MCC-Einladung.
+  // Budget läuft IMMER direkt Kunde↔Google.
+  if (productKey === ADS_PRODUCT_KEY) {
+    let siteZeile: { id: string; name: string | null; config: Record<string, unknown> | null; domain: string | null; subdomain: string | null } | null = null
+    if (order.site_id) {
+      const { data } = await supabase
+        .from('sites')
+        .select('id, name, config, domain, subdomain')
+        .eq('id', order.site_id as string)
+        .maybeSingle()
+      siteZeile = data
+    }
+    if (!siteZeile) {
+      const { data } = await supabase
+        .from('sites')
+        .select('id, name, config, domain, subdomain')
+        .eq('customer_id', customerId)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle()
+      siteZeile = data
+    }
+
+    const entwuerfe = generiereAdsEntwuerfe(siteZeile || { name: kontakt.name, config: null })
+    const { error: adsError } = await supabase.from('ads_kampagnen').insert([
+      { customer_id: customerId, site_id: siteZeile?.id || null, typ: 'search', status: 'ENTWURF', entwurf: entwuerfe.search },
+      { customer_id: customerId, site_id: siteZeile?.id || null, typ: 'pmax', status: 'ENTWURF', entwurf: entwuerfe.pmax },
+    ])
+    if (adsError) {
+      console.error(`[STRIPE] ads_kampagnen-Insert fehlgeschlagen: ${adsError.message}`)
+      await createManualTask(supabase, {
+        typ: 'PROVISIONING_LUECKE',
+        titel: `Ads-Kampagnen-Entwurf manuell anlegen: ${kontakt.name}`,
+        beschreibung: `Order ${order.id} ist bezahlt, aber der ads_kampagnen-Insert schlug fehl: ${adsError.message}.`,
+        customer_id: customerId,
+        quelle: 'stripe-webhook',
+      })
+    } else {
+      await createManualTask(supabase, {
+        typ: 'SONSTIGES',
+        titel: `Ads-Konto verknüpfen (MCC-Einladung): ${kontakt.name}`,
+        beschreibung: `Google Ads Starter gekauft (Order ${order.id}). Kampagnen-Entwürfe (Search + PMax, Test-Modus) liegen in ads_kampagnen. Kunden-Ads-Konto unter unserem MCC anlegen/einladen, Zahlungsmittel des KUNDEN hinterlegen lassen (Budget nie über uns), danach Status auf EINLADUNG_VERSENDET/KONTO_VERKNUEPFT setzen.`,
+        customer_id: customerId,
+        quelle: 'stripe-webhook',
+      })
+    }
   }
 
   await supabase

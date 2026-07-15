@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/briefings",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/seo-plan",
+      "schedule": "0 6 1 * *"
+    },
+    {
+      "path": "/api/cron/ads-check",
+      "schedule": "0 7 * * 1"
     }
   ]
 }

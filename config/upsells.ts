@@ -139,6 +139,23 @@ export const UPSELL_PRODUCTS: UpsellProduct[] = [
     kuendigungsfristMonate: 0,
     provisioning: 'manual_task GBP_EINRICHTUNG für VA',
   },
+  {
+    key: 'google-ads-starter',
+    name: 'Google Ads Starter',
+    nutzen: [
+      'Fertiges Kampagnen-Setup (Suche + Performance Max) aus Ihrer Website',
+      'Werbebudget zahlen Sie immer direkt an Google — volle Kontrolle',
+      'Wöchentliche Checks und Monatsreport inklusive, monatlich kündbar',
+    ],
+    einmalCent: 0,
+    monatCent: 9900,
+    fulfillment: 'auto',
+    touchpoints: ['portal', 'cron-60'],
+    laufzeitMonate: 1,
+    verlaengerungMonate: 1,
+    kuendigungsfristMonate: 1,
+    provisioning: 'Kampagnen-Entwurf (Test-Modus) automatisch, MCC-Einladung als manual_task (Phase G)',
+  },
 ]
 
 export function getUpsellProduct(key: string): UpsellProduct | null {

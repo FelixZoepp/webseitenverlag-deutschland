@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 // Host-Routing (Mission §1):
 //   PRODUKTDOMAIN.de  → Marketing-Landing + /admin (Ops)
 //   app.DOMAIN        → Kunden-Portal (/dashboard, /login)
-//   *.DOMAIN          → später Kundenseiten/Demos (Phase G, vorerst pass-through)
+//   *.DOMAIN + Custom Domains → Kundenseiten (Rewrite auf /kundenseite/<host>, Phase G)
 // Konfiguration über Env — kein Hardcode:
 //   NEXT_PUBLIC_MARKETING_HOST  z.B. "webseitenverlag.de"
 //   NEXT_PUBLIC_APP_HOST        z.B. "app.webseitenverlag.de"
@@ -51,7 +51,23 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(target)
     }
   }
-  // Unbekannte Subdomains (*.DOMAIN): pass-through — Kundenseiten-Rendering folgt in Phase G
+  // Kundenseiten (Phase G): unbekannte Hosts (Subdomains von MARKETING_HOST
+  // oder aktive Custom Domains) auf die Auslieferungs-Route rewriten.
+  // Nur aktiv, wenn Host-Routing konfiguriert ist — sonst wie bisher.
+  if (
+    MARKETING_HOST &&
+    host &&
+    host !== stripPort(MARKETING_HOST) &&
+    (!APP_HOST || host !== stripPort(APP_HOST)) &&
+    !host.endsWith('.vercel.app') &&
+    host !== 'localhost' &&
+    !pathname.startsWith('/api') &&
+    !pathname.startsWith('/kundenseite')
+  ) {
+    const target = request.nextUrl.clone()
+    target.pathname = `/kundenseite/${host}${pathname === '/' ? '' : pathname}`
+    return NextResponse.rewrite(target)
+  }
 
   return await updateSession(request)
 }

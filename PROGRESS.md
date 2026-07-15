@@ -13,7 +13,7 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | D | Generierungs-Pipeline v2 (Firecrawl → Places → manueller Fallback) | ✅ erledigt (2026-07-15) |
 | E | Checkout, Verträge (24/24/3), Provisioning, Dunning, Kündigung | ✅ erledigt (2026-07-15) |
 | F | Portal: Wizard, Chat-Editor (nur strukturierte Ops), Pläne, Upsell-Leiter | ✅ erledigt (2026-07-15) |
-| G | Domains & Upsell-Fulfillment | ⬜ offen |
+| G | Domains & Upsell-Fulfillment | ✅ erledigt (2026-07-15) |
 | H | CI-Gates: Golden-Set, Lighthouse-CI, Playwright E2E, /admin/kennzahlen | ⬜ offen |
 
 ## Sitzungs-Log
@@ -65,14 +65,22 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
   - F6: Upsell-/Upgrade-Kauf §10.4 — `lib/upsell-kauf.ts` (gemeinsamer Kaufweg: Order OFFEN → Stripe-Checkout mit `metadata.product_key/order_id`; Doppelbuchungs-Schutz über activated_upsells; Plan-Upgrade als `plan-upgrade:<tier>`, Downgrades abgewiesen), `lib/supabase/admin.ts` (Service-Role-Client), Kaufweg 1: POST `/api/admin/upsell-payment-link` (requireAdmin), Kaufweg 2: POST `/api/sites/[siteId]/upsell-checkout` + Portal-Kacheln `/dashboard/[siteId]/erweiterungen` (aktive Module markiert, Nerv-Schutz sortiert Abgelehnte ans Ende, Preise transparent). Webhook-Branch `handleUpsellCheckout`: BEZAHLT → eigener Vertrag je Buchung (paket=`upsell:<key>`, Konditionen aus config) → auto: activated_upsells-Upsert + PROVISIONIERT; va_manual: manual_task; Plan-Upgrade: customers/sites.package + Hauptvertrag angehoben + manual_task „altes Stripe-Abo beenden" (Proration-Pragmatismus); alle Lücken → manual_task PROVISIONING_LUECKE + 200 (kein Doppel-Provisioning durch Stripe-Retry)
   - F7/DoD: `scripts/smoke-editor-ops.ts` — 19 Checks grün (invalider Patch/rohes HTML abgewiesen, All-or-Nothing, gesperrte Pfade, Bild-Host-Allowlist, Theme nur Presets, Hero-Schutz bei Toggle+Reorder, >20 Ops); Rollback = bestehende `/api/sites/[siteId]/rollback` + config_versions (funktionsfähig); Build+Lint+Typecheck grün. Upgrade-Kauf-E2E im Stripe-Testmode braucht Migration 019 + Webhook (WARTELISTE)
 
+- **Phase G komplett**:
+  - G2: Auslieferung — `sites.gesperrt` → Sperr-Seite (410), `noindex` → Meta-Tag im Renderer; Wizard-Rechtstexte (`draft_config.rechtstexte`) werden als Impressum-/Datenschutz-Seiten ausgespielt
+  - G3: Domains — Wunsch-Domain-Flow aus Wizard-Schritt 4 mit Mock-Registrar (`REGISTRAR_PROVIDER=mock`, `lib/registrar.ts`), DNS-Recheck, Portal-UI `/dashboard/[siteId]/domain`
+  - G4: SEO-Plan-Automation (Upsell #1) — Cron `/api/cron/seo-plan` (monatlich, `0 6 1 * *`): 1 Keyword-Landingpage aus der Library via Slot-Pipeline, 1-Klick-Freigabe im Portal (`/dashboard/[siteId]/seo`, Sidebar-Nav), technischer SEO-Check, DataForSEO-Stub (Keys auf WARTELISTE)
+  - G5: GBP-Ersteinrichtung (Upsell #2, va_manual) — Kauf erzeugt `gbp_setups`-Zeile (Migration 020) + verknüpfte manual_task (`createManualTask` gibt jetzt Task-ID zurück); `/admin/worklist` (GBP-Status-Flow OFFEN→IN_ARBEIT→ZUGRIFF_ERTEILT→FERTIG als Pill-Kette + offene Aufgaben); FERTIG provisioniert die Order und erledigt die Task automatisch
+  - G6: Google Ads Starter (Upsell #3, 99 €/M Platzhalter → WARTELISTE) — `lib/ads-starter.ts`: deterministischer Kampagnen-Generator (Search + PMax, Test-Modus, Google-Zeichenlimits 30/90); Grundsatz „Werbebudget IMMER direkt Kunde↔Google" im Entwurf verankert; Webhook legt `ads_kampagnen` an + manual_task „MCC-Einladung"; Admin-APIs `/api/admin/ads` (POST = DoD-testbar ohne Stripe) + Status-PATCH; Wochen-Check-Cron `/api/cron/ads-check` (montags: Ziel-URL-Erreichbarkeit, Entwurfs-Vollständigkeit, Leistungsdaten-Stub bis Ads-API-Zugang)
+  - G7: Portal-Rest — POST `/api/sites/[siteId]/billing-portal` (Stripe Customer Portal via `customers.stripe_customer_id`) + Button in `/rechnungen`; alte `/upgrade`-Seite → Redirect auf `/erweiterungen`, `components/upgrade-checkout.tsx` (Fake-Katalog) → `_legacy/components/`; Sidebar + Editor-Gate zeigen auf `/erweiterungen`; Admin-Zahlungslink-Panel im Upsells-Tab der Kundendetailseite (nutzt POST `/api/admin/upsell-payment-link`, Copy-Button)
+  - G8/DoD: Domain-Neuregistrierung läuft mit Mock-Registrar durch; SEO-Cron erzeugt freigebbare Landingpage; GBP-Flow bis „Zugriff erteilt" über `/admin/worklist` testbar; Ads-Setup erzeugt Kampagnen-Entwurf im Test-Modus (POST `/api/admin/ads`). Build+Lint+Typecheck grün
+  - Bewusst offen: kein async Re-Deploy-Queue (serverless ohne Queue-Infra — Re-Deploys laufen synchron im Request); AUDIT R5 (`lib/payment.ts`-Ledger) bleibt, weil der alte Admin-Aktivierungs-Flow (`/api/admin/customers/.../upsells/...` + Upsells-Tab) noch darauf läuft → Ablösung in Phase H
+
 ## Notizen für nächste Session
-- **Nächste Phase: G** (Domains & Upsell-Fulfillment: Cloudflare-Connect für Wunsch-Domain aus Wizard-Schritt 4, Provisioning-Crons für SEO-Abo/Stadtteil/Bewertungen/Radar/Saison, `sites.gesperrt`- und `sites.noindex`-Check beim Ausliefern)
-- Kundenseiten-Sperre: `sites.gesperrt` wird vom Webhook gesetzt, aber noch NICHT beim Ausliefern geprüft — Sperr-Seite/410-Check gehört in Phase G (Host-Routing bzw. Site-Renderer); dito `noindex`-Meta-Tag im Renderer
-- Alte Seite `/dashboard/[siteId]/upgrade` (Prä-Mission-Upsell-UI) existiert parallel zu `/erweiterungen` — in Phase G auf den neuen Kaufweg umstellen oder nach `_legacy/` schieben
-- `lib/payment.ts`-Ledger (rechnungs_posten) läuft weiter parallel; Ablösung durch upsell_orders/contracts in Phase G (AUDIT R5)
-- Admin-Ops-Dashboard hat noch keinen UI-Knopf für den 1-Klick-Zahlungslink (Route steht: POST `/api/admin/upsell-payment-link`) — UI in Phase G
-- Plan-Upgrade-Proration: bewusst pragmatisch — neue Subscription + manual_task zum Beenden des alten Abos; sauberes `subscription.update` mit Proration wäre eine Phase-G/H-Verbesserung
-- Wizard-Rechtstexte landen in `draft_config.rechtstexte` — die Renderer (Library/Premium) müssen sie in Phase G als Impressum-/Datenschutz-Seiten ausspielen
+- **Nächste Phase: H** (CI-Gates: Golden-Set, Lighthouse-CI, Playwright E2E, /admin/kennzahlen)
+- AUDIT R5: alter Admin-Upsell-Aktivierungs-Flow (upsell-orchestrator + rechnungs_posten-Ledger + Upsells-Tab-Kacheln) läuft parallel zum neuen Kaufweg (upsell_orders/contracts) — in Phase H entweder auf Zahlungslink-Flow umstellen oder nach `_legacy`
+- Plan-Upgrade-Proration: bewusst pragmatisch — neue Subscription + manual_task zum Beenden des alten Abos; sauberes `subscription.update` mit Proration wäre eine Phase-H-Verbesserung
+- Migration 020 (gbp_setups + ads_kampagnen) zusammen mit 013–019 ausführen (WARTELISTE aktualisiert)
+- Ads-Preis (99 €/M) und alle Upsell-Preise sind Platzhalter → Bestätigung auf WARTELISTE; echte Ads-Leistungsdaten erst mit Google-Ads-API-Zugang
 - Migrationen 013–019 noch nicht in Supabase ausgeführt (WARTELISTE); danach: `npx tsx scripts/seed-library.ts`
 - Library-Demos: DB-Spalte `engine` wird erst nach Migration 017 geschrieben — der öffentliche Renderer hängt NICHT daran (brancht auf `config.engine`), aber neue Library-Demos brauchen Migration 017 (Insert setzt engine='library')
 - Stock-Assets sind Platzhalter (Friseur nutzt universelle Bilder) — echte lizenzierte Assets auf WARTELISTE

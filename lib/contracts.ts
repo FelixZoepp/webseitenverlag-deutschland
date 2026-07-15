@@ -85,20 +85,27 @@ export interface NeueManualTask {
 /**
  * Aufgabe anlegen — best effort: Fehler werden geloggt, brechen aber nie
  * den aufrufenden Flow (z.B. einen Stripe-Webhook) ab.
+ * Gibt die Task-ID zurück (oder null bei Fehler), damit Aufrufer verknüpfen können.
  */
-export async function createManualTask(supabase: SupabaseClient, task: NeueManualTask): Promise<void> {
-  const { error } = await supabase.from('manual_tasks').insert({
-    typ: task.typ,
-    titel: task.titel,
-    beschreibung: task.beschreibung ?? null,
-    customer_id: task.customer_id ?? null,
-    contract_id: task.contract_id ?? null,
-    demo_id: task.demo_id ?? null,
-    quelle: task.quelle ?? null,
-    faellig_am: task.faellig_am ?? null,
-    status: 'OFFEN',
-  })
+export async function createManualTask(supabase: SupabaseClient, task: NeueManualTask): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('manual_tasks')
+    .insert({
+      typ: task.typ,
+      titel: task.titel,
+      beschreibung: task.beschreibung ?? null,
+      customer_id: task.customer_id ?? null,
+      contract_id: task.contract_id ?? null,
+      demo_id: task.demo_id ?? null,
+      quelle: task.quelle ?? null,
+      faellig_am: task.faellig_am ?? null,
+      status: 'OFFEN',
+    })
+    .select('id')
+    .single()
   if (error) {
     console.error(`[contracts] manual_task konnte nicht angelegt werden (${task.typ}): ${error.message}`)
+    return null
   }
+  return (data?.id as string) ?? null
 }

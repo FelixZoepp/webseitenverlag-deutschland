@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { FileText, Download, Loader2, CreditCard, Calendar } from 'lucide-react'
+import { FileText, Download, Loader2, CreditCard, Calendar, ExternalLink } from 'lucide-react'
 
 interface RechnungsPosten {
   id: string
@@ -29,6 +29,25 @@ export default function RechnungenPage() {
   const [dokumente, setDokumente] = useState<KundenDokument[]>([])
   const [loading, setLoading] = useState(true)
   const [customerInfo, setCustomerInfo] = useState<{ monatsrate: number; paket: string; vertragsende: string } | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
+  const [portalFehler, setPortalFehler] = useState<string | null>(null)
+
+  async function openBillingPortal() {
+    setPortalLoading(true)
+    setPortalFehler(null)
+    try {
+      const res = await fetch(`/api/sites/${siteId}/billing-portal`, { method: 'POST' })
+      const data = await res.json().catch(() => null)
+      if (res.ok && data?.url) {
+        window.location.href = data.url
+        return
+      }
+      setPortalFehler(data?.error || 'Portal konnte nicht geöffnet werden.')
+    } catch {
+      setPortalFehler('Portal konnte nicht geöffnet werden.')
+    }
+    setPortalLoading(false)
+  }
 
   useEffect(() => {
     fetch(`/api/customer/rechnungen?siteId=${siteId}`)
@@ -57,9 +76,32 @@ export default function RechnungenPage() {
       <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>
         Rechnungen & Abrechnung
       </h1>
-      <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '24px' }}>
+      <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '16px' }}>
         Ihre aktuelle Abrechnung und Vertragsdokumente
       </p>
+
+      {/* Stripe Customer Portal */}
+      <div style={{ marginBottom: '24px' }}>
+        <button
+          onClick={openBillingPortal}
+          disabled={portalLoading}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '10px 16px', borderRadius: '10px', border: '1px solid #E5E7EB',
+            background: '#fff', color: '#111827', fontSize: '14px', fontWeight: 600,
+            cursor: portalLoading ? 'wait' : 'pointer',
+          }}
+        >
+          {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink style={{ width: '15px', height: '15px', color: '#6B7280' }} />}
+          Zahlungsmethode & Rechnungen verwalten
+        </button>
+        <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '6px' }}>
+          Öffnet das sichere Stripe-Kundenportal — dort können Sie Ihre Zahlungsmethode ändern und Rechnungen herunterladen.
+        </p>
+        {portalFehler && (
+          <p style={{ fontSize: '13px', color: '#B91C1C', marginTop: '6px' }}>{portalFehler}</p>
+        )}
+      </div>
 
       {/* Übersicht */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '32px' }}>
