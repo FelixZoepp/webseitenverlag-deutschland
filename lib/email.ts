@@ -91,6 +91,45 @@ export async function sendConfirmationToSender(
   }
 }
 
+/**
+ * Zahlungserinnerung / Mahnung (Dunning, Phase E).
+ * Stufe 1 = freundliche Erinnerung, 2 = Mahnung mit Sperr-Ankündigung, 3 = Sperrung.
+ */
+export async function sendDunningEmail(
+  toEmail: string,
+  customerName: string,
+  mahnstufe: number
+): Promise<{ success: boolean; error?: string }> {
+  const stufen: Record<number, { betreff: string; text: string }> = {
+    1: {
+      betreff: 'Zahlungserinnerung — deine Website-Rechnung',
+      text: `die letzte Abbuchung f\u00fcr deine Website konnte nicht durchgef\u00fchrt werden. Das kann z.B. an einer abgelaufenen Karte liegen. Bitte pr\u00fcfe deine Zahlungsmethode — der n\u00e4chste Versuch erfolgt automatisch.`,
+    },
+    2: {
+      betreff: 'Mahnung — Zahlung weiterhin offen',
+      text: `trotz Erinnerung ist die Zahlung f\u00fcr deine Website weiterhin offen. Bitte aktualisiere deine Zahlungsmethode zeitnah. Bleibt die Zahlung aus, m\u00fcssen wir deine Website vor\u00fcbergehend offline nehmen.`,
+    },
+    3: {
+      betreff: 'Deine Website wurde vor\u00fcbergehend deaktiviert',
+      text: `da die Zahlung mehrfach fehlgeschlagen ist, wurde deine Website vor\u00fcbergehend deaktiviert. Sobald die offene Zahlung beglichen ist, schalten wir sie automatisch wieder frei. Melde dich gerne, wenn wir helfen k\u00f6nnen.`,
+    },
+  }
+  const inhalt = stufen[Math.min(3, Math.max(1, mahnstufe))]
+  try {
+    await getResend().emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: toEmail,
+      subject: inhalt.betreff,
+      html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3f4f6"><div style="max-width:600px;margin:0 auto;padding:24px"><div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)"><div style="background:#1f2937;padding:24px 32px"><h1 style="color:#fff;font-size:18px;margin:0">Webseitenverlag Deutschland</h1></div><div style="padding:32px"><h2 style="font-size:20px;color:#111827;margin:0 0 16px">${inhalt.betreff}</h2><p style="color:#374151;line-height:1.6">Hallo ${customerName},</p><p style="color:#374151;line-height:1.6">${inhalt.text}</p><p style="color:#374151;line-height:1.6">Beste Gr\u00fc\u00dfe<br>Webseitenverlag Deutschland</p></div></div></div></body></html>`,
+      text: `Hallo ${customerName},\n\n${inhalt.text}\n\nBeste Gr\u00fc\u00dfe\nWebseitenverlag Deutschland`,
+    })
+    return { success: true }
+  } catch (err: unknown) {
+    console.error('Dunning mail error:', err instanceof Error ? err.message : err)
+    return { success: false, error: err instanceof Error ? err.message : 'Fehler' }
+  }
+}
+
 export async function sendInvitationEmail(
   toEmail: string,
   customerName: string,
