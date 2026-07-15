@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
 /**
- * Perspective-Style Lead-Funnel für Ads-Traffic (/anfrage).
- * Eine Frage pro Screen, Auto-Weiter bei Kachel-Klick, Progress-Bar oben.
- * Weißer Hintergrund, blauer Akzent (Design-Tokens aus marketing.css).
+ * Lead-Funnel für Ads-Traffic (/anfrage) — Design nach Referenz-Screenshots:
+ * heller Grid-Hintergrund, Intro-Screen mit Eyebrow + CTA + Trust-Zeile,
+ * Fragen mit "FRAGE 01 / 06"-Label, dünner Progress-Bar und
+ * Antwort-Karten mit Buchstaben-Präfix (A/B/C/D).
  */
 
 type Antworten = {
@@ -34,76 +35,68 @@ const LEER: Antworten = {
   telefon: "",
 };
 
-type Option = { wert: string; label: string; sub?: string; icon: React.ReactNode };
+const BUCHSTABEN = ["A", "B", "C", "D", "E"];
 
-const ic = (d: string) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
-    <path d={d} />
-  </svg>
-);
-
-const FRAGEN: { key: keyof Antworten; frage: string; sub?: string; optionen: Option[] }[] = [
+const FRAGEN: { key: keyof Antworten; frage: string; optionen: string[] }[] = [
   {
     key: "website_status",
     frage: "Hat Ihr Unternehmen bereits eine Website?",
-    sub: "Damit wir wissen, wo wir ansetzen.",
     optionen: [
-      { wert: "Ja, aber veraltet", label: "Ja, aber sie ist veraltet", sub: "Bringt keine neuen Kunden", icon: ic("M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z") },
-      { wert: "Nein, noch keine", label: "Nein, noch keine", sub: "Wir starten bei null", icon: ic("M12 5v14M5 12h14") },
-      { wert: "Ja, bin zufrieden", label: "Ja, ich bin zufrieden", sub: "Ich schaue mich nur um", icon: ic("M20 6 9 17l-5-5") },
+      "Ja, aber sie ist veraltet und bringt keine Kunden",
+      "Nein, wir haben noch gar keine",
+      "Ja, und ich bin eigentlich zufrieden",
     ],
   },
   {
     key: "zeitrahmen",
     frage: "Wie schnell soll Ihre neue Website online sein?",
     optionen: [
-      { wert: "So schnell wie möglich", label: "So schnell wie möglich", sub: "Am besten diese Woche", icon: ic("M13 2 3 14h9l-1 8 10-12h-9l1-8Z") },
-      { wert: "In 2–4 Wochen", label: "In den nächsten 2–4 Wochen", sub: "Kein akuter Zeitdruck", icon: ic("M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z") },
-      { wert: "Erst informieren", label: "Ich möchte mich erst informieren", sub: "Unverbindlich vergleichen", icon: ic("M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z") },
+      "So schnell wie möglich — am besten diese Woche",
+      "In den nächsten 2–4 Wochen",
+      "Ich möchte mich erst einmal informieren",
     ],
   },
   {
     key: "branche",
     frage: "In welcher Branche sind Sie tätig?",
     optionen: [
-      { wert: "Handwerk", label: "Handwerk & Bau", icon: ic("M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4L15 12l-3-3 2.7-2.7Z") },
-      { wert: "Gastronomie", label: "Gastronomie & Hotel", icon: ic("M3 11h18M5 11V7a7 7 0 0 1 14 0v4M2 15h20v2a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4v-2Z") },
-      { wert: "Gesundheit", label: "Gesundheit & Praxis", icon: ic("M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 12 5 5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7 7-7Z") },
-      { wert: "Beauty & Friseur", label: "Beauty & Friseur", icon: ic("M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12") },
-      { wert: "Andere Branche", label: "Andere Branche", icon: ic("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 0c2.5 2.5 2.5 15.5 0 18m-9-9h18") },
+      "Handwerk & Bau",
+      "Gastronomie & Hotel",
+      "Gesundheit & Praxis",
+      "Beauty & Friseur",
+      "Andere Branche",
     ],
   },
   {
     key: "ziel",
-    frage: "Was ist Ihnen am wichtigsten?",
+    frage: "Was ist Ihnen bei Ihrer Website am wichtigsten?",
     optionen: [
-      { wert: "Neue Kunden über Google", label: "Neue Kunden über Google", sub: "Gefunden werden, wenn Kunden suchen", icon: ic("M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6ZM2 9h4v12H2zM4 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z") },
-      { wert: "Professioneller Auftritt", label: "Ein professioneller Auftritt", sub: "Seriöser erster Eindruck", icon: ic("M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14Zm-3.5-1.5L7 23l5-3 5 3-1.5-9.5") },
-      { wert: "Rundum-sorglos", label: "Alles aus einer Hand", sub: "Null Aufwand für mich", icon: ic("M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z") },
+      "Neue Kunden über Google gewinnen",
+      "Ein professioneller erster Eindruck",
+      "Alles aus einer Hand — null Aufwand für mich",
     ],
   },
 ];
 
-// Schritte gesamt: 4 Fragen + Firma + Kontakt
+// 4 Fragen + Firma + Kontakt
 const GESAMT = FRAGEN.length + 2;
 
+function fmt(n: number) {
+  return String(n).padStart(2, "0");
+}
+
 export default function FunnelPage() {
-  const [schritt, setSchritt] = useState(0);
+  // schritt: -1 = Intro, 0..3 = Fragen, 4 = Firma, 5 = Kontakt
+  const [schritt, setSchritt] = useState(-1);
   const [antworten, setAntworten] = useState<Antworten>(LEER);
   const [honeypot, setHoneypot] = useState("");
   const [sending, setSending] = useState(false);
   const [fertig, setFertig] = useState(false);
   const [error, setError] = useState("");
 
-  const fortschritt = useMemo(
-    () => Math.round(((fertig ? GESAMT : schritt) / GESAMT) * 100),
-    [schritt, fertig]
-  );
-
   const waehle = useCallback((key: keyof Antworten, wert: string) => {
     setAntworten((a) => ({ ...a, [key]: wert }));
-    // Auto-Weiter mit kurzer Verzögerung, damit die Auswahl sichtbar aufblitzt
-    setTimeout(() => setSchritt((s) => s + 1), 200);
+    setTimeout(() => setSchritt((s) => s + 1), 180);
   }, []);
 
   async function absenden(e: React.FormEvent) {
@@ -156,50 +149,93 @@ export default function FunnelPage() {
   }
 
   const inputCls =
-    "w-full rounded-xl border border-[var(--border)] bg-white px-5 py-3.5 text-[16px] text-[var(--ink)] placeholder:text-[var(--ink-soft)]/60 transition-all focus:border-[var(--blue)] focus:outline-none focus:ring-4 focus:ring-[var(--blue)]/10";
+    "w-full rounded-xl border border-[var(--border)] bg-white px-5 py-3.5 text-[16px] text-[var(--ink)] placeholder:text-[var(--ink-soft)]/50 transition-all focus:border-[var(--blue)] focus:outline-none focus:ring-4 focus:ring-[var(--blue)]/10";
   const labelCls = "mb-1.5 block text-left text-sm font-semibold text-[var(--ink)]";
+  const btnCls =
+    "w-full rounded-xl bg-[var(--blue-2)] py-4 text-[16px] font-bold text-white shadow-[0_8px_20px_rgba(30,64,175,0.25)] transition-all hover:bg-[var(--blue-hover)] hover:shadow-[0_10px_28px_rgba(30,64,175,0.35)] disabled:opacity-60";
+
+  const frageNr = Math.min(schritt + 1, GESAMT);
+  const fortschritt = fertig ? 100 : schritt < 0 ? 0 : Math.round((schritt / GESAMT) * 100);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="funnel-bg flex min-h-screen flex-col">
       {/* Header */}
-      <header className="flex items-center justify-center border-b border-[var(--border)] px-6 py-4">
-        <a href="/" className="text-[17px] font-bold tracking-tight text-[var(--ink)]">
-          Webseitenverlag <span className="text-[var(--blue)]">Deutschland</span>
+      <header className="border-b border-[var(--border)] bg-white/90 px-5 py-4 backdrop-blur-sm">
+        <a href="/" className="text-[16px] font-bold tracking-tight text-[var(--ink)]">
+          Webseitenverlag <span className="font-semibold text-[var(--ink-soft)]">Deutschland</span>
         </a>
       </header>
 
-      {/* Progress */}
-      <div className="h-1.5 w-full bg-[var(--cream-tint)]">
-        <div
-          className="h-full bg-[var(--blue)] transition-all duration-500 ease-out"
-          style={{ width: `${Math.max(fortschritt, 4)}%` }}
-        />
-      </div>
+      <main className="mx-auto flex w-full max-w-[520px] flex-1 flex-col px-5 pb-16">
+        {/* ── Intro-Screen ─────────────────────────────── */}
+        {schritt === -1 && !fertig && (
+          <div className="funnel-fade flex flex-1 flex-col justify-center py-14 text-center">
+            <p className="mb-5 flex items-center justify-center gap-2.5 font-[family-name:var(--font-mono)] text-[11.5px] font-bold uppercase tracking-[0.18em] text-[var(--blue)]">
+              <span className="inline-block h-[2px] w-6 bg-[var(--blue)]" aria-hidden="true" />
+              Der kostenlose Website-Check
+            </p>
+            <h1 className="mb-5 text-[34px] font-extrabold leading-[1.12] tracking-tight text-[var(--ink)] sm:text-[40px]">
+              Wie viel Potenzial steckt in Ihrem Betrieb?
+            </h1>
+            <p className="mx-auto mb-9 max-w-[380px] text-[16.5px] leading-relaxed text-[var(--ink-soft)]">
+              Finden Sie in 60 Sekunden heraus, ob sich eine professionelle Website für Sie lohnt
+              &ndash; inklusive kostenlosem Entwurf.
+            </p>
+            <button type="button" onClick={() => setSchritt(0)} className={btnCls}>
+              Jetzt Check starten <span aria-hidden="true">→</span>
+            </button>
+            <p className="mt-4 font-[family-name:var(--font-mono)] text-[12px] tracking-[0.12em] text-[var(--ink-soft)]">
+              Kostenlos · {GESAMT} kurze Fragen
+            </p>
 
-      <main className="mx-auto flex w-full max-w-[560px] flex-1 flex-col px-5 pb-16 pt-8 sm:pt-12">
-        {/* Zurück-Button */}
-        {!fertig && schritt > 0 && (
-          <button
-            type="button"
-            onClick={() => setSchritt((s) => s - 1)}
-            className="mb-6 flex items-center gap-1.5 self-start text-sm font-medium text-[var(--ink-soft)] transition-colors hover:text-[var(--ink)]"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            Zurück
-          </button>
+            <hr className="my-10 border-[var(--border)]" />
+
+            <p className="mb-2 flex items-center justify-center gap-2 text-[15px]">
+              <span className="tracking-[0.1em] text-[#f59e0b]" aria-hidden="true">★★★★★</span>
+              <strong className="text-[var(--ink)]">200+</strong>
+              <span className="text-[var(--ink-soft)]">Webseiten erstellt</span>
+            </p>
+            <p className="mx-auto max-w-[360px] text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
+              Über <strong className="text-[var(--ink)]">200 Betriebe</strong> aus Handwerk,
+              Gastronomie und Gesundheit vertrauen dem Webseitenverlag.
+            </p>
+          </div>
         )}
 
-        {/* Danke-Screen */}
+        {/* ── Zurück + Progress (alle Frage-Screens) ───── */}
+        {!fertig && schritt >= 0 && (
+          <div className="pt-8">
+            <button
+              type="button"
+              onClick={() => setSchritt((s) => s - 1)}
+              className="mb-6 flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] transition-colors hover:text-[var(--ink)]"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Zurück
+            </button>
+            <p className="mb-2 font-[family-name:var(--font-mono)] text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--ink-soft)]">
+              Frage {fmt(frageNr)} / {fmt(GESAMT)}
+            </p>
+            <div className="mb-9 h-[3px] w-full rounded-full bg-[var(--border)]">
+              <div
+                className="h-full rounded-full bg-[var(--blue-2)] transition-all duration-500 ease-out"
+                style={{ width: `${Math.max(fortschritt, 4)}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ── Danke-Screen ─────────────────────────────── */}
         {fertig ? (
-          <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
+          <div className="funnel-fade flex flex-1 flex-col items-center justify-center py-16 text-center">
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--blue)]/10">
-              <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-2)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
                 <path d="M20 6 9 17l-5-5" />
               </svg>
             </div>
-            <h1 className="mb-3 text-[28px] font-bold leading-tight text-[var(--ink)]">
+            <h1 className="mb-3 text-[28px] font-extrabold leading-tight tracking-tight text-[var(--ink)]">
               Vielen Dank{antworten.name ? `, ${antworten.name.split(" ")[0]}` : ""}!
             </h1>
             <p className="max-w-[400px] text-[16px] leading-relaxed text-[var(--ink-soft)]">
@@ -208,59 +244,45 @@ export default function FunnelPage() {
               uns innerhalb von 24 Stunden bei Ihnen.
             </p>
           </div>
-        ) : schritt < FRAGEN.length ? (
-          /* Fragen-Screens */
+        ) : schritt >= 0 && schritt < FRAGEN.length ? (
+          /* ── Frage-Screens (A/B/C/D-Karten) ──────────── */
           <div key={schritt} className="funnel-fade">
-            <p className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.1em] text-[var(--blue)]">
-              Schritt {schritt + 1} von {GESAMT}
-            </p>
-            <h1 className="mb-2 text-center text-[26px] font-bold leading-tight text-[var(--ink)] sm:text-[30px]">
+            <h2 className="mb-8 text-center text-[25px] font-extrabold leading-[1.2] tracking-tight text-[var(--ink)] sm:text-[28px]">
               {FRAGEN[schritt].frage}
-            </h1>
-            {FRAGEN[schritt].sub && (
-              <p className="mb-8 text-center text-[15px] text-[var(--ink-soft)]">{FRAGEN[schritt].sub}</p>
-            )}
-            {!FRAGEN[schritt].sub && <div className="mb-8" />}
-            <div className="flex flex-col gap-3">
-              {FRAGEN[schritt].optionen.map((o) => {
-                const aktiv = antworten[FRAGEN[schritt].key] === o.wert;
+            </h2>
+            <div className="flex flex-col gap-3.5">
+              {FRAGEN[schritt].optionen.map((text, i) => {
+                const aktiv = antworten[FRAGEN[schritt].key] === text;
                 return (
                   <button
-                    key={o.wert}
+                    key={text}
                     type="button"
-                    onClick={() => waehle(FRAGEN[schritt].key, o.wert)}
-                    className={`group flex items-center gap-4 rounded-2xl border-2 bg-white px-5 py-4 text-left transition-all duration-150 ${
+                    onClick={() => waehle(FRAGEN[schritt].key, text)}
+                    className={`flex items-center gap-4 rounded-2xl border bg-white px-5 py-4 text-left shadow-[0_2px_10px_rgba(15,23,42,0.05)] transition-all duration-150 ${
                       aktiv
-                        ? "border-[var(--blue)] bg-[var(--blue)]/5 shadow-[0_4px_16px_rgba(37,99,235,0.15)]"
-                        : "border-[var(--border)] hover:border-[var(--blue)] hover:shadow-[0_4px_16px_rgba(37,99,235,0.10)]"
+                        ? "border-[var(--blue-2)] shadow-[0_4px_16px_rgba(30,64,175,0.18)]"
+                        : "border-[var(--border)] hover:border-[var(--blue-2)] hover:shadow-[0_4px_16px_rgba(30,64,175,0.12)]"
                     }`}
                   >
                     <span
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${
-                        aktiv ? "bg-[var(--blue)] text-white" : "bg-[var(--blue)]/8 text-[var(--blue)] group-hover:bg-[var(--blue)]/15"
+                      className={`font-[family-name:var(--font-mono)] text-[14px] font-medium ${
+                        aktiv ? "text-[var(--blue-2)]" : "text-[var(--ink-soft)]"
                       }`}
-                      style={!aktiv ? { backgroundColor: "rgba(37,99,235,0.08)" } : undefined}
                     >
-                      {o.icon}
+                      {BUCHSTABEN[i]}
                     </span>
-                    <span>
-                      <span className="block text-[16px] font-semibold text-[var(--ink)]">{o.label}</span>
-                      {o.sub && <span className="mt-0.5 block text-[13.5px] text-[var(--ink-soft)]">{o.sub}</span>}
-                    </span>
+                    <span className="text-[15.5px] font-medium leading-snug text-[var(--ink)]">{text}</span>
                   </button>
                 );
               })}
             </div>
           </div>
         ) : schritt === FRAGEN.length ? (
-          /* Firmen-Screen */
+          /* ── Firmen-Screen ────────────────────────────── */
           <div className="funnel-fade">
-            <p className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.1em] text-[var(--blue)]">
-              Schritt {schritt + 1} von {GESAMT}
-            </p>
-            <h1 className="mb-2 text-center text-[26px] font-bold leading-tight text-[var(--ink)] sm:text-[30px]">
+            <h2 className="mb-2 text-center text-[25px] font-extrabold leading-[1.2] tracking-tight text-[var(--ink)] sm:text-[28px]">
               Erzählen Sie uns kurz von Ihrem Unternehmen
-            </h1>
+            </h2>
             <p className="mb-8 text-center text-[15px] text-[var(--ink-soft)]">
               Damit wir Ihren kostenlosen Entwurf vorbereiten können.
             </p>
@@ -302,23 +324,17 @@ export default function FunnelPage() {
                   />
                 </div>
               )}
-              <button
-                type="submit"
-                className="mt-2 w-full rounded-xl bg-[var(--blue)] py-4 text-[16px] font-semibold text-white transition-all hover:bg-[var(--blue-hover)] hover:shadow-[0_8px_24px_rgba(37,99,235,0.35)]"
-              >
-                Weiter
+              <button type="submit" className={`mt-2 ${btnCls}`}>
+                Weiter <span aria-hidden="true">→</span>
               </button>
             </form>
           </div>
-        ) : (
-          /* Kontakt-Screen */
+        ) : schritt > FRAGEN.length ? (
+          /* ── Kontakt-Screen ───────────────────────────── */
           <div className="funnel-fade">
-            <p className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.1em] text-[var(--blue)]">
-              Letzter Schritt
-            </p>
-            <h1 className="mb-2 text-center text-[26px] font-bold leading-tight text-[var(--ink)] sm:text-[30px]">
+            <h2 className="mb-2 text-center text-[25px] font-extrabold leading-[1.2] tracking-tight text-[var(--ink)] sm:text-[28px]">
               Wohin dürfen wir Ihren kostenlosen Entwurf senden?
-            </h1>
+            </h2>
             <p className="mb-8 text-center text-[15px] text-[var(--ink-soft)]">
               100&nbsp;% kostenlos &amp; unverbindlich. Keine Startgebühr.
             </p>
@@ -362,11 +378,7 @@ export default function FunnelPage() {
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <button
-                type="submit"
-                disabled={sending}
-                className="mt-2 w-full rounded-xl bg-[var(--blue)] py-4 text-[16px] font-semibold text-white transition-all hover:bg-[var(--blue-hover)] hover:shadow-[0_8px_24px_rgba(37,99,235,0.35)] disabled:opacity-60"
-              >
+              <button type="submit" disabled={sending} className={`mt-2 ${btnCls}`}>
                 {sending ? "Wird gesendet…" : "Kostenlosen Entwurf anfordern"}
               </button>
               <p className="text-center text-[12.5px] leading-relaxed text-[var(--ink-soft)]">
@@ -374,11 +386,11 @@ export default function FunnelPage() {
               </p>
             </form>
           </div>
-        )}
+        ) : null}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--border)] px-6 py-5 text-center text-[13px] text-[var(--ink-soft)]">
+      <footer className="border-t border-[var(--border)] bg-white/90 px-6 py-5 text-center text-[13px] text-[var(--ink-soft)]">
         <a href="/impressum" className="hover:text-[var(--ink)]">Impressum</a>
         <span className="mx-2">·</span>
         <a href="/datenschutz" className="hover:text-[var(--ink)]">Datenschutz</a>
