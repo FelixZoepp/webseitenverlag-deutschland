@@ -1,14 +1,27 @@
 import { getOwnedSite } from '@/lib/api-helpers'
 import { chatWithClaude, type CustomerContext } from '@/lib/claude'
 import { getPackage, type PackageTier } from '@/lib/packages'
+import { PatchSchema, applyPatch } from '@/lib/editor-ops'
+import { NERV_SCHUTZ_TAGE } from '@/config/upsells'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { SiteConfig, isMultiPageConfig } from '@/types'
+
+/**
+ * Chat-Editor (§10.2): Claude schlägt AUSSCHLIESSLICH strukturierte Ops vor,
+ * die hier serverseitig Zod-validiert und gegen die Leitplanken geprüft
+ * werden. Ein ungültiger Patch wird abgewiesen und verändert NICHTS.
+ * Änderungen landen im Entwurf (draft_config) — live geht es erst über den
+ * expliziten "Veröffentlichen"-Klick (publish-Route + config_versions).
+ */
 
 const ChatSchema = z.object({
   message: z.string().min(1, 'Nachricht darf nicht leer sein'),
   currentPage: z.string().optional(),
 })
+
+/** Rate-Limit §10.2: 50 Nachrichten pro Tag und Kunde. */
+const CHAT_LIMIT_PRO_TAG = 50
 
 export async function POST(
   request: Request,
@@ -37,6 +50,28 @@ export async function POST(
 
     const { message, currentPage } = parsed.data
 
+    // Rate-Limit: 50 Kunden-Nachrichten/Tag über alle Sites des Kunden
+    const { data: kundenSites } = await supabase
+      .from('sites')
+      .select('id')
+      .eq('customer_id', customer.id)
+    const siteIds = (kundenSites || []).map((s: { id: string }) => s.id)
+    const tagesbeginn = new Date()
+    tagesbeginn.setUTCHours(0, 0, 0, 0)
+    const { count: heutigeNachrichten } = await supabase
+      .from('chat_messages')
+      .select('*', { count: 'exact', head: true })
+      .in('site_id', siteIds.length > 0 ? siteIds : [params.siteId])
+      .eq('role', 'user')
+      .gte('created_at', tagesbeginn.toISOString())
+
+    if ((heutigeNachrichten || 0) >= CHAT_LIMIT_PRO_TAG) {
+      return NextResponse.json(
+        { error: `Tageslimit erreicht (${CHAT_LIMIT_PRO_TAG} Nachrichten). Morgen geht es weiter — dringende Anliegen gern an den Support.` },
+        { status: 429 }
+      )
+    }
+
     await supabase.from('chat_messages').insert({
       site_id: params.siteId,
       role: 'user',
@@ -61,46 +96,57 @@ export async function POST(
     // Kunden-Kontext laden für Chatbot-Regeln
     const customerContext = await buildCustomerContext(supabase, customer, site)
 
-    const { response, configChanges, upsellSuggestion } = await chatWithClaude(
+    const { response, patchOps, upsellSuggestion } = await chatWithClaude(
       chatMessages,
       currentConfig,
       isMultiPage ? currentPage || 'home' : undefined,
       customerContext
     )
 
-    // If upsell was suggested, do NOT apply config changes — wait for customer decision
-    const effectiveConfigChanges = upsellSuggestion ? null : configChanges
+    // Bei Upsell-Vorschlag: NIE gleichzeitig Änderungen anwenden
+    let antwort = response
+    let angewendeteOps: unknown = null
+
+    if (!upsellSuggestion && patchOps !== null) {
+      // 1. Zod: nur die 6 erlaubten Op-Typen, sonst Abweisung
+      const opsParsed = PatchSchema.safeParse(patchOps)
+      if (!opsParsed.success) {
+        antwort = `${response}\n\n(Hinweis: Die vorgeschlagene Änderung hatte ein ungültiges Format und wurde NICHT übernommen. Bitte formulieren Sie den Wunsch noch einmal.)`
+      } else {
+        // 2. Leitplanken + Anwendung auf Kopie — ein Fehler weist alles ab
+        const ergebnis = applyPatch(currentConfig, opsParsed.data)
+        if (!ergebnis.ok) {
+          antwort = `${response}\n\n(Die Änderung wurde NICHT übernommen: ${ergebnis.fehler.join(' ')})`
+        } else {
+          const { error: updateError } = await supabase
+            .from('sites')
+            .update({ draft_config: ergebnis.config, updated_at: new Date().toISOString() })
+            .eq('id', params.siteId)
+
+          if (!updateError) {
+            angewendeteOps = opsParsed.data
+            await supabase.from('config_versions').insert({
+              site_id: params.siteId,
+              config: ergebnis.config,
+              created_by: 'chatbot',
+              description: response.slice(0, 200),
+            })
+          } else {
+            antwort = `${response}\n\n(Die Änderung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.)`
+          }
+        }
+      }
+    }
 
     await supabase.from('chat_messages').insert({
       site_id: params.siteId,
       role: 'assistant',
-      content: response,
-      config_changes: effectiveConfigChanges,
+      content: antwort,
+      config_changes: angewendeteOps,
     })
 
-    if (effectiveConfigChanges) {
-      let mergedConfig: SiteConfig
-
-      if (isMultiPage && isMultiPageConfig(currentConfig)) {
-        mergedConfig = applyMultiPageChanges(currentConfig as unknown as Record<string, unknown>, effectiveConfigChanges, currentPage || 'home')
-      } else {
-        mergedConfig = { ...currentConfig, ...effectiveConfigChanges }
-      }
-
-      await supabase
-        .from('sites')
-        .update({ draft_config: mergedConfig, updated_at: new Date().toISOString() })
-        .eq('id', params.siteId)
-
-      await supabase.from('config_versions').insert({
-        site_id: params.siteId,
-        config: mergedConfig,
-        created_by: 'chatbot',
-        description: response.slice(0, 200),
-      })
-    }
-
-    return NextResponse.json({ response, configChanges: effectiveConfigChanges, upsellSuggestion })
+    // configChanges bleibt als Feldname erhalten (Frontend-Vertrag): truthy = Entwurf hat sich geändert
+    return NextResponse.json({ response: antwort, configChanges: angewendeteOps, upsellSuggestion })
   } catch (err) {
     console.error('Chat error:', err)
     return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 })
@@ -126,14 +172,14 @@ async function buildCustomerContext(
     .eq('customer_id', customer.id as string)
     .is('deaktiviert_am', null)
 
-  // Kürzlich abgelehnte Upsells (letzte 30 Tage)
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  // Kürzlich abgelehnte Upsells (Nerv-Schutz §10.4: 60 Tage)
+  const nervSchutzAb = new Date()
+  nervSchutzAb.setDate(nervSchutzAb.getDate() - NERV_SCHUTZ_TAGE)
   const { data: rejections } = await supabase
     .from('upsell_rejections')
     .select('upsell_id')
     .eq('customer_id', customer.id as string)
-    .gte('rejected_at', thirtyDaysAgo.toISOString())
+    .gte('rejected_at', nervSchutzAb.toISOString())
 
   // Seitenzahl berechnen
   const config = (site.draft_config || site.config) as SiteConfig
@@ -162,56 +208,4 @@ async function buildCustomerContext(
     vertragsMonate: (customer.contract_years as number || 4) * 12,
     abgelehntUpsellsLetzterMonat: (rejections || []).map((r) => r.upsell_id),
   }
-}
-
-// ============================================================
-// Config-Merge Helpers (unverändert)
-// ============================================================
-
-function applyMultiPageChanges(
-  config: Record<string, unknown>,
-  changes: Record<string, unknown>,
-  currentPage: string
-): SiteConfig {
-  const result = JSON.parse(JSON.stringify(config))
-
-  if (changes.site) {
-    result.site = deepMerge(result.site || {}, changes.site as Record<string, unknown>)
-  }
-
-  if (changes.pages) {
-    const pageChanges = changes.pages as Record<string, unknown>
-    if (!result.pages) result.pages = {}
-    for (const [key, val] of Object.entries(pageChanges)) {
-      if (result.pages[key]) {
-        result.pages[key] = deepMerge(result.pages[key], val as Record<string, unknown>)
-      }
-    }
-  }
-
-  const nonMetaKeys = Object.keys(changes).filter((k) => k !== 'site' && k !== 'pages')
-  if (nonMetaKeys.length > 0 && result.pages?.[currentPage]) {
-    const pageConfig = result.pages[currentPage].config || {}
-    for (const key of nonMetaKeys) {
-      pageConfig[key] = changes[key]
-    }
-    result.pages[currentPage].config = pageConfig
-  }
-
-  return result as SiteConfig
-}
-
-function deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
-  const result = { ...target }
-  for (const key of Object.keys(source)) {
-    if (
-      source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) &&
-      target[key] && typeof target[key] === 'object' && !Array.isArray(target[key])
-    ) {
-      result[key] = deepMerge(target[key] as Record<string, unknown>, source[key] as Record<string, unknown>)
-    } else {
-      result[key] = source[key]
-    }
-  }
-  return result
 }

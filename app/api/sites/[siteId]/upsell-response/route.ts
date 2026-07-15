@@ -1,4 +1,5 @@
 import { getOwnedSite } from '@/lib/api-helpers'
+import { NERV_SCHUTZ_TAGE } from '@/config/upsells'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -32,8 +33,9 @@ export async function POST(
     const { upsellId, action, reason } = parsed.data
 
     if (action === 'reject' || action === 'later') {
+      // Nerv-Schutz §10.4: abgelehnte/ignorierte Angebote 60 Tage nicht erneut pushen
       const retryAfter = new Date()
-      retryAfter.setDate(retryAfter.getDate() + 30)
+      retryAfter.setDate(retryAfter.getDate() + NERV_SCHUTZ_TAGE)
 
       await supabase.from('upsell_rejections').insert({
         customer_id: customer.id,

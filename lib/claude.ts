@@ -3,6 +3,7 @@ import { SiteConfig, isMultiPageConfig } from '@/types'
 import { UPSELL_MODULES } from '@/lib/upsells'
 import { getPackage, type PackageTier } from './packages'
 import { getLeitplankenPrompt } from './editor-leitplanken'
+import { getOpsPrompt } from './editor-ops'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -132,7 +133,7 @@ ${upsellTriggers}
 # UPSELL-DIALOG-LOGIK
 Wenn der Kunde eine Funktion anfragt, die ein Upsell-Modul erfordert:
 
-WICHTIG: Bei einem Upsell-Vorschlag darfst du KEINE config_changes machen! Du darfst die Website NICHT verändern!
+WICHTIG: Bei einem Upsell-Vorschlag darfst du KEINEN patch_ops-Block senden! Du darfst die Website NICHT verändern!
 Du schlägst NUR das Modul vor und wartest auf die Entscheidung des Kunden.
 
 1. ANERKENNEN: Bestätige, dass die Idee Sinn ergibt und warum
@@ -145,9 +146,9 @@ Formatiere das Angebot so:
 "[Anerkennung]. Das ist eine eigene Funktion in unserem System: [Was es macht].
 Möchten Sie das aktivieren? Es kostet [Preis]€/Monat."
 
-NIEMALS gleichzeitig einen <upsell_suggestion> UND einen <config_changes> Block senden!
+NIEMALS gleichzeitig einen <upsell_suggestion> UND einen <patch_ops> Block senden!
 
-Wenn du ein Upsell vorschlägst, füge am Ende IMMER diesen Block ein (und NUR diesen, KEINE config_changes):
+Wenn du ein Upsell vorschlägst, füge am Ende IMMER diesen Block ein (und NUR diesen, KEINE patch_ops):
 <upsell_suggestion>
 {"upsellId": "modul-id", "action": "suggest"}
 </upsell_suggestion>
@@ -186,31 +187,25 @@ ${isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage) : buildS
 }
 
 function buildSinglePageEditorSection(): string {
-  return `# EDITOR-FUNKTIONEN (Single-Page)
+  return `# EDITOR-FELDER (Single-Page)
 
-Verfügbare Config-Felder:
+Text-Pfade (update_text):
 - businessName, tagline, description — Grundtexte
-- primaryColor, secondaryColor, backgroundColor, textColor — HEX-Farbwerte
-- phone, email, address — Kontaktdaten
-- heroImageUrl, heroSubtitle, heroBadge — Hero-Bereich
-- ctaText, ctaImageUrl — Call-to-Action
-- ownerName, ownerRole, ownerImageUrl — Inhaber-Info
+- email, address — Kontaktdaten (Telefon ist gesperrt → Fakten-Check)
+- heroSubtitle, heroBadge — Hero-Bereich
+- ctaText — Call-to-Action-Text (max. 30 Zeichen)
+- ownerName, ownerRole — Inhaber-Info
 - aboutText, aboutText2 — Über-uns-Texte
 - region — Regionsbezeichnung
-- stats — Array von {value, label}
-- services — Array von {icon, title, description}
-- reviews — Array von {text, name, source}
-- faqItems — Array von {question, answer}
-- galleryImages — Array von Bild-URLs
+- services.<index>.title / .description, faqItems.<index>.question / .answer, stats.<index>.value / .label, reviews.<index>.text
+
+Bild-Pfade (swap_image_from_pool_or_upload):
+- heroImageUrl, ctaImageUrl, ownerImageUrl, galleryImages.<index>
+
+Sektionen (add_section_from_library / reorder / toggle):
 - sections — Array mit {id, type, title, visible, order}
 
-Wenn der Kunde eine Änderung wünscht, antworte mit einer freundlichen Bestätigung und gib die Änderungen als JSON zurück:
-
-<config_changes>
-{"key": "neuer Wert"}
-</config_changes>
-
-Wenn der Kunde nur eine Frage stellt, antworte normal ohne config_changes-Block.`
+${getOpsPrompt()}`
 }
 
 function buildMultiPageEditorSection(currentPage: string): string {
@@ -225,34 +220,21 @@ KONTEXT-REGELN:
 - Neue Sektionen: auf der aktuellen Seite, außer User sagt explizit anders
 - KEINE NEUEN PAGES ERSTELLEN. Bei "erstelle eine neue Seite" antworte: "Neue Seiten können Sie im Page-Manager links anlegen."
 
-KONFIG-STRUKTUR:
+KONFIG-STRUKTUR (Pfade für update_text / swap_image_from_pool_or_upload):
 - site.name — Firmenname
-- site.colors.primary/secondary/background/text — HEX-Farben
 - site.branding.logoText — Logo-Text
-- site.navigation — Array der sichtbaren Page-Keys
 - site.footer.text — Footer-Text
-- pages.{pageKey}.config.* — Seitenspezifische Inhalte
-- pages.{pageKey}.title — Seitentitel
+- pages.${currentPage}.title — Seitentitel
+- pages.${currentPage}.config.* — Seitenspezifische Inhalte
+- Farben NIE über Pfade — nur set_theme_preset
 
 Für Page-Configs je nach Template:
-- home: hero.headline, hero.subtitle, hero.imageUrl, hero.badge, hero.ctaText, highlights[]
-- about: title, story, story2, team[], imageUrl
-- services: title, intro, items[] (icon, title, description)
-- contact: title, address, phone, email, hours
+- home: pages.home.config.hero.headline / .subtitle / .imageUrl / .badge / .ctaText
+- about: pages.about.config.title / .story / .story2 / .imageUrl
+- services: pages.services.config.title / .intro / .items.<index>.title / .description
+- contact: pages.contact.config.title / .address / .email / .hours (Telefon gesperrt → Fakten-Check)
 
-ANTWORTFORMAT — gib Änderungen als JSON zurück:
-
-Für seitenspezifische Änderungen:
-<config_changes>
-{"pages": {"${currentPage}": {"config": {"title": "Neuer Titel"}}}}
-</config_changes>
-
-Für globale Änderungen:
-<config_changes>
-{"site": {"colors": {"primary": "#ff6600"}}}
-</config_changes>
-
-Wenn der Kunde nur eine Frage stellt, antworte normal ohne config_changes-Block.`
+${getOpsPrompt()}`
 }
 
 // ============================================================
@@ -266,7 +248,8 @@ export async function chatWithClaude(
   customerContext?: CustomerContext
 ): Promise<{
   response: string
-  configChanges: Partial<SiteConfig> | null
+  /** Rohe, UNVALIDIERTE Ops aus dem <patch_ops>-Block — Validierung passiert serverseitig (lib/editor-ops). */
+  patchOps: unknown | null
   upsellSuggestion: { upsellId: string; action: string } | null
 }> {
   const isMultiPage = isMultiPageConfig(currentConfig)
@@ -291,14 +274,14 @@ export async function chatWithClaude(
   const text =
     response.content[0].type === 'text' ? response.content[0].text : ''
 
-  // Parse config_changes
-  const configMatch = text.match(/<config_changes>\n?([\s\S]*?)\n?<\/config_changes>/)
-  let configChanges: Partial<SiteConfig> | null = null
-  if (configMatch) {
+  // Parse patch_ops (roh — Zod-Validierung übernimmt die Route über lib/editor-ops)
+  const opsMatch = text.match(/<patch_ops>\n?([\s\S]*?)\n?<\/patch_ops>/)
+  let patchOps: unknown | null = null
+  if (opsMatch) {
     try {
-      configChanges = JSON.parse(configMatch[1])
+      patchOps = JSON.parse(opsMatch[1])
     } catch {
-      // Invalid JSON — ignore
+      // Ungültiges JSON — wird wie ein abgewiesener Patch behandelt (null)
     }
   }
 
@@ -314,9 +297,10 @@ export async function chatWithClaude(
   }
 
   const cleanResponse = text
+    .replace(/<patch_ops>[\s\S]*?<\/patch_ops>/g, '')
     .replace(/<config_changes>[\s\S]*?<\/config_changes>/g, '')
     .replace(/<upsell_suggestion>[\s\S]*?<\/upsell_suggestion>/g, '')
     .trim()
 
-  return { response: cleanResponse, configChanges, upsellSuggestion }
+  return { response: cleanResponse, patchOps, upsellSuggestion }
 }

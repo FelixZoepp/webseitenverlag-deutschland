@@ -65,3 +65,65 @@ export async function createDemoCheckoutSession(params: {
   if (!session.url) throw new Error('Stripe hat keine Checkout-URL zurückgegeben')
   return { url: session.url, sessionId: session.id }
 }
+
+/**
+ * Checkout-Session für Upsells/Upgrades (§10.4).
+ * Monatlicher Anteil → subscription-Mode (einmaliger Anteil als Zusatzposten),
+ * rein einmalig → payment-Mode. metadata.product_key steuert den Webhook.
+ */
+export async function createUpsellCheckoutSession(params: {
+  orderId: string
+  productKey: string
+  produktName: string
+  einmalCent: number
+  monatCent: number
+  customerId: string
+  siteId?: string
+  successUrl: string
+  cancelUrl: string
+}): Promise<{ url: string; sessionId: string }> {
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = []
+
+  if (params.monatCent > 0) {
+    lineItems.push({
+      quantity: 1,
+      price_data: {
+        currency: 'eur',
+        recurring: { interval: 'month' },
+        unit_amount: params.monatCent,
+        product_data: { name: params.produktName },
+      },
+    })
+  }
+  if (params.einmalCent > 0) {
+    lineItems.push({
+      quantity: 1,
+      price_data: {
+        currency: 'eur',
+        unit_amount: params.einmalCent,
+        product_data: { name: `${params.produktName} — Einrichtung (einmalig)` },
+      },
+    })
+  }
+  if (lineItems.length === 0) throw new Error('Produkt ohne Preis')
+
+  const metadata = {
+    product_key: params.productKey,
+    order_id: params.orderId,
+    customer_id: params.customerId,
+    site_id: params.siteId || '',
+  }
+
+  const session = await getStripe().checkout.sessions.create({
+    mode: params.monatCent > 0 ? 'subscription' : 'payment',
+    locale: 'de',
+    line_items: lineItems,
+    metadata,
+    ...(params.monatCent > 0 ? { subscription_data: { metadata } } : {}),
+    success_url: params.successUrl,
+    cancel_url: params.cancelUrl,
+  })
+
+  if (!session.url) throw new Error('Stripe hat keine Checkout-URL zurückgegeben')
+  return { url: session.url, sessionId: session.id }
+}

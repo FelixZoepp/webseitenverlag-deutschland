@@ -159,9 +159,14 @@ export default function SiteEditor({ site: initialSite, messages: initialMessage
           {isMultiPage && <span className="glass-badge" style={{ fontSize: '8px' }}>Multi-Page</span>}
           {hasUnsavedChanges && <span style={{ fontSize: '10px', color: '#B25E10', fontWeight: 500 }}>Nicht veröffentlicht</span>}
         </div>
-        <button onClick={handlePublish} disabled={deploying} className="glass-btn" style={{ padding: '6px 14px', fontSize: '10px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-          {deploying ? <><Loader2 className="w-3 h-3 animate-spin" /> Deploying...</> : <><Upload className="w-3 h-3" /> Veröffentlichen</>}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <a href={`/dashboard/${site.id}/erweiterungen`} className="glass-btn-ghost" style={{ padding: '6px 12px', fontSize: '10px', textDecoration: 'none' }}>
+            Erweiterungen
+          </a>
+          <button onClick={handlePublish} disabled={deploying} className="glass-btn" style={{ padding: '6px 14px', fontSize: '10px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            {deploying ? <><Loader2 className="w-3 h-3 animate-spin" /> Deploying...</> : <><Upload className="w-3 h-3" /> Veröffentlichen</>}
+          </button>
+        </div>
       </header>
 
 

@@ -25,6 +25,7 @@ import {
   vertragsende,
   wirksamesKuendigungsdatum,
 } from '@/lib/contracts'
+import { getUpsellProduct, istPlanUpgrade, planUpgradeTier } from '@/config/upsells'
 
 export const maxDuration = 60
 
@@ -81,6 +82,12 @@ export async function POST(request: Request) {
 // ------------------------------------------------------------
 
 async function handleCheckoutCompleted(supabase: SupabaseClient, session: Stripe.Checkout.Session) {
+  // §10.4: Upsell-/Upgrade-Käufe tragen metadata.product_key und laufen
+  // über einen eigenen Pfad (upsell_orders → Freischaltung + eigener Vertrag).
+  if (session.metadata?.product_key) {
+    return handleUpsellCheckout(supabase, session)
+  }
+
   const demoId = session.metadata?.demo_id
   const paket = session.metadata?.paket || 'starter'
   if (!demoId) return OK()
@@ -282,6 +289,233 @@ async function handleCheckoutCompleted(supabase: SupabaseClient, session: Stripe
   }
 
   console.log(`[STRIPE] Demo ${demoId} → Kunde ${customerId} provisioniert (${paket})`)
+  return OK()
+}
+
+// ------------------------------------------------------------
+// Upsell-/Upgrade-Kauf (§10.4): BEZAHLT → Vertrag → Auto-Freischaltung
+// ------------------------------------------------------------
+
+async function handleUpsellCheckout(supabase: SupabaseClient, session: Stripe.Checkout.Session) {
+  const productKey = session.metadata?.product_key || ''
+  const orderId = session.metadata?.order_id
+
+  // Bestellung finden (per order_id aus den Metadaten, Fallback: Session-ID)
+  let order: Record<string, unknown> | null = null
+  if (orderId) {
+    const { data } = await supabase.from('upsell_orders').select('*').eq('id', orderId).maybeSingle()
+    order = data
+  }
+  if (!order) {
+    const { data } = await supabase
+      .from('upsell_orders')
+      .select('*')
+      .eq('stripe_checkout_session_id', session.id)
+      .maybeSingle()
+    order = data
+  }
+  if (!order) {
+    console.error(`[STRIPE] Upsell-Order zu Session ${session.id} (${productKey}) nicht gefunden`)
+    await createManualTask(supabase, {
+      typ: 'PROVISIONING_LUECKE',
+      titel: `Upsell bezahlt, aber Bestellung fehlt: ${productKey}`,
+      beschreibung: `Checkout-Session ${session.id} wurde bezahlt (product_key ${productKey}), aber es gibt keine upsell_orders-Zeile. Freischaltung manuell prüfen. (Migration 019 ausgeführt?)`,
+      quelle: 'stripe-webhook',
+    })
+    return OK() // kein Retry — Stripe kann das nicht heilen
+  }
+
+  // Idempotenz: Stripe sendet Events ggf. mehrfach
+  if (order.status === 'BEZAHLT' || order.status === 'PROVISIONIERT') return OK()
+
+  const customerId = order.customer_id as string
+  const monatCent = (order.monat_cent as number) || 0
+  const stripeCustomerId = typeof session.customer === 'string' ? session.customer : session.customer?.id || null
+  const stripeSubscriptionId =
+    typeof session.subscription === 'string' ? session.subscription : session.subscription?.id || null
+
+  await supabase
+    .from('upsell_orders')
+    .update({
+      status: 'BEZAHLT',
+      stripe_checkout_session_id: session.id,
+      stripe_subscription_id: stripeSubscriptionId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', order.id as string)
+
+  const kontakt = await kundenKontakt(supabase, customerId)
+
+  // --- Fall A: Plan-Upgrade (starter→business→growth) ---------------------
+  if (istPlanUpgrade(productKey)) {
+    const zielTier = planUpgradeTier(productKey) as PackageTier
+    const pkg = getPackage(zielTier)
+
+    // Automatische Freischaltung: Paket auf Kunde + Site(s) setzen
+    await supabase
+      .from('customers')
+      .update({ package: zielTier, monthly_price: pkg.price })
+      .eq('id', customerId)
+    if (order.site_id) {
+      await supabase.from('sites').update({ package: zielTier }).eq('id', order.site_id as string)
+    } else {
+      await supabase.from('sites').update({ package: zielTier }).eq('customer_id', customerId)
+    }
+
+    // Bestehenden AKTIV-Vertrag auf das neue Paket heben (Laufzeit bleibt),
+    // neue Subscription verknüpfen — KEIN zweiter 24/24/3-Vertrag.
+    const { data: hauptVertrag } = await supabase
+      .from('contracts')
+      .select('id, stripe_subscription_id')
+      .eq('customer_id', customerId)
+      .eq('status', 'AKTIV')
+      .not('paket', 'like', 'upsell:%')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    const alteSubscription = hauptVertrag?.stripe_subscription_id || null
+    if (hauptVertrag) {
+      await supabase
+        .from('contracts')
+        .update({
+          paket: zielTier,
+          monatsrate_cent: pkg.price * 100,
+          stripe_subscription_id: stripeSubscriptionId || alteSubscription,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', hauptVertrag.id)
+      await supabase
+        .from('upsell_orders')
+        .update({ contract_id: hauptVertrag.id, updated_at: new Date().toISOString() })
+        .eq('id', order.id as string)
+    }
+
+    // Altes Abo läuft in Stripe weiter → manuell beenden (Proration-Pragmatismus)
+    await createManualTask(supabase, {
+      typ: 'SONSTIGES',
+      titel: `Altes Stripe-Abo nach Plan-Upgrade beenden: ${kontakt.name}`,
+      beschreibung: `Kunde hat auf ${pkg.name} (${pkg.price} €/Monat) upgegradet — neue Subscription ${stripeSubscriptionId ?? '—'} ist aktiv. Alte Subscription ${alteSubscription ?? '—'} in Stripe kündigen/anteilig verrechnen, damit nicht doppelt abgebucht wird.`,
+      customer_id: customerId,
+      quelle: 'stripe-webhook',
+    })
+
+    await supabase
+      .from('upsell_orders')
+      .update({ status: 'PROVISIONIERT', provisioniert_am: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq('id', order.id as string)
+
+    console.log(`[STRIPE] Plan-Upgrade → Kunde ${customerId} auf ${zielTier} freigeschaltet`)
+    return OK()
+  }
+
+  // --- Fall B: Katalog-Upsell ----------------------------------------------
+  const produkt = getUpsellProduct(productKey)
+  if (!produkt) {
+    await createManualTask(supabase, {
+      typ: 'PROVISIONING_LUECKE',
+      titel: `Unbekanntes Upsell-Produkt bezahlt: ${productKey}`,
+      beschreibung: `Order ${order.id} ist BEZAHLT, aber ${productKey} steht nicht (mehr) in config/upsells.ts. Freischaltung manuell klären.`,
+      customer_id: customerId,
+      quelle: 'stripe-webhook',
+    })
+    return OK()
+  }
+
+  // Eigener Vertrag je Buchung (§10.4) — nur bei monatlichem Anteil
+  if (monatCent > 0) {
+    const { data: existingContract } = stripeSubscriptionId
+      ? await supabase
+          .from('contracts')
+          .select('id')
+          .eq('stripe_subscription_id', stripeSubscriptionId)
+          .maybeSingle()
+      : { data: null }
+
+    if (!existingContract) {
+      const beginn = heuteIso()
+      const { data: contract, error: contractError } = await supabase
+        .from('contracts')
+        .insert({
+          customer_id: customerId,
+          site_id: (order.site_id as string) || null,
+          paket: `upsell:${productKey}`,
+          monatsrate_cent: monatCent,
+          laufzeit_monate: produkt.laufzeitMonate,
+          verlaengerung_monate: produkt.verlaengerungMonate,
+          kuendigungsfrist_monate: produkt.kuendigungsfristMonate,
+          beginn,
+          ende: vertragsende(beginn, Math.max(1, produkt.laufzeitMonate)),
+          status: 'AKTIV',
+          stripe_customer_id: stripeCustomerId,
+          stripe_subscription_id: stripeSubscriptionId,
+          letzte_zahlung_am: beginn,
+        })
+        .select('id')
+        .single()
+
+      if (contractError) {
+        console.error(`[STRIPE] Upsell-Vertrag fehlgeschlagen: ${contractError.message}`)
+        await createManualTask(supabase, {
+          typ: 'PROVISIONING_LUECKE',
+          titel: `Upsell-Vertrag manuell anlegen: ${kontakt.name} — ${produkt.name}`,
+          beschreibung: `Order ${order.id} ist bezahlt, aber der contracts-Insert schlug fehl: ${contractError.message}.`,
+          customer_id: customerId,
+          quelle: 'stripe-webhook',
+        })
+      } else if (contract) {
+        await supabase
+          .from('upsell_orders')
+          .update({ contract_id: contract.id, updated_at: new Date().toISOString() })
+          .eq('id', order.id as string)
+      }
+    }
+  }
+
+  // Fulfillment
+  if (produkt.fulfillment === 'va_manual') {
+    await createManualTask(supabase, {
+      typ: 'SONSTIGES',
+      titel: `Upsell einrichten: ${produkt.name} — ${kontakt.name}`,
+      beschreibung: `Kunde hat "${produkt.name}" gekauft (Order ${order.id}). ${produkt.provisioning}. Nach Erledigung Order auf PROVISIONIERT setzen.`,
+      customer_id: customerId,
+      quelle: 'stripe-webhook',
+    })
+    console.log(`[STRIPE] Upsell ${productKey} → manual_task für VA (${customerId})`)
+    return OK() // bleibt BEZAHLT, bis der VA fertig ist
+  }
+
+  // fulfillment 'auto': Modul freischalten (activated_upsells), Rest macht der Cron (Phase G)
+  const { error: aktivError } = await supabase.from('activated_upsells').upsert(
+    {
+      customer_id: customerId,
+      upsell_id: productKey,
+      preis_pro_monat_cent: monatCent,
+      aktiviert_am: new Date().toISOString(),
+      deaktiviert_am: null,
+      externe_payment_item_ref: stripeSubscriptionId || session.id,
+    },
+    { onConflict: 'customer_id,upsell_id' }
+  )
+
+  if (aktivError) {
+    console.error(`[STRIPE] Upsell-Freischaltung fehlgeschlagen: ${aktivError.message}`)
+    await createManualTask(supabase, {
+      typ: 'PROVISIONING_LUECKE',
+      titel: `Upsell manuell freischalten: ${produkt.name} — ${kontakt.name}`,
+      beschreibung: `Order ${order.id} ist bezahlt, aber activated_upsells-Upsert schlug fehl: ${aktivError.message}.`,
+      customer_id: customerId,
+      quelle: 'stripe-webhook',
+    })
+    return OK()
+  }
+
+  await supabase
+    .from('upsell_orders')
+    .update({ status: 'PROVISIONIERT', provisioniert_am: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq('id', order.id as string)
+
+  console.log(`[STRIPE] Upsell ${productKey} → Kunde ${customerId} freigeschaltet`)
   return OK()
 }
 

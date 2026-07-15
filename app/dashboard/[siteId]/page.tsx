@@ -4,6 +4,8 @@ import SiteEditor from '@/components/site-editor'
 import CustomerOnboardingFlow from '@/components/customer-onboarding-flow'
 import KundenStatusDashboard from '@/components/kunden-status-dashboard'
 import FreigabeBanner from '@/components/freigabe-banner'
+import WizardBanner from '@/components/wizard-banner'
+import { wizardFortschritt, WizardStatus } from '@/lib/wizard'
 
 export const dynamic = 'force-dynamic'
 
@@ -112,9 +114,16 @@ export default async function SiteEditorPage({
 
   const showFreigabeBanner = !isAdmin && buildStatus === 'FERTIG' && !siteIsLive
 
+  // Fertigstellungs-Wizard-Banner (§10.1): sichtbar bis fertiggestellt, blockiert nie
+  const wizardOffen = !site.fertiggestellt_am
+  const fortschritt = wizardFortschritt((site.wizard_status as WizardStatus) || {})
+
   return (
     <>
       {showFreigabeBanner && <FreigabeBanner siteId={params.siteId} />}
+      {!isAdmin && wizardOffen && (
+        <WizardBanner siteId={params.siteId} bearbeitet={fortschritt.bearbeitet} gesamt={fortschritt.gesamt} />
+      )}
       <SiteEditor
         site={site}
         messages={messages || []}
