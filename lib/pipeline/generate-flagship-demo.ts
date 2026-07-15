@@ -11,7 +11,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { generiereAsset, makePair } from '@/lib/assets/pipeline'
+import { generiereAsset, generiereVideo, makePair } from '@/lib/assets/pipeline'
 import { baueAssetPrompt } from '@/lib/seeding/seed-branche'
 import type { BranchenProfil } from '@/lib/seeding/schema'
 import type { FlagshipConfig } from '@/lib/flagship/types'
@@ -23,6 +23,7 @@ const DEMO_KOSTEN_LIMIT_CENT = 150
 
 export interface DemoAssetMeta {
   hero?: { id: string; quelle: 'frisch' | 'bank' }
+  video?: { job_id: string; quelle: 'frisch' }
   paar?: { pair_id: string | null; asset_ids: string[]; quelle: 'frisch' | 'bank' }
   fallback: string[]
   warnungen: string[]
@@ -232,6 +233,22 @@ export async function generiereFlagshipDemo(
       kostenCent += hero.kostenCent
       config.inhalte.hero.media.datei = hero.publicUrl
       assetMeta.hero = { id: hero.id, quelle: 'frisch' }
+
+      // Video-Hero: Hero-Bild → Looping-Video (image-to-video via Higgsfield)
+      try {
+        const video = await generiereVideo({
+          imageUrl: hero.publicUrl,
+          prompt: baueAssetPrompt(styleProfil, s.szenen.hero),
+          kontext: `video:${kontext}`,
+        })
+        if (video.videoUrl) {
+          kostenCent += video.kostenCent
+          config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl }
+          assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
+        }
+      } catch (e) {
+        warnungen.push(`Video-Hero fehlgeschlagen (Bild-Hero bleibt): ${(e as Error).message}`)
+      }
     } else {
       warnungen.push(`Hero-Generierung fehlgeschlagen: ${(heroErgebnis.reason as Error).message}`)
     }

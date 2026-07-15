@@ -45,6 +45,41 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
   const sekundaer = hero.cta_sekundaer
     ? `\n        <a class="btn ghost" href="${escAttr(hero.cta_sekundaer.href)}">${esc(hero.cta_sekundaer.label)}</a>`
     : ''
+
+  // Video-Hero (Growth-Level): Looping-Video als Hintergrund mit Gradient-Shade
+  if (hero.video?.src) {
+    const posterAttr = hero.video.poster
+      ? ` poster="${escAttr(hero.video.poster)}"`
+      : hero.media.datei
+        ? ` poster="${escAttr(hero.media.datei)}"`
+        : ''
+    const reducedBg = hero.video.poster || hero.media.datei
+      ? `\n  <style>@media(prefers-reduced-motion:reduce){.vhero{background:url('${escAttr(hero.video.poster || hero.media.datei!)}') center/cover}}</style>`
+      : ''
+    return `<!-- sektion:hero -->
+<header class="vhero" id="top">
+  <video id="heroVideo" autoplay muted loop playsinline preload="metadata"${posterAttr}>
+    <source src="${escAttr(hero.video.src)}" type="video/mp4">
+  </video>
+  <div class="vshade"></div>
+  <div class="wrap vinner">
+    <div class="rv in" style="max-width:640px">
+      <span class="eyebrow">${esc(hero.eyebrow)}</span>
+      <h1>${headline}</h1>
+      <p class="lead" style="margin:24px 0 36px">${esc(hero.lead)}</p>
+      <div class="cta-row">
+        <a class="${ctaKlasse}" href="${escAttr(funnelUrl)}">${esc(hero.cta_label)} <span class="arr">→</span></a>${sekundaer}
+      </div>
+      <div class="chips">
+        ${chips}
+      </div>
+    </div>
+  </div>
+  <div class="stat-card vcard"><b>${esc(hero.stat2.wert)}</b><small>${esc(hero.stat2.label)}</small></div>${reducedBg}
+</header>`
+  }
+
+  // Standard: statischer Bild-Hero
   return `<!-- sektion:hero -->
 <header class="hero" id="top">
   <div class="wrap">

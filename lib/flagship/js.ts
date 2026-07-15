@@ -111,7 +111,12 @@ export function flagshipJs(opts: { ablauf?: AblaufInhalt; hatBaSlider: boolean; 
 
   teile.push(`
   /* Highlight-Wipes im Hero sofort */
-  document.querySelectorAll('.hero .hl').forEach(function(h){setTimeout(function(){h.classList.add('on')},300)});`)
+  document.querySelectorAll('.hero .hl, .vhero .hl').forEach(function(h){setTimeout(function(){h.classList.add('on')},300)});
+
+  /* Video-Hero: reduced-motion → pausieren */
+  var hv=document.getElementById('heroVideo');
+  if(reduced&&hv){hv.pause();hv.removeAttribute('autoplay');}`)
+
 
   return `(function(){\n  ${teile.join('\n')}\n})();`
 }

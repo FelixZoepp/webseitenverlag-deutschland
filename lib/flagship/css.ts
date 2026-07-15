@@ -130,6 +130,23 @@ nav .btn{padding:11px 20px;font-size:${hell ? '.88rem' : '.87rem'};${hell ? 'mar
 @media(max-width:900px){.sc1{left:10px}.sc2{right:10px}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(${hell ? '-10px' : '-9px'})}}
 
+/* Video-Hero (Growth-Level) */
+.vhero{position:relative;min-height:100vh;display:flex;align-items:center;padding:150px 0 100px;overflow:hidden}
+.vhero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.vshade{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,var(--basis) 0%,rgba(${rgb(t.basis)},.97) 34%,rgba(${rgb(t.basis)},.72) 52%,rgba(${rgb(t.basis)},0) 70%)}
+.vshade::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(${rgb(t.basis)},.5),transparent 20%)}
+.vinner{position:relative;z-index:2;width:100%}
+.vcard{position:absolute;right:44px;bottom:48px;z-index:2}
+@media(max-width:860px){
+  .vshade{background:linear-gradient(180deg,var(--basis) 0%,rgba(${rgb(t.basis)},.92) 34%,rgba(${rgb(t.basis)},.6) 60%,rgba(${rgb(t.basis)},.3) 100%)}
+  .vcard{display:none}
+  .vhero{min-height:92vh;padding-top:130px}
+}
+@media(prefers-reduced-motion:reduce){
+  .vhero video{display:none}
+}
+
 .media{position:relative;background:${platzhalter}}
 .media::before{content:"";position:absolute;inset:0;opacity:.5;background:repeating-linear-gradient(115deg,transparent 0 26px,rgba(${hell ? '255,255,255' : rgb(t.text)},.05) 26px 27px)}
 .media::after{content:attr(data-label) "\\A Asset folgt · Higgsfield";white-space:pre;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:rgba(${hell ? '255,255,255,.92' : rgb(t.text) + ',.85'});font-weight:700;font-size:${hell ? '.95rem' : '.92rem'};letter-spacing:.06em;line-height:2;padding:24px}

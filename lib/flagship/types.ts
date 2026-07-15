@@ -52,6 +52,14 @@ export interface MediaSlot {
   hintergrund?: string
 }
 
+/** Video-Slot für den Video-Hero (Growth-Level, via Higgsfield image-to-video) */
+export interface VideoSlot {
+  /** MP4-URL des Looping-Videos */
+  src: string
+  /** Poster-Bild (erster Frame / Hero-Bild) — wird auch als reduced-motion-Fallback genutzt */
+  poster?: string
+}
+
 export interface NavInhalt {
   logo_text: string
   /** Optionaler zweiter Logo-Teil in Akzentfarbe (Restaurant: „ VINO") */
@@ -71,6 +79,8 @@ export interface HeroInhalt {
   /** check = SVG-Häkchen (Reinigung), dot = Gold-Punkt (Restaurant) */
   chip_stil: 'check' | 'dot'
   media: MediaSlot
+  /** Video-Hero (Growth-Level): Looping-Video als Hintergrund mit Gradient-Overlay */
+  video?: VideoSlot
   stat1: { wert: string; label: string }
   stat2: { wert: string; label: string }
 }

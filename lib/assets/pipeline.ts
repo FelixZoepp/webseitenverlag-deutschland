@@ -25,6 +25,8 @@ import {
   type AssetAspect,
   type AssetProvider,
   type GeneratedImage,
+  type GeneratedVideo,
+  type GenerateVideoOptions,
 } from './higgsfield'
 
 const BUCKET = 'asset-bank'
@@ -263,6 +265,61 @@ export interface AssetPaar {
  * pair_id in der Bank. WICHTIG: Beide Bilder müssen vom SELBEN Provider
  * kommen (der Edit referenziert den Job des ersten Bilds).
  */
+export interface VideoErgebnis {
+  videoUrl: string
+  posterUrl: string | undefined
+  kostenCent: number
+  jobId: string
+  provider: AssetProvider['name']
+}
+
+/**
+ * generiereVideo(): Hero-Bild → Looping-Video (image-to-video via Higgsfield).
+ * Nur Provider mit generateVideo-Methode werden probiert (Mock liefert leere URL).
+ */
+export async function generiereVideo(
+  o: GenerateVideoOptions & { kontext?: string }
+): Promise<VideoErgebnis> {
+  if (generierungGesperrt()) {
+    throw new Error('GENERATION_KILL_SWITCH aktiv — Video-Generierung gestoppt')
+  }
+  const kette = getAssetProviderKette()
+  let ergebnis: GeneratedVideo | null = null
+  let provider: AssetProvider | null = null
+  let letzterFehler: unknown = null
+  for (const p of kette) {
+    if (!p.generateVideo) continue
+    try {
+      ergebnis = await p.generateVideo(o)
+      provider = p
+      break
+    } catch (e) {
+      letzterFehler = e
+      console.warn(`[video] Provider ${p.name} fehlgeschlagen:`, (e as Error).message)
+    }
+  }
+  if (!ergebnis || !provider) {
+    throw new Error(
+      `Kein Video-Provider verfügbar: ${letzterFehler instanceof Error ? letzterFehler.message : 'keine Provider mit generateVideo'}`
+    )
+  }
+
+  if (ergebnis.costCents > 0) {
+    await erfasseNutzung('asset_generierung', {
+      kostenCent: ergebnis.costCents,
+      kontext: o.kontext ?? `video:${provider.name}`,
+    })
+  }
+
+  return {
+    videoUrl: ergebnis.url,
+    posterUrl: ergebnis.posterUrl,
+    kostenCent: ergebnis.costCents,
+    jobId: ergebnis.jobId,
+    provider: provider.name,
+  }
+}
+
 export async function makePair(o: PaarGenerierung): Promise<AssetPaar> {
   const pairId = randomUUID()
   const aspect = o.aspect ?? '4:3'

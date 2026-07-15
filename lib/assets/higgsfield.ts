@@ -37,10 +37,28 @@ export interface GeneratedImage {
   seed?: string
 }
 
+export interface GenerateVideoOptions {
+  /** URL des Quellbilds (Hero-Bild → animiertes Looping-Video) */
+  imageUrl: string
+  prompt: string
+  /** Dauer in Sekunden (Higgsfield: typisch 4–6s, Loop) */
+  durationSeconds?: number
+}
+
+export interface GeneratedVideo {
+  jobId: string
+  /** Download-URL des MP4 */
+  url: string
+  costCents: number
+  /** Poster-Bild (erster Frame / Original) */
+  posterUrl?: string
+}
+
 export interface AssetProvider {
   readonly name: 'higgsfield' | 'fal' | 'mock'
   readonly quelle: 'ai_higgsfield' | 'ai_fal' | 'ai_mock'
   generateImage(o: GenerateImageOptions): Promise<GeneratedImage>
+  generateVideo?(o: GenerateVideoOptions): Promise<GeneratedVideo>
 }
 
 /** Poll-Timeout laut BF §2.1: 120 s je Job. */
@@ -142,6 +160,47 @@ export class HiggsfieldProvider implements AssetProvider {
       url,
       costCents: Number(process.env.HIGGSFIELD_KOSTEN_CENT ?? 6),
       seed,
+    }
+  }
+
+  async generateVideo(o: GenerateVideoOptions): Promise<GeneratedVideo> {
+    const pfad = process.env.HIGGSFIELD_PATH_IMG2VID ?? '/v1/image2video/soul'
+    const anlage = await fetch(`${this.base}${pfad}`, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify({
+        params: {
+          prompt: o.prompt,
+          image_url: o.imageUrl,
+          duration: o.durationSeconds ?? 5,
+        },
+      }),
+    })
+    if (!anlage.ok) {
+      throw new Error(`Higgsfield-Video fehlgeschlagen (${anlage.status}): ${await anlage.text()}`)
+    }
+    const job = (await anlage.json()) as { id?: string; job_set_id?: string }
+    const jobId = job.id ?? job.job_set_id
+    if (!jobId) throw new Error('Higgsfield-Video: keine Job-ID in der Antwort')
+
+    const url = await pollBis(async () => {
+      const res = await fetch(`${this.base}/v1/job-sets/${jobId}`, { headers: this.headers })
+      if (!res.ok) throw new Error(`Higgsfield-Video-Poll fehlgeschlagen (${res.status})`)
+      const daten = (await res.json()) as {
+        jobs?: Array<{ status: string; results?: { raw?: { url?: string } } }>
+      }
+      const fertig = daten.jobs?.find((j) => j.status === 'completed')
+      if (daten.jobs?.every((j) => j.status === 'failed')) {
+        throw new Error('Higgsfield-Video: alle Jobs failed')
+      }
+      return fertig?.results?.raw?.url ?? null
+    }, `Higgsfield-Video-Job ${jobId}`)
+
+    return {
+      jobId,
+      url,
+      costCents: Number(process.env.HIGGSFIELD_VIDEO_KOSTEN_CENT ?? 12),
+      posterUrl: o.imageUrl,
     }
   }
 }
@@ -269,6 +328,17 @@ export class MockProvider implements AssetProvider {
       url: `data:image/png;base64,${png.toString('base64')}`,
       costCents: 0,
       seed,
+    }
+  }
+
+  async generateVideo(_o: GenerateVideoOptions): Promise<GeneratedVideo> {
+    // Mock: kein echtes Video — Pipeline durchläuft trotzdem,
+    // hero.video bleibt ungesetzt (kein src → statischer Bild-Hero)
+    return {
+      jobId: `mock_video_${randomUUID()}`,
+      url: '',
+      costCents: 0,
+      posterUrl: _o.imageUrl,
     }
   }
 }
