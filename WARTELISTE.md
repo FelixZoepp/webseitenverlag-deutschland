@@ -20,6 +20,14 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 - [ ] **Kosten je Call verifizieren**: `HIGGSFIELD_KOSTEN_CENT` (Default 6) / `FAL_KOSTEN_CENT` (Default 4) sind Schätzwerte — nach den ersten echten Läufen mit dem Provider-Dashboard abgleichen
 - [ ] **Tages-Budget bestätigen**: `ASSET_BUDGET_TAG_CENT` Default 500 (= 5 €/Tag); Pipeline stoppt hart, wenn erreicht
 
+## Branchen-Fabrik (F3–F5)
+- [ ] **16 Branchen freigeben** (`/admin/branchen`): Seeding legt alles als `draft` an — Mensch-Gate nach BF §4.6. Je Branche Preview prüfen (`/branchen-preview/<key>`), dann Freigeben oder Feedback (mit „Feedback & neu generieren" läuft sofort eine Regenerier-Runde mit deinem Feedback im Prompt)
+- [ ] **Slack `#library`-Webhook anlegen** (`SLACK_WEBHOOK_LIBRARY`): Pings für „neue Branche wartet auf Freigabe" + Regenerier-Ergebnisse; ohne Env-Var nur Log-Stub
+- [ ] **Higgsfield-Key + Re-Seeding der Assets**: aktuelle Branchen-Assets kommen vom Mock-Provider (Platzhalter, 0 Cent). Mit echtem Key je Branche neu generieren (z. B. `npx tsx scripts/seed-branchen.ts --nur <keys>` oder Regenerier-Runde) — erst dann sind Previews/Demos mit echten Bildern
+- [ ] **Subdomain-Preview** `preview-<branche>.DOMAIN` (BF §4.5): aktuell Pfad-Route `/branchen-preview/<key>` — Host-Routing-Erweiterung erst sinnvoll, wenn Produktdomain feststeht
+- [ ] **Inngest (o. ä.) für Seeding-Jobs**: Auto-Seeding läuft synchron im Request (maxDuration 800 → braucht Vercel Pro + Fluid; falls Deploy meckert, auf 300 senken). Sauber wäre ein Hintergrund-Job mit Status-Polling
+- [ ] **Demo-Kosten kalibrieren**: `kosten_cent` an der Demo basiert auf `HIGGSFIELD_KOSTEN_CENT`/`FAL_KOSTEN_CENT`-Schätzwerten — nach ersten echten Läufen gegen Provider-Dashboard prüfen (DoD ≤ 1,50 €/Demo)
+
 ## Entscheidungen
 - [ ] **`LEAD_NOTIFY_EMAIL` festlegen**: Lead-Benachrichtigungen gehen jetzt in die leads-Tabelle + Mail an diese Adresse (das hartcodierte `hendrik@hoffmann-wd.de` aus dem Alt-Repo ist raus). Ohne Env-Var: Fallback FROM_EMAIL
 - [ ] **Produktdomain festlegen** (für Host-Routing: PRODUKTDOMAIN.de = Marketing, app. = Portal, *. = Kundenseiten)
