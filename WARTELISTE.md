@@ -3,7 +3,7 @@
 Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 
 ## Sofort (für aktuellen Stand)
-- [ ] **Migrationen 013–016 in Supabase ausführen** (`013_demos.sql`, `014_stripe.sql`, `015_leads.sql`, `016_template_library.sql`)
+- [ ] **Migrationen 013–017 in Supabase ausführen** (`013_demos.sql`, `014_stripe.sql`, `015_leads.sql`, `016_template_library.sql`, `017_demos_engine.sql` — 017 nötig für Library-Demos)
 - [ ] **Library seeden** (nach Migration 016): `npx tsx scripts/seed-library.ts` (Env: NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY)
 - [ ] **Vercel Env-Vars setzen**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `LEAD_NOTIFY_EMAIL`
 - [ ] **Stripe-Webhook-Endpoint anlegen**: Dashboard → Webhooks → `https://<domain>/api/webhooks/stripe`, Event `checkout.session.completed`
@@ -18,5 +18,6 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 - [ ] AGB / Vertragswerk vom Anwalt prüfen lassen (24/24/3-Konditionen)
 - [ ] Golden-Set: 5–10 echte Firmen für Pipeline-Tests benennen
 - [ ] Registrar-Zugang (Domains für Kunden), Google Business Profile API, Ads-Konto-Zugang
-- [ ] Firecrawl-API-Key (Phase D) — alternativ bleibt eigener Scraper
+- [ ] Firecrawl-API-Key (`FIRECRAWL_API_KEY`) — alternativ bleibt eigener Scraper
+- [ ] Google-Places-API-Key (`GOOGLE_PLACES_API_KEY`, Places API New) — liefert Adresse, Telefon, Öffnungszeiten + echte Bewertungen für Library-Demos; ohne Key läuft die Pipeline ohne diese Daten
 - [ ] **Stock-Assets lizenzieren/hochladen**: aktuelle Seeds sind Unsplash-Platzhalter; Friseur hat noch keine branchenspezifischen Bilder (nutzt universelle Platzhalter)
