@@ -90,7 +90,31 @@ function generateStarsSvg(count: number): string {
 }
 
 export function renderReinigungPrivatTemplate(config: ReinigungPrivatConfig, siteId?: string): string {
-  const c = config
+  // KI-Demo-Configs (generate-demo.ts) liefern ein generisches Schema
+  // (services[].title, pricingTable, stats, ohne openingHours) — hier aufs
+  // Template-Interface normalisieren, statt mit undefined.map zu crashen.
+  const raw = config as ReinigungPrivatConfig & {
+    pricingTable?: { service: string; price: string; includes?: string }[]
+    stats?: { value: string; label: string }[]
+  }
+  const c: ReinigungPrivatConfig = {
+    ...config,
+    services: (config.services ?? []).map((s) => ({
+      ...s,
+      name: s.name ?? (s as { title?: string }).title ?? '',
+    })),
+    pricingPlans:
+      config.pricingPlans ??
+      raw.pricingTable?.map((r) => ({
+        name: r.service,
+        price: r.price,
+        features: r.includes ? r.includes.split(/,\s*/) : [],
+      })) ??
+      [],
+    reviews: config.reviews ?? [],
+    openingHours: config.openingHours ?? [],
+    aboutStats: config.aboutStats ?? raw.stats,
+  }
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://webseitenverlag-deutschland.vercel.app'
 
   // Derived color values

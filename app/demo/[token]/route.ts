@@ -66,7 +66,8 @@ export async function GET(
     try {
       const loaded = await loadLibraryPage(supabase, config.library_page_key)
       html = renderLibraryPage(config, loaded?.assets ?? [])
-    } catch {
+    } catch (err) {
+      console.error(`Demo-Render fehlgeschlagen (library, demo ${demo.id}):`, err)
       return notFoundPage('Die Demo konnte nicht geladen werden.')
     }
   } else {
@@ -75,7 +76,8 @@ export async function GET(
     }
     try {
       html = renderPremiumTemplate(demo.template_id, demo.config as Record<string, unknown>)
-    } catch {
+    } catch (err) {
+      console.error(`Demo-Render fehlgeschlagen (template ${demo.template_id}, demo ${demo.id}):`, err)
       return notFoundPage('Die Demo konnte nicht geladen werden.')
     }
   }
