@@ -767,3 +767,12 @@ footer { background: var(--dark); color: rgba(255,255,255,0.7); padding: 64px 0 
   .bento-grid { grid-template-columns: 1fr; }
   .bento-card { min-height: 400px; padding: 28px 24px; }
 }
+
+/* ========================================
+   FUNNEL (/anfrage)
+   ======================================== */
+@keyframes funnelFade {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.funnel-fade { animation: funnelFade 0.35s var(--smooth) both; }

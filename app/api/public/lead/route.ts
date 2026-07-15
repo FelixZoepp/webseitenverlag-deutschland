@@ -56,7 +56,8 @@ export async function POST(request: Request) {
       body.mitarbeiter ? `Mitarbeiter: ${str(body.mitarbeiter, 50)}` : null,
       body.zeitrahmen ? `Zeitrahmen: ${str(body.zeitrahmen, 100)}` : null,
     ].filter(Boolean).join('\n') || null,
-    quelle: 'landing',
+    // Herkunft: 'funnel' = Ads-Funnel /anfrage, sonst 'landing'
+    quelle: body.quelle === 'funnel' ? 'funnel' : 'landing',
     utm_source: str(body.utm_source, 100),
     utm_medium: str(body.utm_medium, 100),
     utm_campaign: str(body.utm_campaign, 100),
