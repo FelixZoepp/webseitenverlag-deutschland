@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generatePreCallBriefing } from '@/lib/briefing'
+import { meldeJobFehler } from '@/lib/monitoring'
 import { Resend } from 'resend'
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@resend.dev'
@@ -67,6 +68,15 @@ export async function GET(request: Request) {
     } catch (err: unknown) {
       ergebnisse.push({ kundenId: kunde.id, firma: kunde.company_name, status: 'FEHLER', error: err instanceof Error ? err.message : 'Unbekannt' })
     }
+  }
+
+  const fehlgeschlagen = ergebnisse.filter((e) => e.status === 'FEHLER')
+  if (fehlgeschlagen.length > 0) {
+    await meldeJobFehler(
+      'briefings',
+      fehlgeschlagen.map((e) => `${e.firma}: ${e.error}`).join('\n'),
+      `${fehlgeschlagen.length}/${ergebnisse.length} Briefings fehlgeschlagen`
+    )
   }
 
   return NextResponse.json({ briefings: ergebnisse, checked: now.toISOString() })

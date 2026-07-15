@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { SupabaseClient } from '@supabase/supabase-js'
+import { erfasseNutzung } from './nutzung'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
@@ -95,6 +96,11 @@ Erstelle das Briefing in diesem Format:
 - Bilder: ${(bilder || []).length} hochgeladen
 - Cloudflare: ${customer.cloudflare_account_id ? 'Konfiguriert' : 'Noch nicht eingerichtet'}`,
     }],
+  })
+  await erfasseNutzung('claude_tokens', {
+    tokensInput: response.usage.input_tokens,
+    tokensOutput: response.usage.output_tokens,
+    kontext: 'briefing',
   })
 
   const briefingText = response.content[0].type === 'text' ? response.content[0].text : ''

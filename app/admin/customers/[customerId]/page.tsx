@@ -3,46 +3,50 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Trash2, Mail, Loader2, Zap, X, Check, Package, FileText, Clock, ChevronRight, Download, Building2, CreditCard, Image, Sparkles, Link2, Copy } from 'lucide-react'
+import { ArrowLeft, Trash2, Mail, Loader2, Check, Package, FileText, Clock, ChevronRight, Download, Building2, CreditCard, Image, Sparkles, Link2, Copy } from 'lucide-react'
 import { VERTRAGS_STATUS_LABELS, VERTRAGS_STATUS_COLORS, type VertragsStatus, type KundenDokument, type VertragsTimeline } from '@/types'
 import { UPSELL_PRODUCTS } from '@/config/upsells'
 
-interface UpsellModuleWithStatus {
-  id: string
+/** Katalog-Produkt (§10.4) mit Kauf-Status aus upsell_orders (neuer Kaufweg). */
+interface UpsellProduktStatus {
+  key: string
   name: string
-  preisProMonatCent: number
-  beschreibung: string
-  bereitsAktiv: boolean
-  aktivierung: { aktiviert_am: string; konfiguration: Record<string, unknown> } | null
-  configSchema: { fields: ConfigField[] }
+  nutzen: string[]
+  einmalCent: number
+  monatCent: number
+  fulfillment: 'auto' | 'va_manual'
+  orderStatus: string | null
+  gekauftAm: string | null
+  quelle: string | null
 }
 
-interface ConfigField {
-  key: string
-  label: string
-  type: string
-  required: boolean
-  default?: unknown
-  options?: { value: string; label: string }[]
-  description?: string
+/** Alt-Freischaltung aus dem abgelösten Aktivierungs-Flow (nur lesend). */
+interface AltUpsell {
+  upsell_id: string
+  preis_pro_monat_cent: number
+  aktiviert_am: string
 }
 
 export default function CustomerDetailPage() {
   const params = useParams()
   const [customer, setCustomer] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(true)
-  const [upsells, setUpsells] = useState<UpsellModuleWithStatus[]>([])
+  const [produkte, setProdukte] = useState<UpsellProduktStatus[]>([])
+  const [altUpsells, setAltUpsells] = useState<AltUpsell[]>([])
   const [upsellsLoading, setUpsellsLoading] = useState(true)
   const [dokumente, setDokumente] = useState<KundenDokument[]>([])
   const [timeline, setTimeline] = useState<VertragsTimeline[]>([])
   const [bilder, setBilder] = useState<{ id: string; slot_id: string | null; dateiname: string; public_url: string; ki_zuordnung: string | null; ki_confidence: number | null; manuell_zugeordnet: boolean }[]>([])
-  const [activatingModal, setActivatingModal] = useState<UpsellModuleWithStatus | null>(null)
   const [activeTab, setActiveTab] = useState<'overview' | 'dokumente' | 'upsells' | 'timeline' | 'bilder' | 'briefing'>('overview')
 
   const loadUpsells = useCallback(() => {
     setUpsellsLoading(true)
     fetch(`/api/admin/customers/${params.customerId}/upsells`).then(async (r) => {
-      if (r.ok) setUpsells(await r.json())
+      if (r.ok) {
+        const data = await r.json()
+        setProdukte(data.produkte || [])
+        setAltUpsells(data.altUpsells || [])
+      }
       setUpsellsLoading(false)
     })
   }, [params.customerId])
@@ -71,8 +75,11 @@ export default function CustomerDetailPage() {
   if (!customer) return <div className="p-8 text-center text-gray-500">Kunde nicht gefunden</div>
 
   const sites = (customer.sites || []) as Record<string, unknown>[]
-  const aktiveUpsellCount = upsells.filter((u) => u.bereitsAktiv).length
-  const upsellSumme = upsells.filter((u) => u.bereitsAktiv).reduce((s, u) => s + u.preisProMonatCent, 0)
+  const gekaufteProdukte = produkte.filter((p) => p.orderStatus && ['BEZAHLT', 'PROVISIONIERT'].includes(p.orderStatus))
+  const aktiveUpsellCount = gekaufteProdukte.length + altUpsells.length
+  const upsellSumme =
+    gekaufteProdukte.reduce((s, p) => s + p.monatCent, 0) +
+    altUpsells.reduce((s, a) => s + (a.preis_pro_monat_cent || 0), 0)
   const basisPreis = Number(customer.monthly_price || 0) * 100
   const gesamtrate = (basisPreis + upsellSumme) / 100
   const vertragsStatus = (customer.vertrags_status || 'ENTWURF') as VertragsStatus
@@ -293,32 +300,62 @@ export default function CustomerDetailPage() {
           {upsellsLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-gray-400" /></div>
           ) : (
-            <div className="grid grid-cols-3 gap-4">
-              {upsells.map((upsell) => (
-                <div key={upsell.id} className={`bg-white rounded-lg border p-4 ${upsell.bereitsAktiv ? 'border-green-300 bg-green-50/30' : 'border-gray-200'}`}>
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900 text-sm">{upsell.name}</h3>
-                    {upsell.bereitsAktiv && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium flex items-center gap-1">
-                        <Check className="w-3 h-3" /> Aktiv
-                      </span>
-                    )}
+            <>
+              <div className="grid grid-cols-3 gap-4">
+                {produkte.map((p) => {
+                  const gekauft = !!(p.orderStatus && ['BEZAHLT', 'PROVISIONIERT'].includes(p.orderStatus))
+                  const preisTeile: string[] = []
+                  if (p.einmalCent > 0) preisTeile.push(`${(p.einmalCent / 100).toFixed(0)} € einmalig`)
+                  if (p.monatCent > 0) preisTeile.push(`${(p.monatCent / 100).toFixed(0)} €/Mt`)
+                  return (
+                    <div key={p.key} className={`bg-white rounded-lg border p-4 ${gekauft ? 'border-green-300 bg-green-50/30' : 'border-gray-200'}`}>
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900 text-sm">{p.name}</h3>
+                        {gekauft ? (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium flex items-center gap-1">
+                            <Check className="w-3 h-3" /> {p.orderStatus === 'PROVISIONIERT' ? 'Provisioniert' : 'Bezahlt'}
+                          </span>
+                        ) : p.orderStatus === 'OFFEN' ? (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">Link offen</span>
+                        ) : null}
+                      </div>
+                      <ul className="text-xs text-gray-500 mb-3 space-y-0.5 list-disc pl-4">
+                        {p.nutzen.map((n, i) => <li key={i}>{n}</li>)}
+                      </ul>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-gray-900">{preisTeile.join(' + ')}</span>
+                        <span className="text-xs text-gray-400">{p.fulfillment === 'va_manual' ? 'VA-Einrichtung' : 'Auto'}</span>
+                      </div>
+                      {gekauft && p.gekauftAm && (
+                        <p className="text-xs text-gray-400 mt-2">
+                          Gekauft am {new Date(p.gekauftAm).toLocaleDateString('de-DE')}{p.quelle ? ` · ${p.quelle}` : ''}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-gray-400 mt-4">
+                Kauf läuft über Stripe-Checkout: Zahlungslink oben erzeugen oder der Kunde bucht selbst im Portal.
+                Freischaltung passiert automatisch per Webhook — keine manuelle Aktivierung mehr.
+              </p>
+              {altUpsells.length > 0 && (
+                <div className="mt-6 bg-white rounded-lg border border-gray-200 p-4">
+                  <h3 className="font-semibold text-gray-900 text-sm mb-2">Alt-Bestand (abgelöster Aktivierungs-Flow)</h3>
+                  <div className="divide-y divide-gray-100">
+                    {altUpsells.map((a) => (
+                      <div key={a.upsell_id} className="flex items-center justify-between py-2 text-sm">
+                        <span className="text-gray-700">{a.upsell_id}</span>
+                        <span className="text-gray-500">
+                          {(a.preis_pro_monat_cent / 100).toFixed(2)} €/Mt · seit {new Date(a.aktiviert_am).toLocaleDateString('de-DE')}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">{upsell.beschreibung}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-gray-900">{upsell.preisProMonatCent / 100} €<span className="text-xs font-normal text-gray-500">/Mt</span></span>
-                    {upsell.bereitsAktiv ? (
-                      <DeactivateButton customerId={params.customerId as string} upsellId={upsell.id} upsellName={upsell.name} onDone={loadUpsells} />
-                    ) : (
-                      <InviteUpsellButton customerId={params.customerId as string} upsellId={upsell.id} upsellName={upsell.name} />
-                    )}
-                  </div>
-                  {upsell.bereitsAktiv && upsell.aktivierung && (
-                    <p className="text-xs text-gray-400 mt-2">Seit {new Date(upsell.aktivierung.aktiviert_am).toLocaleDateString('de-DE')}</p>
-                  )}
+                  <p className="text-xs text-gray-400 mt-2">Nur lesend — Abrechnung dieser Alt-Module bei Vertragsumstellung klären.</p>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -392,15 +429,6 @@ export default function CustomerDetailPage() {
         </div>
       )}
 
-      {/* Aktivierungs-Modal */}
-      {activatingModal && (
-        <ActivationModal
-          customerId={params.customerId as string}
-          upsell={activatingModal}
-          onClose={() => setActivatingModal(null)}
-          onActivated={() => { setActivatingModal(null); loadUpsells() }}
-        />
-      )}
     </main>
   )
 }
@@ -554,224 +582,6 @@ function ZahlungslinkPanel({ customerId, sites }: { customerId: string; sites: R
         </div>
       )}
       {fehler && <p className="mt-3 text-sm text-red-600">{fehler}</p>}
-    </div>
-  )
-}
-
-function InviteUpsellButton({ customerId, upsellId }: {
-  customerId: string; upsellId: string; upsellName?: string
-}) {
-  const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
-
-  async function handleInvite() {
-    setLoading(true)
-    const res = await fetch(`/api/admin/customers/${customerId}/upsells/${upsellId}/invite`, { method: 'POST' })
-    setLoading(false)
-    if (res.ok) setSent(true)
-  }
-
-  if (sent) {
-    return (
-      <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
-        <Check className="w-3 h-3" /> Email gesendet
-      </span>
-    )
-  }
-
-  return (
-    <button onClick={handleInvite} disabled={loading} className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-medium hover:bg-blue-700 disabled:opacity-50">
-      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Mail className="w-3 h-3" /> Angebot senden</>}
-    </button>
-  )
-}
-
-function DeactivateButton({ customerId, upsellId, upsellName, onDone }: {
-  customerId: string; upsellId: string; upsellName: string; onDone: () => void
-}) {
-  const [loading, setLoading] = useState(false)
-
-  async function handleDeactivate() {
-    if (!confirm(`${upsellName} wirklich deaktivieren?`)) return
-    setLoading(true)
-    await fetch(`/api/admin/customers/${customerId}/upsells/${upsellId}`, { method: 'DELETE' })
-    setLoading(false)
-    onDone()
-  }
-
-  return (
-    <button onClick={handleDeactivate} disabled={loading} className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50">
-      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Deaktivieren'}
-    </button>
-  )
-}
-
-function ActivationModal({ customerId, upsell, onClose, onActivated }: {
-  customerId: string; upsell: UpsellModuleWithStatus; onClose: () => void; onActivated: () => void
-}) {
-  const [config, setConfig] = useState<Record<string, unknown>>(() => {
-    const defaults: Record<string, unknown> = {}
-    for (const f of upsell.configSchema.fields) {
-      if (f.default !== undefined) defaults[f.key] = f.default
-    }
-    return defaults
-  })
-  const [activating, setActivating] = useState(false)
-  const [result, setResult] = useState<{ success: boolean; neueMonatsrateGesamtCent?: number; fehler?: string } | null>(null)
-
-  async function handleActivate() {
-    setActivating(true)
-    try {
-      const res = await fetch(`/api/admin/customers/${customerId}/upsells/${upsell.id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ config }),
-      })
-      const data = await res.json()
-      if (res.ok && data.success) {
-        setResult(data)
-      } else {
-        setResult({ success: false, fehler: data.error || 'Fehler bei Aktivierung' })
-      }
-    } catch {
-      setResult({ success: false, fehler: 'Netzwerkfehler' })
-    } finally {
-      setActivating(false)
-    }
-  }
-
-  const requiredMissing = upsell.configSchema.fields.some(
-    (f) => f.required && !config[f.key]
-  )
-
-  return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">{upsell.name} aktivieren</h2>
-            <p className="text-sm text-gray-500">{upsell.preisProMonatCent / 100} €/Monat</p>
-          </div>
-          <button onClick={result?.success ? onActivated : onClose} className="p-1 hover:bg-gray-100 rounded">
-            <X className="w-5 h-5 text-gray-400" />
-          </button>
-        </div>
-
-        <div className="px-6 py-4">
-          {result?.success ? (
-            <div className="text-center py-6">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Check className="w-6 h-6 text-green-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{upsell.name} ist jetzt aktiv!</h3>
-              {result.neueMonatsrateGesamtCent && (
-                <p className="text-sm text-gray-600">Neue Monatsrate: {(result.neueMonatsrateGesamtCent / 100).toFixed(2)} €</p>
-              )}
-              <button onClick={onActivated} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-                Schließen
-              </button>
-            </div>
-          ) : result?.fehler ? (
-            <div className="text-center py-6">
-              <p className="text-red-600 font-medium mb-2">Fehler</p>
-              <p className="text-sm text-gray-600">{result.fehler}</p>
-              <button onClick={() => setResult(null)} className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200">
-                Erneut versuchen
-              </button>
-            </div>
-          ) : (
-            <>
-              <p className="text-sm text-gray-600 mb-4">{upsell.beschreibung}</p>
-
-              {upsell.configSchema.fields.length > 0 && (
-                <div className="space-y-4 mb-6">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Konfiguration</p>
-                  {upsell.configSchema.fields.map((field) => (
-                    <DynamicField key={field.key} field={field} value={config[field.key]} onChange={(v) => setConfig((c) => ({ ...c, [field.key]: v }))} />
-                  ))}
-                </div>
-              )}
-
-              <button onClick={handleActivate} disabled={activating || requiredMissing} className="w-full py-2.5 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                {activating ? <><Loader2 className="w-4 h-4 animate-spin" /> Wird aktiviert...</> : <><Zap className="w-4 h-4" /> Jetzt aktivieren</>}
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function DynamicField({ field, value, onChange }: { field: ConfigField; value: unknown; onChange: (v: unknown) => void }) {
-  const labelEl = (
-    <label className="block text-xs font-medium text-gray-600 mb-1">
-      {field.label} {field.required && <span className="text-red-400">*</span>}
-      {field.description && <span className="block text-xs text-gray-400 font-normal mt-0.5">{field.description}</span>}
-    </label>
-  )
-
-  if (field.type === 'boolean') {
-    return (
-      <div className="flex items-center gap-2">
-        <input type="checkbox" checked={!!value} onChange={(e) => onChange(e.target.checked)}
-          className="w-4 h-4 rounded border-gray-300 text-blue-600" />
-        <label className="text-xs text-gray-600">{field.label}</label>
-      </div>
-    )
-  }
-
-  if (field.type === 'select') {
-    return (
-      <div>{labelEl}
-        <select value={String(value || '')} onChange={(e) => onChange(e.target.value)}
-          className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 bg-white">
-          <option value="">— Auswählen —</option>
-          {field.options?.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-      </div>
-    )
-  }
-
-  if (field.type === 'multiselect') {
-    const selected = Array.isArray(value) ? value as string[] : []
-    return (
-      <div>{labelEl}
-        <div className="flex flex-wrap gap-2">
-          {field.options?.map((o) => (
-            <button key={o.value} type="button" onClick={() => {
-              onChange(selected.includes(o.value) ? selected.filter((s) => s !== o.value) : [...selected, o.value])
-            }} className={`text-xs px-3 py-1.5 rounded-full border ${selected.includes(o.value) ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-600'}`}>
-              {o.label}
-            </button>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (field.type === 'textarea') {
-    return (
-      <div>{labelEl}
-        <textarea value={String(value || '')} onChange={(e) => onChange(e.target.value)} rows={3}
-          className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 resize-vertical" />
-      </div>
-    )
-  }
-
-  if (field.type === 'number') {
-    return (
-      <div>{labelEl}
-        <input type="number" value={String(value || '')} onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full text-sm border border-gray-200 rounded-md px-3 py-2" />
-      </div>
-    )
-  }
-
-  return (
-    <div>{labelEl}
-      <input type="text" value={String(value || '')} onChange={(e) => onChange(e.target.value)}
-        className="w-full text-sm border border-gray-200 rounded-md px-3 py-2" />
     </div>
   )
 }

@@ -1,0 +1,120 @@
+{
+  "_hinweis": "Golden-Set (Mission §12, Phase H). 10 reale Firmen für Pipeline-Tests: 5 mit Website, 3 nur mit Google-Eintrag, 2 ohne alles. Aktuell PLATZHALTER — Felix trägt echte Firmen ein (siehe WARTELISTE.md). Der CI-Check (npm run ci:golden-set) läuft offline über den deterministischen Fallback-Pfad und prüft Schema, Floskel-Blacklist, Stadt-im-Hero und Zero-JS/keine Fremd-CDNs.",
+  "firmen": [
+    {
+      "platzhalter": true,
+      "kategorie": "website",
+      "firma": "Sanitär Brandt Meisterbetrieb",
+      "ort": "Leipzig",
+      "branche": "Handwerk",
+      "stil": "klar",
+      "websiteUrl": "https://example.com/sanitaer-brandt",
+      "telefon": "0341 1234567",
+      "email": "info@example.com"
+    },
+    {
+      "platzhalter": true,
+      "kategorie": "website",
+      "firma": "Gasthaus Zur Linde",
+      "ort": "Bamberg",
+      "branche": "Gastronomie",
+      "stil": "warm",
+      "websiteUrl": "https://example.com/zur-linde",
+      "telefon": "0951 7654321",
+      "email": "kontakt@example.com"
+    },
+    {
+      "platzhalter": true,
+      "kategorie": "website",
+      "firma": "Salon Haarwerk",
+      "ort": "Münster",
+      "branche": "Friseur",
+      "stil": "warm",
+      "websiteUrl": "https://example.com/haarwerk",
+      "telefon": "0251 998877",
+      "email": null
+    },
+    {
+      "platzhalter": true,
+      "kategorie": "website",
+      "firma": "Physiotherapie Bewegungsraum",
+      "ort": "Kassel",
+      "branche": "Gesundheit",
+      "stil": "klar",
+      "websiteUrl": "https://example.com/bewegungsraum",
+      "telefon": "0561 445566",
+      "email": "praxis@example.com"
+    },
+    {
+      "platzhalter": true,
+      "kategorie": "website",
+      "firma": "Elektro Feldmann",
+      "ort": "Oldenburg",
+      "branche": "Handwerk",
+      "stil": "warm",
+      "websiteUrl": "https://example.com/elektro-feldmann",
+      "telefon": "0441 223344",
+      "email": null
+    },
+    {
+      "platzhalter": true,
+      "kategorie": "google",
+      "firma": "Trattoria Da Enzo",
+      "ort": "Fürth",
+      "branche": "Gastronomie",
+      "stil": "warm",
+      "websiteUrl": null,
+      "telefon": "0911 556677",
+      "email": null,
+      "notizen": "Nur Google-Eintrag, 4,7 Sterne, 120 Bewertungen. Keine eigene Website."
+    },
+    {
+      "platzhalter": true,
+      "kategorie": "google",
+      "firma": "Malerbetrieb Kowalski",
+      "ort": "Bottrop",
+      "branche": "Handwerk",
+      "stil": "klar",
+      "websiteUrl": null,
+      "telefon": "02041 334455",
+      "email": null,
+      "notizen": "Nur Google-Eintrag. Schwerpunkt Fassaden und Innenräume, 2 Gesellen."
+    },
+    {
+      "platzhalter": true,
+      "kategorie": "google",
+      "firma": "Zahnarztpraxis Dr. Weigel",
+      "ort": "Gera",
+      "branche": "Gesundheit",
+      "stil": "klar",
+      "websiteUrl": null,
+      "telefon": "0365 778899",
+      "email": null,
+      "notizen": "Nur Google-Eintrag, Terminvergabe bisher nur telefonisch."
+    },
+    {
+      "platzhalter": true,
+      "kategorie": "nichts",
+      "firma": "Friseur Petzold",
+      "ort": "Zwickau",
+      "branche": "Friseur",
+      "stil": "warm",
+      "websiteUrl": null,
+      "telefon": null,
+      "email": null,
+      "notizen": "Weder Website noch Google-Eintrag. Laufkundschaft, Empfehlung vom Setter."
+    },
+    {
+      "platzhalter": true,
+      "kategorie": "nichts",
+      "firma": "Café Morgenrot",
+      "ort": "Cottbus",
+      "branche": "Gastronomie",
+      "stil": "klar",
+      "websiteUrl": null,
+      "telefon": null,
+      "email": null,
+      "notizen": "Weder Website noch Google-Eintrag. Neueröffnung vor 6 Monaten."
+    }
+  ]
+}

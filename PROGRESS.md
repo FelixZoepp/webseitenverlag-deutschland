@@ -14,7 +14,7 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | E | Checkout, Verträge (24/24/3), Provisioning, Dunning, Kündigung | ✅ erledigt (2026-07-15) |
 | F | Portal: Wizard, Chat-Editor (nur strukturierte Ops), Pläne, Upsell-Leiter | ✅ erledigt (2026-07-15) |
 | G | Domains & Upsell-Fulfillment | ✅ erledigt (2026-07-15) |
-| H | CI-Gates: Golden-Set, Lighthouse-CI, Playwright E2E, /admin/kennzahlen | ⬜ offen |
+| H | CI-Gates: Golden-Set, Lighthouse-CI, Playwright E2E, /admin/kennzahlen | ✅ erledigt (2026-07-15) |
 
 ## Sitzungs-Log
 
@@ -75,13 +75,21 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
   - G8/DoD: Domain-Neuregistrierung läuft mit Mock-Registrar durch; SEO-Cron erzeugt freigebbare Landingpage; GBP-Flow bis „Zugriff erteilt" über `/admin/worklist` testbar; Ads-Setup erzeugt Kampagnen-Entwurf im Test-Modus (POST `/api/admin/ads`). Build+Lint+Typecheck grün
   - Bewusst offen: kein async Re-Deploy-Queue (serverless ohne Queue-Infra — Re-Deploys laufen synchron im Request); AUDIT R5 (`lib/payment.ts`-Ledger) bleibt, weil der alte Admin-Aktivierungs-Flow (`/api/admin/customers/.../upsells/...` + Upsells-Tab) noch darauf läuft → Ablösung in Phase H
 
+- **Phase H komplett**:
+  - H2: Golden-Set §12 — `test/golden_set.json` (10 Firmen-Slots: 5 website / 3 google / 2 nichts, aktuell Platzhalter → WARTELISTE) + `scripts/ci-golden-set.ts` (`npm run ci:golden-set`): komplett offline (API-Keys werden im Prozess gelöscht, Supabase-Stub erzwingt Seed-Fallback), prüft je Firma Floskel-Blacklist, Hero-Block, Stadt im Hero, kein `<script>`/keine Fremd-CDNs — 82 Checks grün
+  - H3: Lighthouse-CI §2.1 — `scripts/ci-lighthouse-render.ts` rendert 11 Seiten offline nach `.lighthouse/dist/` (8 Kompositionen 4 Branchen × 2 Stile mit festen Beispiel-Firmen + 3 Golden-Demos je Kategorie) mit hartem Fremd-CDN-Check (throw = Build rot); `lighthouserc.json` (`staticDistDir`, `maxAutodiscoverUrls: 0` — LHCI-Default prüft sonst nur 5 URLs!, Mobile-Emulation = LHCI-Default) mit Assertions Perf ≥0.9, SEO ≥0.95, A11y ≥0.9, Script ≤30 KB; `npm run ci:lighthouse`. Lokaler Lauf: alle 11 Seiten grün (Perf 0.92–0.99, SEO 1.0, A11y 0.91–1.0, 0 KB JS)
+  - H4: Playwright-E2E — `e2e/journey.spec.ts` + `playwright.config.ts` (`npm run test:e2e`): kompletter Durchlauf Landing-Form (UTM in leads) → Admin → Library-Demo (Offline-Defaults) → `/demo/[token]` → Stripe-Checkout-Session (echter Testmode-Call) → Webhook-Simulation mit echt signierter Payload (`webhooks.generateTestHeaderString`; Handler macht keine Stripe-Nachfragen → kein CLI-Forwarding nötig) → Kunde+Site+24/24/3-Vertrag+CONVERTED → Kunden-Login (Passwort via Admin-API) → Wizard (Pflichtangaben, Fakten, Domain-Neuregistrierung Mock-Registrar, SEO-Upsell-Kauf inkl. zweiter Webhook-Sim → `upsell:seo-unterseiten-abo`-Vertrag) → Fertigstellen (Auto-QA) → Chat-Edit (nur mit ANTHROPIC_API_KEY, sonst Step-Skip) → Publish → Rollback (config_versions) → Kickoff-Touchpoint (GBP-Angebot in `/erweiterungen`). Env-gated über `E2E_ENABLED=1` + Supabase/Stripe-TEST-Keys (fehlen → sauberer Skip ohne Serverstart); Stop-Condition: Lauf gegen `sk_live_` wird hart verweigert; afterAll räumt Testdaten auf. Echter Lauf braucht Stripe-Testkeys + migrierte (Test-)Supabase → WARTELISTE
+  - H5: Monitoring §12 — `lib/monitoring.ts` (Slack #errors/#money via Webhooks, Log-Stub ohne Env) + `lib/nutzung.ts` (Kosten-Events in `nutzungs_events`, Migration 021) + `GENERATION_KILL_SWITCH` (sperrt Demo-Generierung + Crons) + Kosten-Summary-Cron 6:30 (`/api/cron/kosten-summary`, vercel.json)
+  - H6: `/admin/kennzahlen` — Funnel je UTM-Quelle (Leads → Demos → Käufe), MRR/ARPU/Upsell-Quote/Churn; MRR-Quelle der Wahrheit = `contracts` (Hauptverträge + `upsell:`-Verträge getrennt), `activated_upsells` zählt nur für Alt-Modul-IDs (sonst Dreifachzählung mit upsell_orders/Webhook-Verträgen); Nav-Link im Admin-Layout
+  - H7 (AUDIT R5 erledigt): alter Upsell-Aktivierungs-Flow abgelöst — `lib/upsell-orchestrator.ts`, `lib/payment.ts` (rechnungs_posten-Schreibweg), `lib/upsell-emails.ts`, `/api/admin/customers/[customerId]/upsells/[upsellId]/*` → `_legacy/` (README-Tabelle ergänzt); Katalog-GET-Route neu auf upsell_orders-Kaufstatus; Upsells-Tab der Kundendetailseite = Zahlungslink-Panel + 7-Produkte-Katalog (Kauf-Status, keine manuelle Aktivierung mehr) + Alt-Bestand read-only; rechnungs_posten-Ansichten bleiben lesend für Altdaten
+  - H8/DoD: Build + Lint + Typecheck + Golden-Set (82 Checks) + Lighthouse (11×) grün; `.github/workflows/ci.yml` (Lint, tsc, Golden-Set, Lighthouse; greift erst nach Git-Push → WARTELISTE); Playwright-Skip-Verhalten ohne Envs verifiziert
+
 ## Notizen für nächste Session
-- **Nächste Phase: H** (CI-Gates: Golden-Set, Lighthouse-CI, Playwright E2E, /admin/kennzahlen)
-- AUDIT R5: alter Admin-Upsell-Aktivierungs-Flow (upsell-orchestrator + rechnungs_posten-Ledger + Upsells-Tab-Kacheln) läuft parallel zum neuen Kaufweg (upsell_orders/contracts) — in Phase H entweder auf Zahlungslink-Flow umstellen oder nach `_legacy`
-- Plan-Upgrade-Proration: bewusst pragmatisch — neue Subscription + manual_task zum Beenden des alten Abos; sauberes `subscription.update` mit Proration wäre eine Phase-H-Verbesserung
-- Migration 020 (gbp_setups + ads_kampagnen) zusammen mit 013–019 ausführen (WARTELISTE aktualisiert)
+- **Alle Phasen 0–H abgeschlossen.** Offen ist nur noch, was ein Mensch liefern muss → WARTELISTE.md (Migrationen 013–021 ausführen, Library seeden, Stripe-Test-/Webhook-Keys, Git-Remote + erster Push für CI, E2E-Freischaltung, echte Golden-Set-Firmen, Preis-Bestätigungen)
+- Gesamt-DoD „kompletter Testmode-Durchlauf ohne manuellen Eingriff": als env-gated E2E implementiert (`E2E_ENABLED=1 npm run test:e2e`); tatsächlicher Grün-Lauf blockiert allein durch fehlende Stripe-Testkeys + nicht migrierte Supabase (WARTELISTE „E2E-Lauf freischalten")
+- Plan-Upgrade-Proration: weiterhin pragmatisch (neue Subscription + manual_task) — Verbesserung mit `subscription.update` + Proration möglich, bewusst nicht in H gebaut
 - Ads-Preis (99 €/M) und alle Upsell-Preise sind Platzhalter → Bestätigung auf WARTELISTE; echte Ads-Leistungsdaten erst mit Google-Ads-API-Zugang
-- Migrationen 013–019 noch nicht in Supabase ausgeführt (WARTELISTE); danach: `npx tsx scripts/seed-library.ts`
+- Migrationen 013–021 noch nicht in Supabase ausgeführt (WARTELISTE); danach: `npx tsx scripts/seed-library.ts`
 - Library-Demos: DB-Spalte `engine` wird erst nach Migration 017 geschrieben — der öffentliche Renderer hängt NICHT daran (brancht auf `config.engine`), aber neue Library-Demos brauchen Migration 017 (Insert setzt engine='library')
 - Stock-Assets sind Platzhalter (Friseur nutzt universelle Bilder) — echte lizenzierte Assets auf WARTELISTE
 - Firecrawl/Places-Keys optional (WARTELISTE) — Kette degradiert sanft auf eigenen Scraper + manuelle Daten

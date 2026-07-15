@@ -8,6 +8,11 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 - [ ] **Vercel Env-Vars setzen**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `LEAD_NOTIFY_EMAIL`
 - [ ] **Stripe-Webhook-Endpoint anlegen**: Dashboard → Webhooks → `https://<domain>/api/webhooks/stripe`, Events: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted` (alle 5 nötig für Verträge + Dunning, Phase E)
 - [ ] **Resend-Domain verifizieren** (für Zugangs-/Lead-Mails von eigener Domain)
+- [ ] **Migration 021 ausführen** (`021_monitoring.sql` — nutzungs_events für die tägliche Kosten-Summary; ohne Migration loggt lib/nutzung.ts nur Warnungen, nichts bricht)
+- [ ] **Slack-Webhooks anlegen** (optional, sonst Log-Stub): `SLACK_WEBHOOK_ERRORS` (#errors, Job-Fails) + `SLACK_WEBHOOK_MONEY` (#money, tägliche Kosten-Summary 6:30 Uhr)
+- [ ] **Sentry entscheiden**: bewusst NICHT eingebunden solange kein DSN existiert — Slack #errors + Vercel-Logs decken den Start ab. Wenn gewünscht: Sentry-Projekt anlegen, DSN liefern, dann bauen wir es ein
+- [ ] **Git-Remote anlegen + pushen**: Das Repo hat aktuell KEIN Remote. Der CI-Workflow (`.github/workflows/ci.yml` — Lint, Typecheck, Golden-Set, Lighthouse-Budgets) greift erst nach dem ersten Push zu GitHub. Bis dahin lokal: `npm run ci:golden-set` + `npm run ci:lighthouse`
+- [ ] **E2E-Lauf freischalten** (Playwright, `e2e/journey.spec.ts`): braucht (a) Stripe-**Test**-Keys in `.env.local` (`STRIPE_SECRET_KEY=sk_test_...` + `STRIPE_WEBHOOK_SECRET` — fehlen aktuell komplett), (b) eine Supabase-Instanz mit Migrationen 001–021 + Library-Seeds. Achtung: Der Test legt echte Zeilen an (leads/demos/customers/sites/contracts/auth-User) und räumt sie am Ende auf — am besten gegen ein separates Test-Projekt laufen lassen, nicht gegen die Produktions-DB. Start: `E2E_ENABLED=1 npm run test:e2e` (einmalig vorher `npx playwright install chromium`). Live-Keys verweigert der Test hart
 
 ## Entscheidungen
 - [ ] **`LEAD_NOTIFY_EMAIL` festlegen**: Lead-Benachrichtigungen gehen jetzt in die leads-Tabelle + Mail an diese Adresse (das hartcodierte `hendrik@hoffmann-wd.de` aus dem Alt-Repo ist raus). Ohne Env-Var: Fallback FROM_EMAIL
@@ -18,7 +23,7 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 
 ## Später (vor Kunden-Go-Live)
 - [ ] AGB / Vertragswerk vom Anwalt prüfen lassen (24/24/3-Konditionen)
-- [ ] Golden-Set: 5–10 echte Firmen für Pipeline-Tests benennen
+- [ ] Golden-Set: 10 echte Firmen in `test/golden_set.json` eintragen (5 mit Website, 3 nur Google-Eintrag, 2 ohne alles — aktuell Platzhalter mit `"platzhalter": true`; Check läuft mit `npm run ci:golden-set`)
 - [ ] Registrar-Zugang (Domains für Kunden), Google Business Profile API, Ads-Konto-Zugang — bis dahin läuft der Mock-Registrar (`REGISTRAR_PROVIDER=mock`, Neuregistrierungen werden simuliert)
 - [ ] DataForSEO-Zugang (`DATAFORSEO_LOGIN` + `DATAFORSEO_PASSWORD`) für echte Rank-Reports im SEO-Abo; ohne Keys liefert der technische SEO-Check einen Stub statt Sichtbarkeitsdaten
 - [ ] Firecrawl-API-Key (`FIRECRAWL_API_KEY`) — alternativ bleibt eigener Scraper

@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { AdsEntwurf } from '@/lib/ads-starter'
+import { meldeJobFehler } from '@/lib/monitoring'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -75,6 +76,15 @@ export async function GET(request: Request) {
     } catch (e) {
       ergebnisse[k.id] = `fehler: ${e instanceof Error ? e.message : 'unbekannt'}`
     }
+  }
+
+  const fehlgeschlagen = Object.entries(ergebnisse).filter(([, v]) => v.startsWith('fehler'))
+  if (fehlgeschlagen.length > 0) {
+    await meldeJobFehler(
+      'ads-check',
+      fehlgeschlagen.map(([id, v]) => `${id}: ${v}`).join('\n'),
+      `${fehlgeschlagen.length} Kampagnen fehlgeschlagen`
+    )
   }
 
   return NextResponse.json({ anzahl: (kampagnen || []).length, ergebnisse })

@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/ads-check",
       "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/cron/kosten-summary",
+      "schedule": "30 6 * * *"
     }
   ]
 }

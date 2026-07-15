@@ -4,6 +4,7 @@ import { UPSELL_MODULES } from '@/lib/upsells'
 import { getPackage, type PackageTier } from './packages'
 import { getLeitplankenPrompt } from './editor-leitplanken'
 import { getOpsPrompt } from './editor-ops'
+import { erfasseNutzung } from './nutzung'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -269,6 +270,11 @@ export async function chatWithClaude(
       role: m.role,
       content: m.content,
     })),
+  })
+  await erfasseNutzung('claude_tokens', {
+    tokensInput: response.usage.input_tokens,
+    tokensOutput: response.usage.output_tokens,
+    kontext: 'chat-editor',
   })
 
   const text =

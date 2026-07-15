@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
 import { requireAdmin } from '@/lib/auth-helpers'
+import { generierungGesperrt } from '@/lib/monitoring'
 import { isPremiumTemplate } from '@/lib/templates'
 import { scrapeProspectWebsite } from '@/lib/scrape-prospect'
 import { generateDemoConfig } from '@/lib/generate-demo'
@@ -27,6 +28,13 @@ export async function GET() {
 export async function POST(request: Request) {
   const auth = await requireAdmin()
   if (!auth.ok) return auth.response
+
+  if (generierungGesperrt()) {
+    return NextResponse.json(
+      { error: 'Generierung gestoppt (GENERATION_KILL_SWITCH aktiv) — Env-Var entfernen, um wieder zu generieren.' },
+      { status: 503 }
+    )
+  }
 
   const body = await request.json().catch(() => null)
   const prospectName = typeof body?.prospectName === 'string' ? body.prospectName.trim() : ''

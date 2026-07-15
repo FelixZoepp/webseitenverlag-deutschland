@@ -10,6 +10,7 @@
  * Ohne API-Keys verhält sich die Kette wie v1 (eigener Scraper + manuelle Daten).
  */
 
+import { erfasseNutzung } from '@/lib/nutzung'
 import { scrapeProspectWebsite, type ScrapedProspect } from '@/lib/scrape-prospect'
 
 export interface ProspectBewertung {
@@ -86,6 +87,7 @@ async function fetchFirecrawl(url: string): Promise<FirecrawlResult | null> {
       data?: { markdown?: string; metadata?: { title?: string; description?: string; ogImage?: string } }
     }
     if (!json.success || !json.data?.markdown) return null
+    await erfasseNutzung('firecrawl_scrape', { kontext: 'prospect-pipeline' })
     return {
       markdown: json.data.markdown.slice(0, 12000),
       title: json.data.metadata?.title ?? null,
@@ -147,6 +149,7 @@ async function fetchPlaces(firma: string, ort: string | null): Promise<PlacesRes
       signal: AbortSignal.timeout(10000),
     })
     if (!detailRes.ok) return null
+    await erfasseNutzung('places_lookup', { kontext: 'prospect-pipeline' })
     const detail = (await detailRes.json()) as {
       formattedAddress?: string
       nationalPhoneNumber?: string

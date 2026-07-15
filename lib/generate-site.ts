@@ -3,6 +3,7 @@ import { SiteConfig } from '@/types'
 import { PackageTier, getPackage } from './packages'
 import { getTemplateSchema } from './template-schemas'
 import { isPremiumTemplate } from './templates'
+import { erfasseNutzung } from './nutzung'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -204,6 +205,11 @@ WICHTIG: Setze die Bild-URLs in die passenden Felder ein:
         content: `Firmenname: ${companyName}${templateId ? `\nTemplate: ${templateId}` : ''}\nPaket: ${packageTier.toUpperCase()}\n\nOnboarding-Transkript/Briefing:\n\n${transcript}${bilderInfo}`,
       },
     ],
+  })
+  await erfasseNutzung('claude_tokens', {
+    tokensInput: response.usage.input_tokens,
+    tokensOutput: response.usage.output_tokens,
+    kontext: 'onboarding-site',
   })
 
   const text = response.content[0].type === 'text' ? response.content[0].text : ''

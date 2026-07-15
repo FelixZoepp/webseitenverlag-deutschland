@@ -1,13 +1,14 @@
 // Slack-Integration via Incoming Webhooks
-// Channels: #vertrieb, #worklist, #errors
+// Channels: #vertrieb, #worklist, #errors, #money
 
 const WEBHOOKS = {
   vertrieb: process.env.SLACK_WEBHOOK_VERTRIEB,
   worklist: process.env.SLACK_WEBHOOK_WORKLIST,
   errors: process.env.SLACK_WEBHOOK_ERRORS,
+  money: process.env.SLACK_WEBHOOK_MONEY,
 }
 
-type SlackChannel = keyof typeof WEBHOOKS
+export type SlackChannel = keyof typeof WEBHOOKS
 
 export async function sendSlackNotification(
   channel: SlackChannel,

@@ -14,6 +14,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { FLOSKEL_BLACKLIST, pruefeContentAufFloskeln } from '@/lib/floskel-blacklist'
+import { erfasseNutzung } from '@/lib/nutzung'
 import type { LoadedLibraryPage } from '@/lib/library/load'
 import type { SectionType, Stil } from '@/lib/library/types'
 import type { ProspectData } from './prospect-data'
@@ -224,6 +225,11 @@ async function generiereMitClaude(
         max_tokens: 8192,
         system,
         messages,
+      })
+      await erfasseNutzung('claude_tokens', {
+        tokensInput: res.usage.input_tokens,
+        tokensOutput: res.usage.output_tokens,
+        kontext: 'library-content',
       })
       const text = res.content.find((c) => c.type === 'text')?.text ?? ''
       const inhalte = parseJsonAntwort(text) as Partial<Record<SectionType, Record<string, unknown>>>

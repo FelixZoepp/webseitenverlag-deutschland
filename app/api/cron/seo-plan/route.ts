@@ -10,6 +10,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generiereSeoLandingpage, SEO_PRODUCT_KEY } from '@/lib/seo-plan'
 import { sendSeoFreigabeEmail } from '@/lib/email'
+import { generierungGesperrt, meldeJobFehler } from '@/lib/monitoring'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -26,6 +27,13 @@ export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  if (generierungGesperrt()) {
+    return NextResponse.json(
+      { error: 'Generierung gestoppt (GENERATION_KILL_SWITCH aktiv)' },
+      { status: 503 }
+    )
   }
 
   const supabase = getServiceClient()
@@ -129,6 +137,15 @@ export async function GET(request: Request) {
     } catch (e) {
       ergebnisse[siteId] = `fehler: ${e instanceof Error ? e.message : 'unbekannt'}`
     }
+  }
+
+  const fehlgeschlagen = Object.entries(ergebnisse).filter(([, v]) => v.startsWith('fehler') || v.startsWith('insert-fehler'))
+  if (fehlgeschlagen.length > 0) {
+    await meldeJobFehler(
+      'seo-plan',
+      fehlgeschlagen.map(([id, v]) => `${id}: ${v}`).join('\n'),
+      `${fehlgeschlagen.length}/${verarbeitet.size} Sites fehlgeschlagen`
+    )
   }
 
   return NextResponse.json({ monat, anzahl: verarbeitet.size, ergebnisse })

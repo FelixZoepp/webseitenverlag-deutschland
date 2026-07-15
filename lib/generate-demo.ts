@@ -6,6 +6,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { getTemplateSchema } from './template-schemas'
 import { ScrapedProspect } from './scrape-prospect'
+import { erfasseNutzung } from './nutzung'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -119,6 +120,11 @@ export async function generateDemoConfig(
       max_tokens: 6144,
       system: systemPrompt,
       messages: [{ role: 'user', content: userMessage }],
+    })
+    await erfasseNutzung('claude_tokens', {
+      tokensInput: response.usage.input_tokens,
+      tokensOutput: response.usage.output_tokens,
+      kontext: 'premium-demo',
     })
 
     const text = response.content[0].type === 'text' ? response.content[0].text : ''
