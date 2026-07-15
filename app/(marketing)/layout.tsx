@@ -1,0 +1,47 @@
+import type { Metadata } from 'next'
+import { Fraunces, Inter_Tight, JetBrains_Mono } from 'next/font/google'
+import './marketing.css'
+
+// Selbst gehostet via next/font (kein Fremd-CDN)
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  axes: ['opsz', 'SOFT'],
+})
+const interTight = Inter_Tight({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter-tight',
+})
+const jetbrains = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-jetbrains',
+})
+
+export const metadata: Metadata = {
+  title: 'Webseitenverlag Deutschland – Professionelle Webseiten ab 99€/Monat',
+  description:
+    'Professionelle Webseiten in 24 Stunden online. Keine Startgebühr, ab 99€/Monat, inklusive Hosting, SEO & Support. Webseitenverlag Deutschland.',
+  keywords: [
+    'Webseite erstellen lassen',
+    'Webdesign günstig',
+    'Homepage erstellen',
+    'Webseite mieten',
+    'Webdesign Deutschland',
+  ],
+  openGraph: {
+    title: 'Webseitenverlag Deutschland – Professionelle Webseiten ab 99€/Monat',
+    description: 'In 24h online. Keine Startgebühr. Ab 99€/Monat all-inclusive.',
+    type: 'website',
+    locale: 'de_DE',
+  },
+}
+
+export default function MarketingLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className={`${fraunces.variable} ${interTight.variable} ${jetbrains.variable} marketing-root`}>
+      {children}
+    </div>
+  )
+}

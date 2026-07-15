@@ -1,0 +1,110 @@
+import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { Resend } from 'resend'
+
+export const dynamic = 'force-dynamic'
+
+// Sehr einfaches In-Memory-Rate-Limit (pro Instanz): max 5 Anfragen / 10 Min / IP
+const RATE_LIMIT = 5
+const RATE_WINDOW_MS = 10 * 60 * 1000
+const hits = new Map<string, number[]>()
+
+function rateLimited(ip: string): boolean {
+  const now = Date.now()
+  const recent = (hits.get(ip) || []).filter((t) => now - t < RATE_WINDOW_MS)
+  if (recent.length >= RATE_LIMIT) return true
+  recent.push(now)
+  hits.set(ip, recent)
+  return false
+}
+
+function str(v: unknown, max = 500): string | null {
+  if (typeof v !== 'string') return null
+  const s = v.trim().slice(0, max)
+  return s || null
+}
+
+export async function POST(request: Request) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  if (rateLimited(ip)) {
+    return NextResponse.json({ error: 'Zu viele Anfragen. Bitte später erneut versuchen.' }, { status: 429 })
+  }
+
+  const body = await request.json().catch(() => null)
+  if (!body) return NextResponse.json({ error: 'Ungültige Anfrage' }, { status: 400 })
+
+  // Honeypot: echte Nutzer füllen dieses Feld nie aus
+  if (str(body.homepage)) {
+    return NextResponse.json({ success: true })
+  }
+
+  const name = str(body.name, 200)
+  const email = str(body.email, 200)
+  if (!name || !email || !email.includes('@')) {
+    return NextResponse.json({ error: 'Name und E-Mail sind erforderlich.' }, { status: 400 })
+  }
+
+  const lead = {
+    name,
+    email,
+    firma: str(body.firma, 200),
+    telefon: str(body.telefon, 50),
+    website: str(body.website, 300),
+    branche: str(body.branche, 100),
+    nachricht: [
+      str(body.nachricht, 2000),
+      body.mitarbeiter ? `Mitarbeiter: ${str(body.mitarbeiter, 50)}` : null,
+      body.zeitrahmen ? `Zeitrahmen: ${str(body.zeitrahmen, 100)}` : null,
+    ].filter(Boolean).join('\n') || null,
+    quelle: 'landing',
+    utm_source: str(body.utm_source, 100),
+    utm_medium: str(body.utm_medium, 100),
+    utm_campaign: str(body.utm_campaign, 100),
+    utm_term: str(body.utm_term, 100),
+    utm_content: str(body.utm_content, 100),
+    referrer: str(body.referrer, 500),
+    landing_path: str(body.landing_path, 300),
+  }
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } }
+  )
+
+  const { data: inserted, error } = await supabase.from('leads').insert(lead).select('id').single()
+  if (error) {
+    console.error('Lead insert error:', error.message)
+    return NextResponse.json({ error: 'Anfrage konnte nicht gespeichert werden.' }, { status: 500 })
+  }
+
+  // Benachrichtigung an Vertrieb — Fehler blockieren den Lead nicht
+  const notifyTo = process.env.LEAD_NOTIFY_EMAIL || process.env.FROM_EMAIL
+  const apiKey = process.env.RESEND_API_KEY
+  if (notifyTo && apiKey) {
+    try {
+      const resend = new Resend(apiKey)
+      const fromEmail = process.env.FROM_EMAIL || 'noreply@resend.dev'
+      const fromName = process.env.FROM_NAME || 'Webseitenverlag Deutschland'
+      const rows = Object.entries({
+        Name: lead.name, Firma: lead.firma, 'E-Mail': lead.email, Telefon: lead.telefon,
+        Website: lead.website, Branche: lead.branche, Nachricht: lead.nachricht,
+        'UTM Source': lead.utm_source, 'UTM Campaign': lead.utm_campaign,
+      })
+        .filter(([, v]) => v)
+        .map(([k, v]) => `<tr><td style="padding:10px 16px;border-bottom:1px solid #eee;font-weight:600;color:#374151;width:140px;vertical-align:top">${k}</td><td style="padding:10px 16px;border-bottom:1px solid #eee;color:#1f2937">${String(v).replace(/</g, '&lt;').replace(/\n/g, '<br>')}</td></tr>`)
+        .join('')
+      await resend.emails.send({
+        from: `${fromName} <${fromEmail}>`,
+        to: notifyTo,
+        replyTo: lead.email,
+        subject: `Neuer Lead: ${lead.firma || lead.name}${lead.branche ? ` (${lead.branche})` : ''}`,
+        html: `<h2 style="font-family:sans-serif;color:#2563eb">Neue Anfrage über die Landing-Page</h2><table style="font-family:sans-serif;font-size:15px;border-collapse:collapse;width:100%;max-width:600px">${rows}</table><p style="font-family:sans-serif;font-size:13px;color:#94a3b8;margin-top:24px">Lead-ID: ${inserted.id} · im Admin unter Leads sichtbar</p>`,
+      })
+    } catch (err) {
+      console.error('Lead notification email failed:', err)
+    }
+  }
+
+  return NextResponse.json({ success: true })
+}
