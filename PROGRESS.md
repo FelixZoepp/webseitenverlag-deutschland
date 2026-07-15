@@ -8,7 +8,7 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 |-------|--------|--------|
 | 0 | Git-Sicherheitsnetz, PROGRESS.md, WARTELISTE.md | ✅ erledigt (2026-07-15) |
 | A | Inventur & Audit → AUDIT.md (KEEP/REFACTOR/KILL) | ✅ erledigt (2026-07-15) |
-| B | Aufräumen (/_legacy/), Landing als `(marketing)`, Lead-Form → leads-Tabelle, Host-Routing-Middleware | ⬜ offen |
+| B | Aufräumen (/_legacy/), Landing als `(marketing)`, Lead-Form → leads-Tabelle, Host-Routing-Middleware | ✅ erledigt (2026-07-15) |
 | C | Template-Library + Seeding (4 Branchen × 2 Stile) | ⬜ offen |
 | D | Generierungs-Pipeline v2 (Firecrawl → Places → manueller Fallback) | ⬜ offen |
 | E | Checkout, Verträge (24/24/3), Provisioning, Dunning, Kündigung | ⬜ offen |
@@ -28,6 +28,15 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 - Phase A: Voll-Inventur (53+ Routen, 32 lib-Dateien, 15 Migrationen, Env-Vars, Cron) → AUDIT.md mit KEEP / 12× REFACTOR (R1–R12) / 8× KILL (K1–K8). Typecheck + Lint grün.
 - Wichtigste Audit-Erkenntnisse: `lib/payment.ts` = No-Op-Stub (einziger Importer: upsell-orchestrator → R5), `lib/defaults.ts` tot, DocuSign/SEPA/Qonto/EasyBill → _legacy in Phase B, Cloudflare-Tokens im Klartext (R3), `template-renderer.ts` hat noch 4 Importer (K8 erst Phase C)
 
+- **Phase B komplett** (Commits `17322b9`, `e73f09b`, `26480cb`):
+  - B1: DocuSign/SEPA/IBAN-Closing-Pfad → `_legacy/` (siehe `_legacy/README.md`); tote Flags entfernt; Admin-CTAs → Demo-Maschine. Audit-Korrektur: `lib/payment.ts` bleibt (aktives rechnungs_posten-Ledger, Ablösung in Phase E)
+  - B2: Migration `015_leads.sql` (leads mit UTM-Attribution, RLS admin-only)
+  - B3: Landing aus Webseiten-wvd als `(marketing)`-Route-Group; CSS auf `.marketing-root` gescoped; Fonts self-hosted (next/font); `/api/public/lead` mit Honeypot+Rate-Limit+Resend; CTA-Formular war Attrappe → verdrahtet; Preise 89→99€ angeglichen; Nav mit /login
+  - B4: Host-Routing-Middleware (env-gesteuert, ohne Env-Vars no-op)
+  - B5: Smoke-Tests grün (/, /entwurf, /blog, /login = 200; Lead-Validierung; Honeypot; 0 Font-CDN-Refs), Build+Lint+Typecheck grün
+
 ## Notizen für nächste Session
-- Landing-Klon liegt in `/tmp/webseiten-wvd` (flüchtig! Bei Bedarf neu klonen: FelixZoepp/Webseiten-wvd)
-- Landing-Analyse: keine Blocker; api/entwurf sendet an hartcodiertes `hendrik@hoffmann-wd.de` → muss durch leads-Tabelle ersetzt werden (Phase B)
+- **Nächste Phase: C** (Template-Library: section_library, library_pages, stock_assets, Seeding 4 Branchen × 2 Stile, §6/§7)
+- Migrationen 013/014/015 noch nicht in Supabase ausgeführt (WARTELISTE) — Lead-Insert erst danach live testbar
+- Landing-Klon lag in `/tmp/webseiten-wvd` (flüchtig); alles Nötige ist portiert
+- K8 (`lib/template-renderer.ts`) in Phase C prüfen: 4 Importstellen auf renderPremiumTemplate umstellen, dann _legacy
