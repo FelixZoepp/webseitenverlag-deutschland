@@ -12,7 +12,7 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | C | Template-Library + Seeding (4 Branchen × 2 Stile) | ✅ erledigt (2026-07-15) |
 | D | Generierungs-Pipeline v2 (Firecrawl → Places → manueller Fallback) | ✅ erledigt (2026-07-15) |
 | E | Checkout, Verträge (24/24/3), Provisioning, Dunning, Kündigung | ✅ erledigt (2026-07-15) |
-| F | Portal: Wizard, Chat-Editor (nur strukturierte Ops), Pläne, Upsell-Leiter | ⬜ offen |
+| F | Portal: Wizard, Chat-Editor (nur strukturierte Ops), Pläne, Upsell-Leiter | ✅ erledigt (2026-07-15) |
 | G | Domains & Upsell-Fulfillment | ⬜ offen |
 | H | CI-Gates: Golden-Set, Lighthouse-CI, Playwright E2E, /admin/kennzahlen | ⬜ offen |
 
@@ -57,11 +57,23 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
   - E6: Offline-Smoke `/tmp/smoke-contracts.ts` — 14 Checks grün (Schaltjahr/Monatsende, Kündigung am Fristtag/1 Tag zu spät/nach Laufzeitende, 12/12/1-Sonderkonditionen, Endlosschleifen-Schutz); Build+Lint+Typecheck grün
   - Bewusst offen gelassen: `lib/payment.ts`-Ledger (rechnungs_posten) läuft parallel weiter — Ablösung erst wenn Upsell-Flow in Phase G auf contracts umgestellt ist (AUDIT R5)
 
+- **Phase F komplett**:
+  - F2: Migration `019_portal.sql` — `upsell_orders` (Status OFFEN→BEZAHLT→PROVISIONIERT, Stripe-Verknüpfung, contract_id) + `sites.noindex/fertiggestellt_am/wizard_status/pflichtangaben`; RLS: Kunden SELECT eigene, Schreiben nur Admin/Service-Role. Versionierung/Rollback läuft weiter über `config_versions` (001) — kein neues site_versions
+  - F3: `config/plans.ts` (Feature-Wahrheit §10.3, Preise bleiben in Stripe; starter/business/growth=Premium) + `config/upsells.ts` (§10.5-Katalog: SEO-Unterseiten-Abo 49€/M, Stadtteil-Seiten 299€ einmalig, Bewertungs-System 149€+19€/M, Konkurrenz-Radar 29€/M, Saison-Kampagnen 39€/M, GBP-Einrichtung 199€ va_manual; je 3 Nutzen-Punkte, eigene Laufzeiten, `NERV_SCHUTZ_TAGE=60`, `KICKOFF_MODE`, verworfene Produkte dokumentiert)
+  - F4: Fertigstellungs-Wizard §10.1 — `lib/rechtstexte.ts` (Impressum §5 DDG/§18 MStV + Datenschutzerklärung aus Pflichtangaben-Formular), `lib/wizard.ts` (5 Schritte, nur Pflichtangaben+Fakten sind Pflicht), `lib/qa.ts` (Auto-QA: Platzhalter/Lorem/alt/Meta/Formular/Größe), Routen `/api/sites/[siteId]/wizard` + `/fertigstellen` (QA-Fail → Hinweise, blockiert nie den Rest; Erfolg → `noindex=false` + config_versions-Eintrag), `components/fertigstellungs-wizard.tsx` + Banner im Dashboard. Domain-Schritt = Stub (Cloudflare-Connect in Phase G)
+  - F5: Chat-Editor NUR strukturierte Ops §10.2 — `lib/editor-ops.ts`: 6 Op-Typen (update_text, swap_image_from_pool_or_upload, set_theme_preset, add_section_from_library, reorder, toggle) als Zod-DiscriminatedUnion, max 20 Ops, Pfad-Schema blockt `__proto__`; Leitplanken: Telefon/Logo/Rechtstexte gesperrt, Farben NUR über 6 Presets, Hero/Kontakt/CTA weder löschbar noch ausblendbar, Hero bleibt erste Sektion, Bild-Hosts allowlisted, Längenlimits Headline/CTA; applyPatch = All-or-Nothing auf Kopie → `draft_config` (live erst über Veröffentlichen-Klick, Rollback über bestehende config_versions-Route). Claude liefert `<patch_ops>`, Server validiert; Rate-Limit 50 Nachrichten/Tag/Kunde (429)
+  - F6: Upsell-/Upgrade-Kauf §10.4 — `lib/upsell-kauf.ts` (gemeinsamer Kaufweg: Order OFFEN → Stripe-Checkout mit `metadata.product_key/order_id`; Doppelbuchungs-Schutz über activated_upsells; Plan-Upgrade als `plan-upgrade:<tier>`, Downgrades abgewiesen), `lib/supabase/admin.ts` (Service-Role-Client), Kaufweg 1: POST `/api/admin/upsell-payment-link` (requireAdmin), Kaufweg 2: POST `/api/sites/[siteId]/upsell-checkout` + Portal-Kacheln `/dashboard/[siteId]/erweiterungen` (aktive Module markiert, Nerv-Schutz sortiert Abgelehnte ans Ende, Preise transparent). Webhook-Branch `handleUpsellCheckout`: BEZAHLT → eigener Vertrag je Buchung (paket=`upsell:<key>`, Konditionen aus config) → auto: activated_upsells-Upsert + PROVISIONIERT; va_manual: manual_task; Plan-Upgrade: customers/sites.package + Hauptvertrag angehoben + manual_task „altes Stripe-Abo beenden" (Proration-Pragmatismus); alle Lücken → manual_task PROVISIONING_LUECKE + 200 (kein Doppel-Provisioning durch Stripe-Retry)
+  - F7/DoD: `scripts/smoke-editor-ops.ts` — 19 Checks grün (invalider Patch/rohes HTML abgewiesen, All-or-Nothing, gesperrte Pfade, Bild-Host-Allowlist, Theme nur Presets, Hero-Schutz bei Toggle+Reorder, >20 Ops); Rollback = bestehende `/api/sites/[siteId]/rollback` + config_versions (funktionsfähig); Build+Lint+Typecheck grün. Upgrade-Kauf-E2E im Stripe-Testmode braucht Migration 019 + Webhook (WARTELISTE)
+
 ## Notizen für nächste Session
-- **Nächste Phase: F** (Portal: Wizard, Chat-Editor nur mit strukturierten Ops, Pläne, Upsell-Leiter, §10)
-- Kundenseiten-Sperre: `sites.gesperrt` wird vom Webhook gesetzt, aber noch NICHT beim Ausliefern geprüft — Sperr-Seite/410-Check gehört in Phase F/G (Host-Routing bzw. Site-Renderer)
-- Stripe-Webhook-Endpoint braucht jetzt 5 Events: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted` (WARTELISTE aktualisiert)
+- **Nächste Phase: G** (Domains & Upsell-Fulfillment: Cloudflare-Connect für Wunsch-Domain aus Wizard-Schritt 4, Provisioning-Crons für SEO-Abo/Stadtteil/Bewertungen/Radar/Saison, `sites.gesperrt`- und `sites.noindex`-Check beim Ausliefern)
+- Kundenseiten-Sperre: `sites.gesperrt` wird vom Webhook gesetzt, aber noch NICHT beim Ausliefern geprüft — Sperr-Seite/410-Check gehört in Phase G (Host-Routing bzw. Site-Renderer); dito `noindex`-Meta-Tag im Renderer
+- Alte Seite `/dashboard/[siteId]/upgrade` (Prä-Mission-Upsell-UI) existiert parallel zu `/erweiterungen` — in Phase G auf den neuen Kaufweg umstellen oder nach `_legacy/` schieben
+- `lib/payment.ts`-Ledger (rechnungs_posten) läuft weiter parallel; Ablösung durch upsell_orders/contracts in Phase G (AUDIT R5)
+- Admin-Ops-Dashboard hat noch keinen UI-Knopf für den 1-Klick-Zahlungslink (Route steht: POST `/api/admin/upsell-payment-link`) — UI in Phase G
+- Plan-Upgrade-Proration: bewusst pragmatisch — neue Subscription + manual_task zum Beenden des alten Abos; sauberes `subscription.update` mit Proration wäre eine Phase-G/H-Verbesserung
+- Wizard-Rechtstexte landen in `draft_config.rechtstexte` — die Renderer (Library/Premium) müssen sie in Phase G als Impressum-/Datenschutz-Seiten ausspielen
+- Migrationen 013–019 noch nicht in Supabase ausgeführt (WARTELISTE); danach: `npx tsx scripts/seed-library.ts`
 - Library-Demos: DB-Spalte `engine` wird erst nach Migration 017 geschrieben — der öffentliche Renderer hängt NICHT daran (brancht auf `config.engine`), aber neue Library-Demos brauchen Migration 017 (Insert setzt engine='library')
-- Migrationen 013–018 noch nicht in Supabase ausgeführt (WARTELISTE); danach: `npx tsx scripts/seed-library.ts`
 - Stock-Assets sind Platzhalter (Friseur nutzt universelle Bilder) — echte lizenzierte Assets auf WARTELISTE
 - Firecrawl/Places-Keys optional (WARTELISTE) — Kette degradiert sanft auf eigenen Scraper + manuelle Daten
