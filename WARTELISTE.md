@@ -14,6 +14,12 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 - [ ] **Git-Remote anlegen + pushen**: Das Repo hat aktuell KEIN Remote. Der CI-Workflow (`.github/workflows/ci.yml` — Lint, Typecheck, Golden-Set, Lighthouse-Budgets) greift erst nach dem ersten Push zu GitHub. Bis dahin lokal: `npm run ci:golden-set` + `npm run ci:lighthouse`
 - [ ] **E2E-Lauf freischalten** (Playwright, `e2e/journey.spec.ts`): braucht (a) Stripe-**Test**-Keys in `.env.local` (`STRIPE_SECRET_KEY=sk_test_...` + `STRIPE_WEBHOOK_SECRET` — fehlen aktuell komplett), (b) eine Supabase-Instanz mit Migrationen 001–021 + Library-Seeds. Achtung: Der Test legt echte Zeilen an (leads/demos/customers/sites/contracts/auth-User) und räumt sie am Ende auf — am besten gegen ein separates Test-Projekt laufen lassen, nicht gegen die Produktions-DB. Start: `E2E_ENABLED=1 npm run test:e2e` (einmalig vorher `npx playwright install chromium`). Live-Keys verweigert der Test hart
 
+## Branchen-Fabrik (F1 — Asset-Motor)
+- [ ] **Higgsfield-Account + API-Key** (`HIGGSFIELD_API_KEY` + `HIGGSFIELD_API_SECRET`): https://platform.higgsfield.ai — bis dahin läuft der Mock-Provider (0 Cent, Platzhalterbilder, aber komplette Pipeline inkl. Storage + asset_bank). **Achtung:** Die REST-Endpoints in `lib/assets/higgsfield.ts` sind noch unverifiziert (per ENV `HIGGSFIELD_PATH_TEXT2IMG`/`HIGGSFIELD_PATH_EDIT`/`HIGGSFIELD_API_BASE` korrigierbar) — beim ersten echten Key einen Testlauf `npm run asset:paar` machen und ggf. Pfade anpassen
+- [ ] **fal.ai-Key als Fallback** (`FAL_API_KEY`): https://fal.ai/dashboard/keys — gleiche Schnittstelle, springt automatisch ein, wenn Higgsfield fehlt/failt
+- [ ] **Kosten je Call verifizieren**: `HIGGSFIELD_KOSTEN_CENT` (Default 6) / `FAL_KOSTEN_CENT` (Default 4) sind Schätzwerte — nach den ersten echten Läufen mit dem Provider-Dashboard abgleichen
+- [ ] **Tages-Budget bestätigen**: `ASSET_BUDGET_TAG_CENT` Default 500 (= 5 €/Tag); Pipeline stoppt hart, wenn erreicht
+
 ## Entscheidungen
 - [ ] **`LEAD_NOTIFY_EMAIL` festlegen**: Lead-Benachrichtigungen gehen jetzt in die leads-Tabelle + Mail an diese Adresse (das hartcodierte `hendrik@hoffmann-wd.de` aus dem Alt-Repo ist raus). Ohne Env-Var: Fallback FROM_EMAIL
 - [ ] **Produktdomain festlegen** (für Host-Routing: PRODUKTDOMAIN.de = Marketing, app. = Portal, *. = Kundenseiten)

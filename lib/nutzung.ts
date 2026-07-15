@@ -11,11 +11,15 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-export type NutzungsTyp = 'claude_tokens' | 'firecrawl_scrape' | 'places_lookup'
+export type NutzungsTyp =
+  | 'claude_tokens'
+  | 'firecrawl_scrape'
+  | 'places_lookup'
+  | 'asset_generierung'
 
 export async function erfasseNutzung(
   typ: NutzungsTyp,
-  opts: { tokensInput?: number; tokensOutput?: number; kontext?: string } = {}
+  opts: { tokensInput?: number; tokensOutput?: number; kostenCent?: number; kontext?: string } = {}
 ): Promise<void> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -29,6 +33,7 @@ export async function erfasseNutzung(
       typ,
       tokens_input: opts.tokensInput ?? 0,
       tokens_output: opts.tokensOutput ?? 0,
+      kosten_cent: opts.kostenCent ?? 0,
       kontext: opts.kontext ?? null,
     })
     if (error) console.warn('[nutzung] Insert fehlgeschlagen:', error.message)
