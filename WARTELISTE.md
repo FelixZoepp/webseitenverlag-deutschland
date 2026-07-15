@@ -3,7 +3,8 @@
 Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 
 ## Sofort (für aktuellen Stand)
-- [ ] **Migrationen 013 + 014 + 015 in Supabase ausführen** (`supabase/migrations/013_demos.sql`, `014_stripe.sql`, `015_leads.sql`)
+- [ ] **Migrationen 013–016 in Supabase ausführen** (`013_demos.sql`, `014_stripe.sql`, `015_leads.sql`, `016_template_library.sql`)
+- [ ] **Library seeden** (nach Migration 016): `npx tsx scripts/seed-library.ts` (Env: NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY)
 - [ ] **Vercel Env-Vars setzen**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `LEAD_NOTIFY_EMAIL`
 - [ ] **Stripe-Webhook-Endpoint anlegen**: Dashboard → Webhooks → `https://<domain>/api/webhooks/stripe`, Event `checkout.session.completed`
 - [ ] **Resend-Domain verifizieren** (für Zugangs-/Lead-Mails von eigener Domain)
@@ -18,3 +19,4 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 - [ ] Golden-Set: 5–10 echte Firmen für Pipeline-Tests benennen
 - [ ] Registrar-Zugang (Domains für Kunden), Google Business Profile API, Ads-Konto-Zugang
 - [ ] Firecrawl-API-Key (Phase D) — alternativ bleibt eigener Scraper
+- [ ] **Stock-Assets lizenzieren/hochladen**: aktuelle Seeds sind Unsplash-Platzhalter; Friseur hat noch keine branchenspezifischen Bilder (nutzt universelle Platzhalter)

@@ -9,7 +9,7 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | 0 | Git-Sicherheitsnetz, PROGRESS.md, WARTELISTE.md | ✅ erledigt (2026-07-15) |
 | A | Inventur & Audit → AUDIT.md (KEEP/REFACTOR/KILL) | ✅ erledigt (2026-07-15) |
 | B | Aufräumen (/_legacy/), Landing als `(marketing)`, Lead-Form → leads-Tabelle, Host-Routing-Middleware | ✅ erledigt (2026-07-15) |
-| C | Template-Library + Seeding (4 Branchen × 2 Stile) | ⬜ offen |
+| C | Template-Library + Seeding (4 Branchen × 2 Stile) | ✅ erledigt (2026-07-15) |
 | D | Generierungs-Pipeline v2 (Firecrawl → Places → manueller Fallback) | ⬜ offen |
 | E | Checkout, Verträge (24/24/3), Provisioning, Dunning, Kündigung | ⬜ offen |
 | F | Portal: Wizard, Chat-Editor (nur strukturierte Ops), Pläne, Upsell-Leiter | ⬜ offen |
@@ -35,8 +35,15 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
   - B4: Host-Routing-Middleware (env-gesteuert, ohne Env-Vars no-op)
   - B5: Smoke-Tests grün (/, /entwurf, /blog, /login = 200; Lead-Validierung; Honeypot; 0 Font-CDN-Refs), Build+Lint+Typecheck grün
 
+- **Phase C komplett** (Commit `93aaafb`):
+  - C2: Migration `016_template_library.sql` — section_library, library_pages, stock_assets (RLS admin-only, Rendering läuft serverseitig)
+  - C3: Seeding via `scripts/seed-library.ts` (idempotent, upsert on key): 40 Sektions-Bausteine (10-Sektionen-Skeleton §2 × Handwerk/Gastronomie/Friseur/Gesundheit) + 8 Startseiten-Kompositionen (Stil `klar` = Defaults, `warm` = Tonalitäts-Overrides auf Hero/CTA) + 15 Stock-Assets (Unsplash-Platzhalter aus Bestand)
+  - Floskel-Blacklist `lib/floskel-blacklist.ts` (§2 Quality-Gate) — geprüft beim Seeding (`--check`), ab Phase D auch in der Pipeline
+  - C4/K8-Korrektur: `renderTemplate` ≠ Drop-in für `renderPremiumTemplate` (inkompatible Datenformen, Legacy-Configs in config_versions) → Ablösung verschoben auf Phase F/G, dokumentiert in AUDIT.md
+  - C5: `npx tsx scripts/seed-library.ts --check` grün (Skeleton vollständig, Referenzen auflösbar, Floskel-frei); Build+Lint+Typecheck grün
+
 ## Notizen für nächste Session
-- **Nächste Phase: C** (Template-Library: section_library, library_pages, stock_assets, Seeding 4 Branchen × 2 Stile, §6/§7)
-- Migrationen 013/014/015 noch nicht in Supabase ausgeführt (WARTELISTE) — Lead-Insert erst danach live testbar
-- Landing-Klon lag in `/tmp/webseiten-wvd` (flüchtig); alles Nötige ist portiert
-- K8 (`lib/template-renderer.ts`) in Phase C prüfen: 4 Importstellen auf renderPremiumTemplate umstellen, dann _legacy
+- **Nächste Phase: D** (Generierungs-Pipeline v2: Firecrawl → Places → manueller Fallback, §8) — Pipeline füllt content_schema-Felder der Library-Sektionen ({{firma}}/{{ort}}/{{jahr}}-Tokens ersetzen) und prüft Texte gegen `lib/floskel-blacklist.ts`
+- Rendering der Library-Kompositionen (Section-Renderer, Design-Tokens je Stil) wird mit Phase D/Demo-Generierung gebaut — DB liefert Inhalt+Komposition, Code die Präsentation
+- Migrationen 013–016 noch nicht in Supabase ausgeführt (WARTELISTE); danach: `npx tsx scripts/seed-library.ts`
+- Stock-Assets sind Platzhalter (Friseur nutzt universelle Bilder) — echte lizenzierte Assets auf WARTELISTE
