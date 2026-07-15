@@ -11,7 +11,7 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | B | Aufräumen (/_legacy/), Landing als `(marketing)`, Lead-Form → leads-Tabelle, Host-Routing-Middleware | ✅ erledigt (2026-07-15) |
 | C | Template-Library + Seeding (4 Branchen × 2 Stile) | ✅ erledigt (2026-07-15) |
 | D | Generierungs-Pipeline v2 (Firecrawl → Places → manueller Fallback) | ✅ erledigt (2026-07-15) |
-| E | Checkout, Verträge (24/24/3), Provisioning, Dunning, Kündigung | ⬜ offen |
+| E | Checkout, Verträge (24/24/3), Provisioning, Dunning, Kündigung | ✅ erledigt (2026-07-15) |
 | F | Portal: Wizard, Chat-Editor (nur strukturierte Ops), Pläne, Upsell-Leiter | ⬜ offen |
 | G | Domains & Upsell-Fulfillment | ⬜ offen |
 | H | CI-Gates: Golden-Set, Lighthouse-CI, Playwright E2E, /admin/kennzahlen | ⬜ offen |
@@ -49,9 +49,19 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
   - D5: Migration `017_demos_engine.sql` (additiv, `demos.engine` default 'premium'); POST/PATCH `/api/admin/demos` mit Library-Engine (Branche+Stil → pageKey, template_id = pageKey); `/demo/[token]` rendert nach `config.engine` (migrationsunabhängig); Admin-UI: Library-Optionen (4×2) + Ort-Feld
   - D6: Offline-Smoke-Test grün (8 Kompositionen, Escaping inkl. `<script>`-Injection in Bewertungen, keine Tokens/CDNs/Floskeln, alle 10 Sektionen); Build+Lint+Typecheck grün
 
+- **Phase E komplett** (Commit `7b1d67c`):
+  - E2: Migration `018_contracts.sql` — `contracts` (Konditionen 24/24/3 pro Zeile konfigurierbar, Mahnwesen-Felder, Stripe-Verknüpfung) + `manual_tasks` (Zero-Fulfillment-Ausnahmen, Status OFFEN/ERLEDIGT/VERWORFEN) + `sites.gesperrt`; RLS admin-only
+  - E3: `lib/contracts.ts` — monatsende-sichere UTC-Datumslogik (`addiereMonate`, `wirksamesKuendigungsdatum` mit Mehrfach-Verlängerung + Endlosschleifen-Schutz), `createManualTask` (best effort, bricht nie den aufrufenden Flow). Stripe-Webhook zum Multi-Event-Handler umgebaut: `checkout.session.completed` provisioniert wie bisher UND legt Vertrag an (idempotent über stripe_subscription_id; Vertragsfehler → manual_task PROVISIONING_LUECKE + 200, KEIN 500 — Demo ist schon CONVERTED, Retry würde doppelt provisionieren)
+  - E4: Dunning-Leiter über `invoice.payment_failed` (Stufe 1 Erinnerung → 2 Mahnung → 3 Site-Sperre + manual_task DUNNING_ESKALIERT), `invoice.paid` setzt Mahnstufe 0 + entsperrt; `customer.subscription.updated` (cancel_at_period_end) → GEKUENDIGT mit 24/24/3-Fristberechnung; `customer.subscription.deleted` → BEENDET + Sperre + Restforderungs-Task. `sendDunningEmail` (3 Stufen) in lib/email.ts. Stripe-API-Hinweis: `invoice.subscription` existiert in SDK 22 nicht mehr → `invoice.parent?.subscription_details?.subscription`
+  - E5: `/admin/vertraege` (Verträge + offene manuelle Aufgaben, Erledigen/Verwerfen, Kündigen-Aktion), GET `/api/admin/contracts`, PATCH `/api/admin/manual-tasks/[taskId]`, POST `/api/admin/contracts/[id]/kuendigen` (Fristberechnung + best-effort Stripe `cancel_at`, Fehler → manual_task); Nav-Link unter Abrechnung
+  - E6: Offline-Smoke `/tmp/smoke-contracts.ts` — 14 Checks grün (Schaltjahr/Monatsende, Kündigung am Fristtag/1 Tag zu spät/nach Laufzeitende, 12/12/1-Sonderkonditionen, Endlosschleifen-Schutz); Build+Lint+Typecheck grün
+  - Bewusst offen gelassen: `lib/payment.ts`-Ledger (rechnungs_posten) läuft parallel weiter — Ablösung erst wenn Upsell-Flow in Phase G auf contracts umgestellt ist (AUDIT R5)
+
 ## Notizen für nächste Session
-- **Nächste Phase: E** (Checkout, Verträge 24/24/3, Provisioning, Dunning, Kündigung, §9) — contracts + manual_tasks-Datenmodell (§6), Stripe-Webhook erweitern, `lib/payment.ts`-Ledger ablösen (siehe AUDIT R5/B1-Notiz)
+- **Nächste Phase: F** (Portal: Wizard, Chat-Editor nur mit strukturierten Ops, Pläne, Upsell-Leiter, §10)
+- Kundenseiten-Sperre: `sites.gesperrt` wird vom Webhook gesetzt, aber noch NICHT beim Ausliefern geprüft — Sperr-Seite/410-Check gehört in Phase F/G (Host-Routing bzw. Site-Renderer)
+- Stripe-Webhook-Endpoint braucht jetzt 5 Events: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted` (WARTELISTE aktualisiert)
 - Library-Demos: DB-Spalte `engine` wird erst nach Migration 017 geschrieben — der öffentliche Renderer hängt NICHT daran (brancht auf `config.engine`), aber neue Library-Demos brauchen Migration 017 (Insert setzt engine='library')
-- Migrationen 013–017 noch nicht in Supabase ausgeführt (WARTELISTE); danach: `npx tsx scripts/seed-library.ts`
+- Migrationen 013–018 noch nicht in Supabase ausgeführt (WARTELISTE); danach: `npx tsx scripts/seed-library.ts`
 - Stock-Assets sind Platzhalter (Friseur nutzt universelle Bilder) — echte lizenzierte Assets auf WARTELISTE
 - Firecrawl/Places-Keys optional (WARTELISTE) — Kette degradiert sanft auf eigenen Scraper + manuelle Daten
