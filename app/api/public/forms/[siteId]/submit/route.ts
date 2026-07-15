@@ -54,20 +54,38 @@ export async function POST(
 
     const body = await request.json()
 
-    // Validate required fields
-    if (!body.name || !body.email) {
+    // form_type-Whitelist (Flagship-Funnel: anfrage/reservierung, sonst contact)
+    const formType: string = ['anfrage', 'reservierung', 'contact'].includes(body.form_type)
+      ? body.form_type
+      : 'contact'
+
+    // Pflichtfelder: Reservierung → Name + Telefon (E-Mail optional), sonst Name + E-Mail
+    if (formType === 'reservierung') {
+      if (!body.name || !body.phone) {
+        return NextResponse.json(
+          { error: 'Name und Telefon sind Pflichtfelder' },
+          { status: 400, headers: corsHeaders }
+        )
+      }
+    } else if (!body.name || !body.email) {
       return NextResponse.json(
         { error: 'Name und E-Mail sind Pflichtfelder' },
         { status: 400, headers: corsHeaders }
       )
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
+    if (body.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
       return NextResponse.json(
         { error: 'Ungültige E-Mail-Adresse' },
         { status: 400, headers: corsHeaders }
       )
     }
+
+    // Strukturierte Qualifizierung aus dem Funnel (jsonb-Spalte, BF §1.2)
+    const qualifizierung =
+      body.qualifizierung && typeof body.qualifizierung === 'object' && !Array.isArray(body.qualifizierung)
+        ? (body.qualifizierung as Record<string, unknown>)
+        : null
 
     // Honeypot check
     const isSpam = !!(body.website || body.url)
@@ -77,16 +95,17 @@ export async function POST(
 
     // Remove honeypot fields from stored data
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { website: _w, url: _u, site_id: _s, ...cleanData } = body
+    const { website: _w, url: _u, site_id: _s, qualifizierung: _q, ...cleanData } = body
 
     // Save submission
     const { data: submission, error: insertError } = await supabase
       .from('form_submissions')
       .insert({
         site_id: params.siteId,
-        form_type: 'contact',
+        form_type: formType,
         data: cleanData,
-        sender_email: body.email,
+        qualifizierung,
+        sender_email: body.email || null,
         sender_name: body.name,
         status: isSpam || !withinLimit ? 'spam' : 'new',
         ip_address: ip,
@@ -121,7 +140,7 @@ export async function POST(
         notificationEmail,
         customerName,
         site.name,
-        cleanData,
+        { ...cleanData, ...(qualifizierung || {}) },
         submission.id,
         params.siteId,
         body.email
@@ -135,8 +154,8 @@ export async function POST(
         })
         .eq('id', submission.id)
 
-      // Send confirmation to sender
-      if (result.success) {
+      // Send confirmation to sender (nur wenn eine E-Mail vorliegt — Reservierung ist telefonisch)
+      if (result.success && body.email) {
         await sendConfirmationToSender(
           body.email,
           body.name,

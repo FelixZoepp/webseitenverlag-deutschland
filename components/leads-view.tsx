@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Site } from '@/types'
-import { Mail, Search, Inbox, Eye, Archive, AlertTriangle, Trash2, X, Loader2, Bell, Send } from 'lucide-react'
+import { Mail, Phone, Search, Inbox, Eye, Archive, AlertTriangle, Trash2, X, Loader2, Bell, Send } from 'lucide-react'
 
 interface Submission {
   id: string
   site_id: string
   form_type: string
   data: Record<string, unknown>
-  sender_email: string
+  qualifizierung: Record<string, unknown> | null
+  sender_email: string | null
   sender_name: string
   status: string
   notification_sent: boolean
@@ -165,7 +166,13 @@ export default function LeadsView({ site }: { site: Site }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className={`text-sm ${s.status === 'new' ? 'font-semibold' : ''}`}>{s.sender_name}</span>
-                    <span className="text-xs text-gray-400">{s.sender_email}</span>
+                    <span className="text-xs text-gray-400">{s.sender_email || String((s.data as Record<string, unknown>).phone || '')}</span>
+                    {s.form_type === 'anfrage' && (
+                      <span className="text-[10px] uppercase tracking-wide bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Anfrage</span>
+                    )}
+                    {s.form_type === 'reservierung' && (
+                      <span className="text-[10px] uppercase tracking-wide bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">Reservierung</span>
+                    )}
                   </div>
                   <p className="text-xs text-gray-500 truncate mt-0.5">
                     {String((s.data as Record<string, unknown>).message || '').slice(0, 80)}
@@ -197,6 +204,19 @@ export default function LeadsView({ site }: { site: Site }) {
                     <p className="text-sm text-gray-800 whitespace-pre-wrap">{String(val || '—')}</p>
                   </div>
                 ))}
+                {selected.qualifizierung && Object.keys(selected.qualifizierung).length > 0 && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-gray-600 mb-2">Qualifizierung aus dem Funnel</p>
+                    <div className="space-y-2">
+                      {Object.entries(selected.qualifizierung).map(([key, val]) => (
+                        <div key={key}>
+                          <label className="text-xs text-gray-500 font-medium">{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                          <p className="text-sm text-gray-800 whitespace-pre-wrap">{String(val || '—')}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="text-xs text-gray-500 font-medium">Eingegangen</label>
                   <p className="text-sm text-gray-800">{new Date(selected.created_at).toLocaleString('de-DE')}</p>
@@ -207,10 +227,17 @@ export default function LeadsView({ site }: { site: Site }) {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <a href={`mailto:${selected.sender_email}?subject=Re: Ihre Anfrage bei ${site.name}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
-                  <Mail className="w-3.5 h-3.5" /> Antworten
-                </a>
+                {selected.sender_email ? (
+                  <a href={`mailto:${selected.sender_email}?subject=Re: Ihre Anfrage bei ${site.name}`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                    <Mail className="w-3.5 h-3.5" /> Antworten
+                  </a>
+                ) : (selected.data as Record<string, unknown>).phone ? (
+                  <a href={`tel:${String((selected.data as Record<string, unknown>).phone)}`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                    <Phone className="w-3.5 h-3.5" /> Anrufen
+                  </a>
+                ) : null}
                 {selected.status !== 'read' && (
                   <button onClick={() => updateStatus(selected.id, 'read')}
                     className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">

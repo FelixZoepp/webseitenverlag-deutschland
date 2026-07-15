@@ -11,7 +11,8 @@
     "ci:golden-set": "npx tsx scripts/ci-golden-set.ts",
     "ci:lighthouse": "npx tsx scripts/ci-lighthouse-render.ts && npx --yes @lhci/cli@0.14.x autorun",
     "test:e2e": "playwright test",
-    "test:kuendigung": "npx tsx scripts/test-kuendigung.ts"
+    "test:kuendigung": "npx tsx scripts/test-kuendigung.ts",
+    "test:flagship": "npx tsx scripts/test-flagship.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",

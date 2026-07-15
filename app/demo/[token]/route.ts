@@ -4,6 +4,8 @@ import { renderPremiumTemplate, isPremiumTemplate } from '@/lib/templates'
 import { renderLibraryPage } from '@/lib/library/render'
 import { loadLibraryPage } from '@/lib/library/load'
 import type { LibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
+import { renderFlagshipPage } from '@/lib/flagship/render'
+import type { FlagshipConfig } from '@/lib/flagship/types'
 
 // RLS erlaubt nur Admins — die öffentliche Demo-Ansicht läuft über den Service-Role-Key
 const supabase = createClient(
@@ -57,10 +59,38 @@ export async function GET(
     return notFoundPage('Diese Demo ist abgelaufen. Melden Sie sich bei uns für eine aktuelle Vorschau.')
   }
 
-  // Engine-Weiche: Library-Demos (Pipeline v2) vs. Premium-Templates (v1)
-  const istLibrary = (demo.config as { engine?: string }).engine === 'library'
+  // Engine-Weiche: Flagship (Branchen-Fabrik) vs. Library (Pipeline v2) vs. Premium-Templates (v1)
+  const engine = (demo.config as { engine?: string }).engine
+  const istLibrary = engine === 'library'
+  const istFlagship = engine === 'flagship'
 
   let html: string
+  if (istFlagship) {
+    try {
+      // Flagship bringt Ribbon + noindex selbst mit — keine Demo-Bar-Injektion nötig
+      html = renderFlagshipPage(demo.config as unknown as FlagshipConfig, {
+        demo: true,
+        basisPfad: `/demo/${token}`,
+      })
+    } catch (err) {
+      console.error(`Demo-Render fehlgeschlagen (flagship, demo ${demo.id}):`, err)
+      return notFoundPage('Die Demo konnte nicht geladen werden.')
+    }
+
+    await supabase
+      .from('demos')
+      .update({ view_count: (demo.view_count ?? 0) + 1, last_viewed_at: new Date().toISOString() })
+      .eq('id', demo.id)
+
+    return new NextResponse(html, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'X-Robots-Tag': 'noindex, nofollow',
+      },
+    })
+  }
   if (istLibrary) {
     const config = demo.config as unknown as LibraryDemoConfig
     try {

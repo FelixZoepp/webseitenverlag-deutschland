@@ -17,6 +17,9 @@ import { isPremiumTemplate, renderPremiumTemplate } from '@/lib/templates'
 import { renderLibraryPage } from '@/lib/library/render'
 import { loadLibraryPage } from '@/lib/library/load'
 import type { LibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
+import { renderFlagshipPage } from '@/lib/flagship/render'
+import { renderAnfrageSeite } from '@/lib/flagship/anfrage'
+import type { FlagshipConfig } from '@/lib/flagship/types'
 
 export interface Rechtstexte {
   impressum: string
@@ -206,6 +209,19 @@ async function renderEngineSeite(
   slug: string,
   hatRechtstexte: boolean
 ): Promise<string | null> {
+  if ((config as { engine?: string }).engine === 'flagship') {
+    const fsConfig = config as unknown as FlagshipConfig
+    // Live-Sites indexieren (noindex steuert der Aufrufer über site.noindex)
+    if (slug === '') return renderFlagshipPage(fsConfig, { noindex: false })
+    const funnelSlug = fsConfig.funnel.modus === 'reservierung' ? 'reservierung' : 'anfrage'
+    if (slug === funnelSlug) {
+      return renderAnfrageSeite(fsConfig, {
+        submitZiel: `/api/public/forms/${site.id}/submit`,
+      })
+    }
+    return null
+  }
+
   if ((config as { engine?: string }).engine === 'library') {
     if (slug !== '') return null
     const libConfig = config as unknown as LibraryDemoConfig
