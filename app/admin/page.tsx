@@ -91,9 +91,9 @@ export default async function AdminDashboard() {
           <span className="tb-heading">Dashboard</span>
         </div>
         <div style={{ flex: 1 }} />
-        <Link href="/admin/customers/new"
+        <Link href="/admin/demos"
           style={{ background: 'var(--za-gold-grad)', color: '#fff', padding: '9px 18px', borderRadius: '10px', fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const, textDecoration: 'none', boxShadow: '0 4px 14px -4px rgba(42,111,219,0.50)' }}>
-          + Neuer Kunde
+          + Neue Demo
         </Link>
       </div>
 

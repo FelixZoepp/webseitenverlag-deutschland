@@ -53,7 +53,7 @@ Bestandsaufnahme des Ist-Zustands mit Einordnung **KEEP / REFACTOR / KILL** geme
 | # | Was | Begründung |
 |---|---|---|
 | K1 | `lib/docusign.ts` (181 LOC) + `app/api/webhooks/docusign` | Stripe-Checkout ersetzt Signatur-Flow komplett (§3). Feature-Flag ist eh false |
-| K2 | `lib/payment.ts` (PaymentProvider-Stub für Qonto/EasyBill) | No-Op-Interface „wird später ersetzt" — ist jetzt ersetzt: Stripe. Einziger Importer ist upsell-orchestrator (→ R5) |
+| K2 | `lib/payment.ts` (PaymentProvider-Stub) | **Korrektur Phase B:** kein No-Op — schreibt ins aktive `rechnungs_posten`-Ledger (gelesen von 3 Routen). Bleibt bis Phase E, wird dort durch Stripe-Subscription-Items ersetzt (zusammen mit R5) |
 | K3 | `lib/pdf/sepa-mandat.ts` | SEPA-Mandat obsolet, Stripe zieht ein. (`lib/pdf/angebot.ts` + `helpers.ts` vorerst behalten — Angebots-PDF kann im Closing nützlich bleiben, Entscheidung Phase E) |
 | K4 | `lib/vertrag-emails.ts` (DocuSign-Envelope-Mails) | Hängt am DocuSign-Flow; Phase E baut neue Vertrags-Mails um Stripe/contracts herum |
 | K5 | Feature-Flags `qontoActive`, `easybillActive` in `lib/feature-flags.ts` | Tote Flags ohne Implementierung dahinter |

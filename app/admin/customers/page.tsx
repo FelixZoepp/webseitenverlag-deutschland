@@ -13,8 +13,8 @@ export default async function AdminCustomers() {
     <main className="max-w-6xl mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Kunden</h1>
-        <Link href="/admin/customers/new" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium">
-          + Neuer Kunde
+        <Link href="/admin/demos" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium">
+          + Neue Demo
         </Link>
       </div>
 
