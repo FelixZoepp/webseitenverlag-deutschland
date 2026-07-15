@@ -128,6 +128,15 @@ export function renderReinigungPrivatTemplate(config: ReinigungPrivatConfig, sit
 
   const logoInitial = esc(c.businessName.charAt(0))
 
+  // Akzentwort in der Headline hervorheben, wenn es darin vorkommt —
+  // sonst anhängen (verhindert Dopplung wie "… wirklich sieht wirklich")
+  const headlineEsc = esc(c.heroHeadline)
+  const accentEsc = esc(c.heroAccent)
+  const heroHeadlineHtml =
+    accentEsc && headlineEsc.includes(accentEsc)
+      ? headlineEsc.replace(accentEsc, `<em>${accentEsc}</em>`)
+      : `${headlineEsc}${accentEsc ? ` <em>${accentEsc}</em>` : ''}`
+
   // Services HTML
   const serviceIconMap: Record<string, string> = {
     home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
@@ -217,7 +226,7 @@ export function renderReinigungPrivatTemplate(config: ReinigungPrivatConfig, sit
   // Trust badges
   const trustBadges = c.trustBadges || [
     { icon: 'shield', title: 'Versichert', value: 'Haftpflicht &amp; Betriebshaftpflicht' },
-    { icon: 'clock', title: 'P&uuml;nktlich', value: '98% Termintreue' },
+    { icon: 'clock', title: 'Pünktlich', value: '98% Termintreue' },
     { icon: 'star', title: 'Top bewertet', value: `${c.reviews.length > 0 ? (c.reviews.reduce((s, r) => s + r.rating, 0) / c.reviews.length).toFixed(1) : '5.0'} / 5.0 Sterne` },
     { icon: 'check', title: 'Festpreis', value: 'Keine versteckten Kosten' },
   ]
@@ -1550,8 +1559,7 @@ ${c.announceText || c.emergencyAvailable ? `<div class="announce">
           ${esc(c.heroTag)}
         </div>
         <h1 class="display">
-          ${esc(c.heroHeadline)}
-          <em>${esc(c.heroAccent)}</em>
+          ${heroHeadlineHtml}
           <span class="subtitle">${esc(c.heroLead)}</span>
         </h1>
         <div class="hero-actions">
