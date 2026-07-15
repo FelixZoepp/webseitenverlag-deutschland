@@ -17,7 +17,9 @@ import { startBranche } from '@/lib/seeding/branchen-start'
  * Läuft synchron (~5–10 Min) — Inngest-Job steht auf der WARTELISTE.
  */
 
-export const maxDuration = 800
+// Hobby-Plan-Limit; Seeding braucht oft länger (~330–500s) → Timeout möglich,
+// dann per CLI seeden (seed:branchen). Inngest-Job steht auf der WARTELISTE.
+export const maxDuration = 300
 
 /** Liste für die Demo-UI (F5): welche Branchen-Vorlagen gibt es, was ist approved */
 export async function GET() {

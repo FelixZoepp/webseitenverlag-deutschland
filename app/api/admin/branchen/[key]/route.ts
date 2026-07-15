@@ -16,7 +16,9 @@ import { startBranche } from '@/lib/seeding/branchen-start'
  * PATCH { action: 'draft' }                 → Freigabe zurückziehen
  */
 
-export const maxDuration = 800
+// Hobby-Plan-Limit; Regenerier-Runde kann länger brauchen → Timeout möglich,
+// dann per CLI seeden (seed:branchen). Inngest-Job steht auf der WARTELISTE.
+export const maxDuration = 300
 
 export async function PATCH(
   request: Request,
