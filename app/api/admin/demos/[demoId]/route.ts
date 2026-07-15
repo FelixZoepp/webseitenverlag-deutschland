@@ -3,6 +3,12 @@ import { requireAdmin } from '@/lib/auth-helpers'
 import { scrapeProspectWebsite } from '@/lib/scrape-prospect'
 import { generateDemoConfig } from '@/lib/generate-demo'
 import { ScrapedProspect } from '@/lib/scrape-prospect'
+import { collectProspectData } from '@/lib/pipeline/prospect-data'
+import {
+  generateLibraryDemoConfig,
+  type LibraryDemoConfig,
+} from '@/lib/pipeline/generate-library-content'
+import { loadLibraryPage } from '@/lib/library/load'
 
 export const maxDuration = 120
 
@@ -60,6 +66,50 @@ export async function PATCH(
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ demo: updated })
+  }
+
+  // Neu generieren (Library-Engine, Pipeline v2): Datenkette komplett neu durchlaufen
+  if (action === 'regenerate' && (demo.config as { engine?: string })?.engine === 'library') {
+    const alteConfig = demo.config as LibraryDemoConfig
+
+    const loaded = await loadLibraryPage(supabase, alteConfig.library_page_key)
+    if (!loaded) {
+      return NextResponse.json(
+        { error: `Komposition ${alteConfig.library_page_key} nicht gefunden` },
+        { status: 500 }
+      )
+    }
+
+    const prospect = await collectProspectData({
+      firma: demo.prospect_name,
+      ort: alteConfig.meta.ort,
+      branche: demo.branche,
+      websiteUrl: demo.prospect_website,
+      telefon: alteConfig.meta.telefon,
+      email: alteConfig.meta.email,
+      notizen: demo.notes,
+    })
+
+    const config = await generateLibraryDemoConfig(prospect, loaded)
+
+    const { data: updated, error } = await supabase
+      .from('demos')
+      .update({
+        config,
+        scraped_data: prospect,
+        status: 'GENERIERT',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', params.demoId)
+      .select()
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    const warning =
+      config.herkunft.generator === 'defaults'
+        ? 'Demo wurde mit Standard-Inhalten erstellt (Claude nicht verfügbar oder Qualitätsprüfung fehlgeschlagen).'
+        : null
+    return NextResponse.json({ demo: updated, warning })
   }
 
   // Neu generieren: frisch scrapen falls Website vorhanden, sonst gespeicherte Daten nutzen

@@ -29,7 +29,18 @@ const STATUS_STYLES: Record<string, { label: string; bg: string; fg: string }> =
   ABGELAUFEN: { label: 'Abgelaufen', bg: 'rgba(0,0,0,0.06)', fg: '#8a877f' },
 }
 
+// Library-Kompositionen (Pipeline v2): Auswahlwert "library:<Branche>:<Stil>"
+const LIBRARY_BRANCHEN = ['Handwerk', 'Gastronomie', 'Friseur', 'Gesundheit'] as const
+const LIBRARY_STILE = [
+  { id: 'klar', label: 'Klar (direkt, faktisch)' },
+  { id: 'warm', label: 'Warm (persönlich)' },
+] as const
+
 function templateName(id: string): string {
+  if (id.startsWith('startseite.')) {
+    const [, slug, stil] = id.split('.')
+    return `Library · ${slug} · ${stil}`
+  }
   return TEMPLATE_CATALOG.find((t) => t.id === id)?.name || id
 }
 
@@ -46,6 +57,7 @@ export default function DemosPage() {
   const [prospectName, setProspectName] = useState('')
   const [websiteUrl, setWebsiteUrl] = useState('')
   const [templateId, setTemplateId] = useState('')
+  const [ort, setOrt] = useState('')
   const [notes, setNotes] = useState('')
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -76,17 +88,33 @@ export default function DemosPage() {
     setError(null)
     setWarning(null)
     try {
-      const selectedTemplate = TEMPLATE_CATALOG.find((t) => t.id === templateId)
-      const res = await fetch('/api/admin/demos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const istLibrary = templateId.startsWith('library:')
+      let payload: Record<string, unknown>
+      if (istLibrary) {
+        const [, branche, stil] = templateId.split(':')
+        payload = {
+          engine: 'library',
+          prospectName: prospectName.trim(),
+          websiteUrl: websiteUrl.trim(),
+          branche,
+          stil,
+          ort: ort.trim() || null,
+          notes: notes.trim() || null,
+        }
+      } else {
+        const selectedTemplate = TEMPLATE_CATALOG.find((t) => t.id === templateId)
+        payload = {
           prospectName: prospectName.trim(),
           websiteUrl: websiteUrl.trim(),
           templateId,
           branche: selectedTemplate?.industry || null,
           notes: notes.trim() || null,
-        }),
+        }
+      }
+      const res = await fetch('/api/admin/demos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -96,6 +124,7 @@ export default function DemosPage() {
       if (data.warning) setWarning(data.warning)
       setProspectName('')
       setWebsiteUrl('')
+      setOrt('')
       setNotes('')
       setDemos((prev) => [data.demo, ...prev])
       window.open(`/demo/${data.demo.share_token}`, '_blank')
@@ -228,7 +257,7 @@ export default function DemosPage() {
         </div>
 
         <form onSubmit={handleGenerate}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
             <div>
               <label style={labelStyle}>Firmenname *</label>
               <input type="text" value={prospectName} onChange={(e) => setProspectName(e.target.value)}
@@ -240,10 +269,24 @@ export default function DemosPage() {
                 placeholder="z.B. friseur-schmidt.de (wird gescrapt)" style={inputStyle} disabled={generating} />
             </div>
             <div>
+              <label style={labelStyle}>Ort (für Google-Daten)</label>
+              <input type="text" value={ort} onChange={(e) => setOrt(e.target.value)}
+                placeholder="z.B. Leipzig" style={inputStyle} disabled={generating} />
+            </div>
+            <div>
               <label style={labelStyle}>Template *</label>
               <select value={templateId} onChange={(e) => setTemplateId(e.target.value)}
                 style={{ ...inputStyle, cursor: 'pointer' }} disabled={generating} required>
                 <option value="">— Template wählen —</option>
+                <optgroup label="Library (Pipeline v2)">
+                  {LIBRARY_BRANCHEN.map((b) =>
+                    LIBRARY_STILE.map((s) => (
+                      <option key={`library:${b}:${s.id}`} value={`library:${b}:${s.id}`}>
+                        {b} — {s.label}
+                      </option>
+                    ))
+                  )}
+                </optgroup>
                 {CATALOG_INDUSTRIES.map((ind) => (
                   <optgroup key={ind} label={ind}>
                     {TEMPLATE_CATALOG.filter((t) => t.industry === ind).map((t) => (

@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { renderPremiumTemplate, isPremiumTemplate } from '@/lib/templates'
+import { renderLibraryPage } from '@/lib/library/render'
+import { loadLibraryPage } from '@/lib/library/load'
+import type { LibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
 
 // RLS erlaubt nur Admins — die öffentliche Demo-Ansicht läuft über den Service-Role-Key
 const supabase = createClient(
@@ -54,15 +57,27 @@ export async function GET(
     return notFoundPage('Diese Demo ist abgelaufen. Melden Sie sich bei uns für eine aktuelle Vorschau.')
   }
 
-  if (!isPremiumTemplate(demo.template_id)) {
-    return notFoundPage('Dieser Demo-Link ist ungültig oder wurde entfernt.')
-  }
+  // Engine-Weiche: Library-Demos (Pipeline v2) vs. Premium-Templates (v1)
+  const istLibrary = (demo.config as { engine?: string }).engine === 'library'
 
   let html: string
-  try {
-    html = renderPremiumTemplate(demo.template_id, demo.config as Record<string, unknown>)
-  } catch {
-    return notFoundPage('Die Demo konnte nicht geladen werden.')
+  if (istLibrary) {
+    const config = demo.config as unknown as LibraryDemoConfig
+    try {
+      const loaded = await loadLibraryPage(supabase, config.library_page_key)
+      html = renderLibraryPage(config, loaded?.assets ?? [])
+    } catch {
+      return notFoundPage('Die Demo konnte nicht geladen werden.')
+    }
+  } else {
+    if (!isPremiumTemplate(demo.template_id)) {
+      return notFoundPage('Dieser Demo-Link ist ungültig oder wurde entfernt.')
+    }
+    try {
+      html = renderPremiumTemplate(demo.template_id, demo.config as Record<string, unknown>)
+    } catch {
+      return notFoundPage('Die Demo konnte nicht geladen werden.')
+    }
   }
 
   // Demo-Leiste einblenden + Suchmaschinen ausschließen
