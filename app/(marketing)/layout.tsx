@@ -3,10 +3,12 @@ import { Fraunces, Inter_Tight, JetBrains_Mono } from 'next/font/google'
 import './marketing.css'
 
 // Selbst gehostet via next/font (kein Fremd-CDN)
+// Nur die tatsächlich genutzten Gewichte (600/700) statt Variable-Font mit
+// opsz+SOFT-Achsen — spart ~100 KB Font-Download und beschleunigt das LCP
 const fraunces = Fraunces({
   subsets: ['latin'],
+  weight: ['600', '700'],
   variable: '--font-fraunces',
-  axes: ['opsz', 'SOFT'],
 })
 const interTight = Inter_Tight({
   subsets: ['latin'],
