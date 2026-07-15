@@ -30,8 +30,10 @@
    RESET + BASE
    ======================================== */
 html { scroll-behavior: smooth; }
-/* Basis auf .marketing-root gescoped, damit Admin/Dashboard unberührt bleiben */
-.marketing-root, .marketing-root * { margin: 0; padding: 0; box-sizing: border-box; }
+/* Basis auf .marketing-root gescoped, damit Admin/Dashboard unberührt bleiben.
+   :where() hält die Spezifität bei 0, sonst überschreibt der Reset alle
+   Tailwind-Spacing-Utilities (px-*, mb-*, mx-auto …) z. B. im Funnel. */
+:where(.marketing-root, .marketing-root *) { margin: 0; padding: 0; box-sizing: border-box; }
 .marketing-root {
   min-height: 100vh;
   font-family: var(--font-body);
