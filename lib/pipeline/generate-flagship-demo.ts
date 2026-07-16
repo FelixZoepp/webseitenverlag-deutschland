@@ -311,16 +311,51 @@ export async function generiereFlagshipDemo(
       warnungen.push(`Signature-Paar fehlgeschlagen: ${(paarErgebnis.reason as Error).message}`)
     }
   } else {
-    // Flagship-Branche ohne style_prompts: Prompts aus den Vorlagen-Inhalten ableiten
+    // Flagship-Branche ohne style_prompts: hochwertige Prompts aus den Vorlagen-Labels
     const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
     const sigVorherLabel = config.inhalte.signature.vorher.label || config.inhalte.signature.tag_vorher
     const sigNachherLabel = config.inhalte.signature.nachher.label || config.inhalte.signature.tag_nachher
     const brancheName = row.name || brancheKey
+    const sigCap = config.inhalte.signature.cap || ''
 
-    const heroPrompt = `Professional close-up photography of ${heroLabel}. Industry: ${brancheName}. Shallow depth of field, warm natural lighting, high-end commercial quality, subject positioned on the right half of the frame. No text, no logos, no people looking at camera.`
-    const videoPrompt = `Cinematic 4K quality, completely static camera, no camera movement. Scene: ${heroLabel}. Subtle natural ambient motion fitting for ${brancheName} — gentle light shifts, material textures, atmospheric details. Seamless loop feeling. No people looking at camera, no text, no logos.`
-    const nachherPrompt = `Professional photography: ${sigNachherLabel}. Industry: ${brancheName}. Clean, bright, well-maintained result. Warm natural lighting, sharp detail. No text, no logos.`
-    const vorherPrompt = `Same scene as reference image but showing: ${sigVorherLabel}. Neglected, dirty, or worn state. Muted colors, less appealing. No text, no logos.`
+    // Hero: Das Ergebnis der Arbeit im Fokus (NICHT eine Person), Hauptmotiv links+mitte
+    // damit es unter dem Gradient-Overlay sichtbar ist (Text liegt links, Motiv muss also
+    // im linken/mittleren Bereich glänzen, rechts kann auslaufen)
+    const heroPrompt = [
+      `Ultra-realistic commercial photography, 16:9 wide format.`,
+      `Scene: ${heroLabel}. Industry: ${brancheName}.`,
+      `Focus on the RESULT of the work — gleaming surfaces, pristine materials, the satisfying outcome.`,
+      `The main visual interest (reflections, textures, details) should be spread across the LEFT and CENTER of the frame.`,
+      `Shallow depth of field, natural side lighting creating reflections and highlights.`,
+      `Premium commercial quality, magazine-cover aesthetic. Color palette: clean, bright, professional.`,
+      `NO people facing camera, no text, no logos, no watermarks. People only as blurred background silhouettes if at all.`,
+    ].join(' ')
+
+    // Video: subtile Bewegung die zum Ergebnis passt (Licht-Reflexe, Wassertropfen, Glanz)
+    const videoPrompt = [
+      `Cinematic 4K, completely static tripod camera, zero camera movement.`,
+      `Scene: ${heroLabel}. Industry: ${brancheName}.`,
+      `Subtle ambient motion only: light reflections slowly shifting on clean surfaces, gentle water droplets, dust particles in sunlight, natural light changes.`,
+      `Seamless 5-second loop. Calm, premium, satisfying to watch.`,
+      `No people moving, no text, no logos.`,
+    ].join(' ')
+
+    // Nachher: das saubere/fertige Ergebnis — GLEICHE Szene wie in sigCap beschrieben
+    const nachherPrompt = [
+      `Professional interior/detail photography: ${sigNachherLabel}.`,
+      sigCap ? `Scene: ${sigCap}.` : `Industry: ${brancheName}.`,
+      `The space/object is IMMACULATE — gleaming, well-lit, perfectly maintained.`,
+      `Bright natural daylight, warm tones, inviting atmosphere. Sharp details showing the quality of the result.`,
+      `4:3 format. No text, no logos.`,
+    ].join(' ')
+
+    // Vorher: EXAKT dieselbe Szene, aber im vernachlässigten Zustand
+    const vorherPrompt = [
+      `Same exact room/scene as the reference image, but in a NEGLECTED state: ${sigVorherLabel}.`,
+      `Dust, grime, stains, dull surfaces, poor lighting. Everything looks tired and unmaintained.`,
+      `Muted desaturated colors, flat unflattering light. The contrast to the clean version should be dramatic but realistic.`,
+      `Same camera angle, same composition, same objects — just dirty/worn. 4:3 format. No text, no logos.`,
+    ].join(' ')
 
     // Hero + Signature-Paar parallel generieren
     const [heroErgebnis, paarErgebnis] = await Promise.allSettled([
