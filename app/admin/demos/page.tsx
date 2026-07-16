@@ -240,12 +240,12 @@ export default function DemosPage() {
         setError(data.error || 'Payment-Link konnte nicht erstellt werden')
         return
       }
-      await navigator.clipboard.writeText(data.url)
       setDemos((prev) => prev.map((d) => (d.id === demo.id ? { ...d, paket, payment_link_url: data.url } : d)))
+      try { await navigator.clipboard.writeText(data.url) } catch { /* clipboard kann auf HTTP fehlschlagen */ }
       setCopiedPaymentId(demo.id)
       setTimeout(() => setCopiedPaymentId(null), 2500)
-    } catch {
-      setError('Netzwerkfehler — bitte erneut versuchen.')
+    } catch (err) {
+      setError(`Payment-Link fehlgeschlagen: ${err instanceof Error ? err.message : 'Netzwerkfehler'}`)
     } finally {
       setBusyId(null)
     }
@@ -437,7 +437,7 @@ export default function DemosPage() {
               const expired = new Date(demo.expires_at) < new Date()
               const busy = busyId === demo.id
               return (
-                <div key={demo.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 20px', borderBottom: '1px solid var(--za-border)', opacity: busy ? 0.6 : 1, position: 'relative', zIndex: paymentMenuId === demo.id ? 100 : 'auto' }}>
+                <div key={demo.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 20px', borderBottom: '1px solid var(--za-border)', opacity: busy ? 0.6 : 1, position: 'relative' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
                       <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--za-fg-1)' }}>{demo.prospect_name}</span>
@@ -472,35 +472,13 @@ export default function DemosPage() {
                       {copiedId === demo.id ? <><Check style={{ width: '12px', height: '12px' }} /> Kopiert</> : <><Copy style={{ width: '12px', height: '12px' }} /> Link</>}
                     </button>
                     {demo.status !== 'CONVERTED' && (
-                      <div style={{ position: 'relative' }}>
-                        <button onClick={() => setPaymentMenuId(paymentMenuId === demo.id ? null : demo.id)} disabled={busy}
-                          title={demo.payment_link_url ? `Payment-Link (${demo.paket}) — klicken für neuen Link` : 'Stripe Payment-Link erstellen'}
-                          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', background: copiedPaymentId === demo.id ? 'rgba(46,196,160,0.12)' : 'rgba(255,255,255,0.65)', border: '1px solid var(--za-border)', borderRadius: '7px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', color: copiedPaymentId === demo.id ? '#1e8a70' : 'var(--za-fg-2)', fontFamily: 'inherit', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                          {copiedPaymentId === demo.id
-                            ? <><Check style={{ width: '12px', height: '12px' }} /> Kopiert</>
-                            : <><Euro style={{ width: '12px', height: '12px' }} /> {demo.paket ? `Zahlung (${demo.paket})` : 'Zahlung'}</>}
-                        </button>
-                        {paymentMenuId === demo.id && (
-                          <div style={{ position: 'absolute', bottom: '40px', right: 0, zIndex: 9999, background: '#fff', border: '1px solid var(--za-border)', borderRadius: '10px', boxShadow: '0 12px 32px rgba(0,0,0,0.18)', padding: '6px', minWidth: '220px' }}>
-                            {demo.payment_link_url && (
-                              <button onClick={() => { handleCopyPaymentLink(demo); setPaymentMenuId(null) }}
-                                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '8px 12px', background: 'none', border: 'none', borderRadius: '7px', fontSize: '12px', cursor: 'pointer', color: 'var(--za-fg-2)', fontFamily: 'inherit', textAlign: 'left' }}>
-                                <Copy style={{ width: '12px', height: '12px' }} /> Bestehenden Link kopieren
-                              </button>
-                            )}
-                            <div style={{ padding: '6px 12px 4px', fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--za-fg-4)' }}>
-                              {demo.payment_link_url ? 'Neuen Link erstellen' : 'Paket wählen'}
-                            </div>
-                            {PACKAGES.map((p) => (
-                              <button key={p.id} onClick={() => handlePaymentLink(demo, p.id)}
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '8px 12px', background: 'none', border: 'none', borderRadius: '7px', fontSize: '12px', cursor: 'pointer', color: 'var(--za-fg-1)', fontFamily: 'inherit', textAlign: 'left' }}>
-                                <span>{p.emoji} {p.name}</span>
-                                <span style={{ color: 'var(--za-fg-3)', fontSize: '11px' }}>{p.price} €/Mt</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      <button onClick={() => setPaymentMenuId(paymentMenuId === demo.id ? null : demo.id)} disabled={busy}
+                        title={demo.payment_link_url ? `Payment-Link (${demo.paket}) — klicken für neuen Link` : 'Stripe Payment-Link erstellen'}
+                        style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', background: copiedPaymentId === demo.id ? 'rgba(46,196,160,0.12)' : 'rgba(255,255,255,0.65)', border: '1px solid var(--za-border)', borderRadius: '7px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', color: copiedPaymentId === demo.id ? '#1e8a70' : 'var(--za-fg-2)', fontFamily: 'inherit', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                        {copiedPaymentId === demo.id
+                          ? <><Check style={{ width: '12px', height: '12px' }} /> Kopiert</>
+                          : <><Euro style={{ width: '12px', height: '12px' }} /> {demo.paket ? `Zahlung (${demo.paket})` : 'Zahlung'}</>}
+                      </button>
                     )}
                     {demo.status === 'GENERIERT' && !expired && (
                       <button onClick={() => handleStatus(demo, 'VERSENDET')} disabled={busy} title="Als versendet markieren"
@@ -523,6 +501,45 @@ export default function DemosPage() {
           </div>
         )}
       </div>
+
+      {/* Payment-Menü als Fixed-Overlay (nie abgeschnitten) */}
+      {paymentMenuId && (() => {
+        const demo = demos.find((d) => d.id === paymentMenuId)
+        if (!demo) return null
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => setPaymentMenuId(null)}>
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
+            <div style={{ position: 'relative', background: '#fff', borderRadius: '14px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', padding: '20px', minWidth: '300px', maxWidth: '400px' }}
+              onClick={(e) => e.stopPropagation()}>
+              <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '4px' }}>Zahlungslink erstellen</div>
+              <div style={{ fontSize: '12px', color: 'var(--za-fg-3)', marginBottom: '16px' }}>{demo.prospect_name}</div>
+              {demo.payment_link_url && (
+                <button onClick={() => { handleCopyPaymentLink(demo); setPaymentMenuId(null) }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', background: 'rgba(46,196,160,0.08)', border: '1px solid rgba(46,196,160,0.3)', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', color: '#1e8a70', fontFamily: 'inherit', textAlign: 'left', marginBottom: '12px', fontWeight: 600 }}>
+                  <Copy style={{ width: '14px', height: '14px' }} /> Bestehenden Link kopieren ({demo.paket})
+                </button>
+              )}
+              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--za-fg-4)', marginBottom: '8px' }}>
+                {demo.payment_link_url ? 'Oder neuen Link erstellen' : 'Paket wählen'}
+              </div>
+              {PACKAGES.map((p) => (
+                <button key={p.id} onClick={() => handlePaymentLink(demo, p.id)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '12px 14px', background: 'none', border: '1px solid var(--za-border)', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', color: 'var(--za-fg-1)', fontFamily: 'inherit', textAlign: 'left', marginBottom: '6px', transition: '.15s' }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.borderColor = 'var(--za-gold)'; (e.target as HTMLElement).style.background = 'rgba(212,168,40,0.06)' }}
+                  onMouseLeave={(e) => { (e.target as HTMLElement).style.borderColor = 'var(--za-border)'; (e.target as HTMLElement).style.background = 'none' }}>
+                  <span style={{ fontWeight: 600 }}>{p.emoji} {p.name}</span>
+                  <span style={{ color: 'var(--za-fg-3)', fontSize: '12px' }}>{p.price} €/Mt</span>
+                </button>
+              ))}
+              <button onClick={() => setPaymentMenuId(null)}
+                style={{ marginTop: '10px', width: '100%', padding: '8px', background: 'none', border: 'none', fontSize: '12px', color: 'var(--za-fg-4)', cursor: 'pointer', fontFamily: 'inherit' }}>
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        )
+      })()}
     </>
   )
 }
