@@ -437,7 +437,7 @@ export default function DemosPage() {
               const expired = new Date(demo.expires_at) < new Date()
               const busy = busyId === demo.id
               return (
-                <div key={demo.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 20px', borderBottom: '1px solid var(--za-border)', opacity: busy ? 0.6 : 1 }}>
+                <div key={demo.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 20px', borderBottom: '1px solid var(--za-border)', opacity: busy ? 0.6 : 1, position: 'relative', zIndex: paymentMenuId === demo.id ? 100 : 'auto' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
                       <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--za-fg-1)' }}>{demo.prospect_name}</span>
@@ -481,7 +481,7 @@ export default function DemosPage() {
                             : <><Euro style={{ width: '12px', height: '12px' }} /> {demo.paket ? `Zahlung (${demo.paket})` : 'Zahlung'}</>}
                         </button>
                         {paymentMenuId === demo.id && (
-                          <div style={{ position: 'absolute', top: '36px', right: 0, zIndex: 9999, background: '#fff', border: '1px solid var(--za-border)', borderRadius: '10px', boxShadow: '0 12px 32px rgba(0,0,0,0.18)', padding: '6px', minWidth: '220px' }}>
+                          <div style={{ position: 'absolute', bottom: '40px', right: 0, zIndex: 9999, background: '#fff', border: '1px solid var(--za-border)', borderRadius: '10px', boxShadow: '0 12px 32px rgba(0,0,0,0.18)', padding: '6px', minWidth: '220px' }}>
                             {demo.payment_link_url && (
                               <button onClick={() => { handleCopyPaymentLink(demo); setPaymentMenuId(null) }}
                                 style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '8px 12px', background: 'none', border: 'none', borderRadius: '7px', fontSize: '12px', cursor: 'pointer', color: 'var(--za-fg-2)', fontFamily: 'inherit', textAlign: 'left' }}>
