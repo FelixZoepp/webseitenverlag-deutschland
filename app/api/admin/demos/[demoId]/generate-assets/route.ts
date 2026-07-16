@@ -132,6 +132,14 @@ export async function POST(
     }
   })
 
+  // Gallery-Loaded-CSS injizieren (Platzhalter-Text ausblenden wenn Bild geladen)
+  html = html.replace(
+    '</style>',
+    `.galstrip figure.loaded::after{display:none}
+.galstrip figure img{position:relative;z-index:1}
+</style>`
+  )
+
   // reduced-motion Fallback fürs Video
   if (ergebnisse.hero && ergebnisse.video) {
     html = html.replace(
