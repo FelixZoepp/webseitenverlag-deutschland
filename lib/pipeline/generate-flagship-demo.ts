@@ -437,6 +437,41 @@ export async function generiereFlagshipDemo(
     }
   }
 
+  // Ergebnis-Paare (ba_slider): jedes Paar braucht eigene Vorher/Nachher-Bilder
+  if (config.inhalte.ergebnisse.variante === 'ba_slider' && config.inhalte.ergebnisse.paare) {
+    for (let i = 0; i < config.inhalte.ergebnisse.paare.length; i++) {
+      const paarDef = config.inhalte.ergebnisse.paare[i]
+      if (paarDef.nachher.datei && paarDef.vorher.datei) continue // schon gesetzt
+      try {
+        const nachherLabel = paarDef.nachher.label || paarDef.caption
+        const vorherLabel = paarDef.vorher.label || paarDef.caption
+        const brName = row.name || brancheKey
+        const ergebnisPaar = await makePair({
+          branche: brancheKey,
+          nachherPrompt: [
+            `${nachherLabel}. ${brName}.`,
+            `Immaculate, clean, well-maintained result of professional work.`,
+            `Bright natural lighting, sharp details. 16:9 format.`,
+            `Photorealistic photography, shallow depth of field. No people, no text, no logos.`,
+          ].join(' '),
+          vorherPrompt: [
+            `Edit this exact scene, keep IDENTICAL room, objects, camera angle unchanged.`,
+            `Only change: ${vorherLabel}. Dirty, dusty, neglected, worn state. Muted colors, flat light.`,
+            `Same composition — only the condition changes. No text, no logos.`,
+          ].join(' '),
+          aspect: '16:9',
+          quelleOverride: 'demo_generiert',
+          kontext: `${kontext}:ergebnis-${i}`,
+        })
+        kostenCent += ergebnisPaar.nachher.kostenCent + ergebnisPaar.vorher.kostenCent
+        paarDef.nachher.datei = ergebnisPaar.nachher.publicUrl
+        paarDef.vorher.datei = ergebnisPaar.vorher.publicUrl
+      } catch (e) {
+        warnungen.push(`Ergebnis-Paar ${i + 1} fehlgeschlagen: ${(e as Error).message}`)
+      }
+    }
+  }
+
   if (kostenCent > DEMO_KOSTEN_LIMIT_CENT) {
     warnungen.push(
       `Demo-Kosten ${kostenCent} Cent über DoD-Grenze (${DEMO_KOSTEN_LIMIT_CENT} Cent)`
