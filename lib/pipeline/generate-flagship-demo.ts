@@ -87,6 +87,27 @@ function wendeDesignOverridesAn(config: FlagshipConfig, overrides: DesignOverrid
 /** DoD-Grenze (BF §6): Kosten pro Demo in Cent */
 const DEMO_KOSTEN_LIMIT_CENT = 150
 
+const MAX_ASSET_DURCHLAEUFE = 2
+
+/**
+ * Prüft ob alle Pflicht-Asset-Slots in der Config befüllt sind.
+ * Gibt die Namen fehlender Slots zurück (leer = alles ok).
+ */
+function fehlendePflichtSlots(config: FlagshipConfig): string[] {
+  const fehlend: string[] = []
+  if (!config.inhalte.hero.media.datei) fehlend.push('hero')
+  if (!config.inhalte.signature.nachher.datei) fehlend.push('signature-nachher')
+  if (!config.inhalte.signature.vorher.datei) fehlend.push('signature-vorher')
+  if (config.inhalte.ergebnisse.variante === 'ba_slider' && config.inhalte.ergebnisse.paare) {
+    for (let i = 0; i < config.inhalte.ergebnisse.paare.length; i++) {
+      const p = config.inhalte.ergebnisse.paare[i]
+      if (!p.nachher.datei) fehlend.push(`ergebnis-${i}-nachher`)
+      if (!p.vorher.datei) fehlend.push(`ergebnis-${i}-vorher`)
+    }
+  }
+  return fehlend
+}
+
 export interface DemoAssetMeta {
   hero?: { id: string; quelle: 'frisch' | 'bank' }
   video?: { job_id: string; quelle: 'frisch' }
@@ -268,170 +289,130 @@ export async function generiereFlagshipDemo(
     }))
   }
 
-  // 2) Schlüssel-Assets: frisch → Bank → CSS-Platzhalter (nie Abbruch)
+  // 2) Schlüssel-Assets: Retry-Schleife → Bank-Fallback → Pflicht-Validierung
   const warnungen: string[] = []
   const assetMeta: DemoAssetMeta = { fallback: [], warnungen }
   let kostenCent = 0
   const styleProfil = gespeichert?.profil
   const kontext = `demo:${brancheKey}:${prospect.firma}`
+  for (let durchlauf = 1; durchlauf <= MAX_ASSET_DURCHLAEUFE; durchlauf++) {
+    // Hero nur generieren wenn noch nicht vorhanden
+    if (!config.inhalte.hero.media.datei) {
+      let heroPrompt: string
+      if (styleProfil?.style_prompts) {
+        heroPrompt = baueAssetPrompt(styleProfil, styleProfil.style_prompts.szenen.hero)
+      } else {
+        const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
+        const brancheName = row.name || brancheKey
+        heroPrompt = [
+          `Close-up on the craft and result: ${heroLabel}, hands and tools only, no face visible, cropped above shoulders.`,
+          `The main action positioned on the RIGHT half of the frame, calm open ${brancheName} interior on the left.`,
+          `${brancheName} professional environment, authentic workplace details.`,
+          `Bright natural side lighting with reflections on clean surfaces.`,
+          `Shallow depth of field, 16:9 wide format.`,
+          `Photorealistic editorial photography. No text, no logos, no watermarks, no recognizable people.`,
+        ].join(' ')
+      }
 
-  if (styleProfil?.style_prompts) {
-    const s = styleProfil.style_prompts
-    const [heroErgebnis, paarErgebnis] = await Promise.allSettled([
-      generiereAsset({
-        prompt: baueAssetPrompt(styleProfil, s.szenen.hero),
-        aspect: '16:9',
-        branche: brancheKey,
-        szeneTyp: 'hero',
-        quelleOverride: 'demo_generiert',
-        kontext,
-      }),
-      makePair({
-        branche: brancheKey,
-        nachherPrompt: baueAssetPrompt(styleProfil, s.szenen.signature_nachher),
-        vorherPrompt: s.szenen.signature_vorher,
-        aspect: '16:9',
-        quelleOverride: 'demo_generiert',
-        kontext,
-      }),
-    ])
-
-    if (heroErgebnis.status === 'fulfilled') {
-      const hero = heroErgebnis.value
-      kostenCent += hero.kostenCent
-      config.inhalte.hero.media.datei = hero.publicUrl
-      assetMeta.hero = { id: hero.id, quelle: 'frisch' }
-
-      // Video-Hero: Hero-Bild → Looping-Video (image-to-video via Higgsfield)
       try {
-        const video = await generiereVideo({
-          imageUrl: hero.publicUrl,
-          prompt: baueVideoPrompt(styleProfil),
-          durationSeconds: 6,
-          kontext: `video:${kontext}`,
+        const hero = await generiereAsset({
+          prompt: heroPrompt,
+          aspect: '16:9',
+          branche: brancheKey,
+          szeneTyp: 'hero',
+          quelleOverride: 'demo_generiert',
+          kontext,
         })
-        if (video.videoUrl) {
-          kostenCent += video.kostenCent
-          config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl }
-          assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
+        kostenCent += hero.kostenCent
+        config.inhalte.hero.media.datei = hero.publicUrl
+        assetMeta.hero = { id: hero.id, quelle: 'frisch' }
+
+        // Video-Hero (optional, Fehler = Warning)
+        try {
+          let videoPrompt: string
+          if (styleProfil?.style_prompts) {
+            videoPrompt = baueVideoPrompt(styleProfil)
+          } else {
+            const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
+            const brancheName = row.name || brancheKey
+            const branchenBewegung = VIDEO_PROMPTS[brancheKey] || `Subtle ambient motion fitting for ${brancheName}: light reflections shifting on surfaces, gentle material movement, dust particles in light.`
+            videoPrompt = [
+              `Cinematic 4K, completely static tripod camera, zero camera movement.`,
+              `Close-up scene: ${heroLabel}. ${brancheName} environment.`,
+              branchenBewegung,
+              `Seamless 5-second loop, calm and premium. No face visible, no person looking at camera. No text, no logos.`,
+            ].join(' ')
+          }
+          const video = await generiereVideo({
+            imageUrl: hero.publicUrl,
+            prompt: videoPrompt,
+            durationSeconds: 6,
+            kontext: `video:${kontext}`,
+          })
+          if (video.videoUrl) {
+            kostenCent += video.kostenCent
+            config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl }
+            assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
+          }
+        } catch (e) {
+          warnungen.push(`Video-Hero fehlgeschlagen (Bild-Hero bleibt): ${(e as Error).message}`)
         }
       } catch (e) {
-        warnungen.push(`Video-Hero fehlgeschlagen (Bild-Hero bleibt): ${(e as Error).message}`)
+        warnungen.push(`Hero-Generierung Durchlauf ${durchlauf} fehlgeschlagen: ${(e as Error).message}`)
       }
-    } else {
-      warnungen.push(`Hero-Generierung fehlgeschlagen: ${(heroErgebnis.reason as Error).message}`)
     }
 
-    if (paarErgebnis.status === 'fulfilled') {
-      const paar = paarErgebnis.value
-      kostenCent += paar.nachher.kostenCent + paar.vorher.kostenCent
-      config.inhalte.signature.nachher.datei = paar.nachher.publicUrl
-      config.inhalte.signature.vorher.datei = paar.vorher.publicUrl
-      assetMeta.paar = { pair_id: paar.pairId, asset_ids: [paar.nachher.id, paar.vorher.id], quelle: 'frisch' }
-    } else {
-      warnungen.push(`Signature-Paar fehlgeschlagen: ${(paarErgebnis.reason as Error).message}`)
-    }
-  } else {
-    // Flagship-Branche ohne style_prompts: hochwertige Prompts aus den Vorlagen-Labels
-    const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
-    const sigVorherLabel = config.inhalte.signature.vorher.label || config.inhalte.signature.tag_vorher
-    const sigNachherLabel = config.inhalte.signature.nachher.label || config.inhalte.signature.tag_nachher
-    const brancheName = row.name || brancheKey
-    const sigCap = config.inhalte.signature.cap || ''
+    // Signature-Paar nur generieren wenn noch nicht vorhanden
+    if (!config.inhalte.signature.nachher.datei || !config.inhalte.signature.vorher.datei) {
+      let nachherPrompt: string
+      let vorherPrompt: string
+      if (styleProfil?.style_prompts) {
+        nachherPrompt = baueAssetPrompt(styleProfil, styleProfil.style_prompts.szenen.signature_nachher)
+        vorherPrompt = styleProfil.style_prompts.szenen.signature_vorher
+      } else {
+        const nachherLabel = config.inhalte.signature.nachher.label || config.inhalte.signature.tag_nachher
+        const vorherLabel = config.inhalte.signature.vorher.label || config.inhalte.signature.tag_vorher
+        const brancheName = row.name || brancheKey
+        const sigCap = config.inhalte.signature.cap || ''
+        nachherPrompt = [
+          `${nachherLabel}. ${sigCap || brancheName}.`,
+          `The space/result is IMMACULATE — gleaming surfaces, well-maintained, inviting. The satisfying outcome of professional work.`,
+          `Bright natural daylight, warm atmosphere, sharp details showing quality.`,
+          `Eye-level perspective, 16:9 wide format.`,
+          `Photorealistic photography, shallow depth of field. No people, no text, no logos.`,
+        ].join(' ')
+        vorherPrompt = [
+          `Edit this exact scene, keep the IDENTICAL room, furniture, objects, windows, camera angle and perspective unchanged.`,
+          `Only change: ${vorherLabel}. Cover surfaces in dust, grime, stains. Dull and unmaintained state.`,
+          `Muted desaturated colors, flat unflattering light. Dramatic but realistic contrast to the clean version.`,
+          `Same exact composition and framing — only the cleanliness/condition changes. No text, no logos.`,
+        ].join(' ')
+      }
 
-    // ASSET-REZEPTUR: Prompt-Anatomie [SUBJEKT+HANDLUNG], [KOMPOSITION], [MILIEU], [LICHT], [KAMERA], [STIL-ANKER]
-    // DSGVO-Kernregel: die ARBEIT zeigen, nicht die Person — keine erkennbaren Gesichter
-
-    // Hero 16:9: Close-up des Handwerks/Ergebnisses auf der Text-Gegenseite (rechts)
-    const heroPrompt = [
-      `Close-up on the craft and result: ${heroLabel}, hands and tools only, no face visible, cropped above shoulders.`,
-      `The main action positioned on the RIGHT half of the frame, calm open ${brancheName} interior on the left.`,
-      `${brancheName} professional environment, authentic workplace details.`,
-      `Bright natural side lighting with reflections on clean surfaces.`,
-      `Shallow depth of field, 16:9 wide format.`,
-      `Photorealistic editorial photography. No text, no logos, no watermarks, no recognizable people.`,
-    ].join(' ')
-
-    // Video: statische Kamera, branchen-spezifische Mikrobewegung
-    const branchenBewegung = VIDEO_PROMPTS[brancheKey] || `Subtle ambient motion fitting for ${brancheName}: light reflections shifting on surfaces, gentle material movement, dust particles in light.`
-    const videoPrompt = [
-      `Cinematic 4K, completely static tripod camera, zero camera movement.`,
-      `Close-up scene: ${heroLabel}. ${brancheName} environment.`,
-      branchenBewegung,
-      `Seamless 5-second loop, calm and premium. No face visible, no person looking at camera. No text, no logos.`,
-    ].join(' ')
-
-    // Signature ZIEL (Nachher): der erstrebenswerte Zustand — wird ZUERST generiert (16:9)
-    const nachherPrompt = [
-      `${sigNachherLabel}. ${sigCap || brancheName}.`,
-      `The space/result is IMMACULATE — gleaming surfaces, well-maintained, inviting. The satisfying outcome of professional work.`,
-      `Bright natural daylight, warm atmosphere, sharp details showing quality.`,
-      `Eye-level perspective, 16:9 wide format.`,
-      `Photorealistic photography, shallow depth of field. No people, no text, no logos.`,
-    ].join(' ')
-
-    // Signature GEGEN-Zustand (Vorher): Edit des Ziel-Bildes — EXAKT gleiche Szene festgenagelt
-    const vorherPrompt = [
-      `Edit this exact scene, keep the IDENTICAL room, furniture, objects, windows, camera angle and perspective unchanged.`,
-      `Only change: ${sigVorherLabel}. Cover surfaces in dust, grime, stains. Dull and unmaintained state.`,
-      `Muted desaturated colors, flat unflattering light. Dramatic but realistic contrast to the clean version.`,
-      `Same exact composition and framing — only the cleanliness/condition changes. No text, no logos.`,
-    ].join(' ')
-
-    // Hero + Signature-Paar parallel generieren
-    const [heroErgebnis, paarErgebnis] = await Promise.allSettled([
-      generiereAsset({
-        prompt: heroPrompt,
-        aspect: '16:9',
-        branche: brancheKey,
-        szeneTyp: 'hero',
-        quelleOverride: 'demo_generiert',
-        kontext,
-      }),
-      makePair({
-        branche: brancheKey,
-        nachherPrompt,
-        vorherPrompt,
-        aspect: '16:9',
-        quelleOverride: 'demo_generiert',
-        kontext,
-      }),
-    ])
-
-    if (heroErgebnis.status === 'fulfilled') {
-      const hero = heroErgebnis.value
-      kostenCent += hero.kostenCent
-      config.inhalte.hero.media.datei = hero.publicUrl
-      assetMeta.hero = { id: hero.id, quelle: 'frisch' }
-
-      // Video aus dem Hero-Bild
       try {
-        const video = await generiereVideo({
-          imageUrl: hero.publicUrl,
-          prompt: videoPrompt,
-          durationSeconds: 6,
-          kontext: `video:${kontext}`,
+        const paar = await makePair({
+          branche: brancheKey,
+          nachherPrompt,
+          vorherPrompt,
+          aspect: '16:9',
+          quelleOverride: 'demo_generiert',
+          kontext,
         })
-        if (video.videoUrl) {
-          kostenCent += video.kostenCent
-          config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl }
-          assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
-        }
+        kostenCent += paar.nachher.kostenCent + paar.vorher.kostenCent
+        config.inhalte.signature.nachher.datei = paar.nachher.publicUrl
+        config.inhalte.signature.vorher.datei = paar.vorher.publicUrl
+        assetMeta.paar = { pair_id: paar.pairId, asset_ids: [paar.nachher.id, paar.vorher.id], quelle: 'frisch' }
       } catch (e) {
-        warnungen.push(`Video-Hero fehlgeschlagen (Bild-Hero bleibt): ${(e as Error).message}`)
+        warnungen.push(`Signature-Paar Durchlauf ${durchlauf} fehlgeschlagen: ${(e as Error).message}`)
       }
-    } else {
-      warnungen.push(`Hero-Generierung fehlgeschlagen: ${(heroErgebnis.reason as Error).message}`)
     }
 
-    if (paarErgebnis.status === 'fulfilled') {
-      const paar = paarErgebnis.value
-      kostenCent += paar.nachher.kostenCent + paar.vorher.kostenCent
-      config.inhalte.signature.nachher.datei = paar.nachher.publicUrl
-      config.inhalte.signature.vorher.datei = paar.vorher.publicUrl
-      assetMeta.paar = { pair_id: paar.pairId, asset_ids: [paar.nachher.id, paar.vorher.id], quelle: 'frisch' }
-    } else {
-      warnungen.push(`Signature-Paar fehlgeschlagen: ${(paarErgebnis.reason as Error).message}`)
+    // Prüfen ob Hero + Signature komplett sind → früh raus
+    if (config.inhalte.hero.media.datei && config.inhalte.signature.nachher.datei && config.inhalte.signature.vorher.datei) {
+      break
+    }
+    if (durchlauf < MAX_ASSET_DURCHLAEUFE) {
+      console.warn(`[flagship-demo] Durchlauf ${durchlauf}: Assets unvollständig, starte Retry…`)
     }
   }
 
@@ -458,39 +439,54 @@ export async function generiereFlagshipDemo(
     }
   }
 
-  // Ergebnis-Paare (ba_slider): jedes Paar braucht eigene Vorher/Nachher-Bilder
   if (config.inhalte.ergebnisse.variante === 'ba_slider' && config.inhalte.ergebnisse.paare) {
     for (let i = 0; i < config.inhalte.ergebnisse.paare.length; i++) {
       const paarDef = config.inhalte.ergebnisse.paare[i]
-      if (paarDef.nachher.datei && paarDef.vorher.datei) continue // schon gesetzt
-      try {
-        const nachherLabel = paarDef.nachher.label || paarDef.caption
-        const vorherLabel = paarDef.vorher.label || paarDef.caption
-        const brName = row.name || brancheKey
-        const ergebnisPaar = await makePair({
-          branche: brancheKey,
-          nachherPrompt: [
-            `${nachherLabel}. ${brName}.`,
-            `Immaculate, clean, well-maintained result of professional work.`,
-            `Bright natural lighting, sharp details. 16:9 format.`,
-            `Photorealistic photography, shallow depth of field. No people, no text, no logos.`,
-          ].join(' '),
-          vorherPrompt: [
-            `Edit this exact scene, keep IDENTICAL room, objects, camera angle unchanged.`,
-            `Only change: ${vorherLabel}. Dirty, dusty, neglected, worn state. Muted colors, flat light.`,
-            `Same composition — only the condition changes. No text, no logos.`,
-          ].join(' '),
-          aspect: '16:9',
-          quelleOverride: 'demo_generiert',
-          kontext: `${kontext}:ergebnis-${i}`,
-        })
-        kostenCent += ergebnisPaar.nachher.kostenCent + ergebnisPaar.vorher.kostenCent
-        paarDef.nachher.datei = ergebnisPaar.nachher.publicUrl
-        paarDef.vorher.datei = ergebnisPaar.vorher.publicUrl
-      } catch (e) {
-        warnungen.push(`Ergebnis-Paar ${i + 1} fehlgeschlagen: ${(e as Error).message}`)
+      if (paarDef.nachher.datei && paarDef.vorher.datei) continue
+
+      for (let durchlauf = 1; durchlauf <= MAX_ASSET_DURCHLAEUFE; durchlauf++) {
+        try {
+          const nachherLabel = paarDef.nachher.label || paarDef.caption
+          const vorherLabel = paarDef.vorher.label || paarDef.caption
+          const brName = row.name || brancheKey
+          const ergebnisPaar = await makePair({
+            branche: brancheKey,
+            nachherPrompt: [
+              `${nachherLabel}. ${brName}.`,
+              `Immaculate, clean, well-maintained result of professional work.`,
+              `Bright natural lighting, sharp details. 16:9 format.`,
+              `Photorealistic photography, shallow depth of field. No people, no text, no logos.`,
+            ].join(' '),
+            vorherPrompt: [
+              `Edit this exact scene, keep IDENTICAL room, objects, camera angle unchanged.`,
+              `Only change: ${vorherLabel}. Dirty, dusty, neglected, worn state. Muted colors, flat light.`,
+              `Same composition — only the condition changes. No text, no logos.`,
+            ].join(' '),
+            aspect: '16:9',
+            quelleOverride: 'demo_generiert',
+            kontext: `${kontext}:ergebnis-${i}`,
+          })
+          kostenCent += ergebnisPaar.nachher.kostenCent + ergebnisPaar.vorher.kostenCent
+          paarDef.nachher.datei = ergebnisPaar.nachher.publicUrl
+          paarDef.vorher.datei = ergebnisPaar.vorher.publicUrl
+          break
+        } catch (e) {
+          warnungen.push(`Ergebnis-Paar ${i + 1} Durchlauf ${durchlauf} fehlgeschlagen: ${(e as Error).message}`)
+          if (durchlauf >= MAX_ASSET_DURCHLAEUFE) {
+            // Kein throw hier — Validierung am Ende fängt es
+          }
+        }
       }
     }
+  }
+
+  // Pflicht-Validierung: ALLE Asset-Slots müssen befüllt sein
+  const fehlend = fehlendePflichtSlots(config)
+  if (fehlend.length > 0) {
+    throw new Error(
+      `Asset-Generierung unvollständig nach ${MAX_ASSET_DURCHLAEUFE} Durchläufen + Bank-Fallback. ` +
+      `Fehlende Slots: ${fehlend.join(', ')}. Demo wurde NICHT gespeichert.`
+    )
   }
 
   if (kostenCent > DEMO_KOSTEN_LIMIT_CENT) {
