@@ -180,7 +180,7 @@ export class HiggsfieldProvider implements AssetProvider {
   }
 
   async generateVideo(o: GenerateVideoOptions): Promise<GeneratedVideo> {
-    const pfad = process.env.HIGGSFIELD_PATH_IMG2VID ?? '/bytedance/seedance/v1/pro/image-to-video'
+    const pfad = process.env.HIGGSFIELD_PATH_IMG2VID ?? '/higgsfield-ai/dop/standard'
 
     const anlage = await fetch(`${this.base}${pfad}`, {
       method: 'POST',
