@@ -61,6 +61,8 @@ export function flagshipCss(design: FlagshipDesign): string {
   --ak1:${t.akzent1};--ak1d:${t.akzent1_tief};--ak2:${t.akzent2};--line:${t.line};
   --tiefe:${tiefe};--flaeche:${flaeche};
   --shadow:${shadow};--r:${r};--w:${w};
+  --ak1-soft:rgba(${rgb(t.akzent1)},.12);--ak2-soft:rgba(${rgb(t.akzent2)},.12);
+  --glow:0 0 40px rgba(${rgb(t.akzent1)},.2);
   --sans:${sans};--serif:${serif};
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -309,9 +311,8 @@ footer .fl a{opacity:.7}footer .fl a:hover{opacity:1}
 .ribbon i{width:8px;height:8px;background:${hell ? 'var(--ak1)' : 'var(--ak2)'};border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-.rv{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.rv{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0) * 0.08s)}
 .rv.in{opacity:1;transform:none}
-.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   .rv{opacity:1;transform:none}
