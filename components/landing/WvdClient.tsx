@@ -2,6 +2,14 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
+
+const reveal = {
+  initial: { opacity: 0, y: 30 },
+  whileInView: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+  viewport: { once: true, margin: "-80px" },
+} as const;
 
 /* ═══════════════════════════════════════
    ROI CALCULATOR DATA
@@ -240,6 +248,7 @@ export default function WvdClient() {
             </h2>
           </div>
 
+          <motion.div {...reveal}>
           <div className="problem-bento">
             {[
               {
@@ -286,6 +295,7 @@ export default function WvdClient() {
               </div>
             ))}
           </div>
+          </motion.div>
 
           <div style={{ textAlign: "center", marginTop: 48 }}>
             <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "clamp(20px, 2.5vw, 28px)", fontStyle: "italic", color: "var(--blue)", fontVariationSettings: '"opsz" 144, "SOFT" 80', lineHeight: 1.3 }}>
@@ -359,6 +369,7 @@ export default function WvdClient() {
             </p>
           </div>
 
+          <motion.div {...reveal}>
           <div className="bento-grid">
             {/* Row 1: 2 wide cards */}
             <div className="bento-card wide">
@@ -462,6 +473,7 @@ export default function WvdClient() {
               </div>
             </div>
           </div>
+          </motion.div>
         </div>
       </section>
 
@@ -476,6 +488,7 @@ export default function WvdClient() {
             <p>Du kümmerst dich um deine Arbeit. Wir kümmern uns um deine Sichtbarkeit.</p>
           </div>
 
+          <motion.div {...reveal}>
           <div style={{ background: "var(--cream)", borderRadius: 24, border: "1px solid var(--border)", padding: "48px 40px 40px" }}>
             <div className="workflow-v2">
               {[
@@ -518,6 +531,7 @@ export default function WvdClient() {
               </div>
             </div>
           </div>
+          </motion.div>
         </div>
       </section>
 
@@ -724,6 +738,7 @@ export default function WvdClient() {
           </p>
 
           {/* Preview Cards */}
+          <motion.div {...reveal}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 48 }}>
             {[
               { name: "Grünwerk GaLaBau", result: "+340% Anfragen", stars: 5 },
@@ -751,6 +766,7 @@ export default function WvdClient() {
               </div>
             ))}
           </div>
+          </motion.div>
 
           <a href="/kundenmeinungen" className="btn btn-primary" style={{ fontSize: 16, padding: "18px 40px" }}>
             <span>Alle Kundenergebnisse ansehen →</span>
@@ -778,6 +794,7 @@ export default function WvdClient() {
           ═══════════════════════════════════════ */}
       <section style={{ padding: "96px 0" }}>
         <div className="container" style={{ maxWidth: 900 }}>
+          <motion.div {...reveal}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
             {/* Negative */}
             <div style={{
@@ -829,6 +846,7 @@ export default function WvdClient() {
               </ul>
             </div>
           </div>
+          </motion.div>
         </div>
       </section>
 
