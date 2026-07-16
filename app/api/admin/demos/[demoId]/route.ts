@@ -8,6 +8,8 @@ import {
   generateLibraryDemoConfig,
   type LibraryDemoConfig,
 } from '@/lib/pipeline/generate-library-content'
+import { generiereFlagshipDemo } from '@/lib/pipeline/generate-flagship-demo'
+import type { FlagshipConfig } from '@/lib/flagship/types'
 import { loadLibraryPage } from '@/lib/library/load'
 
 export const maxDuration = 120
@@ -66,6 +68,47 @@ export async function PATCH(
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ demo: updated })
+  }
+
+  // Neu generieren: Flagship-Engine
+  if (action === 'regenerate' && (demo.config as { engine?: string })?.engine === 'flagship') {
+    const alteConfig = demo.config as FlagshipConfig
+
+    const prospect = await collectProspectData({
+      firma: demo.prospect_name,
+      ort: alteConfig.meta.ort,
+      branche: demo.branche,
+      websiteUrl: demo.prospect_website,
+      notizen: demo.notes,
+    })
+
+    let ergebnis
+    try {
+      ergebnis = await generiereFlagshipDemo(prospect, demo.branche!)
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : 'Flagship-Regenerierung fehlgeschlagen' },
+        { status: 500 }
+      )
+    }
+
+    const { data: updated, error } = await supabase
+      .from('demos')
+      .update({
+        config: ergebnis.config,
+        scraped_data: prospect,
+        status: 'GENERIERT',
+        kosten_cent: ergebnis.kostenCent,
+        asset_meta: ergebnis.assetMeta,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', params.demoId)
+      .select()
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    const warning = ergebnis.warnungen.length > 0 ? ergebnis.warnungen.join(' · ') : null
+    return NextResponse.json({ demo: updated, warning })
   }
 
   // Neu generieren (Library-Engine, Pipeline v2): Datenkette komplett neu durchlaufen
