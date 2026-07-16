@@ -74,6 +74,7 @@ export default function DemosPage() {
   const [typoModus, setTypoModus] = useState<'sans_bold_hell' | 'serif_warm_dunkel' | ''>('')
   const [brandfarbe, setBrandfarbe] = useState('')
   const [paket, setPaket] = useState<'starter' | 'business' | 'growth'>('business')
+  const [scrollAnimationen, setScrollAnimationen] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [warning, setWarning] = useState<string | null>(null)
@@ -130,6 +131,7 @@ export default function DemosPage() {
           ort: ort.trim() || null,
           notes: notes.trim() || null,
           paket,
+          scrollAnimationen,
           ...(typoModus ? { typoModus } : {}),
           ...(brandfarbe ? { brandfarbe } : {}),
         }
@@ -171,6 +173,7 @@ export default function DemosPage() {
       setNotes('')
       setTypoModus('')
       setBrandfarbe('')
+      setScrollAnimationen(false)
       setDemos((prev) => [data.demo, ...prev])
       window.open(`/demo/${data.demo.share_token}`, '_blank')
     } catch {
@@ -354,7 +357,7 @@ export default function DemosPage() {
           </div>
 
           {templateId.startsWith('flagship:') && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
               <div>
                 <label style={labelStyle}>Paket</label>
                 <div style={{ display: 'flex', gap: '6px' }}>
@@ -396,6 +399,14 @@ export default function DemosPage() {
                     </button>
                   )}
                 </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Extras</label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: scrollAnimationen ? 'rgba(212,168,40,0.08)' : 'rgba(255,255,255,0.7)', border: `1px solid ${scrollAnimationen ? 'var(--za-gold)' : 'var(--za-border)'}`, borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: 'var(--za-fg-2)', transition: '.15s' }}>
+                  <input type="checkbox" checked={scrollAnimationen} onChange={(e) => setScrollAnimationen(e.target.checked)}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--za-gold)' }} disabled={generating} />
+                  Scroll-Animationen (Premium)
+                </label>
               </div>
             </div>
           )}

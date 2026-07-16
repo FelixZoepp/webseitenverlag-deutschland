@@ -94,8 +94,9 @@ const FRAGEN: { key: keyof Antworten; frage: string; optionen: string[] }[] = [
     frage: "Welche Features sind Ihnen wichtig?",
     optionen: [
       "Standard-Website — sauber und professionell",
-      "Mit Animationen & Video-Header — richtig premium",
-      "Volle Ausstattung — SEO, Animationen, Terminbuchung",
+      "Mit Video-Header & sanften Animationen — premium",
+      "Volle Ausstattung — SEO, Video, Terminbuchung",
+      "Krasse Scroll-Animationen — richtig auffällig & interaktiv",
     ],
   },
 ];
@@ -270,11 +271,13 @@ export default function FunnelPage() {
             </p>
             {antworten.extras && (
               <p className="mt-4 rounded-xl bg-[var(--blue)]/5 px-6 py-3 text-[14px] text-[var(--blue-2)]">
-                {antworten.extras.includes("Volle Ausstattung")
-                  ? "Basierend auf Ihren Wünschen bereiten wir Ihnen unser Growth-Paket vor — mit SEO, Animationen & Terminbuchung."
-                  : antworten.extras.includes("Video-Header")
-                    ? "Basierend auf Ihren Wünschen bereiten wir Ihnen unser Business-Paket mit Premium-Animationen vor."
-                    : "Wir bereiten Ihnen einen sauberen, professionellen Entwurf vor."}
+                {antworten.extras.includes("Krasse Scroll")
+                  ? "Wow — Sie wollen das volle Programm! Wir bereiten ein individuelles Konzept mit interaktiven Scroll-Animationen vor."
+                  : antworten.extras.includes("Volle Ausstattung")
+                    ? "Basierend auf Ihren Wünschen bereiten wir Ihnen unser Growth-Paket vor — mit SEO, Video & Terminbuchung."
+                    : antworten.extras.includes("Video-Header")
+                      ? "Basierend auf Ihren Wünschen bereiten wir Ihnen unser Business-Paket mit Premium-Animationen vor."
+                      : "Wir bereiten Ihnen einen sauberen, professionellen Entwurf vor."}
               </p>
             )}
           </div>
