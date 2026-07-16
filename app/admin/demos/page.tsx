@@ -305,6 +305,20 @@ export default function DemosPage() {
     finally { setEditBusy(null) }
   }
 
+  async function handleGenerateCustomAssets(demoId: string) {
+    if (busyId) return
+    setBusyId(demoId)
+    setError(null)
+    try {
+      const res = await fetch(`/api/admin/demos/${demoId}/generate-assets`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Asset-Generierung fehlgeschlagen'); return }
+      if (data.warnungen?.length) setWarning(data.warnungen.join(' · '))
+      loadDemos()
+    } catch { setError('Netzwerkfehler') }
+    finally { setBusyId(null) }
+  }
+
   async function handleDelete(demo: Demo) {
     if (busyId) return
     if (!window.confirm(`Demo für "${demo.prospect_name}" wirklich löschen?`)) return
@@ -554,6 +568,12 @@ export default function DemosPage() {
                       <button onClick={() => handleStatus(demo, 'VERSENDET')} disabled={busy} title="Als versendet markieren"
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', background: 'rgba(255,255,255,0.65)', border: '1px solid var(--za-border)', borderRadius: '7px', cursor: 'pointer', color: 'var(--za-fg-3)' }}>
                         <Send style={{ width: '13px', height: '13px' }} />
+                      </button>
+                    )}
+                    {(demo as unknown as { config?: { engine?: string } }).config?.engine === 'custom' && (
+                      <button onClick={() => handleGenerateCustomAssets(demo.id)} disabled={busy} title="Bilder + Video generieren (Higgsfield)"
+                        style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', background: 'rgba(255,255,255,0.65)', border: '1px solid var(--za-border)', borderRadius: '7px', fontSize: '10px', fontWeight: 600, cursor: busy ? 'wait' : 'pointer', color: 'var(--za-fg-2)', fontFamily: 'inherit', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                        <Image style={{ width: '12px', height: '12px' }} /> {busy ? 'Generiert…' : 'Assets'}
                       </button>
                     )}
                     {(demo as unknown as { config?: { engine?: string } }).config?.engine === 'flagship' && (
