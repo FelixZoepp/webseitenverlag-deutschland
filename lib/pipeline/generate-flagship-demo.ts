@@ -296,9 +296,12 @@ export async function generiereFlagshipDemo(
   const styleProfil = gespeichert?.profil
   const kontext = `demo:${brancheKey}:${prospect.firma}`
   for (let durchlauf = 1; durchlauf <= MAX_ASSET_DURCHLAEUFE; durchlauf++) {
-    // Hero nur generieren wenn noch nicht vorhanden
+    // Prompts vorbereiten
+    let heroPrompt: string | null = null
+    let nachherPrompt: string | null = null
+    let vorherPrompt: string | null = null
+
     if (!config.inhalte.hero.media.datei) {
-      let heroPrompt: string
       if (styleProfil?.style_prompts) {
         heroPrompt = baueAssetPrompt(styleProfil, styleProfil.style_prompts.szenen.hero)
       } else {
@@ -313,59 +316,9 @@ export async function generiereFlagshipDemo(
           `Photorealistic editorial photography. No text, no logos, no watermarks, no recognizable people.`,
         ].join(' ')
       }
-
-      try {
-        const hero = await generiereAsset({
-          prompt: heroPrompt,
-          aspect: '16:9',
-          branche: brancheKey,
-          szeneTyp: 'hero',
-          quelleOverride: 'demo_generiert',
-          kontext,
-        })
-        kostenCent += hero.kostenCent
-        config.inhalte.hero.media.datei = hero.publicUrl
-        assetMeta.hero = { id: hero.id, quelle: 'frisch' }
-
-        // Video-Hero (optional, Fehler = Warning)
-        try {
-          let videoPrompt: string
-          if (styleProfil?.style_prompts) {
-            videoPrompt = baueVideoPrompt(styleProfil)
-          } else {
-            const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
-            const brancheName = row.name || brancheKey
-            const branchenBewegung = VIDEO_PROMPTS[brancheKey] || `Subtle ambient motion fitting for ${brancheName}: light reflections shifting on surfaces, gentle material movement, dust particles in light.`
-            videoPrompt = [
-              `Cinematic 4K, completely static tripod camera, zero camera movement.`,
-              `Close-up scene: ${heroLabel}. ${brancheName} environment.`,
-              branchenBewegung,
-              `Seamless 5-second loop, calm and premium. No face visible, no person looking at camera. No text, no logos.`,
-            ].join(' ')
-          }
-          const video = await generiereVideo({
-            imageUrl: hero.publicUrl,
-            prompt: videoPrompt,
-            durationSeconds: 6,
-            kontext: `video:${kontext}`,
-          })
-          if (video.videoUrl) {
-            kostenCent += video.kostenCent
-            config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl }
-            assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
-          }
-        } catch (e) {
-          warnungen.push(`Video-Hero fehlgeschlagen (Bild-Hero bleibt): ${(e as Error).message}`)
-        }
-      } catch (e) {
-        warnungen.push(`Hero-Generierung Durchlauf ${durchlauf} fehlgeschlagen: ${(e as Error).message}`)
-      }
     }
 
-    // Signature-Paar nur generieren wenn noch nicht vorhanden
     if (!config.inhalte.signature.nachher.datei || !config.inhalte.signature.vorher.datei) {
-      let nachherPrompt: string
-      let vorherPrompt: string
       if (styleProfil?.style_prompts) {
         nachherPrompt = baueAssetPrompt(styleProfil, styleProfil.style_prompts.szenen.signature_nachher)
         vorherPrompt = styleProfil.style_prompts.szenen.signature_vorher
@@ -388,24 +341,82 @@ export async function generiereFlagshipDemo(
           `Same exact composition and framing — only the cleanliness/condition changes. No text, no logos.`,
         ].join(' ')
       }
+    }
 
-      try {
-        const paar = await makePair({
+    // Hero + Signature PARALLEL generieren (wie vor dem Refactor)
+    const aufgaben: Promise<void>[] = []
+
+    if (heroPrompt) {
+      aufgaben.push(
+        generiereAsset({
+          prompt: heroPrompt,
+          aspect: '16:9',
+          branche: brancheKey,
+          szeneTyp: 'hero',
+          quelleOverride: 'demo_generiert',
+          kontext,
+        }).then(async (hero) => {
+          kostenCent += hero.kostenCent
+          config.inhalte.hero.media.datei = hero.publicUrl
+          assetMeta.hero = { id: hero.id, quelle: 'frisch' }
+
+          // Video-Hero (optional, Fehler = Warning)
+          try {
+            let videoPrompt: string
+            if (styleProfil?.style_prompts) {
+              videoPrompt = baueVideoPrompt(styleProfil)
+            } else {
+              const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
+              const brancheName = row.name || brancheKey
+              const branchenBewegung = VIDEO_PROMPTS[brancheKey] || `Subtle ambient motion fitting for ${brancheName}: light reflections shifting on surfaces, gentle material movement, dust particles in light.`
+              videoPrompt = [
+                `Cinematic 4K, completely static tripod camera, zero camera movement.`,
+                `Close-up scene: ${heroLabel}. ${brancheName} environment.`,
+                branchenBewegung,
+                `Seamless 5-second loop, calm and premium. No face visible, no person looking at camera. No text, no logos.`,
+              ].join(' ')
+            }
+            const video = await generiereVideo({
+              imageUrl: hero.publicUrl,
+              prompt: videoPrompt,
+              durationSeconds: 6,
+              kontext: `video:${kontext}`,
+            })
+            if (video.videoUrl) {
+              kostenCent += video.kostenCent
+              config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl }
+              assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
+            }
+          } catch (e) {
+            warnungen.push(`Video-Hero fehlgeschlagen (Bild-Hero bleibt): ${(e as Error).message}`)
+          }
+        }).catch((e: Error) => {
+          warnungen.push(`Hero-Generierung Durchlauf ${durchlauf} fehlgeschlagen: ${e.message}`)
+        })
+      )
+    }
+
+    if (nachherPrompt && vorherPrompt) {
+      aufgaben.push(
+        makePair({
           branche: brancheKey,
           nachherPrompt,
           vorherPrompt,
           aspect: '16:9',
           quelleOverride: 'demo_generiert',
           kontext,
+        }).then((paar) => {
+          kostenCent += paar.nachher.kostenCent + paar.vorher.kostenCent
+          config.inhalte.signature.nachher.datei = paar.nachher.publicUrl
+          config.inhalte.signature.vorher.datei = paar.vorher.publicUrl
+          assetMeta.paar = { pair_id: paar.pairId, asset_ids: [paar.nachher.id, paar.vorher.id], quelle: 'frisch' }
+        }).catch((e: Error) => {
+          warnungen.push(`Signature-Paar Durchlauf ${durchlauf} fehlgeschlagen: ${e.message}`)
         })
-        kostenCent += paar.nachher.kostenCent + paar.vorher.kostenCent
-        config.inhalte.signature.nachher.datei = paar.nachher.publicUrl
-        config.inhalte.signature.vorher.datei = paar.vorher.publicUrl
-        assetMeta.paar = { pair_id: paar.pairId, asset_ids: [paar.nachher.id, paar.vorher.id], quelle: 'frisch' }
-      } catch (e) {
-        warnungen.push(`Signature-Paar Durchlauf ${durchlauf} fehlgeschlagen: ${(e as Error).message}`)
-      }
+      )
     }
+
+    if (aufgaben.length > 0) await Promise.all(aufgaben)
 
     // Prüfen ob Hero + Signature komplett sind → früh raus
     if (config.inhalte.hero.media.datei && config.inhalte.signature.nachher.datei && config.inhalte.signature.vorher.datei) {
@@ -471,10 +482,8 @@ export async function generiereFlagshipDemo(
           paarDef.vorher.datei = ergebnisPaar.vorher.publicUrl
           break
         } catch (e) {
+          // Kein throw — Pflicht-Validierung am Ende fängt fehlende Slots
           warnungen.push(`Ergebnis-Paar ${i + 1} Durchlauf ${durchlauf} fehlgeschlagen: ${(e as Error).message}`)
-          if (durchlauf >= MAX_ASSET_DURCHLAEUFE) {
-            // Kein throw hier — Validierung am Ende fängt es
-          }
         }
       }
     }
