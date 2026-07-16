@@ -6,6 +6,9 @@ import { loadLibraryPage } from '@/lib/library/load'
 import type { LibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
 import { renderFlagshipPage } from '@/lib/flagship/render'
 import type { FlagshipConfig } from '@/lib/flagship/types'
+import { inlineEditorScript } from '@/lib/demo-editor'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 // RLS erlaubt nur Admins — die öffentliche Demo-Ansicht läuft über den Service-Role-Key
 const supabase = createClient(
@@ -39,11 +42,13 @@ function demoBar(prospectName: string): string {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: { token: string } }
 ) {
   const token = params.token
   if (!token || token.length > 100) return notFoundPage('Dieser Demo-Link ist ungültig.')
+  const url = new URL(request.url)
+  const editMode = url.searchParams.has('edit')
 
   const { data: demo } = await supabase
     .from('demos')
@@ -64,11 +69,35 @@ export async function GET(
   const istLibrary = engine === 'library'
   const istFlagship = engine === 'flagship'
 
+  // Admin-Check für Edit-Modus
+  let isAdmin = false
+  if (editMode) {
+    try {
+      const cookieStore = cookies()
+      const authClient = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { cookies: { get: (name) => cookieStore.get(name)?.value } }
+      )
+      const { data: { user } } = await authClient.auth.getUser()
+      if (user) {
+        const { data: customer } = await authClient.from('customers').select('role').eq('user_id', user.id).single()
+        isAdmin = customer?.role === 'admin'
+      }
+    } catch { /* nicht eingeloggt → kein Editor */ }
+  }
+
+  function injectEditor(pageHtml: string): string {
+    if (!isAdmin) return pageHtml
+    const editorCode = inlineEditorScript(demo!.id)
+    return pageHtml.replace('</body>', editorCode + '\n</body>')
+  }
+
   let html: string
 
   // Custom-HTML-Demos (z. B. Animations-Flagships wie Padel)
   if (engine === 'custom' && typeof (demo.config as { html?: string }).html === 'string') {
-    html = (demo.config as { html: string }).html
+    html = injectEditor((demo.config as { html: string }).html)
     await supabase
       .from('demos')
       .update({ view_count: (demo.view_count ?? 0) + 1, last_viewed_at: new Date().toISOString() })
@@ -81,11 +110,16 @@ export async function GET(
 
   if (istFlagship) {
     try {
-      // Flagship bringt Ribbon + noindex selbst mit — keine Demo-Bar-Injektion nötig
-      html = renderFlagshipPage(demo.config as unknown as FlagshipConfig, {
-        demo: true,
-        basisPfad: `/demo/${token}`,
-      })
+      // Wenn ein HTML-Override vom Inline-Editor existiert, direkt rendern
+      const htmlOverride = (demo.config as { _html_override?: string })._html_override
+      if (htmlOverride) {
+        html = injectEditor(htmlOverride)
+      } else {
+        html = injectEditor(renderFlagshipPage(demo.config as unknown as FlagshipConfig, {
+          demo: true,
+          basisPfad: `/demo/${token}`,
+        }))
+      }
     } catch (err) {
       console.error(`Demo-Render fehlgeschlagen (flagship, demo ${demo.id}):`, err)
       return notFoundPage('Die Demo konnte nicht geladen werden.')

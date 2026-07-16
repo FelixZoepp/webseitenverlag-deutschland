@@ -332,5 +332,36 @@ export async function PATCH(
     return NextResponse.json({ error: `Unbekannter Slot "${slot}" — erlaubt: hero, signature, ergebnis-0, ergebnis-1, …` }, { status: 400 })
   }
 
+  // ── Inline-Editor: HTML direkt speichern ──
+  if (action === 'save-html') {
+    const newHtml = typeof body?.html === 'string' ? body.html : ''
+    if (!newHtml || newHtml.length < 100) {
+      return NextResponse.json({ error: 'HTML zu kurz oder fehlt' }, { status: 400 })
+    }
+    if (newHtml.length > 500000) {
+      return NextResponse.json({ error: 'HTML zu groß (max 500 KB)' }, { status: 400 })
+    }
+
+    const engine = (demo.config as { engine?: string })?.engine
+    let newConfig: Record<string, unknown>
+    if (engine === 'custom') {
+      newConfig = { engine: 'custom', html: newHtml }
+    } else if (engine === 'flagship') {
+      // Flagship: HTML nicht direkt speichern, stattdessen als custom-override
+      newConfig = { ...(demo.config as Record<string, unknown>), _html_override: newHtml }
+    } else {
+      return NextResponse.json({ error: 'save-html nur für Flagship/Custom-Demos' }, { status: 400 })
+    }
+
+    const { data: updated, error } = await supabase
+      .from('demos')
+      .update({ config: newConfig, updated_at: new Date().toISOString() })
+      .eq('id', params.demoId)
+      .select()
+      .single()
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ demo: updated })
+  }
+
   return NextResponse.json({ error: 'Ungültige Aktion' }, { status: 400 })
 }
