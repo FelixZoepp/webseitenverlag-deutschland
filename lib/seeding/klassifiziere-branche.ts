@@ -20,7 +20,7 @@ const KlassifizierungSchema = z.object({
   meta_kategorie: z.enum(KATEGORIE_KEYS),
   beschreibung: z.string().min(40).max(500),
   sicherheit: z.enum(['sicher', 'unsicher']),
-  begruendung: z.string().max(300),
+  begruendung: z.string().max(600),
 })
 
 function parseJson(text: string): unknown {
