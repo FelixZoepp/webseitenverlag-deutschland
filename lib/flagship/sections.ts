@@ -94,7 +94,7 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
         ${chips}
       </div>
     </div>
-    <div class="hero-media rv in d1">
+    <div class="hero-media rv in" style="--i:1">
       ${mediaSlot(hero.media, 'frame')}
       <div class="stat-card sc1"><b>${esc(hero.stat1.wert)}</b><small>${esc(hero.stat1.label)}</small></div>
       <div class="stat-card sc2"><b>${esc(hero.stat2.wert)}</b><small>${esc(hero.stat2.label)}</small></div>
@@ -118,13 +118,13 @@ export function renderFakten(fakten: FaktenInhalt): string {
 export function renderEmpathie(e: EmpathieInhalt): string {
   let rechts: string
   if (e.variante === 'zitat' && e.zitat) {
-    rechts = `<blockquote class="rv d1">
+    rechts = `<blockquote class="rv" style="--i:1">
       ${esc(e.zitat.text)}
       <cite>— ${esc(e.zitat.cite)}</cite>
     </blockquote>`
   } else {
     const items = (e.situationen || [])
-      .map((s, i) => `<div class="rv${i > 0 ? ` d${Math.min(i, 3)}` : ''}">${icon('check', 2)}${esc(s)}</div>`)
+      .map((s, i) => `<div class="rv" style="--i:${i}">${icon('check', 2)}${esc(s)}</div>`)
       .join('\n      ')
     rechts = `<div class="situations">
       ${items}
@@ -165,14 +165,13 @@ export function renderSignature(sig: SignatureInhalt): string {
 }
 
 export function renderLeistungen(l: LeistungenInhalt): string {
-  const delays = ['', ' d1', ' d2']
   const karten = l.karten
     .map((k, i) => {
       const kopf = l.stil === 'nummern'
         ? `<span class="no">${esc(k.no || '')}</span>`
         : `<div class="ic">${icon(k.icon || 'sparkle')}</div>`
       const link = k.link_label ? `\n        <span class="fp">${esc(k.link_label)}</span>` : ''
-      return `<div class="card rv${delays[i % 3]}">
+      return `<div class="card rv" style="--i:${i}">
         ${kopf}
         <h3>${esc(k.titel)}</h3>
         <p>${esc(k.text)}</p>${link}
@@ -212,7 +211,7 @@ export function renderAblauf(a: AblaufInhalt): string {
       <div class="proz-line" id="prozLine" style="width:0%"></div>
       ${steps}
     </div>
-    <div class="proz-card rv d1" id="prozCard">
+    <div class="proz-card rv" style="--i:1" id="prozCard">
       <div class="ic">${icon(erster.icon)}</div>
       <h3>${esc(erster.titel)}</h3>
       <p>${esc(erster.text)}</p>
@@ -228,7 +227,7 @@ export function renderErgebnisse(e: ErgebnisseInhalt): string {
   if (e.variante === 'ba_slider') {
     inhalt = `<div class="ba-grid">
       ${(e.paare || [])
-        .map((p, i) => `<figure class="ba rv${i > 0 ? ' d1' : ''}" data-ba>
+        .map((p, i) => `<figure class="ba rv" style="--i:${i}" data-ba>
         ${mediaSlot(p.vorher, 'lay before')}
         ${mediaSlot(p.nachher, 'lay after')}
         <div class="handle"><div class="knob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M8 7l-4 5 4 5M16 7l4 5-4 5"/></svg></div></div>
@@ -237,10 +236,9 @@ export function renderErgebnisse(e: ErgebnisseInhalt): string {
         .join('\n      ')}
     </div>`
   } else {
-    const delays = ['', ' d1', ' d2']
     inhalt = `<div class="gal">
       ${(e.bilder || [])
-        .map((b, i) => `<figure class="rv${delays[i % 3]} media" data-label="${escAttr(b.media.label)}">
+        .map((b, i) => `<figure class="rv media" style="--i:${i}" data-label="${escAttr(b.media.label)}">
         ${b.media.datei ? `<img src="${escAttr(b.media.datei)}" alt="${escAttr(b.media.alt || b.media.label)}" onload="this.parentElement.classList.add('loaded')" onerror="this.remove()">` : ''}
         <figcaption>${esc(b.caption)}</figcaption>
       </figure>`)
@@ -260,14 +258,13 @@ export function renderErgebnisse(e: ErgebnisseInhalt): string {
 }
 
 export function renderZahlen(z: ZahlenInhalt): string {
-  const delays = ['', ' d1', ' d2', ' d3']
   const items = z.items
     .map((it, i) => {
       const wert = typeof it.wert === 'number'
         ? `<span data-count="${it.wert}">${it.start ?? 0}</span>`
         : esc(it.wert)
       const suffix = it.suffix ? `<em>${esc(it.suffix)}</em>` : ''
-      return `<div class="z rv${delays[i % 4]}"><b>${it.prefix ? esc(it.prefix) : ''}${wert}${suffix}</b><small>${esc(it.label)}</small></div>`
+      return `<div class="z rv" style="--i:${i}"><b>${it.prefix ? esc(it.prefix) : ''}${wert}${suffix}</b><small>${esc(it.label)}</small></div>`
     })
     .join('\n    ')
   return `<!-- sektion:zahlen -->
@@ -279,9 +276,8 @@ export function renderZahlen(z: ZahlenInhalt): string {
 }
 
 export function renderStimmen(s: StimmenInhalt): string {
-  const delays = ['', ' d1', ' d2']
   const quotes = s.quotes
-    .map((q, i) => `<div class="quote rv${delays[i % 3]}">
+    .map((q, i) => `<div class="quote rv" style="--i:${i}">
         <span class="stars">★★★★★</span>
         <p>${esc(q.text)}</p>
         <div class="who"><span class="av">${esc(q.initialen)}</span><span><b>${esc(q.name)}</b><small>${esc(q.meta)}</small></span></div>
@@ -303,13 +299,12 @@ export function renderStimmen(s: StimmenInhalt): string {
 
 export function renderLokal(l: LokalInhalt): string {
   if (l.variante === 'info') {
-    const delays = ['', ' d1', ' d2']
     const infos = (l.infos || [])
       .map((inf, i) => {
         const text = inf.telefon_link
           ? `<a href="tel:${escAttr(inf.telefon_link)}">${esc(inf.text)}</a>`
           : esc(inf.text)
-        return `<div class="rv${delays[i % 3]}">${icon(inf.icon)}<span><b>${esc(inf.titel)}</b>${text}</span></div>`
+        return `<div class="rv" style="--i:${i}">${icon(inf.icon)}<span><b>${esc(inf.titel)}</b>${text}</span></div>`
       })
       .join('\n      ')
     return `<!-- sektion:lokal -->
@@ -333,9 +328,9 @@ export function renderLokal(l: LokalInhalt): string {
       <span class="eyebrow">${esc(l.eyebrow)}</span>
       <h2>${hl(l.headline)}</h2>
     </div>
-    <div class="bezirke rv d1">
+    <div class="bezirke rv" style="--i:1">
       ${chips}
-    </div>${l.note ? `\n    <p class="lokal-note rv d2">${esc(l.note)}</p>` : ''}
+    </div>${l.note ? `\n    <p class="lokal-note rv" style="--i:2">${esc(l.note)}</p>` : ''}
   </div>
 </section>`
 }
@@ -381,7 +376,7 @@ export function renderConversion(c: ConversionInhalt, hell: boolean, funnelUrl: 
         ${trust}
       </div>
     </div>
-    <div class="konv-card rv d1">
+    <div class="konv-card rv" style="--i:1">
       <h3>${esc(funnelLabel)}</h3>
       <p>Ein paar kurze Fragen – dauert keine zwei Minuten.</p>
       <a class="${ctaKlasse}" href="${escAttr(funnelUrl)}">${esc(c.cta_label)} <span class="arr">→</span></a>${tel}
