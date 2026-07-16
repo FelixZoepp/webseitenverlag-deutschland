@@ -8,6 +8,8 @@ export interface PackageDefinition {
   label: string
   maxPages: number
   features: string[]
+  /** Kurzbeschreibung für den Stripe-Checkout (max ~200 Zeichen) */
+  stripeDescription: string
   seoLevel: 'basic' | 'local' | 'advanced'
   schemaOrg: boolean
   seoArticles: number
@@ -32,6 +34,7 @@ export const PACKAGES: PackageDefinition[] = [
       'Spam-Schutz',
       'DSGVO-Paket (Impressum, Datenschutz, Cookie-Banner)',
     ],
+    stripeDescription: 'Professionelle One-Pager-Website mit eigener Domain, Hosting, KI-Editor, Kontaktformular, DSGVO-Paket & mobilem Design.',
     seoLevel: 'basic',
     schemaOrg: false,
     seoArticles: 0,
@@ -52,6 +55,7 @@ export const PACKAGES: PackageDefinition[] = [
       'Strukturierte Daten (Schema.org LocalBusiness)',
       'Erweiterte Templates',
     ],
+    stripeDescription: 'Alles aus Starter + bis zu 5 Unterseiten, lokales SEO-Setup (Stadt + Branche), strukturierte Daten für Google & erweiterte Design-Templates.',
     seoLevel: 'local',
     schemaOrg: true,
     seoArticles: 0,
@@ -71,6 +75,7 @@ export const PACKAGES: PackageDefinition[] = [
       'Programmatische Landing-Pages',
       'Monatlicher Performance-Report',
     ],
+    stripeDescription: 'Das Komplettpaket: bis zu 10 Unterseiten, 4 SEO-Artikel/Monat, automatische Landing-Pages, Video-Header, Performance-Reports & Priority-Support.',
     seoLevel: 'advanced',
     schemaOrg: true,
     seoArticles: 4,

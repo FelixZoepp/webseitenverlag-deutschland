@@ -56,7 +56,7 @@ export async function createDemoCheckoutSession(params: {
           unit_amount: pkg.price * 100,
           product_data: {
             name: `Website-Paket ${pkg.name} — ${params.prospectName}`,
-            description: `Professionelle Website inkl. Hosting, KI-Editor & Support (${pkg.price} €/Monat)`,
+            description: pkg.stripeDescription,
           },
         },
       },
@@ -72,7 +72,7 @@ export async function createDemoCheckoutSession(params: {
       },
     },
     success_url: `${APP_URL}/willkommen?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${APP_URL}/willkommen?abgebrochen=1`,
+    cancel_url: `${APP_URL}/`,
   })
 
   if (!session.url) throw new Error('Stripe hat keine Checkout-URL zurückgegeben')
