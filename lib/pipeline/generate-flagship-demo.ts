@@ -311,20 +311,39 @@ export async function generiereFlagshipDemo(
       warnungen.push(`Signature-Paar fehlgeschlagen: ${(paarErgebnis.reason as Error).message}`)
     }
   } else {
-    // Flagship-Branche ohne style_prompts: Hero-Prompt aus dem Media-Label ableiten
+    // Flagship-Branche ohne style_prompts: Prompts aus den Vorlagen-Inhalten ableiten
     const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
-    const genericHeroPrompt = `Professional close-up photography, ${heroLabel}, shallow depth of field, warm natural lighting, high-end commercial quality, subject positioned on the right half of the frame. No text, no logos.`
-    const genericVideoPrompt = 'Cinematic 4K quality, completely static camera, no camera movement, subtle natural ambient motion, gentle light shifts, seamless loop feeling. No people looking at camera, no text, no logos.'
+    const sigVorherLabel = config.inhalte.signature.vorher.label || config.inhalte.signature.tag_vorher
+    const sigNachherLabel = config.inhalte.signature.nachher.label || config.inhalte.signature.tag_nachher
+    const brancheName = row.name || brancheKey
 
-    try {
-      const hero = await generiereAsset({
-        prompt: genericHeroPrompt,
+    const heroPrompt = `Professional close-up photography of ${heroLabel}. Industry: ${brancheName}. Shallow depth of field, warm natural lighting, high-end commercial quality, subject positioned on the right half of the frame. No text, no logos, no people looking at camera.`
+    const videoPrompt = `Cinematic 4K quality, completely static camera, no camera movement. Scene: ${heroLabel}. Subtle natural ambient motion fitting for ${brancheName} — gentle light shifts, material textures, atmospheric details. Seamless loop feeling. No people looking at camera, no text, no logos.`
+    const nachherPrompt = `Professional photography: ${sigNachherLabel}. Industry: ${brancheName}. Clean, bright, well-maintained result. Warm natural lighting, sharp detail. No text, no logos.`
+    const vorherPrompt = `Same scene as reference image but showing: ${sigVorherLabel}. Neglected, dirty, or worn state. Muted colors, less appealing. No text, no logos.`
+
+    // Hero + Signature-Paar parallel generieren
+    const [heroErgebnis, paarErgebnis] = await Promise.allSettled([
+      generiereAsset({
+        prompt: heroPrompt,
         aspect: '16:9',
         branche: brancheKey,
         szeneTyp: 'hero',
         quelleOverride: 'demo_generiert',
         kontext,
-      })
+      }),
+      makePair({
+        branche: brancheKey,
+        nachherPrompt,
+        vorherPrompt,
+        aspect: '4:3',
+        quelleOverride: 'demo_generiert',
+        kontext,
+      }),
+    ])
+
+    if (heroErgebnis.status === 'fulfilled') {
+      const hero = heroErgebnis.value
       kostenCent += hero.kostenCent
       config.inhalte.hero.media.datei = hero.publicUrl
       assetMeta.hero = { id: hero.id, quelle: 'frisch' }
@@ -333,7 +352,7 @@ export async function generiereFlagshipDemo(
       try {
         const video = await generiereVideo({
           imageUrl: hero.publicUrl,
-          prompt: genericVideoPrompt,
+          prompt: videoPrompt,
           durationSeconds: 6,
           kontext: `video:${kontext}`,
         })
@@ -345,8 +364,18 @@ export async function generiereFlagshipDemo(
       } catch (e) {
         warnungen.push(`Video-Hero fehlgeschlagen (Bild-Hero bleibt): ${(e as Error).message}`)
       }
-    } catch (e) {
-      warnungen.push(`Hero-Generierung (Flagship-Fallback) fehlgeschlagen: ${(e as Error).message}`)
+    } else {
+      warnungen.push(`Hero-Generierung fehlgeschlagen: ${(heroErgebnis.reason as Error).message}`)
+    }
+
+    if (paarErgebnis.status === 'fulfilled') {
+      const paar = paarErgebnis.value
+      kostenCent += paar.nachher.kostenCent + paar.vorher.kostenCent
+      config.inhalte.signature.nachher.datei = paar.nachher.publicUrl
+      config.inhalte.signature.vorher.datei = paar.vorher.publicUrl
+      assetMeta.paar = { pair_id: paar.pairId, asset_ids: [paar.nachher.id, paar.vorher.id], quelle: 'frisch' }
+    } else {
+      warnungen.push(`Signature-Paar fehlgeschlagen: ${(paarErgebnis.reason as Error).message}`)
     }
   }
 
