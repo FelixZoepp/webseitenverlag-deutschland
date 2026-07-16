@@ -481,7 +481,7 @@ export default function DemosPage() {
                             : <><Euro style={{ width: '12px', height: '12px' }} /> {demo.paket ? `Zahlung (${demo.paket})` : 'Zahlung'}</>}
                         </button>
                         {paymentMenuId === demo.id && (
-                          <div style={{ position: 'absolute', top: '36px', right: 0, zIndex: 50, background: '#fff', border: '1px solid var(--za-border)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', padding: '6px', minWidth: '220px' }}>
+                          <div style={{ position: 'absolute', top: '36px', right: 0, zIndex: 9999, background: '#fff', border: '1px solid var(--za-border)', borderRadius: '10px', boxShadow: '0 12px 32px rgba(0,0,0,0.18)', padding: '6px', minWidth: '220px' }}>
                             {demo.payment_link_url && (
                               <button onClick={() => { handleCopyPaymentLink(demo); setPaymentMenuId(null) }}
                                 style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '8px 12px', background: 'none', border: 'none', borderRadius: '7px', fontSize: '12px', cursor: 'pointer', color: 'var(--za-fg-2)', fontFamily: 'inherit', textAlign: 'left' }}>
