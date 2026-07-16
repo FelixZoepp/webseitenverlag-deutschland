@@ -311,7 +311,43 @@ export async function generiereFlagshipDemo(
       warnungen.push(`Signature-Paar fehlgeschlagen: ${(paarErgebnis.reason as Error).message}`)
     }
   } else {
-    warnungen.push('Keine style_prompts im Profil (Flagship-Branche) — Bank-Fallback')
+    // Flagship-Branche ohne style_prompts: Hero-Prompt aus dem Media-Label ableiten
+    const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
+    const genericHeroPrompt = `Professional close-up photography, ${heroLabel}, shallow depth of field, warm natural lighting, high-end commercial quality, subject positioned on the right half of the frame. No text, no logos.`
+    const genericVideoPrompt = 'Cinematic 4K quality, completely static camera, no camera movement, subtle natural ambient motion, gentle light shifts, seamless loop feeling. No people looking at camera, no text, no logos.'
+
+    try {
+      const hero = await generiereAsset({
+        prompt: genericHeroPrompt,
+        aspect: '16:9',
+        branche: brancheKey,
+        szeneTyp: 'hero',
+        quelleOverride: 'demo_generiert',
+        kontext,
+      })
+      kostenCent += hero.kostenCent
+      config.inhalte.hero.media.datei = hero.publicUrl
+      assetMeta.hero = { id: hero.id, quelle: 'frisch' }
+
+      // Video aus dem Hero-Bild
+      try {
+        const video = await generiereVideo({
+          imageUrl: hero.publicUrl,
+          prompt: genericVideoPrompt,
+          durationSeconds: 6,
+          kontext: `video:${kontext}`,
+        })
+        if (video.videoUrl) {
+          kostenCent += video.kostenCent
+          config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl }
+          assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
+        }
+      } catch (e) {
+        warnungen.push(`Video-Hero fehlgeschlagen (Bild-Hero bleibt): ${(e as Error).message}`)
+      }
+    } catch (e) {
+      warnungen.push(`Hero-Generierung (Flagship-Fallback) fehlgeschlagen: ${(e as Error).message}`)
+    }
   }
 
   // Fallback-Kette: Bank, dann CSS-Platzhalter (MediaSlot ohne datei)
