@@ -137,3 +137,63 @@ export async function generateDemoConfig(
 
   throw new Error(`Demo-Config konnte nicht generiert werden (ungültiges JSON): ${lastError}`)
 }
+
+const URL_CHECK_TIMEOUT_MS = 5000
+const IMAGE_KEY_PATTERN = /(?:image|img|logo|hero|gallery|photo|src).*url$/i
+
+/**
+ * Prüft alle Bild-URLs in der Config per HEAD-Request.
+ * Unerreichbare URLs werden auf null gesetzt.
+ */
+export async function validateImageUrls(
+  config: Record<string, unknown>
+): Promise<{ config: Record<string, unknown>; entfernt: string[] }> {
+  const urls = new Map<string, { obj: Record<string, unknown>; key: string }>()
+
+  function sammle(obj: unknown, pfad: string): void {
+    if (!obj || typeof obj !== 'object') return
+    if (Array.isArray(obj)) {
+      obj.forEach((v, i) => sammle(v, `${pfad}[${i}]`))
+      return
+    }
+    for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
+      if (
+        typeof val === 'string' &&
+        val.startsWith('http') &&
+        IMAGE_KEY_PATTERN.test(key)
+      ) {
+        urls.set(`${pfad}.${key}`, { obj: obj as Record<string, unknown>, key })
+      } else {
+        sammle(val, `${pfad}.${key}`)
+      }
+    }
+  }
+
+  sammle(config, 'config')
+
+  const entfernt: string[] = []
+  await Promise.all(
+    Array.from(urls.entries()).map(async ([pfad, { obj, key }]) => {
+      const url = obj[key] as string
+      try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), URL_CHECK_TIMEOUT_MS)
+        const res = await fetch(url, {
+          method: 'HEAD',
+          signal: controller.signal,
+          redirect: 'follow',
+        })
+        clearTimeout(timeout)
+        if (!res.ok) {
+          obj[key] = null
+          entfernt.push(url)
+        }
+      } catch {
+        obj[key] = null
+        entfernt.push(url)
+      }
+    })
+  )
+
+  return { config, entfernt }
+}

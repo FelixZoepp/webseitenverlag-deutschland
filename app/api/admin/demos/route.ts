@@ -4,7 +4,7 @@ import { requireAdmin } from '@/lib/auth-helpers'
 import { generierungGesperrt } from '@/lib/monitoring'
 import { isPremiumTemplate } from '@/lib/templates'
 import { scrapeProspectWebsite } from '@/lib/scrape-prospect'
-import { generateDemoConfig } from '@/lib/generate-demo'
+import { generateDemoConfig, validateImageUrls } from '@/lib/generate-demo'
 import { collectProspectData } from '@/lib/pipeline/prospect-data'
 import { generateLibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
 import { generiereFlagshipDemo, type DesignOverrides } from '@/lib/pipeline/generate-flagship-demo'
@@ -200,6 +200,13 @@ export async function POST(request: Request) {
       { error: err instanceof Error ? err.message : 'Demo-Generierung fehlgeschlagen' },
       { status: 500 }
     )
+  }
+
+  // 2b. Bild-URLs validieren (externe URLs vom Prospect können offline sein)
+  const { entfernt } = await validateImageUrls(config)
+  if (entfernt.length > 0) {
+    const urlWarning = `${entfernt.length} Bild-URL(s) nicht erreichbar und entfernt.`
+    scrapeWarning = scrapeWarning ? `${scrapeWarning} ${urlWarning}` : urlWarning
   }
 
   // 3. Demo speichern
