@@ -1,9 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Zap, ExternalLink, Copy, Check, RefreshCw, Trash2, Eye, Loader2, Send, Euro } from 'lucide-react'
+import { Zap, ExternalLink, Copy, Check, RefreshCw, Trash2, Eye, Loader2, Send, Euro, Pencil, Image } from 'lucide-react'
 import { TEMPLATE_CATALOG, CATALOG_INDUSTRIES } from '@/lib/template-catalog'
 import { PACKAGES } from '@/lib/packages'
+import type { FlagshipConfig } from '@/lib/flagship/types'
 
 interface Demo {
   id: string
@@ -85,6 +86,9 @@ export default function DemosPage() {
   const [paymentMenuId, setPaymentMenuId] = useState<string | null>(null)
   const [copiedPaymentId, setCopiedPaymentId] = useState<string | null>(null)
   const [paymentLinkResult, setPaymentLinkResult] = useState<{ url: string; paket: string } | null>(null)
+  const [editDemoId, setEditDemoId] = useState<string | null>(null)
+  const [editBusy, setEditBusy] = useState<string | null>(null)
+  const [editMsg, setEditMsg] = useState<string | null>(null)
 
   const loadDemos = useCallback(async () => {
     try {
@@ -263,6 +267,42 @@ export default function DemosPage() {
     await navigator.clipboard.writeText(demo.payment_link_url)
     setCopiedPaymentId(demo.id)
     setTimeout(() => setCopiedPaymentId(null), 2500)
+  }
+
+  async function handleEditSave(demoId: string, edits: Record<string, unknown>) {
+    setEditBusy('saving')
+    setEditMsg(null)
+    try {
+      const res = await fetch(`/api/admin/demos/${demoId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'edit', edits }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setEditMsg(`Fehler: ${data.error}`); return }
+      setDemos((prev) => prev.map((d) => (d.id === demoId ? { ...d, ...data.demo } : d)))
+      setEditMsg('Gespeichert!')
+      setTimeout(() => setEditMsg(null), 2000)
+    } catch { setEditMsg('Netzwerkfehler') }
+    finally { setEditBusy(null) }
+  }
+
+  async function handleRegenerateAsset(demoId: string, slot: string) {
+    setEditBusy(slot)
+    setEditMsg(null)
+    try {
+      const res = await fetch(`/api/admin/demos/${demoId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'regenerate-asset', slot }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setEditMsg(`Fehler: ${data.error}`); return }
+      setDemos((prev) => prev.map((d) => (d.id === demoId ? { ...d, ...data.demo } : d)))
+      setEditMsg(`${data.regenerated} neu generiert!`)
+      setTimeout(() => setEditMsg(null), 3000)
+    } catch { setEditMsg('Netzwerkfehler') }
+    finally { setEditBusy(null) }
   }
 
   async function handleDelete(demo: Demo) {
@@ -516,7 +556,13 @@ export default function DemosPage() {
                         <Send style={{ width: '13px', height: '13px' }} />
                       </button>
                     )}
-                    <button onClick={() => handleRegenerate(demo)} disabled={busy} title="Neu generieren"
+                    {(demo as unknown as { config?: { engine?: string } }).config?.engine === 'flagship' && (
+                      <button onClick={() => setEditDemoId(editDemoId === demo.id ? null : demo.id)} disabled={busy} title="Demo bearbeiten"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', background: editDemoId === demo.id ? 'var(--za-gold-grad)' : 'rgba(255,255,255,0.65)', border: editDemoId === demo.id ? 'none' : '1px solid var(--za-border)', borderRadius: '7px', cursor: 'pointer', color: editDemoId === demo.id ? '#fff' : 'var(--za-fg-3)' }}>
+                        <Pencil style={{ width: '13px', height: '13px' }} />
+                      </button>
+                    )}
+                    <button onClick={() => handleRegenerate(demo)} disabled={busy} title="Komplett neu generieren"
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', background: 'rgba(255,255,255,0.65)', border: '1px solid var(--za-border)', borderRadius: '7px', cursor: busy ? 'wait' : 'pointer', color: 'var(--za-fg-3)' }}>
                       <RefreshCw style={{ width: '13px', height: '13px', animation: busy ? 'spin 1s linear infinite' : 'none' }} />
                     </button>
@@ -525,6 +571,77 @@ export default function DemosPage() {
                       <Trash2 style={{ width: '13px', height: '13px' }} />
                     </button>
                   </div>
+                  {/* Edit-Panel */}
+                  {editDemoId === demo.id && (demo as unknown as { config?: { engine?: string } }).config?.engine === 'flagship' && (() => {
+                    const cfg = (demo as unknown as { config: FlagshipConfig }).config
+                    return (
+                      <div style={{ padding: '16px 20px', background: 'rgba(0,0,0,0.02)', borderTop: '1px solid var(--za-border)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--za-fg-3)' }}>Demo bearbeiten</span>
+                          {editMsg && <span style={{ fontSize: '11px', color: editMsg.startsWith('Fehler') ? '#b03030' : '#1e8a70', fontWeight: 600 }}>{editMsg}</span>}
+                        </div>
+                        {/* Texte */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
+                          <div>
+                            <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--za-fg-4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Headline</label>
+                            <input defaultValue={cfg.inhalte.hero.headline_zeilen.join(' · ')} id={`edit-headline-${demo.id}`}
+                              style={{ width: '100%', padding: '7px 10px', fontSize: '12px', border: '1px solid var(--za-border)', borderRadius: '6px', fontFamily: 'inherit', marginTop: '4px' }} />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--za-fg-4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Lead-Text</label>
+                            <input defaultValue={cfg.inhalte.hero.lead} id={`edit-lead-${demo.id}`}
+                              style={{ width: '100%', padding: '7px 10px', fontSize: '12px', border: '1px solid var(--za-border)', borderRadius: '6px', fontFamily: 'inherit', marginTop: '4px' }} />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--za-fg-4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Firmenname</label>
+                            <input defaultValue={cfg.meta.firma} id={`edit-firma-${demo.id}`}
+                              style={{ width: '100%', padding: '7px 10px', fontSize: '12px', border: '1px solid var(--za-border)', borderRadius: '6px', fontFamily: 'inherit', marginTop: '4px' }} />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '10px', fontWeight: 600, color: 'var(--za-fg-4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Ort</label>
+                            <input defaultValue={cfg.meta.ort} id={`edit-ort-${demo.id}`}
+                              style={{ width: '100%', padding: '7px 10px', fontSize: '12px', border: '1px solid var(--za-border)', borderRadius: '6px', fontFamily: 'inherit', marginTop: '4px' }} />
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+                          <button onClick={() => {
+                            const headline = (document.getElementById(`edit-headline-${demo.id}`) as HTMLInputElement)?.value || ''
+                            const lead = (document.getElementById(`edit-lead-${demo.id}`) as HTMLInputElement)?.value || ''
+                            const firma = (document.getElementById(`edit-firma-${demo.id}`) as HTMLInputElement)?.value || ''
+                            const ort = (document.getElementById(`edit-ort-${demo.id}`) as HTMLInputElement)?.value || ''
+                            handleEditSave(demo.id, {
+                              meta: { firma, ort },
+                              inhalte: { hero: { headline_zeilen: headline.split(' · ').map((s: string) => s.trim()).filter(Boolean), lead } },
+                            })
+                          }} disabled={editBusy !== null}
+                            style={{ padding: '7px 16px', background: 'var(--za-gold-grad)', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                            {editBusy === 'saving' ? 'Speichert…' : 'Texte speichern'}
+                          </button>
+                        </div>
+                        {/* Asset-Regenerierung */}
+                        <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--za-fg-4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Einzelne Bilder neu generieren</div>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          <button onClick={() => handleRegenerateAsset(demo.id, 'hero')} disabled={editBusy !== null}
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--za-border)', borderRadius: '6px', fontSize: '11px', fontWeight: 600, cursor: editBusy ? 'wait' : 'pointer', fontFamily: 'inherit', color: 'var(--za-fg-2)' }}>
+                            <Image style={{ width: '12px', height: '12px' }} />
+                            {editBusy === 'hero' ? 'Generiert…' : 'Hero + Video'}
+                          </button>
+                          <button onClick={() => handleRegenerateAsset(demo.id, 'signature')} disabled={editBusy !== null}
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--za-border)', borderRadius: '6px', fontSize: '11px', fontWeight: 600, cursor: editBusy ? 'wait' : 'pointer', fontFamily: 'inherit', color: 'var(--za-fg-2)' }}>
+                            <Image style={{ width: '12px', height: '12px' }} />
+                            {editBusy === 'signature' ? 'Generiert…' : 'Vorher/Nachher'}
+                          </button>
+                          {cfg.inhalte.ergebnisse.paare?.map((_, i) => (
+                            <button key={i} onClick={() => handleRegenerateAsset(demo.id, `ergebnis-${i}`)} disabled={editBusy !== null}
+                              style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--za-border)', borderRadius: '6px', fontSize: '11px', fontWeight: 600, cursor: editBusy ? 'wait' : 'pointer', fontFamily: 'inherit', color: 'var(--za-fg-2)' }}>
+                              <Image style={{ width: '12px', height: '12px' }} />
+                              {editBusy === `ergebnis-${i}` ? 'Generiert…' : `Ergebnis ${i + 1}`}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })()}
                 </div>
               )
             })}

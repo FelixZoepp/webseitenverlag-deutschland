@@ -10,9 +10,10 @@ import {
 } from '@/lib/pipeline/generate-library-content'
 import { generiereFlagshipDemo } from '@/lib/pipeline/generate-flagship-demo'
 import type { FlagshipConfig } from '@/lib/flagship/types'
+import { generiereAsset, generiereVideo, makePair } from '@/lib/assets/pipeline'
 import { loadLibraryPage } from '@/lib/library/load'
 
-export const maxDuration = 120
+export const maxDuration = 300
 
 const VALID_STATUS = ['GENERIERT', 'VERSENDET', 'CONVERTED', 'ABGELAUFEN']
 
@@ -202,6 +203,118 @@ export async function PATCH(
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ demo: updated, warning: scrapeWarning })
+  }
+
+  // ── Demo-Korrektur: Config-Felder direkt patchen (Texte, Meta, Design) ──
+  if (action === 'edit' && (demo.config as { engine?: string })?.engine === 'flagship') {
+    const config = demo.config as FlagshipConfig
+    const edits = body?.edits as Record<string, unknown> | undefined
+    if (!edits || typeof edits !== 'object') {
+      return NextResponse.json({ error: 'edits-Objekt fehlt' }, { status: 400 })
+    }
+
+    // Sichere Pfade: nur erlaubte Top-Level-Keys patchen
+    const erlaubt = ['meta', 'inhalte', 'design', 'funnel'] as const
+    for (const key of erlaubt) {
+      if (edits[key] && typeof edits[key] === 'object') {
+        // Shallow-Merge auf erster Ebene, Deep-Merge auf zweiter
+        const ziel = config[key] as unknown as Record<string, unknown>
+        for (const [subKey, subVal] of Object.entries(edits[key] as Record<string, unknown>)) {
+          if (subVal && typeof subVal === 'object' && !Array.isArray(subVal) && ziel[subKey] && typeof ziel[subKey] === 'object') {
+            ziel[subKey] = { ...(ziel[subKey] as Record<string, unknown>), ...subVal }
+          } else {
+            ziel[subKey] = subVal
+          }
+        }
+      }
+    }
+
+    const { data: updated, error } = await supabase
+      .from('demos')
+      .update({ config, updated_at: new Date().toISOString() })
+      .eq('id', params.demoId)
+      .select()
+      .single()
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ demo: updated })
+  }
+
+  // ── Demo-Korrektur: einzelnes Asset neu generieren ──
+  if (action === 'regenerate-asset' && (demo.config as { engine?: string })?.engine === 'flagship') {
+    const config = demo.config as FlagshipConfig
+    const slot = typeof body?.slot === 'string' ? body.slot : ''
+    const brancheKey = config.branche_key || demo.branche || ''
+    const kontext = `demo-edit:${brancheKey}:${demo.prospect_name}`
+
+    if (slot === 'hero') {
+      const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
+      const heroPrompt = `Close-up on the craft and result: ${heroLabel}, hands and tools only, no face visible. The main action on the RIGHT half, calm open interior on the left. Photorealistic photography, shallow depth of field, 16:9. No text, no logos, no people facing camera.`
+      try {
+        const hero = await generiereAsset({ prompt: heroPrompt, aspect: '16:9', branche: brancheKey, szeneTyp: 'hero', quelleOverride: 'demo_generiert', kontext })
+        config.inhalte.hero.media.datei = hero.publicUrl
+        // Video optional dazu
+        try {
+          const video = await generiereVideo({ imageUrl: hero.publicUrl, prompt: `Cinematic 4K, static camera, subtle ambient motion: ${heroLabel}. Seamless loop. No people, no text.`, durationSeconds: 6, kontext: `video:${kontext}` })
+          if (video.videoUrl) config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl }
+        } catch { /* Video-Fehler ignorieren */ }
+        const { data: updated, error } = await supabase.from('demos').update({ config, updated_at: new Date().toISOString() }).eq('id', params.demoId).select().single()
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ demo: updated, regenerated: 'hero' })
+      } catch (err) {
+        return NextResponse.json({ error: `Hero-Generierung fehlgeschlagen: ${(err as Error).message}` }, { status: 500 })
+      }
+    }
+
+    if (slot === 'signature') {
+      const nachherLabel = config.inhalte.signature.nachher.label || config.inhalte.signature.tag_nachher
+      const vorherLabel = config.inhalte.signature.vorher.label || config.inhalte.signature.tag_vorher
+      const sigCap = config.inhalte.signature.cap || brancheKey
+      try {
+        const paar = await makePair({
+          branche: brancheKey,
+          nachherPrompt: `${nachherLabel}. ${sigCap}. Immaculate, gleaming, well-maintained. Bright daylight, 16:9. Photorealistic, shallow depth of field. No people, no text, no logos.`,
+          vorherPrompt: `Same exact scene, keep IDENTICAL room/objects/camera. Only change: ${vorherLabel}. Dusty, grimy, neglected. Muted colors, flat light. No text, no logos.`,
+          aspect: '16:9',
+          quelleOverride: 'demo_generiert',
+          kontext,
+        })
+        config.inhalte.signature.nachher.datei = paar.nachher.publicUrl
+        config.inhalte.signature.vorher.datei = paar.vorher.publicUrl
+        const { data: updated, error } = await supabase.from('demos').update({ config, updated_at: new Date().toISOString() }).eq('id', params.demoId).select().single()
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ demo: updated, regenerated: 'signature' })
+      } catch (err) {
+        return NextResponse.json({ error: `Signature-Paar fehlgeschlagen: ${(err as Error).message}` }, { status: 500 })
+      }
+    }
+
+    if (slot.startsWith('ergebnis-')) {
+      const idx = parseInt(slot.split('-')[1], 10)
+      const paare = config.inhalte.ergebnisse.paare
+      if (!paare || idx < 0 || idx >= paare.length) {
+        return NextResponse.json({ error: `Ergebnis-Paar ${idx} nicht gefunden` }, { status: 400 })
+      }
+      const paarDef = paare[idx]
+      try {
+        const paar = await makePair({
+          branche: brancheKey,
+          nachherPrompt: `${paarDef.nachher.label || paarDef.caption}. Clean, well-maintained. Bright lighting, 16:9. Photorealistic. No people, no text, no logos.`,
+          vorherPrompt: `Same exact scene, keep IDENTICAL composition/camera. Only change: ${paarDef.vorher.label || paarDef.caption} in neglected state. Dusty, worn. Muted colors. No text, no logos.`,
+          aspect: '16:9',
+          quelleOverride: 'demo_generiert',
+          kontext: `${kontext}:ergebnis-${idx}`,
+        })
+        paarDef.nachher.datei = paar.nachher.publicUrl
+        paarDef.vorher.datei = paar.vorher.publicUrl
+        const { data: updated, error } = await supabase.from('demos').update({ config, updated_at: new Date().toISOString() }).eq('id', params.demoId).select().single()
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ demo: updated, regenerated: `ergebnis-${idx}` })
+      } catch (err) {
+        return NextResponse.json({ error: `Ergebnis-Paar fehlgeschlagen: ${(err as Error).message}` }, { status: 500 })
+      }
+    }
+
+    return NextResponse.json({ error: `Unbekannter Slot "${slot}" — erlaubt: hero, signature, ergebnis-0, ergebnis-1, …` }, { status: 400 })
   }
 
   return NextResponse.json({ error: 'Ungültige Aktion' }, { status: 400 })
