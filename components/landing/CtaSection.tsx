@@ -8,7 +8,7 @@ const labelCls =
   "font-[family-name:var(--font-mono)] text-xs font-medium uppercase tracking-[0.08em] text-white/60";
 
 export default function CtaSection() {
-  const [data, setData] = useState({ name: "", email: "", telefon: "", branche: "", nachricht: "" });
+  const [data, setData] = useState({ name: "", email: "", telefon: "", branche: "", website: "", nachricht: "", unterseiten: "", seo: "", video_header: "" });
   const [honeypot, setHoneypot] = useState("");
   const [sending, setSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -23,12 +23,26 @@ export default function CtaSection() {
     setSending(true);
     setError("");
     try {
+      // Qualifizierung in die Nachricht einbauen
+      const quali: string[] = [];
+      if (data.unterseiten) quali.push(`Unterseiten: ${data.unterseiten}`);
+      if (data.seo) quali.push(`SEO: ${data.seo}`);
+      if (data.video_header) quali.push(`Video-Header: ${data.video_header}`);
+      const nachrichtMitQuali = [data.nachricht, ...quali].filter(Boolean).join("\n");
+      // Paket ableiten
+      const empfohlen = data.seo === "ja" || data.unterseiten === "5-10" ? (data.video_header === "ja" || data.unterseiten === "5-10" ? "growth" : "business") : "starter";
       const params = new URLSearchParams(window.location.search);
       const res = await fetch("/api/public/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...data,
+          name: data.name,
+          email: data.email,
+          telefon: data.telefon,
+          branche: data.branche,
+          website: data.website,
+          nachricht: nachrichtMitQuali,
+          mitarbeiter: empfohlen,
           utm_source: params.get("utm_source"),
           utm_medium: params.get("utm_medium"),
           utm_campaign: params.get("utm_campaign"),
@@ -74,9 +88,14 @@ export default function CtaSection() {
           {submitted ? (
             <div className="rounded-2xl border border-[var(--blue)]/40 bg-[var(--blue)]/10 p-10 text-center">
               <h3 className="mb-2 text-2xl font-bold">Vielen Dank!</h3>
-              <p className="text-white/70">
-                Ihre Anfrage ist bei uns eingegangen. Wir melden uns innerhalb von 2 Stunden bei Ihnen.
+              <p className="mb-4 text-white/70">
+                Ihre Anfrage ist bei uns eingegangen. Wir erstellen jetzt Ihren persönlichen Website-Entwurf und melden uns innerhalb von 2 Stunden bei Ihnen.
               </p>
+              {data.seo === "ja" || data.unterseiten === "5-10" ? (
+                <p className="text-sm text-[var(--blue)]">
+                  Basierend auf Ihren Angaben empfehlen wir Ihnen unser {data.video_header === "ja" || data.unterseiten === "5-10" ? "Growth" : "Business"}-Paket.
+                </p>
+              ) : null}
             </div>
           ) : (
             <form className="grid gap-5 md:grid-cols-2 md:gap-x-6" onSubmit={handleSubmit}>
@@ -125,8 +144,58 @@ export default function CtaSection() {
                   <option value="sonstige">Sonstige</option>
                 </select>
               </div>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="cta-website" className={labelCls}>Aktuelle Website (falls vorhanden)</label>
+                <input
+                  id="cta-website" type="text" placeholder="www.meine-firma.de"
+                  value={data.website}
+                  onChange={(e) => setData({ ...data, website: e.target.value })}
+                  className={inputCls}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="cta-unterseiten" className={labelCls}>Wie viele Seiten brauchen Sie?</label>
+                <select
+                  id="cta-unterseiten"
+                  value={data.unterseiten}
+                  onChange={(e) => setData({ ...data, unterseiten: e.target.value })}
+                  className="rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-[15px] text-white/70 transition-all focus:border-[var(--blue)] focus:bg-white/10 focus:outline-none"
+                >
+                  <option value="">Bitte wählen</option>
+                  <option value="1">Nur eine Startseite (One-Pager)</option>
+                  <option value="2-5">2-5 Seiten (z.B. + Leistungen, Über uns)</option>
+                  <option value="5-10">5-10 Seiten (umfangreiche Website)</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="cta-seo" className={labelCls}>SEO-Optimierung gewünscht?</label>
+                <select
+                  id="cta-seo"
+                  value={data.seo}
+                  onChange={(e) => setData({ ...data, seo: e.target.value })}
+                  className="rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-[15px] text-white/70 transition-all focus:border-[var(--blue)] focus:bg-white/10 focus:outline-none"
+                >
+                  <option value="">Bitte wählen</option>
+                  <option value="ja">Ja, bei Google gefunden werden</option>
+                  <option value="nein">Nein, erstmal nicht nötig</option>
+                  <option value="unsicher">Bin mir unsicher</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="cta-video" className={labelCls}>Video-Header (Premium-Look)?</label>
+                <select
+                  id="cta-video"
+                  value={data.video_header}
+                  onChange={(e) => setData({ ...data, video_header: e.target.value })}
+                  className="rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-[15px] text-white/70 transition-all focus:border-[var(--blue)] focus:bg-white/10 focus:outline-none"
+                >
+                  <option value="">Bitte wählen</option>
+                  <option value="ja">Ja, animierter Video-Header</option>
+                  <option value="nein">Nein, Standbild reicht</option>
+                </select>
+              </div>
               <div className="flex flex-col gap-2 md:col-span-2">
-                <label htmlFor="cta-nachricht" className={labelCls}>Ihre Nachricht</label>
+                <label htmlFor="cta-nachricht" className={labelCls}>Ihre Nachricht (optional)</label>
                 <textarea
                   id="cta-nachricht" rows={4}
                   placeholder="Erzählen Sie uns kurz von Ihrem Projekt..."
