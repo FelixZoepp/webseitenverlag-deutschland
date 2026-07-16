@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Zap, ExternalLink, Copy, Check, RefreshCw, Trash2, Eye, Loader2, Send, Euro, Pencil, Image } from 'lucide-react'
-import { TEMPLATE_CATALOG, CATALOG_INDUSTRIES } from '@/lib/template-catalog'
+import { TEMPLATE_CATALOG } from '@/lib/template-catalog'
 import { PACKAGES } from '@/lib/packages'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 
@@ -22,6 +22,7 @@ interface Demo {
   paket?: string | null
   payment_link_url?: string | null
   kosten_cent?: number | null
+  config?: Record<string, unknown>
 }
 
 /** Approved Branchen-Vorlagen aus der Branchen-Fabrik (F5) */
@@ -37,13 +38,6 @@ const STATUS_STYLES: Record<string, { label: string; bg: string; fg: string }> =
   CONVERTED: { label: 'Converted', bg: 'rgba(46,196,160,0.12)', fg: '#1e8a70' },
   ABGELAUFEN: { label: 'Abgelaufen', bg: 'rgba(0,0,0,0.06)', fg: '#8a877f' },
 }
-
-// Library-Kompositionen (Pipeline v2): Auswahlwert "library:<Branche>:<Stil>"
-const LIBRARY_BRANCHEN = ['Handwerk', 'Gastronomie', 'Friseur', 'Gesundheit'] as const
-const LIBRARY_STILE = [
-  { id: 'klar', label: 'Klar (direkt, faktisch)' },
-  { id: 'warm', label: 'Warm (persönlich)' },
-] as const
 
 function templateName(id: string): string {
   if (id.startsWith('startseite.')) {
@@ -76,6 +70,8 @@ export default function DemosPage() {
   const [brandfarbe, setBrandfarbe] = useState('')
   const [paket, setPaket] = useState<'starter' | 'business' | 'growth'>('business')
   const [scrollAnimationen, setScrollAnimationen] = useState(false)
+  const [wirkung, setWirkung] = useState('')
+  const [schriftart, setSchriftart] = useState('')
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [warning, setWarning] = useState<string | null>(null)
@@ -133,11 +129,12 @@ export default function DemosPage() {
           websiteUrl: websiteUrl.trim(),
           branche: templateId.slice('flagship:'.length),
           ort: ort.trim() || null,
-          notes: notes.trim() || null,
+          notes: [notes.trim(), wirkung ? `Wirkung: ${wirkung}` : '', schriftart ? `Schriftart: ${schriftart}` : ''].filter(Boolean).join('\n') || null,
           paket,
           scrollAnimationen,
           ...(typoModus ? { typoModus } : {}),
           ...(brandfarbe ? { brandfarbe } : {}),
+          ...(wirkung === 'edel' || wirkung === 'hochwertig' ? { typoModus: typoModus || 'serif_warm_dunkel' } : {}),
         }
       } else if (istLibrary) {
         const [, branche, stil] = templateId.split(':')
@@ -178,6 +175,8 @@ export default function DemosPage() {
       setTypoModus('')
       setBrandfarbe('')
       setScrollAnimationen(false)
+      setWirkung('')
+      setSchriftart('')
       setDemos((prev) => [data.demo, ...prev])
       window.open(`/demo/${data.demo.share_token}`, '_blank')
     } catch {
@@ -380,37 +379,17 @@ export default function DemosPage() {
               <label style={labelStyle}>Template *</label>
               <select value={templateId} onChange={(e) => setTemplateId(e.target.value)}
                 style={{ ...inputStyle, cursor: 'pointer' }} disabled={generating} required>
-                <option value="">— Template wählen —</option>
-                {flagshipBranchen.length > 0 && (
-                  <optgroup label="Branchen-Fabrik (Flagship)">
-                    {flagshipBranchen.map((b) => (
-                      <option key={`flagship:${b.branche_key}`} value={`flagship:${b.branche_key}`}>
-                        {b.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                )}
-                <optgroup label="Library (Pipeline v2)">
-                  {LIBRARY_BRANCHEN.map((b) =>
-                    LIBRARY_STILE.map((s) => (
-                      <option key={`library:${b}:${s.id}`} value={`library:${b}:${s.id}`}>
-                        {b} — {s.label}
-                      </option>
-                    ))
-                  )}
-                </optgroup>
-                {CATALOG_INDUSTRIES.map((ind) => (
-                  <optgroup key={ind} label={ind}>
-                    {TEMPLATE_CATALOG.filter((t) => t.industry === ind).map((t) => (
-                      <option key={t.id} value={t.id}>{t.name}</option>
-                    ))}
-                  </optgroup>
+                <option value="">— Branche wählen —</option>
+                {flagshipBranchen.map((b) => (
+                  <option key={`flagship:${b.branche_key}`} value={`flagship:${b.branche_key}`}>
+                    {b.name}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
 
-          {templateId.startsWith('flagship:') && (
+          {templateId.startsWith('flagship:') && (<>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
               <div>
                 <label style={labelStyle}>Paket</label>
@@ -455,6 +434,38 @@ export default function DemosPage() {
                 </div>
               </div>
               <div>
+                <label style={labelStyle}>Wirkung</label>
+                <select value={wirkung} onChange={(e) => setWirkung(e.target.value)}
+                  style={{ ...inputStyle, cursor: 'pointer' }} disabled={generating}>
+                  <option value="">— Standard —</option>
+                  <option value="modern">Modern & direkt</option>
+                  <option value="edel">Edel & hochwertig</option>
+                  <option value="warm">Warm & einladend</option>
+                  <option value="minimalistisch">Minimalistisch & clean</option>
+                  <option value="kraftvoll">Kraftvoll & dynamisch</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+              <div>
+                <label style={labelStyle}>Schriftart-Stil</label>
+                <select value={schriftart} onChange={(e) => setSchriftart(e.target.value)}
+                  style={{ ...inputStyle, cursor: 'pointer' }} disabled={generating}>
+                  <option value="">— Aus Vorlage —</option>
+                  <option value="sans">Sans-Serif (modern, klar)</option>
+                  <option value="serif">Serif (klassisch, edel)</option>
+                  <option value="mono">Mono (technisch, markant)</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Video-Header</label>
+                <select value={paket === 'starter' ? 'nein' : 'ja'} disabled
+                  style={{ ...inputStyle, cursor: 'default', opacity: 0.7 }}>
+                  <option value="ja">Ja (Business/Growth)</option>
+                  <option value="nein">Nein (Starter)</option>
+                </select>
+              </div>
+              <div>
                 <label style={labelStyle}>Extras</label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: scrollAnimationen ? 'rgba(212,168,40,0.08)' : 'rgba(255,255,255,0.7)', border: `1px solid ${scrollAnimationen ? 'var(--za-gold)' : 'var(--za-border)'}`, borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: 'var(--za-fg-2)', transition: '.15s' }}>
                   <input type="checkbox" checked={scrollAnimationen} onChange={(e) => setScrollAnimationen(e.target.checked)}
@@ -463,7 +474,7 @@ export default function DemosPage() {
                 </label>
               </div>
             </div>
-          )}
+          </>)}
 
           <div style={{ marginBottom: '16px' }}>
             <label style={labelStyle}>Notizen aus dem Quali-Call (optional)</label>
@@ -570,13 +581,13 @@ export default function DemosPage() {
                         <Send style={{ width: '13px', height: '13px' }} />
                       </button>
                     )}
-                    {(demo as unknown as { config?: { engine?: string } }).config?.engine === 'custom' && (
+                    {(demo.config?.engine as string | undefined) === 'custom' && (
                       <button onClick={() => handleGenerateCustomAssets(demo.id)} disabled={busy} title="Bilder + Video generieren (Higgsfield)"
                         style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', background: 'rgba(255,255,255,0.65)', border: '1px solid var(--za-border)', borderRadius: '7px', fontSize: '10px', fontWeight: 600, cursor: busy ? 'wait' : 'pointer', color: 'var(--za-fg-2)', fontFamily: 'inherit', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                         <Image style={{ width: '12px', height: '12px' }} /> {busy ? 'Generiert…' : 'Assets'}
                       </button>
                     )}
-                    {(demo as unknown as { config?: { engine?: string } }).config?.engine === 'flagship' && (
+                    {(demo.config?.engine as string | undefined) === 'flagship' && (
                       <button onClick={() => setEditDemoId(editDemoId === demo.id ? null : demo.id)} disabled={busy} title="Demo bearbeiten"
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', background: editDemoId === demo.id ? 'var(--za-gold-grad)' : 'rgba(255,255,255,0.65)', border: editDemoId === demo.id ? 'none' : '1px solid var(--za-border)', borderRadius: '7px', cursor: 'pointer', color: editDemoId === demo.id ? '#fff' : 'var(--za-fg-3)' }}>
                         <Pencil style={{ width: '13px', height: '13px' }} />
@@ -592,8 +603,8 @@ export default function DemosPage() {
                     </button>
                   </div>
                   {/* Edit-Panel */}
-                  {editDemoId === demo.id && (demo as unknown as { config?: { engine?: string } }).config?.engine === 'flagship' && (() => {
-                    const cfg = (demo as unknown as { config: FlagshipConfig }).config
+                  {editDemoId === demo.id && (demo.config?.engine as string | undefined) === 'flagship' && (() => {
+                    const cfg = demo.config as unknown as FlagshipConfig
                     return (
                       <div style={{ padding: '16px 20px', background: 'rgba(0,0,0,0.02)', borderTop: '1px solid var(--za-border)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>

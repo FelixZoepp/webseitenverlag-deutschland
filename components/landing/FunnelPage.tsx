@@ -16,6 +16,7 @@ type Antworten = {
   ziel: string;
   umfang: string;
   extras: string;
+  stil: string;
   firma: string;
   ort: string;
   bestehende_website: string;
@@ -31,6 +32,7 @@ const LEER: Antworten = {
   ziel: "",
   umfang: "",
   extras: "",
+  stil: "",
   firma: "",
   ort: "",
   bestehende_website: "",
@@ -99,6 +101,16 @@ const FRAGEN: { key: keyof Antworten; frage: string; optionen: string[] }[] = [
       "Krasse Scroll-Animationen — richtig auffällig & interaktiv",
     ],
   },
+  {
+    key: "stil",
+    frage: "Welcher Stil passt zu Ihrem Unternehmen?",
+    optionen: [
+      "Modern & direkt — klare Linien, serifenlose Schrift",
+      "Edel & hochwertig — klassisch, Serifenschrift, dunkle Töne",
+      "Warm & einladend — freundlich, helle Farben",
+      "Bin mir unsicher — überrascht mich",
+    ],
+  },
 ];
 
 // 4 Fragen + Firma + Kontakt
@@ -137,6 +149,7 @@ export default function FunnelPage() {
         `Wichtigstes Ziel: ${antworten.ziel}`,
         `Umfang: ${antworten.umfang}`,
         `Features: ${antworten.extras}`,
+        `Stil: ${antworten.stil}`,
         antworten.ort ? `Ort: ${antworten.ort}` : null,
         `Zeitrahmen: ${antworten.zeitrahmen}`,
       ]
