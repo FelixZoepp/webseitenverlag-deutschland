@@ -38,12 +38,25 @@ export interface SeedErgebnis {
   fehler?: string
 }
 
-/** Higgsfield-Prompt aus dem Style-Baukasten zusammensetzen (BF §2.3) — auch für F5-Demo-Assets */
+/**
+ * Higgsfield-Prompt aus dem Style-Baukasten zusammensetzen (Asset-Rezeptur §2).
+ * Prompt-Anatomie: [SUBJEKT+HANDLUNG], [KOMPOSITION], [MILIEU], [LICHT], [KAMERA], [STIL-ANKER]
+ * DSGVO-Kernregel: die Arbeit zeigen, nicht die Person — keine erkennbaren Gesichter.
+ */
 export function baueAssetPrompt(profil: BranchenProfil, szene: string): string {
   const s = profil.style_prompts
-  const teile = [s.basis_stil, szene, `Lighting: ${s.licht}`, `Materials: ${s.materialien}`]
-  if (!s.personen_erlaubt) teile.push('no people')
+  const teile = [
+    szene,
+    s.basis_stil,
+    `Lighting: ${s.licht}`,
+    `Materials: ${s.materialien}`,
+    // DSGVO: keine erkennbaren Gesichter/Personen
+    'Close-up on the craft and result, hands and tools only, no face visible, cropped above shoulders',
+    'Photorealistic photography, shallow depth of field',
+  ]
+  if (!s.personen_erlaubt) teile.push('no people at all')
   if (s.negativ) teile.push(`Avoid: ${s.negativ}`)
+  teile.push('No text, no logos, no watermarks')
   return teile.join('. ')
 }
 
@@ -86,7 +99,7 @@ async function generiereAssetGrundset(branche: StartBranche, profil: BranchenPro
       branche: branche.branche_key,
       nachherPrompt: baueAssetPrompt(profil, s.szenen.signature_nachher),
       vorherPrompt: s.szenen.signature_vorher,
-      aspect: '4:3',
+      aspect: '16:9',
       kontext,
     }),
     Promise.all(

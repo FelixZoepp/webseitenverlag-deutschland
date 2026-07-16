@@ -269,7 +269,7 @@ export async function generiereFlagshipDemo(
         branche: brancheKey,
         nachherPrompt: baueAssetPrompt(styleProfil, s.szenen.signature_nachher),
         vorherPrompt: s.szenen.signature_vorher,
-        aspect: '4:3',
+        aspect: '16:9',
         quelleOverride: 'demo_generiert',
         kontext,
       }),
@@ -318,43 +318,43 @@ export async function generiereFlagshipDemo(
     const brancheName = row.name || brancheKey
     const sigCap = config.inhalte.signature.cap || ''
 
-    // Hero: Das Ergebnis der Arbeit im Fokus (NICHT eine Person), Hauptmotiv links+mitte
-    // damit es unter dem Gradient-Overlay sichtbar ist (Text liegt links, Motiv muss also
-    // im linken/mittleren Bereich glänzen, rechts kann auslaufen)
+    // ASSET-REZEPTUR: Prompt-Anatomie [SUBJEKT+HANDLUNG], [KOMPOSITION], [MILIEU], [LICHT], [KAMERA], [STIL-ANKER]
+    // DSGVO-Kernregel: die ARBEIT zeigen, nicht die Person — keine erkennbaren Gesichter
+
+    // Hero 16:9: Close-up des Handwerks/Ergebnisses auf der Text-Gegenseite (rechts)
     const heroPrompt = [
-      `Ultra-realistic commercial photography, 16:9 wide format.`,
-      `Scene: ${heroLabel}. Industry: ${brancheName}.`,
-      `Focus on the RESULT of the work — gleaming surfaces, pristine materials, the satisfying outcome.`,
-      `The main visual interest (reflections, textures, details) should be spread across the LEFT and CENTER of the frame.`,
-      `Shallow depth of field, natural side lighting creating reflections and highlights.`,
-      `Premium commercial quality, magazine-cover aesthetic. Color palette: clean, bright, professional.`,
-      `NO people facing camera, no text, no logos, no watermarks. People only as blurred background silhouettes if at all.`,
+      `Close-up on the craft and result: ${heroLabel}, hands and tools only, no face visible, cropped above shoulders.`,
+      `The main action positioned on the RIGHT half of the frame, calm open ${brancheName} interior on the left.`,
+      `${brancheName} professional environment, authentic workplace details.`,
+      `Bright natural side lighting with reflections on clean surfaces.`,
+      `Shallow depth of field, 16:9 wide format.`,
+      `Photorealistic editorial photography. No text, no logos, no watermarks, no recognizable people.`,
     ].join(' ')
 
-    // Video: subtile Bewegung die zum Ergebnis passt (Licht-Reflexe, Wassertropfen, Glanz)
+    // Video: statische Kamera, subtile Mikrobewegung des Handwerks
     const videoPrompt = [
       `Cinematic 4K, completely static tripod camera, zero camera movement.`,
-      `Scene: ${heroLabel}. Industry: ${brancheName}.`,
-      `Subtle ambient motion only: light reflections slowly shifting on clean surfaces, gentle water droplets, dust particles in sunlight, natural light changes.`,
-      `Seamless 5-second loop. Calm, premium, satisfying to watch.`,
-      `No people moving, no text, no logos.`,
+      `Close-up scene: ${heroLabel}. ${brancheName} environment.`,
+      `Subtle ambient motion only: light reflections shifting on surfaces, gentle material movement, dust particles in light, natural atmosphere.`,
+      `Focus on the craft — hands working, tools in motion, materials responding. No face visible, no person looking at camera.`,
+      `Seamless 5-second loop, calm and premium. No text, no logos.`,
     ].join(' ')
 
-    // Nachher: das saubere/fertige Ergebnis — GLEICHE Szene wie in sigCap beschrieben
+    // Signature ZIEL (Nachher): der erstrebenswerte Zustand — wird ZUERST generiert (16:9)
     const nachherPrompt = [
-      `Professional interior/detail photography: ${sigNachherLabel}.`,
-      sigCap ? `Scene: ${sigCap}.` : `Industry: ${brancheName}.`,
-      `The space/object is IMMACULATE — gleaming, well-lit, perfectly maintained.`,
-      `Bright natural daylight, warm tones, inviting atmosphere. Sharp details showing the quality of the result.`,
-      `4:3 format. No text, no logos.`,
+      `${sigNachherLabel}. ${sigCap || brancheName}.`,
+      `The space/result is IMMACULATE — gleaming surfaces, well-maintained, inviting. The satisfying outcome of professional work.`,
+      `Bright natural daylight, warm atmosphere, sharp details showing quality.`,
+      `Eye-level perspective, 16:9 wide format.`,
+      `Photorealistic photography, shallow depth of field. No people, no text, no logos.`,
     ].join(' ')
 
-    // Vorher: EXAKT dieselbe Szene, aber im vernachlässigten Zustand
+    // Signature GEGEN-Zustand (Vorher): Edit des Ziel-Bildes — EXAKT gleiche Szene festgenagelt
     const vorherPrompt = [
-      `Same exact room/scene as the reference image, but in a NEGLECTED state: ${sigVorherLabel}.`,
-      `Dust, grime, stains, dull surfaces, poor lighting. Everything looks tired and unmaintained.`,
-      `Muted desaturated colors, flat unflattering light. The contrast to the clean version should be dramatic but realistic.`,
-      `Same camera angle, same composition, same objects — just dirty/worn. 4:3 format. No text, no logos.`,
+      `Edit this exact scene, keep the IDENTICAL room, furniture, objects, windows, camera angle and perspective unchanged.`,
+      `Only change: ${sigVorherLabel}. Cover surfaces in dust, grime, stains. Dull and unmaintained state.`,
+      `Muted desaturated colors, flat unflattering light. Dramatic but realistic contrast to the clean version.`,
+      `Same exact composition and framing — only the cleanliness/condition changes. No text, no logos.`,
     ].join(' ')
 
     // Hero + Signature-Paar parallel generieren
@@ -371,7 +371,7 @@ export async function generiereFlagshipDemo(
         branche: brancheKey,
         nachherPrompt,
         vorherPrompt,
-        aspect: '4:3',
+        aspect: '16:9',
         quelleOverride: 'demo_generiert',
         kontext,
       }),
