@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padel Berlin – SMASH HOUSE | Dein Court in der Hauptstadt</title>
+<meta name="description" content="Padel spielen in Berlin: Indoor-Courts, Turniere, Coaching & Community. SMASH HOUSE — jetzt Court buchen.">
+<meta name="robots" content="noindex">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"LocalBusiness","name":"SMASH HOUSE – Padel Berlin",
+ "description":"Indoor Padel Courts in Berlin: Buche deinen Court, trainiere mit Coaches und werde Teil der Community.",
+ "address":{"@type":"PostalAddress","addressLocality":"Berlin","addressRegion":"Berlin","addressCountry":"DE"},
+ "priceRange":"€€"}
+</script>
+<style>
+:root{
+  --ink:#0A0A0A;
+  --paper:#FAFAF8;
+  --panel:#FFFFFF;
+  --neon:#C8FF00;
+  --neon-deep:#A0D600;
+  --court:#1B3A2D;
+  --glass:rgba(10,10,10,.04);
+  --soft:rgba(10,10,10,.55);
+  --line:rgba(10,10,10,.08);
+  --r:20px;--w:1200px;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Monaco,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--neon);color:var(--ink)}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--w);margin:0 auto;padding:0 28px}
+section{padding:120px 0}
+@media(max-width:760px){section{padding:80px 0}}
+
+h1,h2,h3{font-weight:800;letter-spacing:-.04em;line-height:1.04}
+h1{font-size:clamp(3rem,7vw,5.5rem)}
+h2{font-size:clamp(2.2rem,4.5vw,3.6rem)}
+h3{font-size:1.3rem}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:20px}
+.eyebrow::before{content:"";width:28px;height:3px;background:var(--neon);border-radius:2px}
+.lead{font-size:1.18rem;color:var(--soft);max-width:52ch;line-height:1.7}
+.hl{color:var(--neon-deep);font-style:normal}
+
+/* Nav */
+nav{position:fixed;inset:0 0 auto;z-index:60;padding:18px 0;transition:.3s}
+nav .wrap{display:flex;align-items:center;gap:30px}
+nav.scrolled{background:rgba(250,250,248,.92);backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--line);padding:12px 0}
+.logo{font-size:1.4rem;font-weight:900;letter-spacing:-.04em}
+.logo span{color:var(--neon-deep)}
+.navlinks{display:flex;gap:24px;margin-left:auto;font-size:.88rem;font-weight:600}
+.navlinks a{opacity:.6;transition:.2s}.navlinks a:hover{opacity:1}
+@media(max-width:900px){.navlinks{display:none}}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;font-weight:700;font-size:.95rem;padding:14px 28px;border-radius:100px;border:0;cursor:pointer;transition:.3s;box-shadow:0 16px 40px -16px rgba(10,10,10,.4)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 20px 50px -16px rgba(10,10,10,.5)}
+.btn .arr{transition:.25s}.btn:hover .arr{transform:translateX(5px)}
+.btn.neon{background:var(--neon);color:var(--ink);box-shadow:0 16px 40px -16px rgba(200,255,0,.5)}
+.btn.neon:hover{background:var(--neon-deep);box-shadow:0 20px 50px -16px rgba(200,255,0,.6)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 2px var(--ink)}
+nav .btn{padding:10px 20px;font-size:.85rem}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;padding:160px 0 100px;position:relative;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:2}
+@media(max-width:900px){.hero .wrap{grid-template-columns:1fr;text-align:center}.hero{padding-top:130px;min-height:auto}}
+.hero h1{margin-bottom:24px}
+.hero .lead{margin-bottom:36px}
+@media(max-width:900px){.hero .lead{margin:0 auto 36px}}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap}
+@media(max-width:900px){.cta-row{justify-content:center}}
+.chips{display:flex;gap:10px 20px;flex-wrap:wrap;font-size:.88rem;font-weight:600;color:var(--soft);margin-top:30px}
+@media(max-width:900px){.chips{justify-content:center}}
+.chips span{display:inline-flex;align-items:center;gap:8px}
+.chips i{width:6px;height:6px;border-radius:50%;background:var(--neon);display:inline-block}
+.hero-visual{position:relative;display:flex;justify-content:center;align-items:center;min-height:420px}
+
+/* Floating Ball — Scroll-Animation */
+.ball{position:absolute;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFE066,#FFC800 40%,#E6A800 80%);box-shadow:inset -20px -20px 40px rgba(0,0,0,.15),0 30px 60px -20px rgba(255,200,0,.4);z-index:10;opacity:0;transform:translateX(300px) scale(.3) rotate(0deg);transition:none}
+.ball.animate{animation:ballIn 1.2s cubic-bezier(.22,.68,.36,1.2) forwards}
+@keyframes ballIn{
+  0%{opacity:0;transform:translateX(300px) scale(.3) rotate(0deg)}
+  50%{opacity:1;transform:translateX(40px) scale(.8) rotate(180deg)}
+  100%{opacity:1;transform:translateX(0) scale(1) rotate(360deg)}
+}
+
+/* Racket Swing */
+.racket{position:absolute;right:-60px;top:50%;width:220px;opacity:0;transform-origin:bottom center;transform:rotate(60deg) translateY(-50%);z-index:5}
+.racket.animate{animation:racketSwing 0.8s cubic-bezier(.34,.7,.2,1) forwards}
+@keyframes racketSwing{
+  0%{opacity:0;transform:rotate(60deg) translateY(-50%)}
+  40%{opacity:1;transform:rotate(-15deg) translateY(-50%)}
+  60%{opacity:1;transform:rotate(5deg) translateY(-50%)}
+  100%{opacity:1;transform:rotate(0deg) translateY(-50%)}
+}
+
+/* Court-Bild (Placeholder) */
+.court-frame{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;background:linear-gradient(135deg,var(--court) 0%,#0D1F16 100%);box-shadow:0 40px 80px -30px rgba(0,0,0,.3)}
+.court-frame::after{content:"COURT · SMASH HOUSE";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(200,255,0,.4);font-weight:800;font-size:1.2rem;letter-spacing:.2em}
+.court-frame img{width:100%;height:100%;object-fit:cover;position:relative;z-index:1}
+.court-frame.loaded::after{display:none}
+
+/* Stats floating */
+.stat-float{position:absolute;background:var(--panel);border-radius:14px;padding:14px 20px;box-shadow:0 20px 50px -20px rgba(0,0,0,.2);z-index:15}
+.stat-float b{font-size:1.5rem;font-weight:900;display:block;letter-spacing:-.03em;line-height:1}
+.stat-float small{font-size:.72rem;color:var(--soft);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.sf1{left:-20px;bottom:60px;animation:float 5s ease-in-out infinite}
+.sf2{right:-20px;top:60px;animation:float 5s ease-in-out infinite 2.5s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* Trust Bar */
+.trust{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:24px 0;background:var(--panel)}
+.trust .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.trust span{font-weight:700;font-size:.92rem;display:inline-flex;gap:8px;align-items:center}
+.trust em{font-style:normal;color:var(--neon-deep)}
+
+/* Scroll-Reveal Sections */
+.rv{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.15s}.d2{transition-delay:.3s}.d3{transition-delay:.45s}
+
+/* Section: Why Padel */
+.why .wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+@media(max-width:860px){.why .wrap{grid-template-columns:1fr}}
+
+/* Feature Cards */
+.features{background:var(--ink);color:#fff;position:relative;overflow:hidden}
+.features::before{content:"";position:absolute;top:-20%;right:-10%;width:50vw;height:50vw;background:radial-gradient(closest-side,rgba(200,255,0,.08),transparent);pointer-events:none}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:50px}
+@media(max-width:960px){.grid4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.grid4{grid-template-columns:1fr}}
+.fcard{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);padding:32px 24px;transition:.3s}
+.fcard:hover{transform:translateY(-6px);border-color:var(--neon);background:rgba(200,255,0,.04)}
+.fcard .no{font-family:var(--mono);color:var(--neon);font-size:.78rem;letter-spacing:.1em;display:block;margin-bottom:14px}
+.fcard h3{margin-bottom:10px;color:#fff}
+.fcard p{font-size:.92rem;color:rgba(255,255,255,.55);line-height:1.6}
+
+/* Scroll-Triggered Ball Section */
+.ballsection{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;background:var(--court)}
+.ballsection .wrap{position:relative;z-index:2;color:#fff;text-align:center}
+.ballsection .eyebrow{color:var(--neon)}.ballsection .eyebrow::before{background:var(--neon)}
+.ballsection h2{color:#fff}
+.ballsection .lead{color:rgba(255,255,255,.65);margin:0 auto}
+.scrollball{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFE066,#FFC800 40%,#E6A800 80%);box-shadow:0 60px 120px -40px rgba(255,200,0,.3);opacity:.15;right:-100px;top:50%;transform:translateY(-50%) scale(.5);transition:transform 1.2s cubic-bezier(.2,.7,.2,1),opacity 1.2s ease}
+.scrollball.active{opacity:.3;transform:translateY(-50%) scale(1.2);right:10%}
+
+/* Pricing */
+.pricing .wrap{text-align:center}
+.ptable{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:50px;max-width:960px;margin-left:auto;margin-right:auto}
+@media(max-width:800px){.ptable{grid-template-columns:1fr}}
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:36px 28px;text-align:center;transition:.3s;position:relative}
+.pcard:hover{transform:translateY(-6px);border-color:var(--neon);box-shadow:0 30px 60px -20px rgba(0,0,0,.1)}
+.pcard.pop{border-color:var(--neon);box-shadow:0 30px 60px -20px rgba(200,255,0,.2)}
+.pcard.pop::before{content:"BELIEBT";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--neon);color:var(--ink);font-size:.65rem;font-weight:800;letter-spacing:.14em;padding:5px 14px;border-radius:100px}
+.pcard .price{font-size:2.8rem;font-weight:900;letter-spacing:-.04em;margin:16px 0 6px}
+.pcard .price span{font-size:1rem;color:var(--soft);font-weight:600}
+.pcard .pname{font-size:1.1rem;font-weight:700;margin-bottom:16px}
+.pcard ul{list-style:none;text-align:left;font-size:.9rem;color:var(--soft)}
+.pcard li{padding:8px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.pcard li::before{content:"✓";color:var(--neon-deep);font-weight:800;font-size:.8rem}
+.pcard .btn{margin-top:20px;width:100%;justify-content:center}
+
+/* Testimonials */
+.stim .wrap{text-align:center}
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:50px}
+@media(max-width:800px){.qgrid{grid-template-columns:1fr}}
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:28px;text-align:left}
+.qcard p{font-size:.95rem;color:var(--soft);line-height:1.65;margin-bottom:16px;font-style:italic}
+.qcard .author{display:flex;align-items:center;gap:12px}
+.qcard .avatar{width:40px;height:40px;border-radius:50%;background:var(--glass);display:grid;place-items:center;font-weight:800;font-size:.85rem;color:var(--soft)}
+.qcard .aname{font-weight:700;font-size:.88rem}
+.qcard .ameta{font-size:.75rem;color:var(--soft)}
+
+/* FAQ */
+.faqlist{max-width:720px;margin:50px auto 0}
+details{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;padding:22px 0;font-weight:700;font-size:1.02rem;display:flex;justify-content:space-between;gap:16px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary .pm{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;transition:.3s;font-weight:800;font-size:.9rem;color:var(--neon-deep)}
+details[open] .pm{background:var(--ink);border-color:var(--ink);color:var(--neon);transform:rotate(45deg)}
+details p{padding:0 40px 22px 0;color:var(--soft);font-size:.95rem;line-height:1.65}
+
+/* CTA */
+.cta{background:var(--ink);color:#fff;text-align:center}
+.cta .eyebrow{color:var(--neon)}.cta .eyebrow::before{background:var(--neon)}
+.cta h2{color:#fff;margin-bottom:16px}
+.cta .lead{color:rgba(255,255,255,.6);margin:0 auto 36px}
+.cta .trust-row{display:flex;justify-content:center;gap:24px;margin-top:28px;font-size:.85rem;color:rgba(255,255,255,.45);font-weight:600}
+
+/* Footer */
+footer{padding:40px 0;border-top:1px solid var(--line);font-size:.85rem;color:var(--soft)}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+footer a{opacity:.7;transition:.2s}footer a:hover{opacity:1}
+
+/* Gallery with scroll parallax */
+.gallery{overflow:hidden}
+.galstrip{display:flex;gap:18px;margin-top:50px;will-change:transform}
+.galstrip figure{flex:0 0 320px;aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;position:relative;background:linear-gradient(135deg,var(--court),#0D1F16)}
+.galstrip figure::after{content:attr(data-label);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(200,255,0,.3);font-weight:700;font-size:.85rem;letter-spacing:.12em}
+.galstrip img{width:100%;height:100%;object-fit:cover}
+
+@media(prefers-reduced-motion:reduce){
+  .ball,.racket{animation:none!important;opacity:1;transform:none}
+  .scrollball{transition:none;opacity:.15}
+  .rv{opacity:1;transform:none;transition:none}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a class="logo" href="#top">SMASH<span>.</span></a>
+    <div class="navlinks">
+      <a href="#courts">Courts</a>
+      <a href="#preise">Preise</a>
+      <a href="#community">Community</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a class="btn neon" href="#buchen" style="padding:10px 20px;font-size:.85rem">Court buchen <span class="arr">→</span></a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="rv">
+      <span class="eyebrow">Padel Berlin · Indoor · 6 Courts</span>
+      <h1>Dein Spiel.<br>Dein <span class="hl">Court</span>.</h1>
+      <p class="lead">Sechs Indoor-Courts, Coaching auf jedem Level und eine Community, die den Sport lebt. Buche deinen Court in 30 Sekunden — und bring einfach Schuhe mit.</p>
+      <div class="cta-row">
+        <a class="btn neon" href="#buchen">Court buchen <span class="arr">→</span></a>
+        <a class="btn ghost" href="#preise">Preise ansehen</a>
+      </div>
+      <div class="chips">
+        <span><i></i> 6 Indoor-Courts</span>
+        <span><i></i> Online-Buchung 24/7</span>
+        <span><i></i> Coaching für alle Level</span>
+      </div>
+    </div>
+    <div class="hero-visual rv d1">
+      <div class="court-frame" id="heroImg"></div>
+      <div class="ball" id="heroBall"></div>
+      <svg class="racket" id="heroRacket" viewBox="0 0 200 400" fill="none">
+        <ellipse cx="100" cy="100" rx="75" ry="95" stroke="#222" stroke-width="6" fill="none"/>
+        <line x1="100" y1="195" x2="100" y2="380" stroke="#222" stroke-width="8" stroke-linecap="round"/>
+        <line x1="40" y1="60" x2="160" y2="60" stroke="#333" stroke-width="1.5" opacity=".4"/>
+        <line x1="35" y1="85" x2="165" y2="85" stroke="#333" stroke-width="1.5" opacity=".4"/>
+        <line x1="33" y1="110" x2="167" y2="110" stroke="#333" stroke-width="1.5" opacity=".4"/>
+        <line x1="38" y1="135" x2="162" y2="135" stroke="#333" stroke-width="1.5" opacity=".4"/>
+        <line x1="50" y1="160" x2="150" y2="160" stroke="#333" stroke-width="1.5" opacity=".4"/>
+        <line x1="70" y1="20" x2="70" y2="180" stroke="#333" stroke-width="1.5" opacity=".4"/>
+        <line x1="100" y1="8" x2="100" y2="190" stroke="#333" stroke-width="1.5" opacity=".4"/>
+        <line x1="130" y1="20" x2="130" y2="180" stroke="#333" stroke-width="1.5" opacity=".4"/>
+      </svg>
+      <div class="stat-float sf1"><b>6</b><small>Indoor Courts</small></div>
+      <div class="stat-float sf2"><b>500+</b><small>Spieler/Monat</small></div>
+    </div>
+  </div>
+</header>
+
+<!-- Trust -->
+<div class="trust">
+  <div class="wrap">
+    <span><em>6</em> Panorama-Courts</span>
+    <span>Schläger-<em>Verleih</em> inklusive</span>
+    <span>Online-Buchung <em>24/7</em></span>
+    <span>Coaching ab <em>Level 1</em></span>
+  </div>
+</div>
+
+<!-- Why Padel -->
+<section class="why">
+  <div class="wrap">
+    <div class="rv">
+      <span class="eyebrow">Warum Padel?</span>
+      <h2>Der schnellste Weg zum <span class="hl">Spaß</span> auf dem Court.</h2>
+      <p class="lead" style="margin-top:20px">Padel ist der am schnellsten wachsende Sport Europas — leicht zu lernen, schwer aufzuhören. Zwei gegen zwei, Glaswände, kurze Matches, maximaler Spaß. Du brauchst keine Vorkenntnisse.</p>
+    </div>
+    <div class="court-frame rv d1" style="aspect-ratio:16/9" data-label="COURT · PANORAMA">
+    </div>
+  </div>
+</section>
+
+<!-- Features (Dark) -->
+<section class="features" id="courts">
+  <div class="wrap">
+    <div class="rv" style="text-align:center;max-width:640px;margin:0 auto">
+      <span class="eyebrow" style="color:var(--neon)">Was dich erwartet</span>
+      <h2 style="color:#fff">Sechs Courts. Ein <span class="hl">Zuhause</span>.</h2>
+    </div>
+    <div class="grid4">
+      <div class="fcard rv"><span class="no">01</span><h3>Indoor-Courts</h3><p>Panorama-Glaswände, LED-Flutlicht, Turnier-Standard-Boden. Wetterunabhängig, 365 Tage im Jahr.</p></div>
+      <div class="fcard rv d1"><span class="no">02</span><h3>Pro Coaching</h3><p>Zertifizierte Trainer für Einsteiger bis Turnierspieler. Einzelstunden, Gruppenkurse, Video-Analyse.</p></div>
+      <div class="fcard rv d2"><span class="no">03</span><h3>Equipment</h3><p>Schläger und Bälle zum Verleih. Komm einfach mit Hallenschuhen — wir haben den Rest.</p></div>
+      <div class="fcard rv d3"><span class="no">04</span><h3>Community</h3><p>Wöchentliche Mixe, Liga-Abende und Turniere. Finde Spielpartner auf deinem Level.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Ball Scroll Section -->
+<section class="ballsection" id="ballscroll">
+  <div class="wrap">
+    <span class="eyebrow" style="justify-content:center">Das Spielgefühl</span>
+    <h2>Wenn der Ball fliegt,<br>zählt nur der <span class="hl">Moment</span>.</h2>
+    <p class="lead" style="margin-top:20px">Kurze Rallyes, schnelle Reflexe, taktische Finesse — Padel ist Tennis-Intensität auf kleinem Court mit doppelt so viel Action.</p>
+  </div>
+  <div class="scrollball" id="scrollBall"></div>
+</section>
+
+<!-- Gallery Strip -->
+<section class="gallery">
+  <div class="wrap">
+    <div class="rv">
+      <span class="eyebrow">Impressionen</span>
+      <h2>Mehr als nur ein <span class="hl">Court</span>.</h2>
+    </div>
+  </div>
+  <div class="galstrip rv" id="galStrip">
+    <figure data-label="COURT 1 · PANORAMA"><figcaption></figcaption></figure>
+    <figure data-label="LOUNGE · TREFFPUNKT"><figcaption></figcaption></figure>
+    <figure data-label="COACHING · SESSION"><figcaption></figcaption></figure>
+    <figure data-label="TURNIER · NACHT"><figcaption></figcaption></figure>
+    <figure data-label="EQUIPMENT · VERLEIH"><figcaption></figcaption></figure>
+    <figure data-label="COMMUNITY · MIX"><figcaption></figcaption></figure>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="preise">
+  <div class="wrap">
+    <div class="rv">
+      <span class="eyebrow" style="justify-content:center">Preise</span>
+      <h2>Transparent. Ohne <span class="hl">Überraschungen</span>.</h2>
+    </div>
+    <div class="ptable">
+      <div class="pcard rv">
+        <div class="pname">Single Game</div>
+        <div class="price">29€ <span>/ Court</span></div>
+        <ul>
+          <li>90 Min Spielzeit</li>
+          <li>Bis zu 4 Spieler</li>
+          <li>Schläger-Verleih</li>
+          <li>Bälle inklusive</li>
+        </ul>
+        <a class="btn ghost" href="#buchen" style="margin-top:20px;width:100%;justify-content:center">Jetzt buchen</a>
+      </div>
+      <div class="pcard pop rv d1">
+        <div class="pname">10er-Karte</div>
+        <div class="price">249€ <span>/ 10×</span></div>
+        <ul>
+          <li>10 × 90 Min Spielzeit</li>
+          <li>14% Ersparnis</li>
+          <li>Schläger-Verleih</li>
+          <li>Gäste mitbringen</li>
+          <li>Community-Events gratis</li>
+        </ul>
+        <a class="btn neon" href="#buchen" style="margin-top:20px;width:100%;justify-content:center">10er-Karte holen</a>
+      </div>
+      <div class="pcard rv d2">
+        <div class="pname">Flatrate</div>
+        <div class="price">89€ <span>/ Monat</span></div>
+        <ul>
+          <li>Unbegrenzt spielen</li>
+          <li>Alle Courts, alle Zeiten</li>
+          <li>1 Coaching-Stunde/Monat</li>
+          <li>Liga + Turniere inklusive</li>
+          <li>Prioritäts-Buchung</li>
+        </ul>
+        <a class="btn" href="#buchen" style="margin-top:20px;width:100%;justify-content:center">Flatrate starten</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="stim" id="community">
+  <div class="wrap">
+    <div class="rv">
+      <span class="eyebrow" style="justify-content:center">Community</span>
+      <h2>Was unsere Spieler <span class="hl">sagen</span>.</h2>
+    </div>
+    <div class="qgrid">
+      <div class="qcard rv">
+        <p>„Bin über einen Kumpel zum Padel gekommen und jetzt drei Mal die Woche hier. Die Courts sind top und die Community unschlagbar."</p>
+        <div class="author"><div class="avatar">MK</div><div><div class="aname">Marco K.</div><div class="ameta">Flatrate-Mitglied seit 2025</div></div></div>
+      </div>
+      <div class="qcard rv d1">
+        <p>„Die Coaching-Stunden haben mein Spiel komplett verändert. Nach 3 Monaten spiele ich Liga — hätte ich nie gedacht."</p>
+        <div class="author"><div class="avatar">SB</div><div><div class="aname">Sarah B.</div><div class="ameta">Level 3 → Liga</div></div></div>
+      </div>
+      <div class="qcard rv d2">
+        <p>„Perfekte Lage, schnelle Buchung, immer sauber. Und die Turnier-Abende am Freitag sind legendär."</p>
+        <div class="author"><div class="avatar">TH</div><div><div class="aname">Timo H.</div><div class="ameta">10er-Karte</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="rv" style="text-align:center">
+      <span class="eyebrow" style="justify-content:center">FAQ</span>
+      <h2>Häufige <span class="hl">Fragen</span>.</h2>
+    </div>
+    <div class="faqlist">
+      <details class="rv"><summary>Brauche ich eigene Ausrüstung?<span class="pm">+</span></summary><p>Nein. Schläger und Bälle kannst du bei uns kostenlos ausleihen. Du brauchst nur Hallenschuhe — saubere Sohle, kein Profil.</p></details>
+      <details class="rv"><summary>Kann ich auch alleine kommen?<span class="pm">+</span></summary><p>Klar! Unsere Match-Vermittlung findet immer Spielpartner auf deinem Level. Komm zu den offenen Mixen (Di + Do, 19 Uhr) oder poste in unserer WhatsApp-Gruppe.</p></details>
+      <details class="rv"><summary>Wie läuft die Buchung?<span class="pm">+</span></summary><p>Online in 30 Sekunden: Datum, Uhrzeit, Court wählen, fertig. Du bekommst eine Bestätigung per Mail. Stornierung bis 6 Stunden vorher kostenlos.</p></details>
+      <details class="rv"><summary>Ist Padel schwer zu lernen?<span class="pm">+</span></summary><p>Im Gegenteil — Padel ist einer der einsteigerfreundlichsten Racketsports. Nach 20 Minuten spielst du deine ersten Rallyes. Unsere Anfänger-Kurse machen den Einstieg noch einfacher.</p></details>
+      <details class="rv"><summary>Gibt es Parkmöglichkeiten?<span class="pm">+</span></summary><p>Ja, direkt vor der Halle. Außerdem erreichst du uns mit der U-Bahn (U7, 3 Min Fußweg) oder dem Fahrrad (Stellplätze vorhanden).</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="buchen">
+  <div class="wrap">
+    <span class="eyebrow" style="justify-content:center">Bereit?</span>
+    <h2>Dein erster Aufschlag <span class="hl">wartet</span>.</h2>
+    <p class="lead">Buche jetzt deinen Court — online, in 30 Sekunden. Keine Mitgliedschaft nötig, kein Vertrag, kein Stress.</p>
+    <a class="btn neon" href="#buchen" style="font-size:1.05rem;padding:18px 36px">Court buchen <span class="arr">→</span></a>
+    <div class="trust-row">
+      <span>✓ Keine Mitgliedschaft</span>
+      <span>✓ Stornierung kostenlos</span>
+      <span>✓ Equipment inklusive</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 SMASH HOUSE · Padel Berlin</span>
+    <div style="display:flex;gap:20px">
+      <a href="#top">Startseite</a>
+      <a href="#courts">Courts</a>
+      <a href="#preise">Preise</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Nav scroll
+  var nav=document.getElementById('nav');
+  addEventListener('scroll',function(){nav.classList.toggle('scrolled',scrollY>24)},{passive:true});
+
+  // Reveal observer
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
+    });
+  },{threshold:.15});
+  document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});
+
+  // Hero ball + racket animation
+  if(!reduced){
+    var ball=document.getElementById('heroBall');
+    var racket=document.getElementById('heroRacket');
+    var heroObs=new IntersectionObserver(function(es){
+      if(es[0].isIntersecting){
+        setTimeout(function(){racket.classList.add('animate')},200);
+        setTimeout(function(){ball.classList.add('animate')},600);
+        heroObs.disconnect();
+      }
+    },{threshold:.3});
+    heroObs.observe(document.querySelector('.hero-visual'));
+  }
+
+  // Scroll ball in dark section
+  if(!reduced){
+    var sb=document.getElementById('scrollBall');
+    var bsec=document.getElementById('ballscroll');
+    var sbObs=new IntersectionObserver(function(es){
+      sb.classList.toggle('active',es[0].isIntersecting);
+    },{threshold:.3});
+    sbObs.observe(bsec);
+  }
+
+  // Gallery horizontal scroll on vertical scroll
+  if(!reduced){
+    var strip=document.getElementById('galStrip');
+    if(strip){
+      addEventListener('scroll',function(){
+        var r=strip.parentElement.getBoundingClientRect();
+        var p=Math.max(0,Math.min(1,(window.innerHeight-r.top)/(window.innerHeight+r.height)));
+        strip.style.transform='translateX('+(-(p*strip.scrollWidth*.35))+'px)';
+      },{passive:true});
+    }
+  }
+
+  // Highlights
+  document.querySelectorAll('.hero .hl').forEach(function(h){setTimeout(function(){h.style.opacity='1'},400)});
+})();
+</script>
+</body>
+</html>
