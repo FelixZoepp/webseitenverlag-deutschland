@@ -71,6 +71,8 @@ export default function DemosPage() {
   const [templateId, setTemplateId] = useState('')
   const [ort, setOrt] = useState('')
   const [notes, setNotes] = useState('')
+  const [typoModus, setTypoModus] = useState<'sans_bold_hell' | 'serif_warm_dunkel' | ''>('')
+  const [brandfarbe, setBrandfarbe] = useState('')
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [warning, setWarning] = useState<string | null>(null)
@@ -125,6 +127,8 @@ export default function DemosPage() {
           branche: templateId.slice('flagship:'.length),
           ort: ort.trim() || null,
           notes: notes.trim() || null,
+          ...(typoModus ? { typoModus } : {}),
+          ...(brandfarbe ? { brandfarbe } : {}),
         }
       } else if (istLibrary) {
         const [, branche, stil] = templateId.split(':')
@@ -162,6 +166,8 @@ export default function DemosPage() {
       setWebsiteUrl('')
       setOrt('')
       setNotes('')
+      setTypoModus('')
+      setBrandfarbe('')
       setDemos((prev) => [data.demo, ...prev])
       window.open(`/demo/${data.demo.share_token}`, '_blank')
     } catch {
@@ -342,6 +348,38 @@ export default function DemosPage() {
               </select>
             </div>
           </div>
+
+          {templateId.startsWith('flagship:') && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+              <div>
+                <label style={labelStyle}>Design-Stil</label>
+                <select value={typoModus} onChange={(e) => setTypoModus(e.target.value as typeof typoModus)}
+                  style={{ ...inputStyle, cursor: 'pointer' }} disabled={generating}>
+                  <option value="">— Vorlage-Standard —</option>
+                  <option value="sans_bold_hell">☀️ Hell (modern, direkt)</option>
+                  <option value="serif_warm_dunkel">🌙 Dunkel (warm, edel)</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Brandfarbe (optional)</label>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input type="color" value={brandfarbe || '#D4A828'}
+                    onChange={(e) => setBrandfarbe(e.target.value)}
+                    style={{ width: '38px', height: '38px', border: '1px solid var(--za-border)', borderRadius: '8px', padding: '2px', cursor: 'pointer', background: 'rgba(255,255,255,0.7)' }}
+                    disabled={generating} />
+                  <input type="text" value={brandfarbe}
+                    onChange={(e) => { const v = e.target.value; if (!v || /^#[0-9a-fA-F]{0,6}$/.test(v)) setBrandfarbe(v) }}
+                    placeholder="#D4A828" style={{ ...inputStyle, flex: 1, fontFamily: 'monospace' }} disabled={generating} />
+                  {brandfarbe && (
+                    <button type="button" onClick={() => setBrandfarbe('')}
+                      style={{ padding: '8px 10px', background: 'none', border: '1px solid var(--za-border)', borderRadius: '8px', cursor: 'pointer', fontSize: '11px', color: 'var(--za-fg-3)', fontFamily: 'inherit' }}>
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div style={{ marginBottom: '16px' }}>
             <label style={labelStyle}>Notizen aus dem Quali-Call (optional)</label>

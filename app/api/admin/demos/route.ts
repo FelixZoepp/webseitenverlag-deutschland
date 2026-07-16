@@ -7,7 +7,7 @@ import { scrapeProspectWebsite } from '@/lib/scrape-prospect'
 import { generateDemoConfig } from '@/lib/generate-demo'
 import { collectProspectData } from '@/lib/pipeline/prospect-data'
 import { generateLibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
-import { generiereFlagshipDemo } from '@/lib/pipeline/generate-flagship-demo'
+import { generiereFlagshipDemo, type DesignOverrides } from '@/lib/pipeline/generate-flagship-demo'
 import { libraryPageKey, loadLibraryPage } from '@/lib/library/load'
 import { SEED_BRANCHEN, STILE, type Stil } from '@/lib/library/types'
 
@@ -68,9 +68,18 @@ export async function POST(request: Request) {
       notizen: notes,
     })
 
+    // Design-Overrides: Stil (hell/dunkel) + Brandfarbe aus der UI
+    const designOverrides: DesignOverrides = {}
+    if (body?.typoModus === 'sans_bold_hell' || body?.typoModus === 'serif_warm_dunkel') {
+      designOverrides.typo_modus = body.typoModus
+    }
+    if (typeof body?.brandfarbe === 'string' && /^#[0-9a-fA-F]{6}$/.test(body.brandfarbe)) {
+      designOverrides.brandfarbe = body.brandfarbe
+    }
+
     let ergebnis
     try {
-      ergebnis = await generiereFlagshipDemo(prospect, branche)
+      ergebnis = await generiereFlagshipDemo(prospect, branche, Object.keys(designOverrides).length > 0 ? designOverrides : undefined)
     } catch (err) {
       // Typischer Fall: Vorlage nicht approved → sauberer 400 mit Hinweis
       return NextResponse.json(

@@ -14,10 +14,55 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { generiereAsset, generiereVideo, makePair } from '@/lib/assets/pipeline'
 import { baueAssetPrompt, baueVideoPrompt } from '@/lib/seeding/seed-branche'
 import type { BranchenProfil } from '@/lib/seeding/schema'
-import type { FlagshipConfig } from '@/lib/flagship/types'
+import type { FlagshipConfig, FlagshipDesign } from '@/lib/flagship/types'
 import type { ProspectData } from './prospect-data'
 
 const BUCKET = 'asset-bank'
+
+/** Design-Overrides für die Demo-Generierung (UI → API → Pipeline) */
+export interface DesignOverrides {
+  /** Hell (sans_bold_hell) oder Dunkel (serif_warm_dunkel) */
+  typo_modus?: 'sans_bold_hell' | 'serif_warm_dunkel'
+  /** Eigene Brandfarbe (#hex) — ersetzt akzent1, akzent1_tief wird abgeleitet */
+  brandfarbe?: string
+}
+
+/** Dunkelt eine Hex-Farbe um ~25% ab (für akzent1_tief) */
+function dunklereVariante(hex: string): string {
+  const m = /^#?([0-9a-fA-F]{6})$/.exec(hex.trim())
+  if (!m) return hex
+  const n = parseInt(m[1], 16)
+  const r = Math.max(0, Math.round(((n >> 16) & 255) * 0.72))
+  const g = Math.max(0, Math.round(((n >> 8) & 255) * 0.72))
+  const b = Math.max(0, Math.round((n & 255) * 0.72))
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
+}
+
+/** Standard-Token-Palette für hell/dunkel (wenn der Modus gewechselt wird) */
+const HELL_TOKENS: Partial<FlagshipDesign['tokens']> = {
+  basis: '#F5F3ED', panel: '#FFFFFF', text: '#1A1A19', text_soft: 'rgba(26,26,25,.62)',
+  line: 'rgba(26,26,25,.10)',
+}
+const DUNKEL_TOKENS: Partial<FlagshipDesign['tokens']> = {
+  basis: '#1B1612', panel: '#2A2420', text: '#F2ECE0', text_soft: 'rgba(242,236,224,.62)',
+  line: 'rgba(242,236,224,.12)',
+}
+
+/** Wendet Design-Overrides auf die geklonte Config an */
+function wendeDesignOverridesAn(config: FlagshipConfig, overrides: DesignOverrides): void {
+  if (overrides.typo_modus && overrides.typo_modus !== config.design.typo_modus) {
+    const hell = overrides.typo_modus === 'sans_bold_hell'
+    config.design.typo_modus = overrides.typo_modus
+    config.design.typo_signature = hell ? 'wisch_highlight' : 'gold_unterstrich'
+    // Basis-Tokens tauschen (Hintergrund, Text, Panel, Linien)
+    const tokens = hell ? HELL_TOKENS : DUNKEL_TOKENS
+    Object.assign(config.design.tokens, tokens)
+  }
+  if (overrides.brandfarbe && /^#[0-9a-fA-F]{6}$/.test(overrides.brandfarbe)) {
+    config.design.tokens.akzent1 = overrides.brandfarbe
+    config.design.tokens.akzent1_tief = dunklereVariante(overrides.brandfarbe)
+  }
+}
 /** DoD-Grenze (BF §6): Kosten pro Demo in Cent */
 const DEMO_KOSTEN_LIMIT_CENT = 150
 
@@ -127,7 +172,8 @@ async function bankPaar(
  */
 export async function generiereFlagshipDemo(
   prospect: ProspectData,
-  brancheKey: string
+  brancheKey: string,
+  overrides?: DesignOverrides
 ): Promise<FlagshipDemoErgebnis> {
   const admin = createAdminClient()
 
@@ -153,8 +199,9 @@ export async function generiereFlagshipDemo(
     throw new Error(`Branche "${brancheKey}" hat keine Flagship-Vorlage im Profil`)
   }
 
-  // 1) Klonen + deterministische Personalisierung (kein Claude-Call)
+  // 1) Klonen + Design-Overrides + deterministische Personalisierung (kein Claude-Call)
   const config = structuredClone(vorlage)
+  if (overrides) wendeDesignOverridesAn(config, overrides)
   const paare: [string, string][] = []
   if (config.meta.firma && config.meta.firma !== prospect.firma) {
     paare.push([config.meta.firma, prospect.firma])
