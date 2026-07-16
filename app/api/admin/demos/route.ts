@@ -101,6 +101,7 @@ export async function POST(request: Request) {
         scraped_data: prospect,
         share_token: shareToken,
         notes,
+        paket: typeof body?.paket === 'string' && ['starter', 'business', 'growth'].includes(body.paket) ? body.paket : 'business',
         status: 'GENERIERT',
         kosten_cent: ergebnis.kostenCent,
         asset_meta: ergebnis.assetMeta,

@@ -73,6 +73,7 @@ export default function DemosPage() {
   const [notes, setNotes] = useState('')
   const [typoModus, setTypoModus] = useState<'sans_bold_hell' | 'serif_warm_dunkel' | ''>('')
   const [brandfarbe, setBrandfarbe] = useState('')
+  const [paket, setPaket] = useState<'starter' | 'business' | 'growth'>('business')
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [warning, setWarning] = useState<string | null>(null)
@@ -128,6 +129,7 @@ export default function DemosPage() {
           branche: templateId.slice('flagship:'.length),
           ort: ort.trim() || null,
           notes: notes.trim() || null,
+          paket,
           ...(typoModus ? { typoModus } : {}),
           ...(brandfarbe ? { brandfarbe } : {}),
         }
@@ -352,7 +354,22 @@ export default function DemosPage() {
           </div>
 
           {templateId.startsWith('flagship:') && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+              <div>
+                <label style={labelStyle}>Paket</label>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  {(['starter', 'business', 'growth'] as const).map((p) => {
+                    const info = { starter: { emoji: '🥉', label: 'Starter', preis: '99' }, business: { emoji: '🥈', label: 'Business', preis: '149' }, growth: { emoji: '🥇', label: 'Growth', preis: '249' } }[p]
+                    const aktiv = paket === p
+                    return (
+                      <button key={p} type="button" onClick={() => setPaket(p)} disabled={generating}
+                        style={{ flex: 1, padding: '8px 4px', background: aktiv ? 'var(--za-gold-grad)' : 'rgba(255,255,255,0.7)', color: aktiv ? '#fff' : 'var(--za-fg-2)', border: aktiv ? 'none' : '1px solid var(--za-border)', borderRadius: '8px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', lineHeight: '1.3' }}>
+                        {info.emoji}<br />{info.label}<br /><span style={{ fontSize: '10px', opacity: 0.8 }}>{info.preis} €</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
               <div>
                 <label style={labelStyle}>Design-Stil</label>
                 <select value={typoModus} onChange={(e) => setTypoModus(e.target.value as typeof typoModus)}
