@@ -135,15 +135,34 @@ function extractImages(html: string, baseUrl: string): { images: string[]; logoU
 
     const lower = `${tag.toLowerCase()} ${abs.toLowerCase()}`
     const isLogo = lower.includes('logo')
-    const isJunk = /sprite|icon|pixel|tracking|badge|placeholder|captcha|avatar-default|\.svg(\?|$)/.test(abs.toLowerCase())
+    const isSvg = /\.svg(\?|$)/i.test(abs)
+    const isJunk = /sprite|icon|pixel|tracking|badge|placeholder|captcha|avatar-default/.test(abs.toLowerCase())
 
     if (isLogo && !logoUrl) {
-      logoUrl = abs
+      logoUrl = abs  // Logo-SVGs sind erlaubt
       continue
     }
-    if (isJunk) continue
+    if (isJunk || isSvg) continue  // Nicht-Logo SVGs und Junk weiter filtern
     if (!images.includes(abs)) images.push(abs)
     if (images.length >= MAX_IMAGES) break
+  }
+
+  // Fallback: <link rel="icon/apple-touch-icon"> als Logo
+  if (!logoUrl) {
+    const patterns = [
+      /<link[^>]+rel=["'](?:icon|apple-touch-icon|shortcut\s+icon)["'][^>]+href=["']([^"']+)["']/i,
+      /<link[^>]+href=["']([^"']+)["'][^>]+rel=["'](?:icon|apple-touch-icon|shortcut\s+icon)["']/i,
+    ]
+    for (const pattern of patterns) {
+      const match = html.match(pattern)
+      if (match?.[1]) {
+        const abs = absolutize(match[1], baseUrl)
+        if (abs) {
+          logoUrl = abs
+          break
+        }
+      }
+    }
   }
 
   return { images, logoUrl }
