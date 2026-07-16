@@ -29,6 +29,13 @@ import {
   type GenerateVideoOptions,
 } from './higgsfield'
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms))
+}
+
+const PROVIDER_RETRIES = 2
+const RETRY_DELAY_MS = 3000
+
 const BUCKET = 'asset-bank'
 /** srcset-Stufen (Breite in px) — größte Stufe = storage_path/Hauptdatei */
 const SRCSET_BREITEN = [480, 960, 1600]
@@ -174,23 +181,30 @@ export async function generiereAsset(
   let provider: AssetProvider | null = null
   let letzterFehler: unknown = null
   for (const p of kette) {
-    try {
-      bild = await p.generateImage({
-        prompt: o.prompt,
-        aspect: o.aspect,
-        referenceJobId: o.referenceJobId,
-        seed: o.seed,
-      })
-      provider = p
-      break
-    } catch (e) {
-      letzterFehler = e
-      console.warn(`[assets] Provider ${p.name} fehlgeschlagen:`, (e as Error).message)
+    for (let versuch = 1; versuch <= PROVIDER_RETRIES; versuch++) {
+      try {
+        bild = await p.generateImage({
+          prompt: o.prompt,
+          aspect: o.aspect,
+          referenceJobId: o.referenceJobId,
+          seed: o.seed,
+        })
+        provider = p
+        break
+      } catch (e) {
+        letzterFehler = e
+        console.warn(
+          `[assets] Provider ${p.name} Versuch ${versuch}/${PROVIDER_RETRIES} fehlgeschlagen:`,
+          (e as Error).message
+        )
+        if (versuch < PROVIDER_RETRIES) await sleep(RETRY_DELAY_MS)
+      }
     }
+    if (bild) break
   }
   if (!bild || !provider) {
     throw new Error(
-      `Alle Asset-Provider fehlgeschlagen: ${letzterFehler instanceof Error ? letzterFehler.message : letzterFehler}`
+      `Alle Asset-Provider fehlgeschlagen (je ${PROVIDER_RETRIES} Versuche): ${letzterFehler instanceof Error ? letzterFehler.message : letzterFehler}`
     )
   }
 
@@ -292,18 +306,25 @@ export async function generiereVideo(
   let letzterFehler: unknown = null
   for (const p of kette) {
     if (!p.generateVideo) continue
-    try {
-      ergebnis = await p.generateVideo(o)
-      provider = p
-      break
-    } catch (e) {
-      letzterFehler = e
-      console.warn(`[video] Provider ${p.name} fehlgeschlagen:`, (e as Error).message)
+    for (let versuch = 1; versuch <= PROVIDER_RETRIES; versuch++) {
+      try {
+        ergebnis = await p.generateVideo(o)
+        provider = p
+        break
+      } catch (e) {
+        letzterFehler = e
+        console.warn(
+          `[video] Provider ${p.name} Versuch ${versuch}/${PROVIDER_RETRIES} fehlgeschlagen:`,
+          (e as Error).message
+        )
+        if (versuch < PROVIDER_RETRIES) await sleep(RETRY_DELAY_MS)
+      }
     }
+    if (ergebnis) break
   }
   if (!ergebnis || !provider) {
     throw new Error(
-      `Kein Video-Provider verfügbar: ${letzterFehler instanceof Error ? letzterFehler.message : 'keine Provider mit generateVideo'}`
+      `Kein Video-Provider verfügbar (je ${PROVIDER_RETRIES} Versuche): ${letzterFehler instanceof Error ? letzterFehler.message : 'keine Provider mit generateVideo'}`
     )
   }
 
