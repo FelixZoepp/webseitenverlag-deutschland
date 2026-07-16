@@ -20,7 +20,7 @@ export async function GET() {
 
   const { data: demos, error } = await auth.data.supabase
     .from('demos')
-    .select('id, prospect_name, prospect_website, branche, template_id, share_token, status, notes, view_count, last_viewed_at, expires_at, created_at, paket, payment_link_url, kosten_cent, config')
+    .select('id, prospect_name, prospect_website, branche, template_id, share_token, status, notes, view_count, last_viewed_at, expires_at, created_at, paket, payment_link_url, kosten_cent, engine')
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

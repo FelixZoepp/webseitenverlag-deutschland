@@ -17,6 +17,21 @@ export const maxDuration = 300
 
 const VALID_STATUS = ['GENERIERT', 'VERSENDET', 'CONVERTED', 'ABGELAUFEN']
 
+export async function GET(
+  _request: Request,
+  { params }: { params: { demoId: string } }
+) {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  const { data: demo, error } = await auth.data.supabase
+    .from('demos')
+    .select('*')
+    .eq('id', params.demoId)
+    .single()
+  if (error || !demo) return NextResponse.json({ error: 'Demo nicht gefunden' }, { status: 404 })
+  return NextResponse.json({ demo })
+}
+
 export async function DELETE(
   _request: Request,
   { params }: { params: { demoId: string } }

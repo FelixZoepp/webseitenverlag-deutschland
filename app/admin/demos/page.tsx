@@ -22,7 +22,7 @@ interface Demo {
   paket?: string | null
   payment_link_url?: string | null
   kosten_cent?: number | null
-  config?: Record<string, unknown>
+  engine?: string | null
 }
 
 /** Approved Branchen-Vorlagen aus der Branchen-Fabrik (F5) */
@@ -83,8 +83,21 @@ export default function DemosPage() {
   const [copiedPaymentId, setCopiedPaymentId] = useState<string | null>(null)
   const [paymentLinkResult, setPaymentLinkResult] = useState<{ url: string; paket: string } | null>(null)
   const [editDemoId, setEditDemoId] = useState<string | null>(null)
+  const [editConfig, setEditConfig] = useState<FlagshipConfig | null>(null)
   const [editBusy, setEditBusy] = useState<string | null>(null)
   const [editMsg, setEditMsg] = useState<string | null>(null)
+
+  async function openEditPanel(demoId: string) {
+    if (editDemoId === demoId) { setEditDemoId(null); setEditConfig(null); return }
+    setEditDemoId(demoId)
+    setEditConfig(null)
+    try {
+      const res = await fetch(`/api/admin/demos/${demoId}`, { method: 'GET' })
+      if (!res.ok) return
+      const data = await res.json()
+      if (data.demo?.config) setEditConfig(data.demo.config as FlagshipConfig)
+    } catch { /* ignore */ }
+  }
 
   const loadDemos = useCallback(async () => {
     try {
@@ -581,14 +594,14 @@ export default function DemosPage() {
                         <Send style={{ width: '13px', height: '13px' }} />
                       </button>
                     )}
-                    {(demo.config?.engine as string | undefined) === 'custom' && (
+                    {demo.engine === 'custom' && (
                       <button onClick={() => handleGenerateCustomAssets(demo.id)} disabled={busy} title="Bilder + Video generieren (Higgsfield)"
                         style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', background: 'rgba(255,255,255,0.65)', border: '1px solid var(--za-border)', borderRadius: '7px', fontSize: '10px', fontWeight: 600, cursor: busy ? 'wait' : 'pointer', color: 'var(--za-fg-2)', fontFamily: 'inherit', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                         <Image style={{ width: '12px', height: '12px' }} /> {busy ? 'Generiert…' : 'Assets'}
                       </button>
                     )}
-                    {(demo.config?.engine as string | undefined) === 'flagship' && (
-                      <button onClick={() => setEditDemoId(editDemoId === demo.id ? null : demo.id)} disabled={busy} title="Demo bearbeiten"
+                    {demo.engine === 'flagship' && (
+                      <button onClick={() => openEditPanel(demo.id)} disabled={busy} title="Demo bearbeiten"
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', background: editDemoId === demo.id ? 'var(--za-gold-grad)' : 'rgba(255,255,255,0.65)', border: editDemoId === demo.id ? 'none' : '1px solid var(--za-border)', borderRadius: '7px', cursor: 'pointer', color: editDemoId === demo.id ? '#fff' : 'var(--za-fg-3)' }}>
                         <Pencil style={{ width: '13px', height: '13px' }} />
                       </button>
@@ -603,8 +616,8 @@ export default function DemosPage() {
                     </button>
                   </div>
                   {/* Edit-Panel */}
-                  {editDemoId === demo.id && (demo.config?.engine as string | undefined) === 'flagship' && (() => {
-                    const cfg = demo.config as unknown as FlagshipConfig
+                  {editDemoId === demo.id && demo.engine === 'flagship' && editConfig && (() => {
+                    const cfg = editConfig
                     return (
                       <div style={{ padding: '16px 20px', background: 'rgba(0,0,0,0.02)', borderTop: '1px solid var(--za-border)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>

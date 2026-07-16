@@ -12,6 +12,15 @@ function getServiceClient() {
 
 export async function POST(request: Request) {
   try {
+    // B4-Fix: Webhook-Secret prüfen (FIREFLIES_WEBHOOK_SECRET)
+    const secret = process.env.FIREFLIES_WEBHOOK_SECRET
+    if (secret) {
+      const auth = request.headers.get('authorization')
+      if (auth !== `Bearer ${secret}`) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+    }
+
     const event = await request.json()
 
     // Nur bei fertiger Transkription reagieren

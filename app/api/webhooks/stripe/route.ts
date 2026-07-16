@@ -392,14 +392,23 @@ async function handleUpsellCheckout(supabase: SupabaseClient, session: Stripe.Ch
         .eq('id', order.id as string)
     }
 
-    // Altes Abo läuft in Stripe weiter → manuell beenden (Proration-Pragmatismus)
-    await createManualTask(supabase, {
-      typ: 'SONSTIGES',
-      titel: `Altes Stripe-Abo nach Plan-Upgrade beenden: ${kontakt.name}`,
-      beschreibung: `Kunde hat auf ${pkg.name} (${pkg.price} €/Monat) upgegradet — neue Subscription ${stripeSubscriptionId ?? '—'} ist aktiv. Alte Subscription ${alteSubscription ?? '—'} in Stripe kündigen/anteilig verrechnen, damit nicht doppelt abgebucht wird.`,
-      customer_id: customerId,
-      quelle: 'stripe-webhook',
-    })
+    // B2-Fix: Altes Abo automatisch in Stripe kündigen (keine Doppelbelastung)
+    if (alteSubscription && alteSubscription !== stripeSubscriptionId) {
+      try {
+        await getStripe().subscriptions.cancel(alteSubscription, { prorate: true })
+        console.log(`[STRIPE] Altes Abo ${alteSubscription} nach Upgrade automatisch gekündigt`)
+      } catch (cancelErr) {
+        // Fallback: manual_task wenn Auto-Cancel fehlschlägt
+        console.warn(`[STRIPE] Altes Abo ${alteSubscription} Auto-Cancel fehlgeschlagen:`, (cancelErr as Error).message)
+        await createManualTask(supabase, {
+          typ: 'SONSTIGES',
+          titel: `Altes Stripe-Abo nach Plan-Upgrade beenden: ${kontakt.name}`,
+          beschreibung: `Auto-Cancel fehlgeschlagen: ${(cancelErr as Error).message}. Alte Subscription ${alteSubscription} manuell kündigen.`,
+          customer_id: customerId,
+          quelle: 'stripe-webhook',
+        })
+      }
+    }
 
     await supabase
       .from('upsell_orders')
