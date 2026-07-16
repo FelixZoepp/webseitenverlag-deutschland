@@ -43,6 +43,8 @@ export interface AssetGenerierung {
   styleTags?: string[]
   pairId?: string
   referenceJobId?: string
+  /** Fester Seed für Konsistenz (z. B. makePair-Szene) */
+  seed?: string
   /** 'demo_generiert' für frische Demo-Assets (BF §2.3), sonst Provider-Quelle */
   quelleOverride?: 'demo_generiert'
   kontext?: string
@@ -177,6 +179,7 @@ export async function generiereAsset(
         prompt: o.prompt,
         aspect: o.aspect,
         referenceJobId: o.referenceJobId,
+        seed: o.seed,
       })
       provider = p
       break
@@ -320,13 +323,23 @@ export async function generiereVideo(
   }
 }
 
+/**
+ * makePair() (Asset-Rezeptur §3): Ziel-Szene generieren → Gegen-Zustand
+ * als SEPARATES Bild mit gleichem Seed für Szene-Konsistenz.
+ *
+ * Higgsfield Cloud hat KEINE Image-Edit-API — referenceJobId wird nicht
+ * mehr verwendet. Stattdessen: gleicher Seed + extrem präziser Prompt
+ * der die identische Szene beschreibt, nur den Zustand ändert.
+ */
 export async function makePair(o: PaarGenerierung): Promise<AssetPaar> {
   const pairId = randomUUID()
-  const aspect = o.aspect ?? '4:3'
+  const aspect = o.aspect ?? '16:9'
   const admin = createAdminClient()
   const kette = getAssetProviderKette()
+  // Gleicher Seed für beide Bilder → maximale Szene-Konsistenz
+  const sharedSeed = String(Math.floor(Math.random() * 1_000_000))
 
-  // 1) Ziel (nachher) zuerst — Provider-Kette darf hier noch wechseln
+  // 1) Ziel (nachher) zuerst — der erstrebenswerte Zustand
   const nachher = await generiereAsset(
     {
       prompt: o.nachherPrompt,
@@ -337,14 +350,12 @@ export async function makePair(o: PaarGenerierung): Promise<AssetPaar> {
       pairId,
       quelleOverride: o.quelleOverride,
       kontext: o.kontext,
+      seed: sharedSeed,
     },
     { providers: kette, admin }
   )
 
-  // 2) Degradation (vorher) — NUR der Provider, der das Ziel erzeugt hat:
-  //    referenceJobId ist providergebunden; dieselbe Kette-Instanz behält
-  //    die Job-Ergebnisse im Speicher.
-  const zielProvider = kette.find((p) => p.name === nachher.provider)
+  // 2) Gegen-Zustand — gleiches Seed, Prompt beschreibt identische Szene nur degradiert
   const vorher = await generiereAsset(
     {
       prompt: o.vorherPrompt,
@@ -353,18 +364,12 @@ export async function makePair(o: PaarGenerierung): Promise<AssetPaar> {
       szeneTyp: 'vorher',
       styleTags: o.styleTags,
       pairId,
-      referenceJobId: nachher.jobId,
       quelleOverride: o.quelleOverride,
       kontext: o.kontext,
+      seed: sharedSeed,
     },
-    { providers: zielProvider ? [zielProvider] : kette, admin }
+    { providers: kette, admin }
   )
-  // Paar-Check-Minimum: Edit muss auf dem Ziel-Job basieren (gleiche Szene)
-  if (vorher.provider !== nachher.provider) {
-    console.warn(
-      `[assets] Paar ${pairId}: vorher (${vorher.provider}) und nachher (${nachher.provider}) von verschiedenen Providern — Szene ggf. inkonsistent`
-    )
-  }
 
   return { pairId, nachher, vorher }
 }

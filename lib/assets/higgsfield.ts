@@ -140,10 +140,6 @@ export class HiggsfieldProvider implements AssetProvider {
 
   async generateImage(o: GenerateImageOptions): Promise<GeneratedImage> {
     const seed = o.seed ?? String(Math.floor(Math.random() * 1_000_000))
-    const referenzUrl = o.referenceJobId ? this.ergebnisse.get(o.referenceJobId) : undefined
-    if (o.referenceJobId && !referenzUrl) {
-      throw new Error(`Higgsfield: unbekannte referenceJobId ${o.referenceJobId}`)
-    }
 
     const pfad = process.env.HIGGSFIELD_PATH_TEXT2IMG ?? '/higgsfield-ai/soul/standard'
 
@@ -151,8 +147,8 @@ export class HiggsfieldProvider implements AssetProvider {
       prompt: o.prompt,
       aspect_ratio: o.aspect,
       resolution: '720p',
+      seed: Number(seed),
     }
-    if (referenzUrl) body.image_url = referenzUrl
 
     const anlage = await fetch(`${this.base}${pfad}`, {
       method: 'POST',
