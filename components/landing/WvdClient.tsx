@@ -353,34 +353,48 @@ export default function WvdClient() {
             <h2 className="display">Drei Schritte. <span className="accent">Null Stress.</span></h2>
             <p>Du kümmerst dich um deine Arbeit. Wir kümmern uns um deine Sichtbarkeit.</p>
           </div>
-          <div className="workflow-canvas">
-            <svg className="beam-svg" viewBox="0 0 800 80" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="beam-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#2563eb" stopOpacity="0" />
-                  <stop offset="50%" stopColor="#2563eb" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path className="beam-path" d="M 140 40 Q 270 -20 400 40" />
-              <path className="beam-pulse" d="M 140 40 Q 270 -20 400 40" />
-              <path className="beam-path" d="M 400 40 Q 530 100 660 40" />
-              <path className="beam-pulse delayed" d="M 400 40 Q 530 100 660 40" />
-            </svg>
-            {[
-              { icon: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />, step: "01", title: "15 Min. Gespräch", desc: "Du erzählst uns von deinem Business. Wir hören zu und beraten – kostenlos und unverbindlich." },
-              { icon: <><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></>, step: "02", title: "Webseite geht live", desc: "Wir bauen deine Seite. In wenigen Tagen steht sie – fertig, optimiert, startklar." },
-              { icon: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></>, step: "03", title: "Anfragen empfangen", desc: "Deine Webseite arbeitet 24/7 für dich. Du wirst gefunden und bekommst Anfragen." },
-            ].map((s, i) => (
-              <div key={i} className="workflow-step">
-                <div className="step-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">{s.icon}</svg>
+
+          <div style={{ background: "var(--cream)", borderRadius: 24, border: "1px solid var(--border)", padding: "48px 40px 40px" }}>
+            <div className="workflow-v2">
+              {[
+                {
+                  icon: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.19 13.8 19.79 19.79 0 0 1 1.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />,
+                  title: "Kostenloses Erstgespräch",
+                  desc: "In einem 15-Minuten-Gespräch lernen wir dich und dein Business kennen. Kostenlos und unverbindlich.",
+                },
+                {
+                  icon: <><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></>,
+                  title: "Webseite geht live",
+                  desc: "Wir bauen deine Seite. In wenigen Tagen steht sie – fertig, optimiert, startklar.",
+                },
+                {
+                  icon: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></>,
+                  title: "Anfragen empfangen",
+                  desc: "Deine Webseite arbeitet 24/7 für dich. Du wirst gefunden und bekommst Anfragen.",
+                },
+              ].map((s, i) => (
+                <div key={i} className="workflow-v2-step">
+                  <div className="workflow-circle">
+                    <svg viewBox="0 0 24 24">{s.icon}</svg>
+                  </div>
+                  {i < 2 && <div className="workflow-line" />}
+                  <h3>{s.title}</h3>
+                  <p>{s.desc}</p>
                 </div>
-                <div className="step-num">SCHRITT {s.step}</div>
-                <h3>{s.title}</h3>
-                <p>{s.desc}</p>
+              ))}
+            </div>
+
+            <div style={{ textAlign: "center" }}>
+              <a href="/entwurf" className="urgency-cta">
+                <span>Kostenloses Erstgespräch buchen</span>
+                <span className="arrow-circle">
+                  <svg viewBox="0 0 24 24" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </span>
+              </a>
+              <div className="urgency-dot" style={{ justifyContent: "center" }}>
+                Aktuell 3 Plätze diese Woche verfügbar
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
