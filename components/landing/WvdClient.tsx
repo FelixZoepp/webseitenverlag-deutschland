@@ -232,7 +232,7 @@ export default function WvdClient() {
           2. PROBLEM-AGITATION – "Kennst du das?"
           ═══════════════════════════════════════ */}
       <section id="problem" style={{ background: "var(--cream)", padding: "96px 0" }}>
-        <div className="container" style={{ maxWidth: 900 }}>
+        <div className="container" style={{ maxWidth: 1100 }}>
           <div className="section-head">
             <span className="eyebrow">Kommt dir das bekannt vor?</span>
             <h2 className="display" style={{ fontSize: "clamp(36px, 4.5vw, 52px)" }}>
@@ -240,35 +240,48 @@ export default function WvdClient() {
             </h2>
           </div>
 
-          <div style={{ display: "grid", gap: 24 }}>
+          <div className="problem-bento">
             {[
               {
-                emoji: "😤",
-                title: "\"Ich hab mal bei einer Agentur angefragt – 6.000€ wollten die. Nur für die Webseite.\"",
-                desc: "Du weißt, dass du online sichtbar sein musst. Aber 5.000–10.000€ vorab zahlen, ohne zu wissen ob es funktioniert? Das fühlt sich an wie ein Blindflug mit deinem Ersparten."
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <path d="M16 2v4M8 2v4M3 10h18" />
+                    <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01" />
+                  </svg>
+                ),
+                title: "Du hast Sichtbarkeit, aber der Kalender bleibt leer.",
+                desc: "Du weißt, dass du online sichtbar sein musst. Aber 5.000–10.000€ vorab zahlen, ohne zu wissen ob es funktioniert? Das fühlt sich an wie ein Blindflug mit deinem Ersparten.",
               },
               {
-                emoji: "📱",
-                title: "\"Mein Kumpel hat mir was mit WordPress gebastelt. Sieht aus wie 2014.\"",
-                desc: "Die Seite lädt ewig, ist nicht mobil-optimiert und auf Google Seite 5. Du weißt, dass potenzielle Kunden abspringen – aber eine echte Lösung scheint zu teuer."
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <path d="M8 21h8M12 17v4" />
+                    <path d="M7 8h4M7 11h6" />
+                  </svg>
+                ),
+                title: "Schwächere Anbieter ziehen eiskalt an dir vorbei.",
+                desc: "Die Seite deines Konkurrenten lädt schnell, ist mobil-optimiert und auf Google Seite 1. Du weißt, dass potenzielle Kunden abspringen – aber eine echte Lösung scheint zu teuer.",
               },
               {
-                emoji: "😰",
-                title: "\"Mein Konkurrent zwei Straßen weiter hat seit letztem Jahr eine richtig gute Webseite. Der bekommt jetzt die ganzen Anfragen.\"",
-                desc: "Du beobachtest, wie andere in deiner Region online sichtbar werden. Anfragen bekommen. Wachsen. Und du? Du rennst der Arbeit hinterher, statt dass sie zu dir kommt."
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 8v4l3 3" />
+                  </svg>
+                ),
+                title: "Du bist immer der, der hinterherrennt.",
+                desc: "Statt dass Kunden von selbst anfragen, jagst du jeden Deal aktiv. Wer online nicht nach Premium aussieht, bettelt um Aufträge. Und killt dabei seine Verhandlungsposition.",
               },
             ].map((p, i) => (
-              <div key={i} style={{
-                padding: "32px 36px", borderRadius: 20,
-                border: "1px solid var(--border)", background: "var(--bg)",
-                display: "grid", gridTemplateColumns: "auto 1fr", gap: 24, alignItems: "start",
-              }}>
-                <span style={{ fontSize: 36, lineHeight: 1 }}>{p.emoji}</span>
-                <div>
-                  <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 20, lineHeight: 1.3, marginBottom: 10, fontVariationSettings: '"opsz" 24, "SOFT" 50' }}>
-                    {p.title}
-                  </h3>
-                  <p style={{ color: "var(--ink-soft)", fontSize: 15, lineHeight: 1.65 }}>{p.desc}</p>
+              <div key={i} className="problem-card">
+                <div className="problem-card-visual">
+                  {p.icon}
+                </div>
+                <div className="problem-card-body">
+                  <h3>{p.title}</h3>
+                  <p>{p.desc}</p>
                 </div>
               </div>
             ))}
