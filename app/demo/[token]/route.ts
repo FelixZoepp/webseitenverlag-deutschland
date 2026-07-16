@@ -65,6 +65,20 @@ export async function GET(
   const istFlagship = engine === 'flagship'
 
   let html: string
+
+  // Custom-HTML-Demos (z. B. Animations-Flagships wie Padel)
+  if (engine === 'custom' && typeof (demo.config as { html?: string }).html === 'string') {
+    html = (demo.config as { html: string }).html
+    await supabase
+      .from('demos')
+      .update({ view_count: (demo.view_count ?? 0) + 1, last_viewed_at: new Date().toISOString() })
+      .eq('id', demo.id)
+    return new NextResponse(html, {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' },
+    })
+  }
+
   if (istFlagship) {
     try {
       // Flagship bringt Ribbon + noindex selbst mit — keine Demo-Bar-Injektion nötig
