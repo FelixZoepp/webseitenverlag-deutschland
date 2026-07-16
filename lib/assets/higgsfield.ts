@@ -112,26 +112,29 @@ export class HiggsfieldProvider implements AssetProvider {
     }
   }
 
-  /** Pollt den request_id bis ein Ergebnis da ist (Bild-URL oder Video-URL) */
-  private async pollRequest(requestId: string, beschreibung: string): Promise<string> {
+  /** Pollt GET /requests/{request_id}/status bis completed */
+  private async pollRequest(requestId: string, beschreibung: string): Promise<{ imageUrl?: string; videoUrl?: string }> {
     return pollBis(async () => {
-      const res = await fetch(`${this.base}/v1/requests/${requestId}`, { headers: this.headers })
-      if (!res.ok) throw new Error(`Higgsfield-Poll fehlgeschlagen (${res.status})`)
+      const res = await fetch(`${this.base}/requests/${requestId}/status`, {
+        headers: this.headers,
+      })
+      if (!res.ok) throw new Error(`Higgsfield-Poll fehlgeschlagen (${res.status}): ${await res.text().catch(() => '')}`)
       const daten = (await res.json()) as {
         status?: string
-        result?: { url?: string } | Array<{ url?: string }>
-        output_url?: string
-        results?: Array<{ url?: string }>
+        images?: Array<{ url?: string }>
+        video?: { url?: string }
       }
       if (daten.status === 'failed' || daten.status === 'error') {
         throw new Error(`Higgsfield: Job ${requestId} failed`)
       }
-      if (daten.status !== 'completed' && daten.status !== 'done') return null
-      // Ergebnis-URL aus verschiedenen möglichen Response-Formaten
-      const url = daten.output_url
-        ?? (Array.isArray(daten.result) ? daten.result[0]?.url : daten.result?.url)
-        ?? daten.results?.[0]?.url
-      return url ?? null
+      if (daten.status === 'nsfw') {
+        throw new Error(`Higgsfield: Job ${requestId} wurde von der Moderation abgelehnt (NSFW)`)
+      }
+      if (daten.status !== 'completed') return null
+      return {
+        imageUrl: daten.images?.[0]?.url,
+        videoUrl: daten.video?.url,
+      }
     }, beschreibung)
   }
 
@@ -163,7 +166,9 @@ export class HiggsfieldProvider implements AssetProvider {
     const requestId = job.request_id ?? job.id
     if (!requestId) throw new Error('Higgsfield: keine request_id in der Antwort')
 
-    const url = await this.pollRequest(requestId, `Higgsfield-Image ${requestId}`)
+    const result = await this.pollRequest(requestId, `Higgsfield-Image ${requestId}`)
+    const url = result.imageUrl
+    if (!url) throw new Error(`Higgsfield: kein Bild in der Antwort für ${requestId}`)
 
     this.ergebnisse.set(requestId, url)
     return {
@@ -193,7 +198,9 @@ export class HiggsfieldProvider implements AssetProvider {
     const requestId = job.request_id ?? job.id
     if (!requestId) throw new Error('Higgsfield-Video: keine request_id in der Antwort')
 
-    const url = await this.pollRequest(requestId, `Higgsfield-Video ${requestId}`)
+    const result = await this.pollRequest(requestId, `Higgsfield-Video ${requestId}`)
+    const url = result.videoUrl
+    if (!url) throw new Error(`Higgsfield: kein Video in der Antwort für ${requestId}`)
 
     return {
       jobId: requestId,
