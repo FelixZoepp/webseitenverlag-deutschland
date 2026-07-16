@@ -419,7 +419,7 @@ export default function DemosPage() {
       </div>
 
       {/* Liste */}
-      <div className="panel fade-up" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="panel fade-up" style={{ padding: 0 }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--za-border)' }}>
           <span className="panel-title">Alle Demos</span>
         </div>
