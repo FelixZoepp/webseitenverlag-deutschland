@@ -103,11 +103,36 @@ export class HiggsfieldProvider implements AssetProvider {
   }
 
   private get headers(): Record<string, string> {
+    const key = process.env.HIGGSFIELD_API_KEY ?? ''
+    const secret = process.env.HIGGSFIELD_API_SECRET ?? ''
     return {
       'Content-Type': 'application/json',
-      'hf-api-key': process.env.HIGGSFIELD_API_KEY ?? '',
-      'hf-secret': process.env.HIGGSFIELD_API_SECRET ?? '',
+      Accept: 'application/json',
+      Authorization: `Key ${key}:${secret}`,
     }
+  }
+
+  /** Pollt den request_id bis ein Ergebnis da ist (Bild-URL oder Video-URL) */
+  private async pollRequest(requestId: string, beschreibung: string): Promise<string> {
+    return pollBis(async () => {
+      const res = await fetch(`${this.base}/v1/requests/${requestId}`, { headers: this.headers })
+      if (!res.ok) throw new Error(`Higgsfield-Poll fehlgeschlagen (${res.status})`)
+      const daten = (await res.json()) as {
+        status?: string
+        result?: { url?: string } | Array<{ url?: string }>
+        output_url?: string
+        results?: Array<{ url?: string }>
+      }
+      if (daten.status === 'failed' || daten.status === 'error') {
+        throw new Error(`Higgsfield: Job ${requestId} failed`)
+      }
+      if (daten.status !== 'completed' && daten.status !== 'done') return null
+      // Ergebnis-URL aus verschiedenen möglichen Response-Formaten
+      const url = daten.output_url
+        ?? (Array.isArray(daten.result) ? daten.result[0]?.url : daten.result?.url)
+        ?? daten.results?.[0]?.url
+      return url ?? null
+    }, beschreibung)
   }
 
   async generateImage(o: GenerateImageOptions): Promise<GeneratedImage> {
@@ -117,46 +142,32 @@ export class HiggsfieldProvider implements AssetProvider {
       throw new Error(`Higgsfield: unbekannte referenceJobId ${o.referenceJobId}`)
     }
 
-    // Text→Bild bzw. Bild-Edit (Degradation derselben Szene)
-    const pfad = referenzUrl
-      ? (process.env.HIGGSFIELD_PATH_EDIT ?? '/v1/image2image/soul')
-      : (process.env.HIGGSFIELD_PATH_TEXT2IMG ?? '/v1/text2image/soul')
+    const pfad = process.env.HIGGSFIELD_PATH_TEXT2IMG ?? '/higgsfield-ai/soul/standard'
+
+    const body: Record<string, unknown> = {
+      prompt: o.prompt,
+      aspect_ratio: o.aspect,
+      resolution: '720p',
+    }
+    if (referenzUrl) body.image_url = referenzUrl
 
     const anlage = await fetch(`${this.base}${pfad}`, {
       method: 'POST',
       headers: this.headers,
-      body: JSON.stringify({
-        params: {
-          prompt: o.prompt,
-          aspect_ratio: o.aspect,
-          seed: Number(seed),
-          ...(referenzUrl ? { image_url: referenzUrl } : {}),
-        },
-      }),
+      body: JSON.stringify(body),
     })
     if (!anlage.ok) {
       throw new Error(`Higgsfield-Job fehlgeschlagen (${anlage.status}): ${await anlage.text()}`)
     }
-    const job = (await anlage.json()) as { id?: string; job_set_id?: string }
-    const jobId = job.id ?? job.job_set_id
-    if (!jobId) throw new Error('Higgsfield: keine Job-ID in der Antwort')
+    const job = (await anlage.json()) as { request_id?: string; id?: string }
+    const requestId = job.request_id ?? job.id
+    if (!requestId) throw new Error('Higgsfield: keine request_id in der Antwort')
 
-    const url = await pollBis(async () => {
-      const res = await fetch(`${this.base}/v1/job-sets/${jobId}`, { headers: this.headers })
-      if (!res.ok) throw new Error(`Higgsfield-Poll fehlgeschlagen (${res.status})`)
-      const daten = (await res.json()) as {
-        jobs?: Array<{ status: string; results?: { raw?: { url?: string } } }>
-      }
-      const fertig = daten.jobs?.find((j) => j.status === 'completed')
-      if (daten.jobs?.every((j) => j.status === 'failed')) {
-        throw new Error('Higgsfield: alle Jobs failed')
-      }
-      return fertig?.results?.raw?.url ?? null
-    }, `Higgsfield-Job ${jobId}`)
+    const url = await this.pollRequest(requestId, `Higgsfield-Image ${requestId}`)
 
-    this.ergebnisse.set(jobId, url)
+    this.ergebnisse.set(requestId, url)
     return {
-      jobId,
+      jobId: requestId,
       url,
       costCents: Number(process.env.HIGGSFIELD_KOSTEN_CENT ?? 6),
       seed,
@@ -164,40 +175,28 @@ export class HiggsfieldProvider implements AssetProvider {
   }
 
   async generateVideo(o: GenerateVideoOptions): Promise<GeneratedVideo> {
-    const pfad = process.env.HIGGSFIELD_PATH_IMG2VID ?? '/v1/image2video/soul'
+    const pfad = process.env.HIGGSFIELD_PATH_IMG2VID ?? '/bytedance/seedance/v1/pro/image-to-video'
+
     const anlage = await fetch(`${this.base}${pfad}`, {
       method: 'POST',
       headers: this.headers,
       body: JSON.stringify({
-        params: {
-          prompt: o.prompt,
-          image_url: o.imageUrl,
-          duration: o.durationSeconds ?? 5,
-        },
+        image_url: o.imageUrl,
+        prompt: o.prompt,
+        duration: o.durationSeconds ?? 5,
       }),
     })
     if (!anlage.ok) {
       throw new Error(`Higgsfield-Video fehlgeschlagen (${anlage.status}): ${await anlage.text()}`)
     }
-    const job = (await anlage.json()) as { id?: string; job_set_id?: string }
-    const jobId = job.id ?? job.job_set_id
-    if (!jobId) throw new Error('Higgsfield-Video: keine Job-ID in der Antwort')
+    const job = (await anlage.json()) as { request_id?: string; id?: string }
+    const requestId = job.request_id ?? job.id
+    if (!requestId) throw new Error('Higgsfield-Video: keine request_id in der Antwort')
 
-    const url = await pollBis(async () => {
-      const res = await fetch(`${this.base}/v1/job-sets/${jobId}`, { headers: this.headers })
-      if (!res.ok) throw new Error(`Higgsfield-Video-Poll fehlgeschlagen (${res.status})`)
-      const daten = (await res.json()) as {
-        jobs?: Array<{ status: string; results?: { raw?: { url?: string } } }>
-      }
-      const fertig = daten.jobs?.find((j) => j.status === 'completed')
-      if (daten.jobs?.every((j) => j.status === 'failed')) {
-        throw new Error('Higgsfield-Video: alle Jobs failed')
-      }
-      return fertig?.results?.raw?.url ?? null
-    }, `Higgsfield-Video-Job ${jobId}`)
+    const url = await this.pollRequest(requestId, `Higgsfield-Video ${requestId}`)
 
     return {
-      jobId,
+      jobId: requestId,
       url,
       costCents: Number(process.env.HIGGSFIELD_VIDEO_KOSTEN_CENT ?? 12),
       posterUrl: o.imageUrl,
