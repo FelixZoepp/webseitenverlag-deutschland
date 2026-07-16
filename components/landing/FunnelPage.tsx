@@ -14,6 +14,8 @@ type Antworten = {
   zeitrahmen: string;
   branche: string;
   ziel: string;
+  umfang: string;
+  extras: string;
   firma: string;
   ort: string;
   bestehende_website: string;
@@ -27,6 +29,8 @@ const LEER: Antworten = {
   zeitrahmen: "",
   branche: "",
   ziel: "",
+  umfang: "",
+  extras: "",
   firma: "",
   ort: "",
   bestehende_website: "",
@@ -76,6 +80,24 @@ const FRAGEN: { key: keyof Antworten; frage: string; optionen: string[] }[] = [
       "Alles aus einer Hand — null Aufwand für mich",
     ],
   },
+  {
+    key: "umfang",
+    frage: "Wie umfangreich soll Ihre Website sein?",
+    optionen: [
+      "Eine starke Startseite reicht mir",
+      "Startseite + ein paar Unterseiten (Leistungen, Über uns)",
+      "Umfangreich — viele Leistungen, Blog, Stellenanzeigen",
+    ],
+  },
+  {
+    key: "extras",
+    frage: "Welche Features sind Ihnen wichtig?",
+    optionen: [
+      "Standard-Website — sauber und professionell",
+      "Mit Animationen & Video-Header — richtig premium",
+      "Volle Ausstattung — SEO, Animationen, Terminbuchung",
+    ],
+  },
 ];
 
 // 4 Fragen + Firma + Kontakt
@@ -112,7 +134,10 @@ export default function FunnelPage() {
       const nachricht = [
         `Website vorhanden: ${antworten.website_status}`,
         `Wichtigstes Ziel: ${antworten.ziel}`,
+        `Umfang: ${antworten.umfang}`,
+        `Features: ${antworten.extras}`,
         antworten.ort ? `Ort: ${antworten.ort}` : null,
+        `Zeitrahmen: ${antworten.zeitrahmen}`,
       ]
         .filter(Boolean)
         .join("\n");
@@ -243,6 +268,15 @@ export default function FunnelPage() {
               <strong className="text-[var(--ink)]">kostenlosen Website-Entwurf</strong> und melden
               uns innerhalb von 24 Stunden bei Ihnen.
             </p>
+            {antworten.extras && (
+              <p className="mt-4 rounded-xl bg-[var(--blue)]/5 px-6 py-3 text-[14px] text-[var(--blue-2)]">
+                {antworten.extras.includes("Volle Ausstattung")
+                  ? "Basierend auf Ihren Wünschen bereiten wir Ihnen unser Growth-Paket vor — mit SEO, Animationen & Terminbuchung."
+                  : antworten.extras.includes("Video-Header")
+                    ? "Basierend auf Ihren Wünschen bereiten wir Ihnen unser Business-Paket mit Premium-Animationen vor."
+                    : "Wir bereiten Ihnen einen sauberen, professionellen Entwurf vor."}
+              </p>
+            )}
           </div>
         ) : schritt >= 0 && schritt < FRAGEN.length ? (
           /* ── Frage-Screens (A/B/C/D-Karten) ──────────── */
