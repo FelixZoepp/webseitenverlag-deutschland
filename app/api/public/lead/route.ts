@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createHash } from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
@@ -77,6 +78,44 @@ export async function POST(request: Request) {
   if (error) {
     console.error('Lead insert error:', error.message)
     return NextResponse.json({ error: 'Anfrage konnte nicht gespeichert werden.' }, { status: 500 })
+  }
+
+  // M1: Conversion-Tracking (server-side, best effort)
+  // Meta CAPI
+  if (process.env.META_PIXEL_ID && process.env.META_CAPI_TOKEN) {
+    try {
+      await fetch(`https://graph.facebook.com/v19.0/${process.env.META_PIXEL_ID}/events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: [{
+            event_name: 'Lead',
+            event_time: Math.floor(Date.now() / 1000),
+            event_source_url: lead.landing_path ? `https://${process.env.NEXT_PUBLIC_MARKETING_HOST || 'webseitenverlag-deutschland.vercel.app'}${lead.landing_path}` : undefined,
+            action_source: 'website',
+            user_data: {
+              em: lead.email ? [createHash('sha256').update(lead.email.toLowerCase().trim()).digest('hex')] : undefined,
+              ph: lead.telefon ? [createHash('sha256').update(lead.telefon.replace(/\D/g, '')).digest('hex')] : undefined,
+            },
+            custom_data: { lead_id: inserted.id, branche: lead.branche, quelle: lead.quelle },
+          }],
+          access_token: process.env.META_CAPI_TOKEN,
+        }),
+      })
+    } catch (e) { console.warn('[CAPI] Meta event fehlgeschlagen:', (e as Error).message) }
+  }
+  // Google Ads Conversion (Measurement Protocol)
+  if (process.env.GA_MEASUREMENT_ID && process.env.GA_API_SECRET) {
+    try {
+      await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${process.env.GA_MEASUREMENT_ID}&api_secret=${process.env.GA_API_SECRET}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: lead.utm_source || 'server',
+          events: [{ name: 'generate_lead', params: { lead_id: inserted.id, branche: lead.branche, source: lead.quelle } }],
+        }),
+      })
+    } catch (e) { console.warn('[GA] Event fehlgeschlagen:', (e as Error).message) }
   }
 
   // Benachrichtigung an Vertrieb — Fehler blockieren den Lead nicht

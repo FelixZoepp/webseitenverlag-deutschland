@@ -38,6 +38,20 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // M2: Admin-Routen nur für Admin-Rolle (nicht nur authentifiziert)
+  if (user && path.startsWith('/admin')) {
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('role')
+      .eq('user_id', user.id)
+      .single()
+    if (customer?.role !== 'admin') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
+  }
+
   // Redirect authenticated users from login to dashboard (but NOT from register — it shows info message)
   if (user && path === '/login') {
     const url = request.nextUrl.clone()

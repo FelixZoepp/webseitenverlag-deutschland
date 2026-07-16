@@ -19,6 +19,27 @@ import type { ProspectData } from './prospect-data'
 
 const BUCKET = 'asset-bank'
 
+/** M5: Branchen-spezifische Video-Bewegungs-Prompts für Flagships ohne style_prompts */
+const VIDEO_PROMPTS: Record<string, string> = {
+  reinigung: 'Light reflections slowly shifting on freshly cleaned glass surfaces, gentle water droplets running down a window pane, dust particles floating in bright morning sunlight.',
+  restaurant_italienisch: 'Warm candlelight gently flickering, steam rising from a freshly served pasta dish, wine slowly being poured into a crystal glass.',
+  maler: 'Fresh paint slowly dripping from a roller, smooth wet paint surface reflecting light, gentle brush strokes appearing on a wall.',
+  dachdecker: 'Morning light slowly moving across roof tiles, gentle wind moving a safety rope, subtle shadows shifting on a slate surface.',
+  cafe: 'Steam rising from a fresh espresso cup, milk foam slowly settling in a latte art pattern, gentle light through a cafe window.',
+  kosmetikstudio: 'Soft salon lighting slowly shifting, gentle steam from a facial treatment, cosmetic brush softly dusting powder.',
+  zahnarzt: 'Clean dental instruments gleaming under bright LED light, gentle water flowing in a dental basin, sterile blue light reflections.',
+  physiotherapie: 'Gentle movement of therapy bands, soft natural light streaming through treatment room windows, calm water feature in background.',
+  friseur: 'Hair strands gently falling and catching salon light, scissors making precise cuts in slow motion, warm styling tool steam rising.',
+  kfz_werkstatt: 'Oil slowly dripping, wrench turning on a chrome bolt with reflections, hydraulic lift slowly raising a car.',
+  autoaufbereitung: 'Water beading and slowly running off a freshly polished car hood, wax buffer spinning with light reflections, chrome gleaming.',
+  umzugsunternehmen: 'Moving blankets gently settling over furniture, dolly wheels slowly rolling on hardwood floor, morning light through an empty apartment.',
+  fotograf: 'Camera shutter slowly closing, studio flash softly reflecting off an umbrella, gentle bokeh lights drifting.',
+  fitnessstudio: 'Weight plates gently settling on a barbell, gym floor mat slightly compressing, cable machine slowly releasing tension.',
+  personal_training: 'Resistance band slowly stretching, kettlebell gently swinging, morning dew on outdoor training equipment.',
+  hausmeisterservice: 'Keys gently swinging on a caretaker ring, fresh paint drying on a railing, garden sprinkler slowly rotating.',
+  padel: 'A padel ball gently rolling across the polished court surface, subtle light reflections shimmering on glass walls, dust particles floating in LED light.',
+}
+
 /** Design-Overrides für die Demo-Generierung (UI → API → Pipeline) */
 export interface DesignOverrides {
   /** Hell (sans_bold_hell) oder Dunkel (serif_warm_dunkel) */
@@ -331,13 +352,13 @@ export async function generiereFlagshipDemo(
       `Photorealistic editorial photography. No text, no logos, no watermarks, no recognizable people.`,
     ].join(' ')
 
-    // Video: statische Kamera, subtile Mikrobewegung des Handwerks
+    // Video: statische Kamera, branchen-spezifische Mikrobewegung
+    const branchenBewegung = VIDEO_PROMPTS[brancheKey] || `Subtle ambient motion fitting for ${brancheName}: light reflections shifting on surfaces, gentle material movement, dust particles in light.`
     const videoPrompt = [
       `Cinematic 4K, completely static tripod camera, zero camera movement.`,
       `Close-up scene: ${heroLabel}. ${brancheName} environment.`,
-      `Subtle ambient motion only: light reflections shifting on surfaces, gentle material movement, dust particles in light, natural atmosphere.`,
-      `Focus on the craft — hands working, tools in motion, materials responding. No face visible, no person looking at camera.`,
-      `Seamless 5-second loop, calm and premium. No text, no logos.`,
+      branchenBewegung,
+      `Seamless 5-second loop, calm and premium. No face visible, no person looking at camera. No text, no logos.`,
     ].join(' ')
 
     // Signature ZIEL (Nachher): der erstrebenswerte Zustand — wird ZUERST generiert (16:9)

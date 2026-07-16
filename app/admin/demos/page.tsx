@@ -318,17 +318,21 @@ export default function DemosPage() {
   }
 
   async function handleGenerateCustomAssets(demoId: string) {
-    if (busyId) return
     setBusyId(demoId)
     setError(null)
+    setWarning(null)
     try {
       const res = await fetch(`/api/admin/demos/${demoId}/generate-assets`, { method: 'POST' })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Asset-Generierung fehlgeschlagen'); return }
       if (data.warnungen?.length) setWarning(data.warnungen.join(' · '))
+      else setWarning('Assets generiert! Seite neu laden um sie zu sehen.')
       loadDemos()
-    } catch { setError('Netzwerkfehler') }
-    finally { setBusyId(null) }
+    } catch (err) {
+      setError(`Asset-Generierung fehlgeschlagen: ${err instanceof Error ? err.message : 'Netzwerkfehler'}`)
+    } finally {
+      setBusyId(null)
+    }
   }
 
   async function handleDelete(demo: Demo) {
