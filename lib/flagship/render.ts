@@ -147,7 +147,7 @@ export function renderFlagshipPage(config: FlagshipConfig, opts: FlagshipRenderO
 
 /** Sektions-Zuordnung je Unterseite */
 const SEITEN_SEKTIONEN: Record<UnterseitenSlug, (config: FlagshipConfig, hell: boolean) => string[]> = {
-  leistungen: (config, _hell) => {
+  leistungen: (config) => {
     const { inhalte } = config
     return [
       renderLeistungen(inhalte.leistungen),
@@ -156,7 +156,7 @@ const SEITEN_SEKTIONEN: Record<UnterseitenSlug, (config: FlagshipConfig, hell: b
       inhalte.nachweise ? renderNachweise(inhalte.nachweise) : '',
     ]
   },
-  ergebnisse: (config, _hell) => {
+  ergebnisse: (config) => {
     const { inhalte } = config
     return [
       renderErgebnisse(inhalte.ergebnisse),
@@ -164,7 +164,7 @@ const SEITEN_SEKTIONEN: Record<UnterseitenSlug, (config: FlagshipConfig, hell: b
       renderStimmen(inhalte.stimmen),
     ]
   },
-  'ueber-uns': (config, _hell) => {
+  'ueber-uns': (config) => {
     const { inhalte } = config
     return [
       renderEmpathie(inhalte.empathie),
