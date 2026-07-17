@@ -274,9 +274,95 @@ async function bankPaar(
 }
 
 /**
- * Baut die personalisierte Flagship-Demo-Config aus einer approved
- * Branchen-Vorlage. Wirft nur, wenn die Vorlage fehlt oder nicht
- * freigegeben ist — Asset-Probleme werden zu Warnungen (BF §2.3).
+ * Phase 1: Nur Personalisierung (OHNE Asset-Generierung).
+ * Klont die Vorlage, ersetzt Firma/Ort/Telefon, Google-Bewertungen, Lokal-Chips.
+ * Dauert <2s — sicher innerhalb jedes Timeouts.
+ */
+export async function personalisiereFlagshipConfig(
+  prospect: ProspectData,
+  brancheKey: string,
+  overrides?: DesignOverrides
+): Promise<{ config: FlagshipConfig }> {
+  const admin = createAdminClient()
+
+  const { data: row, error } = await admin
+    .from('branchen_profile')
+    .select('branche_key, name, quality_status, profil')
+    .eq('branche_key', brancheKey)
+    .maybeSingle()
+  if (error) throw new Error(`Branchen-Vorlage laden fehlgeschlagen: ${error.message}`)
+  if (!row) throw new Error(`Branchen-Vorlage "${brancheKey}" nicht gefunden`)
+  if (row.quality_status !== 'approved') {
+    throw new Error(
+      `Branche "${brancheKey}" ist nicht freigegeben (${row.quality_status}) — ohne Freigabe keine Demo. Freigabe: /admin/branchen`
+    )
+  }
+
+  const gespeichert = row.profil as {
+    profil: BranchenProfil | null
+    vorlage: FlagshipConfig
+  } | null
+  const vorlage = gespeichert?.vorlage
+  if (!vorlage || vorlage.engine !== 'flagship') {
+    throw new Error(`Branche "${brancheKey}" hat keine Flagship-Vorlage im Profil`)
+  }
+
+  const config = structuredClone(vorlage)
+  if (overrides) wendeDesignOverridesAn(config, overrides)
+  const paare: [string, string][] = []
+  if (config.meta.firma && config.meta.firma !== prospect.firma) {
+    paare.push([config.meta.firma, prospect.firma])
+  }
+  if (prospect.ort && config.meta.ort && config.meta.ort !== prospect.ort) {
+    paare.push([config.meta.ort, prospect.ort])
+  }
+  if (prospect.telefon && config.meta.telefon && config.meta.telefon !== prospect.telefon) {
+    paare.push([config.meta.telefon, prospect.telefon])
+  }
+  config.inhalte = ersetzeUeberall(config.inhalte, paare)
+  config.funnel = ersetzeUeberall(config.funnel, paare)
+
+  config.meta = {
+    firma: prospect.firma,
+    ort: prospect.ort ?? config.meta.ort,
+    telefon: prospect.telefon ?? undefined,
+    email: prospect.email ?? undefined,
+    adresse: prospect.adresse ?? undefined,
+    gegruendet: prospect.gruendungsjahr ?? undefined,
+    seo_titel: config.meta.seo_titel
+      ? ersetzeUeberall(config.meta.seo_titel, paare)
+      : `${prospect.firma}${prospect.ort ? ` — ${prospect.ort}` : ''}`,
+    seo_beschreibung: config.meta.seo_beschreibung
+      ? ersetzeUeberall(config.meta.seo_beschreibung, paare)
+      : undefined,
+  }
+  config.inhalte.conversion.telefon = prospect.telefon ?? undefined
+
+  if (prospect.ort && config.meta.ort && config.inhalte.lokal.variante === 'bezirke') {
+    const vorlagenOrt = vorlage.meta.ort || ''
+    if (vorlagenOrt && prospect.ort.toLowerCase() !== vorlagenOrt.toLowerCase()) {
+      config.inhalte.lokal.chips = [prospect.ort, `${prospect.ort} und Umgebung`, `Großraum ${prospect.ort}`]
+      if (config.inhalte.lokal.note) {
+        config.inhalte.lokal.note = config.inhalte.lokal.note.split(vorlagenOrt).join(prospect.ort)
+      }
+    }
+  }
+  config.herkunft = { ...config.herkunft, generator: 'flagship-demo', quellen: prospect.quellen }
+
+  if (prospect.bewertungen.length >= 2) {
+    config.inhalte.stimmen.quotes = prospect.bewertungen.slice(0, 3).map((b) => ({
+      text: b.text, initialen: initialen(b.name), name: b.name,
+      meta: `Google-Bewertung · ${'★'.repeat(Math.max(1, Math.min(5, Math.round(b.rating))))}`,
+    }))
+  }
+
+  return { config }
+}
+
+/**
+ * Phase 2: Asset-Generierung (Hero, Signature, Ergebnis-Paare).
+ * Wird als separater API-Call getriggert NACH dem Demo-Erstellen.
+ * Dauert 60-180s — hat eigenen maxDuration: 300.
  */
 export async function generiereFlagshipDemo(
   prospect: ProspectData,
