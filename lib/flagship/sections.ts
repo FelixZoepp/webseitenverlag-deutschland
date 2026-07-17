@@ -6,7 +6,8 @@
 import type {
   AblaufInhalt, ConversionInhalt, EmpathieInhalt, ErgebnisseInhalt, FaktenInhalt,
   FaqInhalt, FlagshipInhalte, FooterInhalt, HeroInhalt, LeistungenInhalt,
-  LokalInhalt, NavInhalt, SignatureInhalt, StimmenInhalt, ZahlenInhalt,
+  LokalInhalt, MarkenInhalt, NachweiseInhalt, NavInhalt, ProzessInhalt,
+  ReferenzenInhalt, SignatureInhalt, StimmenInhalt, ZahlenInhalt,
 } from './types'
 import { esc, escAttr, em, hl, icon, mediaSlot } from './html'
 
@@ -120,6 +121,109 @@ export function renderFakten(fakten: FaktenInhalt): string {
     ${punkte}
   </div>
 </div>`
+}
+
+export function renderNachweise(n: NachweiseInhalt): string {
+  const karten = n.items
+    .map((item, i) => {
+      const ic = item.icon ? `<div class="ic">${icon(item.icon)}</div>` : `<div class="ic">${icon('shield')}</div>`
+      const desc = item.beschreibung ? `\n        <p>${esc(item.beschreibung)}</p>` : ''
+      return `<div class="nw-card rv" style="--i:${i}">
+        ${ic}
+        <h3>${esc(item.label)}</h3>${desc}
+      </div>`
+    })
+    .join('\n      ')
+  return `<!-- sektion:nachweise -->
+<section id="nachweise">
+  <div class="wrap">
+    <div class="rv" style="max-width:640px">
+      <span class="eyebrow">${esc(n.eyebrow)}</span>
+      <h2>${hl(n.headline)}</h2>
+    </div>
+    <div class="nachweise-grid">
+      ${karten}
+    </div>
+  </div>
+</section>`
+}
+
+export function renderMarken(m: MarkenInhalt): string {
+  const items = m.logos
+    .map((l) => l.url
+      ? `<span class="marquee-item"><img src="${escAttr(l.url)}" alt="${escAttr(l.name)}"></span>`
+      : `<span class="marquee-item">${esc(l.name)}</span>`)
+    .join('\n      ')
+  // Duplicate for seamless loop
+  const track = `${items}\n      ${items}`
+  const label = m.label ? `<div class="marquee-label">${esc(m.label)}</div>` : ''
+  return `<!-- sektion:marken -->
+<div class="marquee">
+  ${label}<div class="marquee-track">
+      ${track}
+    </div>
+</div>`
+}
+
+export function renderProzess(p: ProzessInhalt): string {
+  const stationen = p.schritte
+    .map((s, i) => {
+      const mediaPart = s.media
+        ? `<div class="proz-media">${mediaSlot(s.media, 'proz-media')}</div>`
+        : s.icon
+          ? `<div class="proz-media" style="display:grid;place-items:center;background:var(--panel)">${icon(s.icon, 3)}</div>`
+          : ''
+      return `<div class="proz-station rv" style="--i:${i}">
+        ${mediaPart}<div class="proz-body">
+          <div class="proz-num">Schritt ${String(i + 1).padStart(2, '0')}</div>
+          <h3>${esc(s.titel)}</h3>
+          <p>${esc(s.text)}</p>
+        </div>
+      </div>`
+    })
+    .join('\n      ')
+  return `<!-- sektion:prozess -->
+<section id="prozess">
+  <div class="wrap">
+    <div class="rv" style="max-width:660px">
+      <span class="eyebrow">${esc(p.eyebrow)}</span>
+      <h2>${hl(p.headline)}</h2>
+    </div>
+    <div class="prozess-scroll">
+      ${stationen}
+    </div>
+  </div>
+</section>`
+}
+
+export function renderReferenzen(r: ReferenzenInhalt): string {
+  const projekte = r.projekte
+    .map((p, i) => {
+      const kz = p.kennzahlen
+        .map((k) => `<span><b>${esc(k.wert)}</b> ${esc(k.label)}</span>`)
+        .join('\n          ')
+      const muster = p.als === 'muster' ? '\n        <div class="ref-muster">Beispielprojekt</div>' : ''
+      return `<div class="ref-card rv" style="--i:${i}">
+        <div class="ref-typ">${esc(p.typ)}</div>
+        <h3>${esc(p.titel)}</h3>
+        <div class="ref-kz">
+          ${kz}
+        </div>${muster}
+      </div>`
+    })
+    .join('\n      ')
+  return `<!-- sektion:referenzen -->
+<section class="ref-section" id="referenzen">
+  <div class="wrap">
+    <div class="rv" style="max-width:660px">
+      <span class="eyebrow">${esc(r.eyebrow)}</span>
+      <h2>${hl(r.headline)}</h2>
+    </div>
+    <div class="ref-grid">
+      ${projekte}
+    </div>
+  </div>
+</section>`
 }
 
 export function renderEmpathie(e: EmpathieInhalt): string {
@@ -416,8 +520,14 @@ export function renderRibbon(): string {
 }
 
 export function sektionsReihenfolge(inhalte: FlagshipInhalte): string[] {
-  const liste = ['nav', 'hero', 'fakten', 'empathie', 'signature', 'leistungen']
+  const liste = ['nav', 'hero', 'fakten']
+  if (inhalte.marken) liste.push('marken')
+  if (inhalte.nachweise) liste.push('nachweise')
+  liste.push('empathie', 'signature', 'leistungen')
+  if (inhalte.prozess) liste.push('prozess')
   if (inhalte.ablauf) liste.push('ablauf')
-  liste.push('ergebnisse', 'zahlen', 'stimmen', 'lokal', 'faq', 'conversion', 'footer')
+  liste.push('ergebnisse')
+  if (inhalte.referenzen) liste.push('referenzen')
+  liste.push('zahlen', 'stimmen', 'lokal', 'faq', 'conversion', 'footer')
   return liste
 }
