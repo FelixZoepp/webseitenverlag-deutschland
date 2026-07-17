@@ -10,8 +10,9 @@ import { flagshipCss } from './css'
 import { flagshipJs } from './js'
 import {
   renderAblauf, renderConversion, renderEmpathie, renderErgebnisse, renderFakten,
-  renderFaq, renderFooter, renderHero, renderLeistungen, renderLokal, renderNav,
-  renderRibbon, renderSignature, renderStimmen, renderZahlen,
+  renderFaq, renderFooter, renderHero, renderLeistungen, renderLokal, renderMarken,
+  renderNav, renderNachweise, renderProzess, renderReferenzen, renderRibbon,
+  renderSignature, renderStimmen, renderZahlen,
 } from './sections'
 
 export function funnelPfad(config: FlagshipConfig, basisPfad = ''): string {
@@ -51,11 +52,15 @@ export function renderFlagshipPage(config: FlagshipConfig, opts: FlagshipRenderO
     renderNav(inhalte.nav, hell, funnelUrl),
     renderHero(inhalte.hero, hell, funnelUrl),
     renderFakten(inhalte.fakten),
+    inhalte.marken ? renderMarken(inhalte.marken) : '',
+    inhalte.nachweise ? renderNachweise(inhalte.nachweise) : '',
     renderEmpathie(inhalte.empathie),
     renderSignature(inhalte.signature),
     renderLeistungen(inhalte.leistungen),
+    inhalte.prozess ? renderProzess(inhalte.prozess) : '',
     inhalte.ablauf ? renderAblauf(inhalte.ablauf) : '',
     renderErgebnisse(inhalte.ergebnisse),
+    inhalte.referenzen ? renderReferenzen(inhalte.referenzen) : '',
     renderZahlen(inhalte.zahlen),
     renderStimmen(inhalte.stimmen),
     renderLokal(inhalte.lokal),
