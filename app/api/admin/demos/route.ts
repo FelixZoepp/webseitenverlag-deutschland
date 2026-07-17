@@ -7,7 +7,7 @@ import { scrapeProspectWebsite } from '@/lib/scrape-prospect'
 import { generateDemoConfig, validateImageUrls } from '@/lib/generate-demo'
 import { collectProspectData } from '@/lib/pipeline/prospect-data'
 import { generateLibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
-import { generiereFlagshipDemo, type DesignOverrides } from '@/lib/pipeline/generate-flagship-demo'
+import { personalisiereFlagshipConfig, generiereFlagshipDemo, type DesignOverrides } from '@/lib/pipeline/generate-flagship-demo'
 import { libraryPageKey, loadLibraryPage } from '@/lib/library/load'
 import { SEED_BRANCHEN, STILE, type Stil } from '@/lib/library/types'
 
@@ -80,11 +80,12 @@ export async function POST(request: Request) {
       designOverrides.premium_animationen = true
     }
 
-    let ergebnis
+    // Phase 1: Nur Personalisierung (OHNE Asset-Generierung) — sofort zurück
+    let config
     try {
-      ergebnis = await generiereFlagshipDemo(prospect, branche, Object.keys(designOverrides).length > 0 ? designOverrides : undefined)
+      const result = await personalisiereFlagshipConfig(prospect, branche, Object.keys(designOverrides).length > 0 ? designOverrides : undefined)
+      config = result.config
     } catch (err) {
-      // Typischer Fall: Vorlage nicht approved → sauberer 400 mit Hinweis
       return NextResponse.json(
         { error: err instanceof Error ? err.message : 'Flagship-Demo fehlgeschlagen' },
         { status: 400 }
@@ -92,9 +93,7 @@ export async function POST(request: Request) {
     }
 
     const gewaehltesPaket = typeof body?.paket === 'string' && ['starter', 'business', 'growth'].includes(body.paket) ? body.paket : 'business'
-
-    // Multipage: Business/Growth bekommen Unterseiten, Starter bleibt Onepager
-    ergebnis.config.seiten_modus = gewaehltesPaket === 'starter' ? 'onepager' : 'multipage'
+    config.seiten_modus = gewaehltesPaket === 'starter' ? 'onepager' : 'multipage'
 
     const shareToken = randomBytes(24).toString('base64url')
     const { data: demo, error } = await auth.data.supabase
@@ -105,28 +104,27 @@ export async function POST(request: Request) {
         branche,
         template_id: `flagship:${branche}`,
         engine: 'flagship',
-        config: ergebnis.config,
+        config,
         scraped_data: prospect,
         share_token: shareToken,
         notes,
         paket: gewaehltesPaket,
         status: 'GENERIERT',
-        kosten_cent: ergebnis.kostenCent,
-        asset_meta: ergebnis.assetMeta,
+        kosten_cent: 0,
       })
       .select()
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    // Video nur für Business + Growth (nicht Starter)
-    const videoErlaubt = gewaehltesPaket !== 'starter'
 
-    const warning = ergebnis.warnungen.length > 0 ? ergebnis.warnungen.join(' · ') : null
+    // Phase 2 kommt über separaten POST /api/admin/demos/[id]/assets (Frontend triggert)
+    const videoErlaubt = gewaehltesPaket !== 'starter'
     return NextResponse.json({
       demo,
-      warning,
-      kosten_cent: ergebnis.kostenCent,
-      videoJob: videoErlaubt && ergebnis.videoJob ? true : false,
+      warning: null,
+      kosten_cent: 0,
+      needsAssets: true,
+      videoJob: videoErlaubt,
     })
   }
 
