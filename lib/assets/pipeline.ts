@@ -357,7 +357,6 @@ export async function makePair(o: PaarGenerierung): Promise<AssetPaar> {
   const aspect = o.aspect ?? '16:9'
   const admin = createAdminClient()
   const kette = getAssetProviderKette()
-  // Gleicher Seed für beide Bilder → maximale Szene-Konsistenz
   const sharedSeed = String(Math.floor(Math.random() * 1_000_000))
 
   // 1) Ziel (nachher) zuerst — der erstrebenswerte Zustand
@@ -376,7 +375,7 @@ export async function makePair(o: PaarGenerierung): Promise<AssetPaar> {
     { providers: kette, admin }
   )
 
-  // 2) Gegen-Zustand — gleiches Seed, Prompt beschreibt identische Szene nur degradiert
+  // 2) Gegen-Zustand — per referenceJobId (Edit) wenn Provider es kann, sonst Seed-Matching
   const vorher = await generiereAsset(
     {
       prompt: o.vorherPrompt,
@@ -388,6 +387,7 @@ export async function makePair(o: PaarGenerierung): Promise<AssetPaar> {
       quelleOverride: o.quelleOverride,
       kontext: o.kontext,
       seed: sharedSeed,
+      referenceJobId: nachher.jobId,
     },
     { providers: kette, admin }
   )

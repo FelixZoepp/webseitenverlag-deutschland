@@ -17,7 +17,7 @@ function rgb(hex: string): string {
   return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`
 }
 
-export function flagshipCss(design: FlagshipDesign): string {
+export function flagshipCss(design: FlagshipDesign, opts?: { premiumAnimationen?: boolean }): string {
   const t = design.tokens
   const hell = design.typo_modus === 'sans_bold_hell'
   const wisch = design.typo_signature === 'wisch_highlight'
@@ -394,6 +394,17 @@ ${hell ? '.ref-section .eyebrow{color:rgba(255,255,255,.7)}\n.ref-section h2{col
 .ref-kz b{color:${hell ? '#fff' : 'var(--text)'};font-weight:700}
 .ref-muster{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${hell ? 'rgba(255,255,255,.4)' : 'var(--soft)'};opacity:.6;margin-top:16px}
 
+${opts?.premiumAnimationen ? `
+/* Premium-Animationen */
+.frame img,.ba img,.gal img,.proz-media img{transition:transform 8s cubic-bezier(.2,.7,.2,1)}
+.frame:hover img,.ba:hover img{transform:scale(1.04)}
+.rv{transition-duration:1s}
+.card,.quote,.nw-card,.proz-station{transition-duration:.5s}
+.card:hover,.quote:hover,.nw-card:hover,.proz-station:hover{transform:translateY(-8px)}
+.hero h1,.hero .lead,.vhero h1,.vhero .lead{text-shadow:0 2px 24px rgba(0,0,0,.3)}
+section{transition:background .6s}
+.frame{overflow:hidden}
+` : ''}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   .rv{opacity:1;transform:none}

@@ -76,6 +76,9 @@ export async function POST(request: Request) {
     if (typeof body?.brandfarbe === 'string' && /^#[0-9a-fA-F]{6}$/.test(body.brandfarbe)) {
       designOverrides.brandfarbe = body.brandfarbe
     }
+    if (body?.scrollAnimationen === true) {
+      designOverrides.premium_animationen = true
+    }
 
     let ergebnis
     try {
@@ -111,12 +114,16 @@ export async function POST(request: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+    const gewaehltesPaket = typeof body?.paket === 'string' && ['starter', 'business', 'growth'].includes(body.paket) ? body.paket : 'business'
+    // Video nur für Business + Growth (nicht Starter)
+    const videoErlaubt = gewaehltesPaket !== 'starter'
+
     const warning = ergebnis.warnungen.length > 0 ? ergebnis.warnungen.join(' · ') : null
     return NextResponse.json({
       demo,
       warning,
       kosten_cent: ergebnis.kostenCent,
-      videoJob: ergebnis.videoJob ? true : false,
+      videoJob: videoErlaubt && ergebnis.videoJob ? true : false,
     })
   }
 
