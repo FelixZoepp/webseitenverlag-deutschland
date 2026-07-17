@@ -353,6 +353,11 @@ export function getAssetProviderKette(): AssetProvider[] {
   const kette: AssetProvider[] = []
   if (process.env.HIGGSFIELD_API_KEY) kette.push(new HiggsfieldProvider())
   if (process.env.FAL_API_KEY) kette.push(new FalProvider())
-  if (kette.length === 0) kette.push(new MockProvider())
+  if (kette.length === 0) {
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+      console.error('[assets] WARNUNG: Kein HIGGSFIELD_API_KEY und kein FAL_API_KEY gesetzt — MockProvider aktiv! Assets werden als Platzhalter generiert.')
+    }
+    kette.push(new MockProvider())
+  }
   return kette
 }

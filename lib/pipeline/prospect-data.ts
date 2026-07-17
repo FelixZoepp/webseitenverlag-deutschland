@@ -206,6 +206,9 @@ export async function collectProspectData(input: ManualProspectInput): Promise<P
     firecrawl = await fetchFirecrawl(input.websiteUrl)
     if (firecrawl) {
       quellen.push('firecrawl')
+      // Impressum, Logo und Kontaktdaten trotzdem vom eigenen Scraper holen
+      // (Firecrawl liefert nur den Hauptinhalt, kein Impressum)
+      scraped = await scrapeProspectWebsite(input.websiteUrl)
     } else {
       scraped = await scrapeProspectWebsite(input.websiteUrl)
       if (scraped) quellen.push('scraper')
@@ -235,11 +238,11 @@ export async function collectProspectData(input: ManualProspectInput): Promise<P
     websiteText: firecrawl?.markdown ?? scraped?.textContent ?? null,
     impressumText: scraped?.impressumText ?? null,
     logoUrl: scraped?.logoUrl ?? null,
-    bilder: [
+    bilder: Array.from(new Set([
       ...(firecrawl?.ogImage ? [firecrawl.ogImage] : []),
       ...(scraped?.ogImage ? [scraped.ogImage] : []),
       ...(scraped?.images ?? []),
-    ].slice(0, 12),
+    ])).slice(0, 12),
     notizen: input.notizen ?? null,
     quellen,
   }

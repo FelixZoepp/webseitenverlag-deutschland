@@ -95,11 +95,17 @@ async function heutigeAssetKostenCent(admin: SupabaseClient): Promise<number> {
   return (data ?? []).reduce((s, z) => s + (z.kosten_cent ?? 0), 0)
 }
 
-/** Lädt das Provider-Bild (CDN- oder data:-URL) als Buffer. */
+/** Lädt das Provider-Bild (CDN- oder data:-URL) als Buffer. 30s Timeout. */
 async function ladeBild(url: string): Promise<Buffer> {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`Bild-Download fehlgeschlagen (${res.status})`)
-  return Buffer.from(await res.arrayBuffer())
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 30_000)
+  try {
+    const res = await fetch(url, { signal: controller.signal })
+    if (!res.ok) throw new Error(`Bild-Download fehlgeschlagen (${res.status})`)
+    return Buffer.from(await res.arrayBuffer())
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 /**
