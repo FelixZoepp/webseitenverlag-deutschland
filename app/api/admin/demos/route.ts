@@ -7,7 +7,7 @@ import { scrapeProspectWebsite } from '@/lib/scrape-prospect'
 import { generateDemoConfig, validateImageUrls } from '@/lib/generate-demo'
 import { collectProspectData } from '@/lib/pipeline/prospect-data'
 import { generateLibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
-import { personalisiereFlagshipConfig, generiereFlagshipDemo, type DesignOverrides } from '@/lib/pipeline/generate-flagship-demo'
+import { personalisiereFlagshipConfig, type DesignOverrides } from '@/lib/pipeline/generate-flagship-demo'
 import { libraryPageKey, loadLibraryPage } from '@/lib/library/load'
 import { SEED_BRANCHEN, STILE, type Stil } from '@/lib/library/types'
 
