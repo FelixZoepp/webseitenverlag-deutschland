@@ -47,6 +47,7 @@ export async function generatePreCallBriefing(
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6-20250514',
     max_tokens: 2000,
+    temperature: 0.4,
     messages: [{
       role: 'user',
       content: `Du bist Assistent für Felix bei Webseitenverlag Deutschland.

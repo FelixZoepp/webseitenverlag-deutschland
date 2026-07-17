@@ -198,6 +198,7 @@ WICHTIG: Setze die Bild-URLs in die passenden Felder ein:
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6-20250514',
     max_tokens: maxTokens,
+    temperature: 0.4,
     system: systemPrompt,
     messages: [
       {

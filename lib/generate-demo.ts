@@ -7,6 +7,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { getTemplateSchema } from './template-schemas'
 import { ScrapedProspect } from './scrape-prospect'
 import { erfasseNutzung } from './nutzung'
+import { pruefeContentAufFloskeln } from './floskel-blacklist'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -58,7 +59,7 @@ DEMO-RICHTLINIEN:
 - Nutze ALLE echten Informationen aus den gescrapten Website-Daten: Leistungen, Preise, Öffnungszeiten, Team-Namen, Firmengeschichte, Telefon, E-Mail, Adresse
 - Formuliere die Texte deutlich BESSER als das Original: klar, modern, überzeugend — aber inhaltlich korrekt zur Firma
 - BILDER: Wenn Bild-URLs mitgeliefert werden, setze sie in passende Bild-Felder ein (heroImageUrl, galleryItems[].imageUrl, team/artists/stylists[].imageUrl usw.). Nutze das inhaltlich am besten passende Bild für den Hero.
-- Wenn echte Kundenstimmen in den Daten stehen, nutze sie. Sonst 2-3 generische, glaubwürdige Beispiel-Reviews mit Vornamen + Initial
+- Wenn echte Kundenstimmen in den Daten stehen, nutze sie. Wenn KEINE echten Bewertungen vorhanden sind, lasse das reviews-Array LEER ([]) — erfinde NIEMALS Bewertungen.
 - Erfinde KEINE konkreten Fakten (Gründungsjahr, Zertifikate, Mitarbeiterzahl), wenn sie nicht in den Daten stehen — nutze dann neutrale Formulierungen
 - Farben: passend zur Branche und, falls erkennbar, zur bisherigen Markenfarbe
 - Alle Texte auf Deutsch, Editorial-Tonalität, kein Marketing-Speak`
@@ -118,6 +119,7 @@ export async function generateDemoConfig(
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 6144,
+      temperature: 0.4,
       system: systemPrompt,
       messages: [{ role: 'user', content: userMessage }],
     })
@@ -129,7 +131,15 @@ export async function generateDemoConfig(
 
     const text = response.content[0].type === 'text' ? response.content[0].text : ''
     try {
-      return parseJsonResponse(text)
+      const config = parseJsonResponse(text)
+      const floskeln = pruefeContentAufFloskeln(config)
+      if (floskeln.length > 0 && attempt === 0) {
+        // First attempt has floskeln — retry with correction
+        lastError = new Error(`Floskeln gefunden: ${floskeln.map(f => f.floskel).join(', ')}`)
+        continue
+      }
+      // On second attempt, accept even with floskeln (better than failing)
+      return config
     } catch (err) {
       lastError = err
     }

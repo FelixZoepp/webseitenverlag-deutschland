@@ -265,6 +265,7 @@ export async function chatWithClaude(
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6-20250514',
     max_tokens: 1024,
+    temperature: 0.5,
     system: systemPrompt + configContext,
     messages: messages.map((m) => ({
       role: m.role,

@@ -71,6 +71,7 @@ REGELN:
   const res = await client.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 700,
+    temperature: 0.1,
     system,
     messages: [{ role: 'user', content: `Branche: ${eingabe}` }],
   })
