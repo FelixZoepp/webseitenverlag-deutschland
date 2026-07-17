@@ -118,6 +118,12 @@ export const BranchenProfilSchema = z.object({
   quali_fragen: z.array(QualiFrageSchema).max(6),
   /** Erfolgstext nach Funnel-Absenden */
   erfolg_text: z.string().min(20).max(300),
+  header_animation: z.object({
+    typ: z.enum(['ambient_loop', 'scroll_scrub', 'material_makro']),
+    higgsfield_prompt: z.string().min(20),
+    poster_prompt: z.string().min(10),
+    begruendung: z.string().min(10),
+  }).optional(),
 })
 
 export type BranchenProfil = z.infer<typeof BranchenProfilSchema>

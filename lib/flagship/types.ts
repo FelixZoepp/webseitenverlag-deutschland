@@ -58,6 +58,8 @@ export interface VideoSlot {
   src: string
   /** Poster-Bild (erster Frame / Hero-Bild) — wird auch als reduced-motion-Fallback genutzt */
   poster?: string
+  /** 'loop' = autoplay loop (default), 'scrub' = video progress tied to scroll position */
+  modus?: 'loop' | 'scrub'
 }
 
 export interface NavInhalt {
