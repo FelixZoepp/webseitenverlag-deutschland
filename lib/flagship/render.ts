@@ -2,9 +2,13 @@
  * Flagship-Engine: Seiten-Renderer.
  * Setzt Head (SEO, JSON-LD), Tokens-CSS, Sektionen und JS zu einem
  * vollständigen HTML-Dokument zusammen (self-contained, keine Fremd-CDNs).
+ *
+ * Multipage-Modus (Business/Growth): Startseite zeigt reduziertes Set,
+ * renderUnterseite() liefert die 4 Unterseiten (leistungen, ergebnisse, ueber-uns, kontakt).
  */
 
-import type { FlagshipConfig, FlagshipRenderOptionen } from './types'
+import type { FlagshipConfig, FlagshipRenderOptionen, NavInhalt, UnterseitenSlug } from './types'
+import { UNTERSEITEN } from './types'
 import { esc, escAttr, ICON_PATHS } from './html'
 import { flagshipCss } from './css'
 import { flagshipJs } from './js'
@@ -35,43 +39,20 @@ function jsonLd(config: FlagshipConfig): string {
   return JSON.stringify(daten).replace(/</g, '\\u003c')
 }
 
-export function renderFlagshipPage(config: FlagshipConfig, opts: FlagshipRenderOptionen = {}): string {
-  const { design, inhalte, meta } = config
-  const hell = design.typo_modus === 'sans_bold_hell'
-  const basisPfad = opts.basisPfad || ''
-  const funnelUrl = funnelPfad(config, basisPfad)
-  const funnelLabel = config.funnel.modus === 'reservierung' ? 'Tisch reservieren' : 'Anfrage starten'
-
-  const titel = meta.seo_titel || `${meta.firma} – ${meta.ort}`
-  const beschreibung = meta.seo_beschreibung || ''
+/** HTML-Dokument-Shell: gemeinsam für Startseite und Unterseiten */
+function htmlShell(
+  config: FlagshipConfig,
+  titel: string,
+  body: string,
+  opts: FlagshipRenderOptionen = {},
+): string {
+  const { design } = config
+  const beschreibung = config.meta.seo_beschreibung || ''
   const noindex = opts.noindex !== false ? '<meta name="robots" content="noindex">' : ''
-
-  const hatBaSlider = inhalte.ergebnisse.variante === 'ba_slider'
-
-  const body = [
-    renderNav(inhalte.nav, hell, funnelUrl),
-    renderHero(inhalte.hero, hell, funnelUrl),
-    renderFakten(inhalte.fakten),
-    inhalte.marken ? renderMarken(inhalte.marken) : '',
-    inhalte.nachweise ? renderNachweise(inhalte.nachweise) : '',
-    renderEmpathie(inhalte.empathie),
-    renderSignature(inhalte.signature),
-    renderLeistungen(inhalte.leistungen),
-    inhalte.prozess ? renderProzess(inhalte.prozess) : '',
-    inhalte.ablauf ? renderAblauf(inhalte.ablauf) : '',
-    renderErgebnisse(inhalte.ergebnisse),
-    inhalte.referenzen ? renderReferenzen(inhalte.referenzen) : '',
-    renderZahlen(inhalte.zahlen),
-    renderStimmen(inhalte.stimmen),
-    renderLokal(inhalte.lokal),
-    renderFaq(inhalte.faq),
-    renderConversion(inhalte.conversion, hell, funnelUrl, funnelLabel),
-    renderFooter(inhalte.footer, inhalte.nav, hell, meta.firma),
-    opts.demo ? renderRibbon() : '',
-  ].filter(Boolean).join('\n\n')
+  const hatBaSlider = config.inhalte.ergebnisse.variante === 'ba_slider'
 
   const js = flagshipJs({
-    ablauf: inhalte.ablauf,
+    ablauf: config.inhalte.ablauf,
     hatBaSlider,
     iconPfade: ICON_PATHS,
   })
@@ -102,4 +83,132 @@ ${js}
 </script>
 </body>
 </html>`
+}
+
+/** Nav-Links für den Multipage-Modus: echte Seiten statt Anker */
+function multipageNavLinks(basisPfad: string): NavInhalt['links'] {
+  return UNTERSEITEN.map((u) => ({ label: u.label, anker: `${basisPfad}/${u.slug}` }))
+}
+
+export function renderFlagshipPage(config: FlagshipConfig, opts: FlagshipRenderOptionen = {}): string {
+  const { design, inhalte, meta } = config
+  const hell = design.typo_modus === 'sans_bold_hell'
+  const basisPfad = opts.basisPfad || ''
+  const funnelUrl = funnelPfad(config, basisPfad)
+  const funnelLabel = config.funnel.modus === 'reservierung' ? 'Tisch reservieren' : 'Anfrage starten'
+  const titel = meta.seo_titel || `${meta.firma} – ${meta.ort}`
+  const multipage = config.seiten_modus === 'multipage'
+
+  // Im Multipage-Modus: Nav-Links auf Unterseiten statt Anker
+  const navInhalt: NavInhalt = multipage
+    ? { ...inhalte.nav, links: multipageNavLinks(basisPfad) }
+    : inhalte.nav
+
+  let body: string
+  if (multipage) {
+    // Multipage-Startseite: reduziertes Sektions-Set
+    body = [
+      renderNav(navInhalt, hell, funnelUrl),
+      renderHero(inhalte.hero, hell, funnelUrl),
+      renderFakten(inhalte.fakten),
+      renderSignature(inhalte.signature),
+      renderZahlen(inhalte.zahlen),
+      renderConversion(inhalte.conversion, hell, funnelUrl, funnelLabel),
+      renderFooter(inhalte.footer, navInhalt, hell, meta.firma),
+      opts.demo ? renderRibbon() : '',
+    ].filter(Boolean).join('\n\n')
+  } else {
+    // Onepager: alle Sektionen
+    body = [
+      renderNav(navInhalt, hell, funnelUrl),
+      renderHero(inhalte.hero, hell, funnelUrl),
+      renderFakten(inhalte.fakten),
+      inhalte.marken ? renderMarken(inhalte.marken) : '',
+      inhalte.nachweise ? renderNachweise(inhalte.nachweise) : '',
+      renderEmpathie(inhalte.empathie),
+      renderSignature(inhalte.signature),
+      renderLeistungen(inhalte.leistungen),
+      inhalte.prozess ? renderProzess(inhalte.prozess) : '',
+      inhalte.ablauf ? renderAblauf(inhalte.ablauf) : '',
+      renderErgebnisse(inhalte.ergebnisse),
+      inhalte.referenzen ? renderReferenzen(inhalte.referenzen) : '',
+      renderZahlen(inhalte.zahlen),
+      renderStimmen(inhalte.stimmen),
+      renderLokal(inhalte.lokal),
+      renderFaq(inhalte.faq),
+      renderConversion(inhalte.conversion, hell, funnelUrl, funnelLabel),
+      renderFooter(inhalte.footer, navInhalt, hell, meta.firma),
+      opts.demo ? renderRibbon() : '',
+    ].filter(Boolean).join('\n\n')
+  }
+
+  return htmlShell(config, titel, body, opts)
+}
+
+/** Sektions-Zuordnung je Unterseite */
+const SEITEN_SEKTIONEN: Record<UnterseitenSlug, (config: FlagshipConfig, hell: boolean) => string[]> = {
+  leistungen: (config, _hell) => {
+    const { inhalte } = config
+    return [
+      renderLeistungen(inhalte.leistungen),
+      inhalte.ablauf ? renderAblauf(inhalte.ablauf) : '',
+      inhalte.prozess ? renderProzess(inhalte.prozess) : '',
+      inhalte.nachweise ? renderNachweise(inhalte.nachweise) : '',
+    ]
+  },
+  ergebnisse: (config, _hell) => {
+    const { inhalte } = config
+    return [
+      renderErgebnisse(inhalte.ergebnisse),
+      inhalte.referenzen ? renderReferenzen(inhalte.referenzen) : '',
+      renderStimmen(inhalte.stimmen),
+    ]
+  },
+  'ueber-uns': (config, _hell) => {
+    const { inhalte } = config
+    return [
+      renderEmpathie(inhalte.empathie),
+      inhalte.marken ? renderMarken(inhalte.marken) : '',
+      renderZahlen(inhalte.zahlen),
+      renderLokal(inhalte.lokal),
+    ]
+  },
+  kontakt: (config, hell) => {
+    const { inhalte } = config
+    const funnelUrl = funnelPfad(config, '')
+    const funnelLabel = config.funnel.modus === 'reservierung' ? 'Tisch reservieren' : 'Anfrage starten'
+    return [
+      renderLokal(inhalte.lokal),
+      renderFaq(inhalte.faq),
+      renderConversion(inhalte.conversion, hell, funnelUrl, funnelLabel),
+    ]
+  },
+}
+
+/** Unterseite im Multipage-Modus rendern (leistungen, ergebnisse, ueber-uns, kontakt) */
+export function renderUnterseite(
+  config: FlagshipConfig,
+  seite: UnterseitenSlug,
+  opts: FlagshipRenderOptionen = {},
+): string {
+  const { design, inhalte, meta } = config
+  const hell = design.typo_modus === 'sans_bold_hell'
+  const basisPfad = opts.basisPfad || ''
+  const funnelUrl = funnelPfad(config, basisPfad)
+
+  const navInhalt: NavInhalt = { ...inhalte.nav, links: multipageNavLinks(basisPfad) }
+
+  const seitenLabel = UNTERSEITEN.find((u) => u.slug === seite)?.label || seite
+  const titel = `${seitenLabel} – ${meta.firma}`
+
+  const sektionen = SEITEN_SEKTIONEN[seite](config, hell)
+
+  const body = [
+    renderNav(navInhalt, hell, funnelUrl),
+    ...sektionen,
+    renderFooter(inhalte.footer, navInhalt, hell, meta.firma),
+    opts.demo ? renderRibbon() : '',
+  ].filter(Boolean).join('\n\n')
+
+  return htmlShell(config, titel, body, opts)
 }

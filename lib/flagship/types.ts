@@ -283,7 +283,19 @@ export interface FlagshipConfig {
   herkunft?: { quellen?: string[]; generator?: string }
   /** Premium-Animationen: parallax auf Bildern, staggered reveals, smoothere Übergänge */
   premium_animationen?: boolean
+  /** Multipage: Sektionen auf eigene Unterseiten verteilen (Business/Growth) */
+  seiten_modus?: 'onepager' | 'multipage'
 }
+
+/** Verfügbare Unterseiten im Multipage-Modus */
+export type UnterseitenSlug = 'leistungen' | 'ergebnisse' | 'ueber-uns' | 'kontakt'
+
+export const UNTERSEITEN: { slug: UnterseitenSlug; label: string }[] = [
+  { slug: 'leistungen', label: 'Leistungen' },
+  { slug: 'ergebnisse', label: 'Ergebnisse' },
+  { slug: 'ueber-uns', label: 'Über uns' },
+  { slug: 'kontakt', label: 'Kontakt' },
+]
 
 /** Render-Optionen (Demo-Ribbon, Submit-Ziel des Funnels, noindex …) */
 export interface FlagshipRenderOptionen {

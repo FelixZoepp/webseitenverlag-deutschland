@@ -12,9 +12,10 @@
  * Aufruf: npm run test:flagship
  */
 import { FLAGSHIP_SEEDS } from '../lib/flagship/seeds'
-import { renderFlagshipPage } from '../lib/flagship/render'
+import { renderFlagshipPage, renderUnterseite } from '../lib/flagship/render'
 import { renderAnfrageSeite } from '../lib/flagship/anfrage'
-import type { FlagshipConfig } from '../lib/flagship/types'
+import type { FlagshipConfig, UnterseitenSlug } from '../lib/flagship/types'
+import { UNTERSEITEN } from '../lib/flagship/types'
 
 let fehler = 0
 let geprueft = 0
@@ -145,6 +146,92 @@ const liveHtml = renderFlagshipPage(liveSeed, { noindex: false })
 assert(!liveHtml.includes('name="robots" content="noindex"'), 'live', 'noindex im Live-Modus gesetzt')
 const liveFunnel = renderAnfrageSeite(liveSeed, { submitZiel: '/api/public/forms/test-site/submit' })
 assert(liveFunnel.includes('/api/public/forms/test-site/submit'), 'live', 'Submit-Ziel fehlt im Live-Funnel')
+
+// ============================================================
+// Multipage-Tests: Startseite (reduziert) + 4 Unterseiten
+// ============================================================
+console.log('\nMultipage-Tests\n')
+
+/** Erwartete Sektionsmarker je Unterseite */
+const UNTERSEITEN_MARKER: Record<UnterseitenSlug, string[]> = {
+  leistungen: ['leistungen'],
+  ergebnisse: ['ergebnisse', 'stimmen'],
+  'ueber-uns': ['empathie', 'zahlen', 'lokal'],
+  kontakt: ['lokal', 'faq', 'conversion'],
+}
+
+/** Sektionen, die auf der Multipage-Startseite NICHT erscheinen dürfen */
+const MULTIPAGE_HOME_AUSGESCHLOSSEN = [
+  'empathie', 'leistungen', 'ergebnisse', 'stimmen', 'lokal', 'faq', 'nachweise',
+]
+
+for (const [key, seed] of Object.entries(FLAGSHIP_SEEDS)) {
+  const mp = klon(seed)
+  mp.seiten_modus = 'multipage'
+  const label = `${key}/multipage`
+  const basisPfad = '/demo/test'
+
+  // Multipage-Startseite: reduziertes Set
+  const homeHtml = renderFlagshipPage(mp, { demo: true, basisPfad })
+  pruefeGrundregeln(`${label}/home`, homeHtml)
+
+  // Pflicht-Sektionen der Multipage-Startseite
+  for (const m of ['nav', 'hero', 'fakten', 'signature', 'zahlen', 'conversion', 'footer']) {
+    assert(homeHtml.includes(`<!-- sektion:${m} -->`), `${label}/home`, `Sektionsmarker "${m}" fehlt`)
+  }
+
+  // Ausgeschlossene Sektionen dürfen nicht auf der Startseite sein
+  for (const m of MULTIPAGE_HOME_AUSGESCHLOSSEN) {
+    assert(!homeHtml.includes(`<!-- sektion:${m} -->`), `${label}/home`, `Sektion "${m}" sollte nicht auf Multipage-Startseite sein`)
+  }
+
+  // Nav-Links: echte Seitenlinks statt Anker
+  for (const u of UNTERSEITEN) {
+    assert(homeHtml.includes(`${basisPfad}/${u.slug}`), `${label}/home`, `Nav-Link zu "${u.slug}" fehlt`)
+  }
+
+  // Demo-Ribbon
+  assert(homeHtml.includes('Demo-Vorschau'), `${label}/home`, 'Demo-Ribbon fehlt')
+
+  console.log(`  ${label}/home: ok`)
+
+  // Unterseiten
+  for (const u of UNTERSEITEN) {
+    const html = renderUnterseite(mp, u.slug, { demo: true, basisPfad })
+    pruefeGrundregeln(`${label}/${u.slug}`, html)
+
+    // Titel: "Label – Firma"
+    assert(html.includes(`<title>${u.label} – `), `${label}/${u.slug}`, `Titel enthält nicht "${u.label} –"`)
+
+    // Nav + Footer immer vorhanden
+    assert(html.includes('<!-- sektion:nav -->'), `${label}/${u.slug}`, 'Nav fehlt')
+    assert(html.includes('<!-- sektion:footer -->'), `${label}/${u.slug}`, 'Footer fehlt')
+
+    // Erwartete Sektionsmarker
+    for (const m of UNTERSEITEN_MARKER[u.slug]) {
+      assert(html.includes(`<!-- sektion:${m} -->`), `${label}/${u.slug}`, `Sektionsmarker "${m}" fehlt`)
+    }
+
+    // Nav-Links: Multipage-Links auf jeder Unterseite
+    for (const link of UNTERSEITEN) {
+      assert(html.includes(`${basisPfad}/${link.slug}`), `${label}/${u.slug}`, `Nav-Link zu "${link.slug}" fehlt`)
+    }
+
+    // Demo-Ribbon
+    assert(html.includes('Demo-Vorschau'), `${label}/${u.slug}`, 'Demo-Ribbon fehlt')
+
+    console.log(`  ${label}/${u.slug}: ok`)
+  }
+}
+
+// Onepager-Modus: seiten_modus 'onepager' oder undefined → alle Sektionen auf Startseite
+const onepager = klon(Object.values(FLAGSHIP_SEEDS)[0])
+onepager.seiten_modus = 'onepager'
+const onepagerHtml = renderFlagshipPage(onepager, { demo: true, basisPfad: '/demo/test' })
+for (const m of PFLICHT_MARKER) {
+  assert(onepagerHtml.includes(`<!-- sektion:${m} -->`), 'onepager', `Sektionsmarker "${m}" fehlt im Onepager`)
+}
+console.log('  onepager: ok (alle Sektionen vorhanden)')
 
 console.log(`\n${geprueft} Prüfungen, ${fehler} Fehler`)
 if (fehler > 0) process.exit(1)

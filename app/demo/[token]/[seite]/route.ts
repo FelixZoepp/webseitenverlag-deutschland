@@ -1,14 +1,19 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { renderAnfrageSeite } from '@/lib/flagship/anfrage'
-import type { FlagshipConfig } from '@/lib/flagship/types'
+import { renderUnterseite } from '@/lib/flagship/render'
+import type { FlagshipConfig, UnterseitenSlug } from '@/lib/flagship/types'
+import { UNTERSEITEN } from '@/lib/flagship/types'
 
 // Funnel-Unterseite der Flagship-Demos (/demo/{token}/anfrage bzw. /reservierung).
+// Multipage: Inhalts-Unterseiten (/demo/{token}/leistungen, /ergebnisse, /ueber-uns, /kontakt).
 // Demo-Modus: kein Submit-Ziel — der Wizard zeigt den Erfolgs-Screen ohne Persistenz.
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
+
+const UNTERSEITEN_SLUGS = new Set<string>(UNTERSEITEN.map((u) => u.slug))
 
 export async function GET(
   _request: Request,
@@ -16,7 +21,11 @@ export async function GET(
 ) {
   const { token, seite } = params
   if (!token || token.length > 100) return NextResponse.redirect(new URL('/', _request.url))
-  if (seite !== 'anfrage' && seite !== 'reservierung') {
+
+  const istFunnel = seite === 'anfrage' || seite === 'reservierung'
+  const istUnterseite = UNTERSEITEN_SLUGS.has(seite)
+
+  if (!istFunnel && !istUnterseite) {
     return new NextResponse('Nicht gefunden', { status: 404 })
   }
 
@@ -34,14 +43,37 @@ export async function GET(
     return new NextResponse('Diese Demo ist abgelaufen.', { status: 404 })
   }
 
+  const basisPfad = `/demo/${token}`
+
+  // Multipage-Unterseiten (leistungen, ergebnisse, ueber-uns, kontakt)
+  if (istUnterseite) {
+    if (config.seiten_modus !== 'multipage') {
+      return new NextResponse('Nicht gefunden', { status: 404 })
+    }
+    const html = renderUnterseite(config, seite as UnterseitenSlug, {
+      demo: true,
+      basisPfad,
+      submitZiel: null,
+    })
+    return new NextResponse(html, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'X-Robots-Tag': 'noindex, nofollow',
+      },
+    })
+  }
+
+  // Funnel-Seiten (anfrage / reservierung)
   const erwartet = config.funnel.modus === 'reservierung' ? 'reservierung' : 'anfrage'
   if (seite !== erwartet) {
-    return NextResponse.redirect(new URL(`/demo/${token}/${erwartet}`, _request.url))
+    return NextResponse.redirect(new URL(`${basisPfad}/${erwartet}`, _request.url))
   }
 
   const html = renderAnfrageSeite(config, {
     demo: true,
-    basisPfad: `/demo/${token}`,
+    basisPfad,
     submitZiel: null,
   })
 

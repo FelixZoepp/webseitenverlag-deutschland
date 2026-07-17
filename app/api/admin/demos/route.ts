@@ -91,6 +91,11 @@ export async function POST(request: Request) {
       )
     }
 
+    const gewaehltesPaket = typeof body?.paket === 'string' && ['starter', 'business', 'growth'].includes(body.paket) ? body.paket : 'business'
+
+    // Multipage: Business/Growth bekommen Unterseiten, Starter bleibt Onepager
+    ergebnis.config.seiten_modus = gewaehltesPaket === 'starter' ? 'onepager' : 'multipage'
+
     const shareToken = randomBytes(24).toString('base64url')
     const { data: demo, error } = await auth.data.supabase
       .from('demos')
@@ -104,7 +109,7 @@ export async function POST(request: Request) {
         scraped_data: prospect,
         share_token: shareToken,
         notes,
-        paket: typeof body?.paket === 'string' && ['starter', 'business', 'growth'].includes(body.paket) ? body.paket : 'business',
+        paket: gewaehltesPaket,
         status: 'GENERIERT',
         kosten_cent: ergebnis.kostenCent,
         asset_meta: ergebnis.assetMeta,
@@ -113,8 +118,6 @@ export async function POST(request: Request) {
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-    const gewaehltesPaket = typeof body?.paket === 'string' && ['starter', 'business', 'growth'].includes(body.paket) ? body.paket : 'business'
     // Video nur für Business + Growth (nicht Starter)
     const videoErlaubt = gewaehltesPaket !== 'starter'
 
