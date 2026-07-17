@@ -75,7 +75,8 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
       </div>
     </div>
   </div>
-  <div class="stat-card vcard"><b>${esc(hero.stat2.wert)}</b><small>${esc(hero.stat2.label)}</small></div>${reducedBg}
+  <div class="stat-card vcard"><b>${esc(hero.stat2.wert)}</b><small>${esc(hero.stat2.label)}</small></div>
+  <div class="scroll-hint">Entdecken <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg></div>${reducedBg}
 </header>`
   }
 
@@ -100,6 +101,7 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
       <div class="stat-card sc2"><b>${esc(hero.stat2.wert)}</b><small>${esc(hero.stat2.label)}</small></div>
     </div>
   </div>
+  <div class="scroll-hint">Entdecken <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg></div>
 </header>`
 }
 
@@ -182,7 +184,7 @@ export function renderLeistungen(l: LeistungenInhalt): string {
     ? `\n    <p class="rv leist-hinweis">${esc(l.hinweis.text)} <a href="${escAttr(l.hinweis.link_anker)}">${esc(l.hinweis.link_label)}</a></p>`
     : ''
   return `<!-- sektion:leistungen -->
-<section class="leist" id="leistungen">
+<section class="leist tex" id="leistungen">
   <div class="wrap">
     <div class="rv" style="max-width:660px">
       <span class="eyebrow">${esc(l.eyebrow)}</span>
@@ -308,7 +310,7 @@ export function renderLokal(l: LokalInhalt): string {
       })
       .join('\n      ')
     return `<!-- sektion:lokal -->
-<section class="lokal-info" id="lokal">
+<section class="lokal-info tex" id="lokal">
   <div class="wrap">
     <div class="rv">
       <span class="eyebrow">${esc(l.eyebrow)}</span>
@@ -322,7 +324,7 @@ export function renderLokal(l: LokalInhalt): string {
   }
   const chips = (l.chips || []).map((c) => `<span>${esc(c)}</span>`).join('')
   return `<!-- sektion:lokal -->
-<section class="lokal-chips" id="lokal">
+<section class="lokal-chips tex" id="lokal">
   <div class="wrap">
     <div class="rv" style="max-width:680px">
       <span class="eyebrow">${esc(l.eyebrow)}</span>
