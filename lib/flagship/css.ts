@@ -143,18 +143,27 @@ nav.scrolled~header .scroll-hint,nav.scrolled~.hero .scroll-hint{opacity:0}
 .vhero{position:relative;min-height:100vh;display:flex;align-items:center;padding:150px 0 100px;overflow:hidden}
 .vhero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .vshade{position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(90deg,var(--basis) 0%,rgba(${rgb(t.basis)},.97) 34%,rgba(${rgb(t.basis)},.72) 52%,rgba(${rgb(t.basis)},0) 70%)}
-.vshade::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(${rgb(t.basis)},.5),transparent 20%)}
+  background:linear-gradient(90deg,var(--basis) 0%,rgba(${rgb(t.basis)},.95) 30%,rgba(${rgb(t.basis)},.7) 50%,rgba(${rgb(t.basis)},.15) 70%,rgba(${rgb(t.basis)},0) 85%)}
+.vshade::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(${rgb(t.basis)},.6),transparent 25%,transparent 75%,rgba(${rgb(t.basis)},.4))}
 .vinner{position:relative;z-index:2;width:100%}
 .vcard{position:absolute;right:44px;bottom:48px;z-index:2}
 @media(max-width:860px){
-  .vshade{background:linear-gradient(180deg,var(--basis) 0%,rgba(${rgb(t.basis)},.92) 34%,rgba(${rgb(t.basis)},.6) 60%,rgba(${rgb(t.basis)},.3) 100%)}
+  .vshade{background:linear-gradient(180deg,var(--basis) 0%,rgba(${rgb(t.basis)},.92) 30%,rgba(${rgb(t.basis)},.6) 55%,rgba(${rgb(t.basis)},.3) 100%)}
   .vcard{display:none}
   .vhero{min-height:92vh;padding-top:130px}
 }
 @media(prefers-reduced-motion:reduce){
   .vhero video{display:none}
 }
+.vplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;background:var(--ak1);border:none;cursor:pointer;display:grid;place-items:center;z-index:3;box-shadow:0 0 0 0 rgba(${rgb(t.akzent1)},.5);animation:vglow 2.5s ease-in-out infinite;transition:opacity .5s,transform .3s var(--spring,ease)}
+.vplay:hover{transform:translate(-50%,-50%) scale(1.1)}
+.vplay.hidden{opacity:0;pointer-events:none}
+.vplay svg{width:28px;height:28px;fill:${hell ? 'var(--text)' : 'var(--basis)'};margin-left:3px}
+@keyframes vglow{0%{box-shadow:0 0 0 0 rgba(${rgb(t.akzent1)},.5)}50%{box-shadow:0 0 0 20px rgba(${rgb(t.akzent1)},0)}100%{box-shadow:0 0 0 0 rgba(${rgb(t.akzent1)},0)}}
+.vhero.scrub{min-height:200vh}
+.vhero.scrub video{position:sticky;top:0;height:100vh;width:100%;object-fit:cover}
+.vhero.scrub .vshade{position:sticky;top:0;height:100vh}
+.vhero.scrub .vinner{position:sticky;top:0;height:100vh;display:flex;align-items:center}
 
 .media{position:relative;background:${platzhalter}}
 .media::before{content:"";position:absolute;inset:0;opacity:.5;background:repeating-linear-gradient(115deg,transparent 0 26px,rgba(${hell ? '255,255,255' : rgb(t.text)},.05) 26px 27px)}
