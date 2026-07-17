@@ -192,36 +192,37 @@ export default function DemosPage() {
       setDemos((prev) => [data.demo, ...prev])
       window.open(`/demo/${data.demo.share_token}`, '_blank')
 
-      // Phase 2: Assets im Hintergrund generieren (Hero, Signature, Ergebnis-Paare)
+      // Phase 2+3: Assets + Video parallel im Hintergrund (eigene Serverless Functions)
       if (data.needsAssets && data.demo?.id) {
         setWarning('⏳ Bilder werden generiert (~1-2 Min)…')
-        try {
-          const assetRes = await fetch(`/api/admin/demos/${data.demo.id}/assets`, { method: 'POST' })
-          const assetData = await assetRes.json()
-          if (assetData.ok) {
-            setDemos((prev) => prev.map((d) => d.id === data.demo.id ? { ...d, ...assetData.demo } : d))
-            setWarning('✓ Bilder erfolgreich generiert!')
+        const demoId = data.demo.id
 
-            // Phase 3: Video im Hintergrund (wenn erlaubt)
-            if (assetData.videoJob && data.videoJob) {
-              setWarning('⏳ Video-Header wird generiert (~2 Min)…')
-              fetch(`/api/admin/demos/${data.demo.id}/video`, { method: 'POST' })
-                .then((r) => r.json())
-                .then((v) => {
-                  if (v.ok) {
-                    setDemos((prev) => prev.map((d) => d.id === data.demo.id ? { ...d, ...v.demo } : d))
-                    setWarning('✓ Bilder + Video erfolgreich generiert!')
-                  } else {
-                    setError(`Video-Header fehlgeschlagen: ${v.error || 'Unbekannter Fehler'}`)
-                  }
-                })
-                .catch(() => setError('Video-Header Netzwerkfehler'))
+        // Assets starten (Phase 2)
+        fetch(`/api/admin/demos/${demoId}/assets`, { method: 'POST' })
+          .then((r) => r.json())
+          .then((assetData) => {
+            if (assetData.ok) {
+              setDemos((prev) => prev.map((d) => d.id === demoId ? { ...d, ...assetData.demo } : d))
+              setWarning('✓ Bilder erfolgreich generiert!')
+            } else {
+              setError(`Bilder fehlgeschlagen: ${assetData.error || 'Unbekannter Fehler'}`)
             }
-          } else {
-            setError(`Asset-Generierung fehlgeschlagen: ${assetData.error || 'Unbekannter Fehler'}`)
-          }
-        } catch {
-          setError('Asset-Generierung Netzwerkfehler — Demo wurde ohne Bilder gespeichert.')
+          })
+          .catch(() => setError('Bilder-Generierung Netzwerkfehler'))
+
+        // Video starten (Phase 3) — pollt selbst auf Hero-Bild
+        if (data.videoJob) {
+          fetch(`/api/admin/demos/${demoId}/video`, { method: 'POST' })
+            .then((r) => r.json())
+            .then((v) => {
+              if (v.ok) {
+                setDemos((prev) => prev.map((d) => d.id === demoId ? { ...d, ...v.demo } : d))
+                setWarning('✓ Bilder + Video erfolgreich generiert!')
+              } else {
+                setError(`Video-Header: ${v.error || 'Fehler'}`)
+              }
+            })
+            .catch(() => { /* Video-Fehler nicht fatal */ })
         }
       }
     } catch {

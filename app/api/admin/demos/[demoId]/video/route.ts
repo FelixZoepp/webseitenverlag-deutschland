@@ -49,9 +49,20 @@ export async function POST(
     return NextResponse.json({ error: 'Nur Flagship-Demos unterstützt' }, { status: 400 })
   }
 
-  const heroUrl = config.inhalte?.hero?.media?.datei
+  let heroUrl = config.inhalte?.hero?.media?.datei
+
+  // Assets werden parallel generiert — kurz warten und nochmal prüfen wenn noch kein Hero da ist
   if (!heroUrl) {
-    return NextResponse.json({ error: 'Kein Hero-Bild vorhanden — Video braucht ein Bild als Basis' }, { status: 400 })
+    for (let i = 0; i < 12; i++) {
+      await new Promise((r) => setTimeout(r, 15_000)) // 15s warten, max 3 Min
+      const { data: fresh } = await admin.from('demos').select('config').eq('id', params.demoId).single()
+      heroUrl = (fresh?.config as FlagshipConfig)?.inhalte?.hero?.media?.datei
+      if (heroUrl) break
+    }
+  }
+
+  if (!heroUrl) {
+    return NextResponse.json({ error: 'Kein Hero-Bild vorhanden nach 3 Min Warten — Asset-Generierung evtl. fehlgeschlagen' }, { status: 400 })
   }
 
   // Bereits ein Video vorhanden?
