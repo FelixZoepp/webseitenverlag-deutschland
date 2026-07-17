@@ -334,6 +334,23 @@ export async function generiereFlagshipDemo(
   }
   // Template-Telefon nie im Kundenoutput: ohne echte Nummer Slot leeren
   config.inhalte.conversion.telefon = prospect.telefon ?? undefined
+
+  // Lokal-Chips: Bezirke aus der Vorlage passen nur zur Vorlage-Stadt.
+  // Bei anderem Ort → Chips durch generische Ortsangabe ersetzen.
+  if (prospect.ort && config.meta.ort && config.inhalte.lokal.variante === 'bezirke') {
+    const vorlagenOrt = vorlage.meta.ort || ''
+    if (vorlagenOrt && prospect.ort.toLowerCase() !== vorlagenOrt.toLowerCase()) {
+      config.inhalte.lokal.chips = [
+        prospect.ort,
+        `${prospect.ort} und Umgebung`,
+        `Großraum ${prospect.ort}`,
+      ]
+      if (config.inhalte.lokal.note) {
+        config.inhalte.lokal.note = config.inhalte.lokal.note
+          .split(vorlagenOrt).join(prospect.ort)
+      }
+    }
+  }
   config.herkunft = {
     ...config.herkunft,
     generator: 'flagship-demo',

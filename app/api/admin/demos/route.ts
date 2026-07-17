@@ -7,9 +7,7 @@ import { scrapeProspectWebsite } from '@/lib/scrape-prospect'
 import { generateDemoConfig, validateImageUrls } from '@/lib/generate-demo'
 import { collectProspectData } from '@/lib/pipeline/prospect-data'
 import { generateLibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
-import { generiereFlagshipDemo, type DesignOverrides, type VideoJobInfo } from '@/lib/pipeline/generate-flagship-demo'
-import { generiereVideo } from '@/lib/assets/pipeline'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { generiereFlagshipDemo, type DesignOverrides } from '@/lib/pipeline/generate-flagship-demo'
 import { libraryPageKey, loadLibraryPage } from '@/lib/library/load'
 import { SEED_BRANCHEN, STILE, type Stil } from '@/lib/library/types'
 
@@ -113,15 +111,13 @@ export async function POST(request: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    // Video async NACH dem Response generieren (fire-and-forget)
-    if (ergebnis.videoJob && demo) {
-      generiereVideoAsync(demo.id, ergebnis.videoJob).catch((e) =>
-        console.error(`[video-async] Demo ${demo.id} Video fehlgeschlagen:`, (e as Error).message)
-      )
-    }
-
     const warning = ergebnis.warnungen.length > 0 ? ergebnis.warnungen.join(' · ') : null
-    return NextResponse.json({ demo, warning, kosten_cent: ergebnis.kostenCent })
+    return NextResponse.json({
+      demo,
+      warning,
+      kosten_cent: ergebnis.kostenCent,
+      videoJob: ergebnis.videoJob ? true : false,
+    })
   }
 
   // ------------------------------------------------------------
@@ -241,45 +237,3 @@ export async function POST(request: Request) {
   return NextResponse.json({ demo, warning: scrapeWarning })
 }
 
-/**
- * Generiert das Hero-Video async NACH dem Response.
- * Updatet die Demo-Config in der DB wenn erfolgreich.
- */
-async function generiereVideoAsync(demoId: string, job: VideoJobInfo): Promise<void> {
-  const admin = createAdminClient()
-  const video = await generiereVideo({
-    imageUrl: job.heroImageUrl,
-    prompt: job.videoPrompt,
-    durationSeconds: 6,
-    kontext: job.kontext,
-  })
-  if (!video.videoUrl) return
-
-  // Demo aus DB laden, Config updaten, zurückschreiben
-  const { data: demo } = await admin
-    .from('demos')
-    .select('config, asset_meta, kosten_cent')
-    .eq('id', demoId)
-    .single()
-  if (!demo) return
-
-  const config = demo.config as Record<string, unknown>
-  const inhalte = config.inhalte as Record<string, unknown>
-  const hero = inhalte.hero as Record<string, unknown>
-  hero.video = { src: video.videoUrl, poster: job.heroImageUrl, modus: job.videoModus }
-
-  const assetMeta = (demo.asset_meta || {}) as Record<string, unknown>
-  assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
-
-  await admin
-    .from('demos')
-    .update({
-      config,
-      asset_meta: assetMeta,
-      kosten_cent: (demo.kosten_cent ?? 0) + video.kostenCent,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', demoId)
-
-  console.log(`[video-async] Demo ${demoId} Video erfolgreich: ${video.videoUrl}`)
-}

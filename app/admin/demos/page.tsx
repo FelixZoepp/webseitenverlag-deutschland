@@ -192,6 +192,19 @@ export default function DemosPage() {
       setSchriftart('')
       setDemos((prev) => [data.demo, ...prev])
       window.open(`/demo/${data.demo.share_token}`, '_blank')
+
+      // Video async im Hintergrund generieren (separater Request)
+      if (data.videoJob && data.demo?.id) {
+        fetch(`/api/admin/demos/${data.demo.id}/video`, { method: 'POST' })
+          .then((r) => r.json())
+          .then((v) => {
+            if (v.ok) {
+              setDemos((prev) => prev.map((d) => d.id === data.demo.id ? { ...d, ...v.demo } : d))
+              setWarning('Video-Header wurde erfolgreich generiert.')
+            }
+          })
+          .catch(() => { /* Video-Fehler still ignorieren */ })
+      }
     } catch {
       setError('Netzwerkfehler — bitte erneut versuchen.')
     } finally {
