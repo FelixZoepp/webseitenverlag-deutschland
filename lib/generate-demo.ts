@@ -173,7 +173,7 @@ export async function validateImageUrls(
 
   const entfernt: string[] = []
   await Promise.all(
-    Array.from(urls.entries()).map(async ([_pfad, { obj, key }]) => {
+    Array.from(urls.values()).map(async ({ obj, key }) => {
       const url = obj[key] as string
       try {
         const controller = new AbortController()
