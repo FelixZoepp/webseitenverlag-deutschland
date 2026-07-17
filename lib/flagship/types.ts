@@ -191,6 +191,34 @@ export interface FooterInhalt {
   links: { label: string; anker: string }[]
 }
 
+export interface NachweiseInhalt {
+  eyebrow: string
+  headline: string
+  items: { label: string; beschreibung?: string; icon?: IconKey }[]
+}
+
+export interface MarkenInhalt {
+  label?: string
+  logos: { name: string; url?: string }[]
+}
+
+export interface ProzessInhalt {
+  eyebrow: string
+  headline: string
+  schritte: { titel: string; text: string; media?: MediaSlot; icon?: IconKey }[]
+}
+
+export interface ReferenzenInhalt {
+  eyebrow: string
+  headline: string
+  projekte: {
+    titel: string
+    typ: string
+    kennzahlen: { label: string; wert: string }[]
+    als: 'muster' | 'kundenbelegt'
+  }[]
+}
+
 export interface FlagshipInhalte {
   nav: NavInhalt
   hero: HeroInhalt
@@ -200,6 +228,10 @@ export interface FlagshipInhalte {
   leistungen: LeistungenInhalt
   /** Ablauf-Stepper (Dienstleistung Pflicht); bei Gastro entfällt er zugunsten lokal/info */
   ablauf?: AblaufInhalt
+  nachweise?: NachweiseInhalt
+  marken?: MarkenInhalt
+  prozess?: ProzessInhalt
+  referenzen?: ReferenzenInhalt
   ergebnisse: ErgebnisseInhalt
   zahlen: ZahlenInhalt
   stimmen: StimmenInhalt
