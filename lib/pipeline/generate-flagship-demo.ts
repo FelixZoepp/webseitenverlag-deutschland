@@ -20,24 +20,75 @@ import type { ProspectData } from './prospect-data'
 const BUCKET = 'asset-bank'
 
 /** M5: Branchen-spezifische Video-Bewegungs-Prompts für Flagships ohne style_prompts */
-const VIDEO_PROMPTS: Record<string, string> = {
-  reinigung: 'Light reflections slowly shifting on freshly cleaned glass surfaces, gentle water droplets running down a window pane, dust particles floating in bright morning sunlight.',
-  restaurant_italienisch: 'Warm candlelight gently flickering, steam rising from a freshly served pasta dish, wine slowly being poured into a crystal glass.',
-  maler: 'Fresh paint slowly dripping from a roller, smooth wet paint surface reflecting light, gentle brush strokes appearing on a wall.',
-  dachdecker: 'Morning light slowly moving across roof tiles, gentle wind moving a safety rope, subtle shadows shifting on a slate surface.',
-  cafe: 'Steam rising from a fresh espresso cup, milk foam slowly settling in a latte art pattern, gentle light through a cafe window.',
-  kosmetikstudio: 'Soft salon lighting slowly shifting, gentle steam from a facial treatment, cosmetic brush softly dusting powder.',
-  zahnarzt: 'Clean dental instruments gleaming under bright LED light, gentle water flowing in a dental basin, sterile blue light reflections.',
-  physiotherapie: 'Gentle movement of therapy bands, soft natural light streaming through treatment room windows, calm water feature in background.',
-  friseur: 'Hair strands gently falling and catching salon light, scissors making precise cuts in slow motion, warm styling tool steam rising.',
-  kfz_werkstatt: 'Oil slowly dripping, wrench turning on a chrome bolt with reflections, hydraulic lift slowly raising a car.',
-  autoaufbereitung: 'Water beading and slowly running off a freshly polished car hood, wax buffer spinning with light reflections, chrome gleaming.',
-  umzugsunternehmen: 'Moving blankets gently settling over furniture, dolly wheels slowly rolling on hardwood floor, morning light through an empty apartment.',
-  fotograf: 'Camera shutter slowly closing, studio flash softly reflecting off an umbrella, gentle bokeh lights drifting.',
-  fitnessstudio: 'Weight plates gently settling on a barbell, gym floor mat slightly compressing, cable machine slowly releasing tension.',
-  personal_training: 'Resistance band slowly stretching, kettlebell gently swinging, morning dew on outdoor training equipment.',
-  hausmeisterservice: 'Keys gently swinging on a caretaker ring, fresh paint drying on a railing, garden sprinkler slowly rotating.',
-  padel: 'A padel ball gently rolling across the polished court surface, subtle light reflections shimmering on glass walls, dust particles floating in LED light.',
+const VIDEO_PROMPTS: Record<string, { loop: string; scrub: string }> = {
+  reinigung: {
+    loop: 'Extreme close-up of a grimy glass surface — an invisible force wipes across from left to right, revealing crystal-clear sparkling glass with bright daylight streaming through. Water droplets bead and roll off the clean surface. Static camera, no person visible, no text, no logos.',
+    scrub: 'Wide shot of a neglected dusty office space transforming into an immaculate clean room — dust disappears from surfaces, floors begin to gleam, windows clear up, everything shines. Static camera, no person, smooth continuous transformation, no text, no logos.',
+  },
+  restaurant_italienisch: {
+    loop: 'Overhead static shot of an empty white ceramic plate on a rustic wooden table — steam rises as fresh handmade pasta with rich tomato sauce materializes on the plate, finished with torn basil leaves and shaved parmesan. Warm candlelight flickers. No hands visible, no text, no logos.',
+    scrub: 'A bare dark restaurant table transforms into a fully set Italian dinner scene — white tablecloth appears, plates materialize, wine slowly fills crystal glasses, candles light themselves, napkins fold. Static camera, warm evening light, no person, no text, no logos.',
+  },
+  maler: {
+    loop: 'Close-up of a paint roller pressing against a wall — fresh white paint spreads smoothly across a patchy grey surface, leaving a perfect even finish. Paint glistens wet under bright work lighting. Static camera, only roller and wall visible, no face, no text, no logos.',
+    scrub: 'A room with damaged peeling walls transforms — cracks fill themselves, primer appears, then fresh paint rolls across every surface. The room brightens from dull grey to pristine white. Static camera, no person, no text, no logos.',
+  },
+  dachdecker: {
+    loop: 'Close-up of weathered broken roof tiles — new slate tiles slide into place one by one, clicking together perfectly. Morning sunlight catches the clean dark surfaces. Static camera from above, only tiles and hands in work gloves visible, no face, no text, no logos.',
+    scrub: 'Aerial view of a damaged old roof transforming — broken tiles replace themselves, flashing appears, gutters straighten. The roof goes from patchy and worn to pristine and uniform. Static camera, no person, no text, no logos.',
+  },
+  cafe: {
+    loop: 'Close-up of an espresso machine portafilter locking in — rich dark espresso streams into a white ceramic cup, crema forms a perfect golden layer on top, steam wisps curl upward. Soft morning café light. Static camera, no face visible, no text, no logos.',
+    scrub: 'An empty café counter transforms into a bustling setup — espresso machine gleams to life, pastries appear under glass cloches, coffee beans fill the grinder, menu boards write themselves. Warm morning light, static camera, no person, no text, no logos.',
+  },
+  kosmetikstudio: {
+    loop: 'Close-up of a jade roller gliding across a dewy skin surface — product absorbs, skin transforms from dull to radiant and glowing. Soft pink-toned studio lighting with gentle lens flare. Static camera, only skin and tool visible, no face, no text, no logos.',
+    scrub: 'A plain treatment room transforms into a luxurious spa setup — towels fold themselves, candles light, products arrange on shelves, the treatment bed prepares with fresh linens. Soft warm lighting, static camera, no person, no text, no logos.',
+  },
+  zahnarzt: {
+    loop: 'Close-up of dental instruments arranged on a sterile tray — bright LED examination light slowly powers on, reflecting off polished chrome surfaces. Sterile blue-white lighting, clean and precise. Static camera, no person, no text, no logos.',
+    scrub: 'An empty dental treatment room powers up — the chair adjusts itself, monitors flicker on showing dental imagery, instruments arrange on the tray, the overhead light swings into position. Clean clinical lighting, static camera, no person, no text, no logos.',
+  },
+  physiotherapie: {
+    loop: 'Close-up of therapy resistance bands stretching and releasing in rhythmic motion — natural light streams through floor-to-ceiling windows of a modern treatment room. Bands catch the light with each stretch. Static camera, no person, no text, no logos.',
+    scrub: 'A bare therapy room equips itself — exercise balls inflate, resistance bands hang themselves on hooks, a treatment table unfolds fresh sheets, anatomical charts appear on walls. Bright natural light, static camera, no person, no text, no logos.',
+  },
+  friseur: {
+    loop: 'Extreme close-up of professional scissors making precise cuts through hair strands in slow motion — cut hair falls catching salon spotlight, each strand detailed and sharp. Warm salon lighting. Static camera, only scissors and hair visible, no face, no text, no logos.',
+    scrub: 'A salon station transforms from closed to ready — mirror lights up, scissors and combs arrange themselves, fresh cape unfolds on the chair, product bottles line up. Warm professional lighting, static camera, no person, no text, no logos.',
+  },
+  kfz_werkstatt: {
+    loop: 'Close-up of a chrome wrench turning on a bolt — oil glistens on metal surfaces, a hydraulic lift slowly raises a car in the background. Workshop LED lighting reflects off polished tools. Static camera, only hands in gloves and tools visible, no face, no text, no logos.',
+    scrub: 'An empty garage bay comes to life — a hydraulic lift rises, tool chest drawers extend, diagnostic screens power on, compressed air hoses coil into place. Industrial lighting, static camera, no person, no text, no logos.',
+  },
+  autoaufbereitung: {
+    loop: 'Close-up of a car hood surface — water beads form and slowly roll off a freshly ceramic-coated deep black surface, reflecting surrounding lights like a mirror. The paint transforms from matte dusty to mirror-glossy. Static camera, no person, no text, no logos.',
+    scrub: 'A neglected dusty car transforms — dirt washes away layer by layer, scratches fill and disappear, paint deepens to a mirror finish, chrome trim gleams. The car goes from neglected to showroom condition. Static camera, no person, no text, no logos.',
+  },
+  umzugsunternehmen: {
+    loop: 'Close-up of moving blankets gently settling over furniture — bubble wrap catches light, a dolly wheel rolls smoothly across hardwood floor. Morning light streams through an empty apartment window. Static camera, no face visible, no text, no logos.',
+    scrub: 'An empty apartment fills itself — boxes slide in through the door, furniture unwraps and positions itself, pictures hang on walls, plants appear on windowsills. Morning light, static camera, no person, no text, no logos.',
+  },
+  fotograf: {
+    loop: 'A camera shutter closes in slow motion — the brief moment of exposure captured in detail, followed by a soft studio flash reflecting off a silver umbrella. Gentle bokeh lights drift in background. Static camera, only camera equipment visible, no person, no text, no logos.',
+    scrub: 'A dark photo studio lights up — backdrop rolls down, softboxes power on one by one, camera mounts itself on tripod, lens focuses. Dramatic lighting transformation from dark to perfectly lit. Static camera, no person, no text, no logos.',
+  },
+  fitnessstudio: {
+    loop: 'Close-up of a barbell being loaded — weight plates slide onto the bar one by one with satisfying clicks, chrome gleams under gym LED lighting. The bar slightly flexes under the weight. Static camera, no person, no text, no logos.',
+    scrub: 'An empty gym floor equips itself — dumbbells rack themselves by weight, a cable machine tensions its cables, mirrors reflect increasingly equipped space, rubber flooring mats interlock. Bright gym lighting, static camera, no person, no text, no logos.',
+  },
+  personal_training: {
+    loop: 'Close-up of a kettlebell gently swinging in the morning dew — outdoor training setup with resistance bands stretching in the wind, fresh morning sunlight creating long shadows on grass. Static camera, no person, no text, no logos.',
+    scrub: 'An empty outdoor training area sets itself up — cones place themselves, battle ropes coil out, a training mat unrolls, TRX straps hang from a frame. Morning golden hour light, static camera, no person, no text, no logos.',
+  },
+  hausmeisterservice: {
+    loop: 'Close-up of a set of brass keys swinging gently on a caretaker key ring — behind them, a freshly painted railing dries in sunlight, a garden sprinkler slowly rotates. Warm afternoon light. Static camera, no person, no text, no logos.',
+    scrub: 'A neglected building entrance transforms — peeling paint refreshes itself, broken light fixtures repair, the garden tidies, the entrance mat straightens. Afternoon sunlight, static camera, no person, no text, no logos.',
+  },
+  padel: {
+    loop: 'A padel ball rolls slowly across a pristine blue court surface — subtle LED light reflections shimmer on the glass walls, dust particles float in the bright court lighting. The ball gently bounces once. Static camera at ground level, no person, no text, no logos.',
+    scrub: 'An empty padel court prepares for play — court lines illuminate, net tensions itself, glass walls gleam as lights power on sequentially, a racket and balls appear courtside. Static camera, no person, no text, no logos.',
+  },
 }
 
 /** Design-Overrides für die Demo-Generierung (UI → API → Pipeline) */
@@ -363,18 +414,19 @@ export async function generiereFlagshipDemo(
           // Video-Hero (optional, Fehler = Warning)
           try {
             let videoPrompt: string
-            if (styleProfil?.style_prompts) {
+            if (styleProfil?.header_animation?.higgsfield_prompt) {
+              videoPrompt = styleProfil.header_animation.higgsfield_prompt
+            } else if (styleProfil?.style_prompts) {
               videoPrompt = baueVideoPrompt(styleProfil)
             } else {
               const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
               const brancheName = row.name || brancheKey
-              const branchenBewegung = VIDEO_PROMPTS[brancheKey] || `Subtle ambient motion fitting for ${brancheName}: light reflections shifting on surfaces, gentle material movement, dust particles in light.`
-              videoPrompt = [
-                `Cinematic 4K, completely static tripod camera, zero camera movement.`,
-                `Close-up scene: ${heroLabel}. ${brancheName} environment.`,
-                branchenBewegung,
-                `Seamless 5-second loop, calm and premium. No face visible, no person looking at camera. No text, no logos.`,
-              ].join(' ')
+              const branchenVideo = VIDEO_PROMPTS[brancheKey]
+              if (branchenVideo) {
+                videoPrompt = branchenVideo.loop
+              } else {
+                videoPrompt = `Cinematic 4K, completely static tripod camera, zero camera movement. Close-up scene: ${heroLabel}. ${brancheName} environment. Subtle ambient motion, gentle material movement, dust particles in light. Seamless 5-second loop, calm and premium. No face visible, no person looking at camera. No text, no logos.`
+              }
             }
             const video = await generiereVideo({
               imageUrl: hero.publicUrl,
@@ -384,7 +436,8 @@ export async function generiereFlagshipDemo(
             })
             if (video.videoUrl) {
               kostenCent += video.kostenCent
-              config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl }
+              const videoModus = styleProfil?.header_animation?.typ === 'scroll_scrub' ? 'scrub' as const : 'loop' as const
+              config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl, modus: videoModus }
               assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
             }
           } catch (e) {
