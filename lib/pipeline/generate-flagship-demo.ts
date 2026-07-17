@@ -167,11 +167,21 @@ export interface DemoAssetMeta {
   warnungen: string[]
 }
 
+/** Info für asynchrone Video-Generierung (nach dem Response) */
+export interface VideoJobInfo {
+  heroImageUrl: string
+  videoPrompt: string
+  videoModus: 'loop' | 'scrub'
+  kontext: string
+}
+
 export interface FlagshipDemoErgebnis {
   config: FlagshipConfig
   kostenCent: number
   assetMeta: DemoAssetMeta
   warnungen: string[]
+  /** Video-Job Infos für async Generierung — wird NICHT synchron awaited */
+  videoJob?: VideoJobInfo
 }
 
 /** Rekursiver String-Walk: ersetzt Vorlagen-Werte (Firma/Ort/Telefon) in allen Texten */
@@ -406,43 +416,11 @@ export async function generiereFlagshipDemo(
           szeneTyp: 'hero',
           quelleOverride: 'demo_generiert',
           kontext,
-        }).then(async (hero) => {
+        }).then((hero) => {
           kostenCent += hero.kostenCent
           config.inhalte.hero.media.datei = hero.publicUrl
           assetMeta.hero = { id: hero.id, quelle: 'frisch' }
-
-          // Video-Hero (optional, Fehler = Warning)
-          try {
-            let videoPrompt: string
-            if (styleProfil?.header_animation?.higgsfield_prompt) {
-              videoPrompt = styleProfil.header_animation.higgsfield_prompt
-            } else if (styleProfil?.style_prompts) {
-              videoPrompt = baueVideoPrompt(styleProfil)
-            } else {
-              const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
-              const brancheName = row.name || brancheKey
-              const branchenVideo = VIDEO_PROMPTS[brancheKey]
-              if (branchenVideo) {
-                videoPrompt = branchenVideo.loop
-              } else {
-                videoPrompt = `Cinematic 4K, completely static tripod camera, zero camera movement. Close-up scene: ${heroLabel}. ${brancheName} environment. Subtle ambient motion, gentle material movement, dust particles in light. Seamless 5-second loop, calm and premium. No face visible, no person looking at camera. No text, no logos.`
-              }
-            }
-            const video = await generiereVideo({
-              imageUrl: hero.publicUrl,
-              prompt: videoPrompt,
-              durationSeconds: 6,
-              kontext: `video:${kontext}`,
-            })
-            if (video.videoUrl) {
-              kostenCent += video.kostenCent
-              const videoModus = styleProfil?.header_animation?.typ === 'scroll_scrub' ? 'scrub' as const : 'loop' as const
-              config.inhalte.hero.video = { src: video.videoUrl, poster: hero.publicUrl, modus: videoModus }
-              assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
-            }
-          } catch (e) {
-            warnungen.push(`Video-Hero fehlgeschlagen (Bild-Hero bleibt): ${(e as Error).message}`)
-          }
+          // Video wird NICHT synchron generiert — videoJob wird am Ende zurückgegeben
         }).catch((e: Error) => {
           warnungen.push(`Hero-Generierung Durchlauf ${durchlauf} fehlgeschlagen: ${e.message}`)
         })
@@ -557,5 +535,33 @@ export async function generiereFlagshipDemo(
     )
   }
 
-  return { config, kostenCent, assetMeta, warnungen }
+  // Video-Job Info zusammenbauen (wird async NACH dem Response generiert)
+  let videoJob: VideoJobInfo | undefined
+  if (config.inhalte.hero.media.datei) {
+    let videoPrompt: string | undefined
+    if (styleProfil?.header_animation?.higgsfield_prompt) {
+      videoPrompt = styleProfil.header_animation.higgsfield_prompt
+    } else if (styleProfil?.style_prompts) {
+      videoPrompt = baueVideoPrompt(styleProfil)
+    } else {
+      const branchenVideo = VIDEO_PROMPTS[brancheKey]
+      if (branchenVideo) {
+        videoPrompt = branchenVideo.loop
+      } else {
+        const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
+        const brancheName = row.name || brancheKey
+        videoPrompt = `Cinematic 4K, completely static tripod camera, zero camera movement. Close-up scene: ${heroLabel}. ${brancheName} environment. Subtle ambient motion, gentle material movement, dust particles in light. Seamless 5-second loop, calm and premium. No face visible, no person looking at camera. No text, no logos.`
+      }
+    }
+    if (videoPrompt) {
+      videoJob = {
+        heroImageUrl: config.inhalte.hero.media.datei,
+        videoPrompt,
+        videoModus: styleProfil?.header_animation?.typ === 'scroll_scrub' ? 'scrub' : 'loop',
+        kontext: `video:${kontext}`,
+      }
+    }
+  }
+
+  return { config, kostenCent, assetMeta, warnungen, videoJob }
 }
