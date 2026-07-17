@@ -11,7 +11,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { generiereAsset, generiereVideo, makePair } from '@/lib/assets/pipeline'
+import { generiereAsset, makePair } from '@/lib/assets/pipeline'
 import { baueAssetPrompt, baueVideoPrompt } from '@/lib/seeding/seed-branche'
 import type { BranchenProfil } from '@/lib/seeding/schema'
 import type { FlagshipConfig, FlagshipDesign } from '@/lib/flagship/types'
