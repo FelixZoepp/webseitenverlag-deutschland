@@ -113,9 +113,33 @@ export function flagshipJs(opts: { ablauf?: AblaufInhalt; hatBaSlider: boolean; 
   /* Highlight-Wipes im Hero sofort */
   document.querySelectorAll('.hero .hl, .vhero .hl').forEach(function(h){setTimeout(function(){h.classList.add('on')},300)});
 
-  /* Video-Hero: reduced-motion → pausieren */
+  /* Video-Hero */
   var hv=document.getElementById('heroVideo');
-  if(reduced&&hv){hv.pause();hv.removeAttribute('autoplay');}`)
+  var vplay=document.querySelector('.vplay');
+  if(reduced&&hv){hv.pause();hv.removeAttribute('autoplay');if(vplay)vplay.classList.add('hidden')}
+
+  /* Play-Button: hide after autoplay starts, click to play */
+  if(hv&&vplay&&!reduced){
+    hv.addEventListener('playing',function(){vplay.classList.add('hidden')});
+    vplay.addEventListener('click',function(){hv.play()});
+    /* If autoplay blocked by browser, keep button visible */
+    var pp=hv.play();if(pp&&pp.catch)pp.catch(function(){vplay.classList.remove('hidden')});
+  }
+
+  /* Scroll-Scrub: tie video progress to scroll position */
+  if(!reduced&&hv&&hv.closest('.scrub')){
+    hv.pause();
+    function scrubV(){
+      var hero=hv.closest('.vhero');
+      var r=hero.getBoundingClientRect();
+      var total=r.height-innerHeight;
+      if(total<=0)return;
+      var p=Math.min(Math.max(-r.top/total,0),1);
+      if(hv.duration)hv.currentTime=p*hv.duration;
+    }
+    addEventListener('scroll',scrubV,{passive:true});
+    hv.addEventListener('loadedmetadata',scrubV);
+  }`)
 
 
   return `(function(){\n  ${teile.join('\n')}\n})();`

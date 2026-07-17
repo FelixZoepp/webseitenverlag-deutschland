@@ -48,6 +48,7 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
 
   // Video-Hero (Growth-Level): Looping-Video als Hintergrund mit Gradient-Shade
   if (hero.video?.src) {
+    const modus = hero.video.modus || 'loop'
     const posterAttr = hero.video.poster
       ? ` poster="${escAttr(hero.video.poster)}"`
       : hero.media.datei
@@ -56,9 +57,12 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
     const reducedBg = hero.video.poster || hero.media.datei
       ? `\n  <style>@media(prefers-reduced-motion:reduce){.vhero{background:url('${escAttr(hero.video.poster || hero.media.datei!)}') center/cover}}</style>`
       : ''
+    const autoplayAttr = modus === 'loop' ? ' autoplay' : ''
+    const loopAttr = modus === 'loop' ? ' loop' : ''
+    const scrubClass = modus === 'scrub' ? ' scrub' : ''
     return `<!-- sektion:hero -->
-<header class="vhero" id="top">
-  <video id="heroVideo" autoplay muted loop playsinline preload="metadata"${posterAttr}>
+<header class="vhero${scrubClass}" id="top" data-modus="${modus}">
+  <video id="heroVideo"${autoplayAttr} muted${loopAttr} playsinline preload="metadata"${posterAttr}>
     <source src="${escAttr(hero.video.src)}" type="video/mp4">
   </video>
   <div class="vshade"></div>
@@ -75,6 +79,7 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
       </div>
     </div>
   </div>
+  <button class="vplay" aria-label="Video abspielen"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
   <div class="stat-card vcard"><b>${esc(hero.stat2.wert)}</b><small>${esc(hero.stat2.label)}</small></div>
   <div class="scroll-hint">Entdecken <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg></div>${reducedBg}
 </header>`
