@@ -85,7 +85,7 @@ ${noindex}
 <meta property="og:locale" content="de_DE">
 <script type="application/ld+json">${jsonLd(config)}</script>
 <style>
-${flagshipCss(design)}
+${flagshipCss(design, { premiumAnimationen: config.premium_animationen })}
 </style>
 </head>
 <body>

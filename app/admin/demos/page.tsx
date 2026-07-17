@@ -195,15 +195,20 @@ export default function DemosPage() {
 
       // Video async im Hintergrund generieren (separater Request)
       if (data.videoJob && data.demo?.id) {
+        setWarning('Video-Header wird im Hintergrund generiert (~2 Min)…')
         fetch(`/api/admin/demos/${data.demo.id}/video`, { method: 'POST' })
           .then((r) => r.json())
           .then((v) => {
             if (v.ok) {
               setDemos((prev) => prev.map((d) => d.id === data.demo.id ? { ...d, ...v.demo } : d))
-              setWarning('Video-Header wurde erfolgreich generiert.')
+              setWarning('✓ Video-Header erfolgreich generiert!')
+            } else {
+              setError(`Video-Header fehlgeschlagen: ${v.error || 'Unbekannter Fehler'}`)
             }
           })
-          .catch(() => { /* Video-Fehler still ignorieren */ })
+          .catch((e) => {
+            setError(`Video-Header Netzwerkfehler: ${e instanceof Error ? e.message : 'Verbindung fehlgeschlagen'}`)
+          })
       }
     } catch {
       setError('Netzwerkfehler — bitte erneut versuchen.')

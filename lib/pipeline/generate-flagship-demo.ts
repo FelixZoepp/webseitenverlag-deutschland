@@ -97,6 +97,8 @@ export interface DesignOverrides {
   typo_modus?: 'sans_bold_hell' | 'serif_warm_dunkel'
   /** Eigene Brandfarbe (#hex) — ersetzt akzent1, akzent1_tief wird abgeleitet */
   brandfarbe?: string
+  /** Premium-Animationen aktivieren (Parallax, staggered reveals) */
+  premium_animationen?: boolean
 }
 
 /** Dunkelt eine Hex-Farbe um ~25% ab (für akzent1_tief) */
@@ -133,6 +135,9 @@ function wendeDesignOverridesAn(config: FlagshipConfig, overrides: DesignOverrid
   if (overrides.brandfarbe && /^#[0-9a-fA-F]{6}$/.test(overrides.brandfarbe)) {
     config.design.tokens.akzent1 = overrides.brandfarbe
     config.design.tokens.akzent1_tief = dunklereVariante(overrides.brandfarbe)
+  }
+  if (overrides.premium_animationen) {
+    config.premium_animationen = true
   }
 }
 /** DoD-Grenze (BF §6): Kosten pro Demo in Cent */
@@ -406,17 +411,17 @@ export async function generiereFlagshipDemo(
         const brancheName = row.name || brancheKey
         const sigCap = config.inhalte.signature.cap || ''
         nachherPrompt = [
-          `${nachherLabel}. ${sigCap || brancheName}.`,
-          `The space/result is IMMACULATE — gleaming surfaces, well-maintained, inviting. The satisfying outcome of professional work.`,
-          `Bright natural daylight, warm atmosphere, sharp details showing quality.`,
-          `Eye-level perspective, 16:9 wide format.`,
-          `Photorealistic photography, shallow depth of field. No people, no text, no logos.`,
+          `A ${brancheName} workspace showing: ${nachherLabel}. ${sigCap || brancheName}.`,
+          `The result is PERFECT — pristine clean surfaces, fresh paint or finish, professional quality visible in every detail.`,
+          `Bright natural daylight flooding the space, warm inviting atmosphere, sharp focus on the quality of workmanship.`,
+          `Eye-level perspective, centered composition, 16:9 wide format.`,
+          `Photorealistic editorial photography, shallow depth of field. No people visible, no text, no logos, no watermarks.`,
         ].join(' ')
         vorherPrompt = [
-          `Edit this exact scene, keep the IDENTICAL room, furniture, objects, windows, camera angle and perspective unchanged.`,
-          `Only change: ${vorherLabel}. Cover surfaces in dust, grime, stains. Dull and unmaintained state.`,
-          `Muted desaturated colors, flat unflattering light. Dramatic but realistic contrast to the clean version.`,
-          `Same exact composition and framing — only the cleanliness/condition changes. No text, no logos.`,
+          `The SAME ${brancheName} workspace as the reference image but in its NEGLECTED state BEFORE professional work was done.`,
+          `${vorherLabel}. Visible wear and deterioration: peeling surfaces, dust buildup, stains, scratches, faded colors.`,
+          `SAME room, SAME angle, SAME composition — only the condition is degraded. Overcast flat lighting, muted washed-out colors.`,
+          `Photorealistic photography, 16:9 wide format. No people, no text, no logos.`,
         ].join(' ')
       }
     }
@@ -511,15 +516,16 @@ export async function generiereFlagshipDemo(
           const ergebnisPaar = await makePair({
             branche: brancheKey,
             nachherPrompt: [
-              `${nachherLabel}. ${brName}.`,
-              `Immaculate, clean, well-maintained result of professional work.`,
-              `Bright natural lighting, sharp details. 16:9 format.`,
+              `A ${brName} project result: ${nachherLabel}.`,
+              `Professional quality finish — pristine, clean, expertly done. Every detail shows craftsmanship.`,
+              `Bright natural lighting, sharp focus on the finished result. 16:9 format.`,
               `Photorealistic photography, shallow depth of field. No people, no text, no logos.`,
             ].join(' '),
             vorherPrompt: [
-              `Edit this exact scene, keep IDENTICAL room, objects, camera angle unchanged.`,
-              `Only change: ${vorherLabel}. Dirty, dusty, neglected, worn state. Muted colors, flat light.`,
-              `Same composition — only the condition changes. No text, no logos.`,
+              `The SAME ${brName} project BEFORE professional work — reference image shows the finished state.`,
+              `${vorherLabel}. Visible deterioration: worn, damaged, neglected, old condition.`,
+              `SAME space, SAME angle — only the condition is degraded. Flat overcast lighting, muted colors.`,
+              `Photorealistic photography. No people, no text, no logos.`,
             ].join(' '),
             aspect: '16:9',
             quelleOverride: 'demo_generiert',

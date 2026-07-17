@@ -249,6 +249,8 @@ export interface FlagshipConfig {
   inhalte: FlagshipInhalte
   funnel: FunnelKonfig
   herkunft?: { quellen?: string[]; generator?: string }
+  /** Premium-Animationen: parallax auf Bildern, staggered reveals, smoothere Übergänge */
+  premium_animationen?: boolean
 }
 
 /** Render-Optionen (Demo-Ribbon, Submit-Ziel des Funnels, noindex …) */
