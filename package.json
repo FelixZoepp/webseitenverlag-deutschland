@@ -14,6 +14,8 @@
     "test:kuendigung": "npx tsx scripts/test-kuendigung.ts",
     "test:flagship": "npx tsx scripts/test-flagship.ts",
     "test:hosting": "npx tsx scripts/test-hosting.ts",
+    "test:assets": "npx tsx scripts/test-assets.ts",
+    "seed:assets": "npx tsx scripts/seed-assets.ts",
     "seed:branchen": "npx tsx scripts/seed-branchen.ts"
   },
   "dependencies": {

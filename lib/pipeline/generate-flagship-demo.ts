@@ -12,6 +12,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generiereAsset, makePair } from '@/lib/assets/pipeline'
+import { getApprovedAssets } from '@/lib/assets/repository'
 import { baueAssetPrompt, baueVideoPrompt } from '@/lib/seeding/seed-branche'
 import type { BranchenProfil } from '@/lib/seeding/schema'
 import type { FlagshipConfig, FlagshipDesign } from '@/lib/flagship/types'
@@ -215,58 +216,39 @@ function publicUrl(admin: SupabaseClient, storagePath: string): string {
   return admin.storage.from(BUCKET).getPublicUrl(storagePath).data.publicUrl
 }
 
-/** Bank-Fallback Hero: approved bevorzugt, sonst neuester Treffer der Branche */
+/**
+ * Bank-Fallback Hero — NUR approved (§3.2): der einzige Lesepfad ist das
+ * Repository; Draft-/Rejected-Assets werden nie ausgespielt.
+ */
 async function bankHero(
   admin: SupabaseClient,
   brancheKey: string
 ): Promise<{ id: string; url: string } | null> {
-  for (const nurApproved of [true, false]) {
-    let q = admin
-      .from('asset_bank')
-      .select('id, storage_path')
-      .contains('branchen', [brancheKey])
-      .eq('szene_typ', 'hero')
-      .order('created_at', { ascending: false })
-      .limit(1)
-    if (nurApproved) q = q.eq('quality_status', 'approved')
-    const { data } = await q
-    const row = data?.[0]
-    if (row) return { id: row.id, url: publicUrl(admin, row.storage_path) }
-  }
-  return null
+  const kandidaten = await getApprovedAssets(admin, { branche: brancheKey, szeneTyp: 'hero' })
+  const row = kandidaten[0]
+  return row ? { id: row.id, url: publicUrl(admin, row.storage_path) } : null
 }
 
-/** Bank-Fallback Signature-Paar: nachher + vorher mit gemeinsamer pair_id */
+/**
+ * Bank-Fallback Signature-Paar — NUR approved (§3.2), IMMER über pair_id:
+ * beide Hälften müssen approved sein, sonst kein Paar (nie ein halbes).
+ */
 async function bankPaar(
   admin: SupabaseClient,
   brancheKey: string
 ): Promise<{ pairId: string; ids: string[]; nachherUrl: string; vorherUrl: string } | null> {
-  for (const nurApproved of [true, false]) {
-    let q = admin
-      .from('asset_bank')
-      .select('id, storage_path, pair_id')
-      .contains('branchen', [brancheKey])
-      .eq('szene_typ', 'nachher')
-      .not('pair_id', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(5)
-    if (nurApproved) q = q.eq('quality_status', 'approved')
-    const { data } = await q
-    for (const nachher of data ?? []) {
-      const { data: vorherRows } = await admin
-        .from('asset_bank')
-        .select('id, storage_path')
-        .eq('pair_id', nachher.pair_id)
-        .eq('szene_typ', 'vorher')
-        .limit(1)
-      const vorher = vorherRows?.[0]
-      if (vorher) {
-        return {
-          pairId: nachher.pair_id,
-          ids: [nachher.id, vorher.id],
-          nachherUrl: publicUrl(admin, nachher.storage_path),
-          vorherUrl: publicUrl(admin, vorher.storage_path),
-        }
+  const kandidaten = await getApprovedAssets(admin, { branche: brancheKey })
+  const nachherListe = kandidaten.filter((a) => a.szene_typ === 'nachher' && a.pair_id)
+  for (const nachher of nachherListe) {
+    const vorher = kandidaten.find(
+      (a) => a.szene_typ === 'vorher' && a.pair_id === nachher.pair_id
+    )
+    if (vorher) {
+      return {
+        pairId: nachher.pair_id as string,
+        ids: [nachher.id, vorher.id],
+        nachherUrl: publicUrl(admin, nachher.storage_path),
+        vorherUrl: publicUrl(admin, vorher.storage_path),
       }
     }
   }

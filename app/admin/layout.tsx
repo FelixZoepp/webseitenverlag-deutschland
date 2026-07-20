@@ -101,6 +101,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="16" height="16"><path d="M2 20h20"/><path d="M4 20V8l5-4 5 4v12"/><path d="M14 20V12l6-3v11"/></svg>
               Branchen-Fabrik
             </Link>
+            <Link href="/admin/assets" className="sb-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+              Asset-Bank
+            </Link>
             <Link href="/admin/templates" className="sb-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
               Templates

@@ -7,6 +7,8 @@
  * renderUnterseite() liefert die 4 Unterseiten (leistungen, ergebnisse, ueber-uns, kontakt).
  */
 
+// Registrierungs-Gate (§3.1): invalide Slot-Deklarationen lassen den Renderer nicht laden
+import './asset-slots'
 import type { FlagshipConfig, FlagshipRenderOptionen, NavInhalt, UnterseitenSlug } from './types'
 import { UNTERSEITEN } from './types'
 import { esc, escAttr, ICON_PATHS } from './html'

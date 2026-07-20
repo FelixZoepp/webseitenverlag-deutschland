@@ -55,6 +55,8 @@ export interface AssetGenerierung {
   /** 'demo_generiert' für frische Demo-Assets (BF §2.3), sonst Provider-Quelle */
   quelleOverride?: 'demo_generiert'
   kontext?: string
+  /** Deutscher Alt-Text (vorbefüllt, Mensch korrigiert in /admin/assets) */
+  altTextDe?: string
 }
 
 export interface BankAsset {
@@ -237,6 +239,8 @@ export async function generiereAsset(
     varianten: gespeichert.varianten,
     breite: gespeichert.breite,
     hoehe: gespeichert.hoehe,
+    aspect_ratio: o.aspect,
+    alt_text_de: o.altTextDe ?? null,
     quality_status: 'draft',
   })
   if (insertFehler) {
@@ -274,6 +278,8 @@ export interface PaarGenerierung {
   styleTags?: string[]
   quelleOverride?: 'demo_generiert'
   kontext?: string
+  nachherAltText?: string
+  vorherAltText?: string
 }
 
 export interface AssetPaar {
@@ -377,6 +383,7 @@ export async function makePair(o: PaarGenerierung): Promise<AssetPaar> {
       quelleOverride: o.quelleOverride,
       kontext: o.kontext,
       seed: sharedSeed,
+      altTextDe: o.nachherAltText,
     },
     { providers: kette, admin }
   )
@@ -394,6 +401,7 @@ export async function makePair(o: PaarGenerierung): Promise<AssetPaar> {
       kontext: o.kontext,
       seed: sharedSeed,
       referenceJobId: nachher.jobId,
+      altTextDe: o.vorherAltText,
     },
     { providers: kette, admin }
   )

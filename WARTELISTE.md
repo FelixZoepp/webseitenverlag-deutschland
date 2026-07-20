@@ -25,6 +25,10 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 - [ ] **Kosten je Call verifizieren**: `HIGGSFIELD_KOSTEN_CENT` (Default 6) / `FAL_KOSTEN_CENT` (Default 4) sind Schätzwerte — nach den ersten echten Läufen mit dem Provider-Dashboard abgleichen
 - [ ] **Tages-Budget bestätigen**: `ASSET_BUDGET_TAG_CENT` Default 500 (= 5 €/Tag); Pipeline stoppt hart, wenn erreicht
 
+## Asset-Bank (MVP-Finish §3)
+- [ ] **Echter Bild-Key für die Asset-Bank** (`HIGGSFIELD_API_KEY` oder `FAL_API_KEY`): `npm run seed:assets -- --branche maler --count 30` erzeugt ohne Key nur STUB-Assets (`quelle='ai_mock'`) — die sind per Server-Regel **nie approvebar** (Freigabe wird mit 400 abgelehnt). Erst mit echtem Key entsteht freigebbares Material
+- [ ] **≥30 Assets inkl. 3 Paare für die erste Ziel-Branche freigeben** (`/admin/assets`): Seeding legt alles als `draft` an — Mensch-Gate. Grid filtert nach Branche/Szene/Status, Paare werden IMMER gemeinsam freigegeben/abgelehnt (Server erzwingt das), Alt-Texte in der Großansicht korrigierbar, „Regenerieren" nutzt den gespeicherten Prompt mit neuem Seed. DoD Phase 2 hängt an dieser Freigabe
+
 ## Branchen-Fabrik (F3–F5)
 - [ ] **16 Branchen freigeben** (`/admin/branchen`): Seeding legt alles als `draft` an — Mensch-Gate nach BF §4.6. Je Branche Preview prüfen (`/branchen-preview/<key>`), dann Freigeben oder Feedback (mit „Feedback & neu generieren" läuft sofort eine Regenerier-Runde mit deinem Feedback im Prompt)
 - [ ] **Slack `#library`-Webhook anlegen** (`SLACK_WEBHOOK_LIBRARY`): Pings für „neue Branche wartet auf Freigabe" + Regenerier-Ergebnisse; ohne Env-Var nur Log-Stub
