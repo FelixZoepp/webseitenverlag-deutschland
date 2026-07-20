@@ -33,7 +33,7 @@ interface FlagshipBranche {
 }
 
 const STATUS_STYLES: Record<string, { label: string; bg: string; fg: string }> = {
-  GENERIERT: { label: 'Generiert', bg: 'rgba(42,111,219,0.10)', fg: '#2a6fdb' },
+  GENERIERT: { label: 'Generiert', bg: 'rgba(224,53,75,0.10)', fg: '#E0354B' },
   VERSENDET: { label: 'Versendet', bg: 'rgba(212,168,40,0.12)', fg: '#a8821e' },
   CONVERTED: { label: 'Converted', bg: 'rgba(46,196,160,0.12)', fg: '#1e8a70' },
   ABGELAUFEN: { label: 'Abgelaufen', bg: 'rgba(0,0,0,0.06)', fg: '#8a877f' },
@@ -546,7 +546,7 @@ export default function DemosPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <button type="submit" disabled={generating || !prospectName.trim() || !templateId}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 22px', background: generating ? 'rgba(0,0,0,0.15)' : 'var(--za-gold-grad)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '11px', fontWeight: 600, cursor: generating ? 'wait' : 'pointer', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'inherit', boxShadow: generating ? 'none' : '0 3px 10px -3px rgba(42,111,219,0.50)' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 22px', background: generating ? 'rgba(0,0,0,0.15)' : 'var(--za-gold-grad)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '11px', fontWeight: 600, cursor: generating ? 'wait' : 'pointer', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'inherit', boxShadow: generating ? 'none' : '0 3px 10px -3px rgba(224,53,75,0.45)' }}>
               {generating
                 ? <><Loader2 style={{ width: '14px', height: '14px', animation: 'spin 1s linear infinite' }} /> Demo wird generiert…</>
                 : <><Zap style={{ width: '14px', height: '14px' }} /> Demo generieren</>}

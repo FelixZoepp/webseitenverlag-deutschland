@@ -63,7 +63,7 @@ export default function TemplatesPage() {
           <div key={t.id} className="panel fade-up" style={{ animationDelay: `${Math.min(i * 40, 400)}ms`, padding: 0, overflow: 'hidden' }}>
             {/* Color thumbnail (no iframe) */}
             <div onClick={() => setPreview(t.id)} style={{ height: '140px', position: 'relative', borderBottom: '1px solid var(--za-border)', cursor: 'pointer', background: `linear-gradient(135deg, ${t.color} 0%, ${t.color}cc 50%, ${t.color}88 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontFamily: "'Noto Serif', Georgia, serif", fontSize: '28px', fontWeight: 700, color: ('dark' in t && t.dark) ? '#fff' : 'rgba(255,255,255,0.9)', letterSpacing: '-0.02em', textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>
+              <span style={{ fontFamily: 'var(--za-font-display)', fontSize: '28px', fontWeight: 700, color: ('dark' in t && t.dark) ? '#fff' : 'rgba(255,255,255,0.9)', letterSpacing: '-0.02em', textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>
                 {t.name.split('—')[0].trim().split(' ')[0]}
               </span>
               <div style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '10px', padding: '3px 10px', borderRadius: '999px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', color: '#fff', fontWeight: 500 }}>
@@ -77,11 +77,11 @@ export default function TemplatesPage() {
                 <span className="panel-title" style={{ fontSize: '13px' }}>{t.name}</span>
               </div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '9px', padding: '2px 8px', borderRadius: '999px', background: 'rgba(42,111,219,0.10)', color: 'var(--za-gold)', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t.industry}</span>
+                <span style={{ fontSize: '9px', padding: '2px 8px', borderRadius: '999px', background: 'rgba(224,53,75,0.10)', color: 'var(--za-gold)', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t.industry}</span>
               </div>
               <p style={{ fontSize: '11px', color: 'var(--za-fg-3)', marginBottom: '12px', lineHeight: 1.5 }}>{t.desc}</p>
               <button onClick={() => setPreview(t.id)}
-                style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', background: 'var(--za-gold-grad)', color: '#fff', border: 'none', borderRadius: '7px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'inherit', boxShadow: '0 3px 10px -3px rgba(42,111,219,0.50)' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', background: 'var(--za-gold-grad)', color: '#fff', border: 'none', borderRadius: '7px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'inherit', boxShadow: '0 3px 10px -3px rgba(224,53,75,0.45)' }}>
                 <Eye style={{ width: '12px', height: '12px' }} /> Vorschau
               </button>
             </div>
@@ -95,11 +95,11 @@ export default function TemplatesPage() {
 
       {/* Preview Modal */}
       {preview && previewTemplate && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,19,34,0.5)', backdropFilter: 'blur(8px)', zIndex: 200, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(23,24,26,0.5)', backdropFilter: 'blur(8px)', zIndex: 200, display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '12px 20px', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(18px)', borderBottom: '1px solid var(--za-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span className="panel-title">{previewTemplate.name}</span>
-              <span style={{ fontSize: '10px', padding: '3px 10px', borderRadius: '999px', background: 'rgba(42,111,219,0.10)', color: 'var(--za-gold)', fontWeight: 600 }}>{previewTemplate.industry}</span>
+              <span style={{ fontSize: '10px', padding: '3px 10px', borderRadius: '999px', background: 'rgba(224,53,75,0.10)', color: 'var(--za-gold)', fontWeight: 600 }}>{previewTemplate.industry}</span>
               <code style={{ fontSize: '10px', color: 'var(--za-fg-4)', background: 'rgba(0,0,0,0.05)', padding: '2px 8px', borderRadius: '4px' }}>{previewTemplate.id}</code>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

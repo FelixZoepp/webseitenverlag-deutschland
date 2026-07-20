@@ -92,7 +92,7 @@ export default async function AdminDashboard() {
         </div>
         <div style={{ flex: 1 }} />
         <Link href="/admin/demos"
-          style={{ background: 'var(--za-gold-grad)', color: '#fff', padding: '9px 18px', borderRadius: '10px', fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const, textDecoration: 'none', boxShadow: '0 4px 14px -4px rgba(42,111,219,0.50)' }}>
+          style={{ background: 'var(--za-gold-grad)', color: '#fff', padding: '9px 18px', borderRadius: '10px', fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const, textDecoration: 'none', boxShadow: '0 4px 14px -4px rgba(224,53,75,0.45)' }}>
           + Neue Demo
         </Link>
       </div>
@@ -120,7 +120,7 @@ export default async function AdminDashboard() {
                 <div key={y.year}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
                     <span style={{ fontWeight: 600, color: 'var(--za-fg)' }}>{y.year}</span>
-                    <span style={{ fontFamily: "'Noto Serif', Georgia, serif", fontWeight: 600, color: 'var(--za-fg)' }}>{fmt(y.revenue)} €</span>
+                    <span style={{ fontFamily: 'var(--za-font-display)', fontWeight: 600, color: 'var(--za-fg)' }}>{fmt(y.revenue)} €</span>
                   </div>
                   <div className="bar-track">
                     <div className="bar-fill" style={{ width: `${pct}%` }} />
@@ -134,7 +134,7 @@ export default async function AdminDashboard() {
           </div>
           <div style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid var(--za-border)', display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
             <span style={{ color: 'var(--za-fg-3)' }}>Gesamtvertragswert</span>
-            <span style={{ fontFamily: "'Noto Serif', Georgia, serif", fontWeight: 700, color: 'var(--za-fg)' }}>{fmt(totalContractValue)} €</span>
+            <span style={{ fontFamily: 'var(--za-font-display)', fontWeight: 700, color: 'var(--za-fg)' }}>{fmt(totalContractValue)} €</span>
           </div>
         </div>
 
@@ -146,15 +146,15 @@ export default async function AdminDashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '12px', color: 'var(--za-fg-2)' }}>Offene Upsells</span>
-              <span style={{ fontFamily: "'Noto Serif', Georgia, serif", fontSize: '20px', color: 'var(--za-gold)' }}>{openUpsells.length}</span>
+              <span style={{ fontFamily: 'var(--za-font-display)', fontSize: '20px', color: 'var(--za-gold)' }}>{openUpsells.length}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '12px', color: 'var(--za-fg-2)' }}>Potenzial MRR</span>
-              <span style={{ fontFamily: "'Noto Serif', Georgia, serif", fontSize: '20px', color: 'var(--za-gold)' }}>+{fmt(potentialUpsellMRR)} €</span>
+              <span style={{ fontFamily: 'var(--za-font-display)', fontSize: '20px', color: 'var(--za-gold)' }}>+{fmt(potentialUpsellMRR)} €</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '12px', color: 'var(--za-fg-2)' }}>Gewonnene Upsells</span>
-              <span style={{ fontFamily: "'Noto Serif', Georgia, serif", fontSize: '20px', color: 'var(--za-success)' }}>+{fmt(wonUpsellMRR)} €/m</span>
+              <span style={{ fontFamily: 'var(--za-font-display)', fontSize: '20px', color: 'var(--za-success)' }}>+{fmt(wonUpsellMRR)} €/m</span>
             </div>
           </div>
           {openUpsells.length > 0 && (
@@ -212,7 +212,7 @@ export default async function AdminDashboard() {
               <Link key={site.id} href={`/dashboard/${site.id}`}
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', padding: '8px 10px', borderRadius: '8px', textDecoration: 'none', color: 'inherit' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ width: '26px', height: '26px', borderRadius: '6px', display: 'grid', placeItems: 'center', background: 'var(--za-gold-grad)', fontFamily: "'Noto Serif', Georgia, serif", fontSize: '11px', color: '#fff' }}>
+                  <span style={{ width: '26px', height: '26px', borderRadius: '6px', display: 'grid', placeItems: 'center', background: 'var(--za-gold-grad)', fontFamily: 'var(--za-font-display)', fontSize: '11px', color: '#fff' }}>
                     {((site.customers as Record<string, string>)?.company_name || 'S').charAt(0)}
                   </span>
                   <span style={{ fontWeight: 500, color: 'var(--za-fg)' }}>{site.name}</span>
@@ -264,7 +264,7 @@ export default async function AdminDashboard() {
                     <tr key={c.id}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <span style={{ width: '26px', height: '26px', borderRadius: '6px', display: 'grid', placeItems: 'center', background: 'var(--za-gold-grad)', fontFamily: "'Noto Serif', Georgia, serif", fontSize: '11px', color: '#fff', flexShrink: 0 }}>
+                          <span style={{ width: '26px', height: '26px', borderRadius: '6px', display: 'grid', placeItems: 'center', background: 'var(--za-gold-grad)', fontFamily: 'var(--za-font-display)', fontSize: '11px', color: '#fff', flexShrink: 0 }}>
                             {(c.company_name || '?').charAt(0)}
                           </span>
                           <Link href={`/admin/customers/${c.id}`} style={{ color: 'var(--za-fg)', fontWeight: 500, textDecoration: 'none' }}>
@@ -272,7 +272,7 @@ export default async function AdminDashboard() {
                           </Link>
                         </div>
                       </td>
-                      <td style={{ fontFamily: "'Noto Serif', Georgia, serif", fontWeight: 600, color: 'var(--za-fg)' }}>
+                      <td style={{ fontFamily: 'var(--za-font-display)', fontWeight: 600, color: 'var(--za-fg)' }}>
                         {monthly > 0 ? `${fmt(monthly)} €` : '—'}
                       </td>
                       <td style={{ fontSize: '11px' }}>
@@ -282,7 +282,7 @@ export default async function AdminDashboard() {
                       <td>{siteCount}</td>
                       <td>
                         {openCount > 0 ? (
-                          <span style={{ background: 'rgba(42,111,219,0.10)', color: 'var(--za-gold)', fontWeight: 600, fontSize: '10px', padding: '3px 8px', borderRadius: '999px' }}>{openCount} offen</span>
+                          <span style={{ background: 'rgba(224,53,75,0.10)', color: 'var(--za-gold)', fontWeight: 600, fontSize: '10px', padding: '3px 8px', borderRadius: '999px' }}>{openCount} offen</span>
                         ) : '—'}
                       </td>
                     </tr>

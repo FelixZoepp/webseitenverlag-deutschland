@@ -169,7 +169,7 @@ export default function PotenzialRechnerPage() {
                 style={{
                   padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 500, cursor: 'pointer',
                   border: brancheSlug === b.slug ? '1.5px solid var(--za-gold)' : '1px solid var(--za-border)',
-                  background: brancheSlug === b.slug ? 'rgba(42,111,219,0.08)' : 'var(--za-surface)',
+                  background: brancheSlug === b.slug ? 'rgba(224,53,75,0.08)' : 'var(--za-surface)',
                   color: brancheSlug === b.slug ? 'var(--za-gold-2)' : 'var(--za-fg-2)',
                   transition: 'all 240ms',
                 }}>
@@ -198,7 +198,7 @@ export default function PotenzialRechnerPage() {
                 style={{
                   padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 500, cursor: 'pointer',
                   border: stadtSlug === s.slug ? '1.5px solid var(--za-gold)' : '1px solid var(--za-border)',
-                  background: stadtSlug === s.slug ? 'rgba(42,111,219,0.08)' : 'var(--za-surface)',
+                  background: stadtSlug === s.slug ? 'rgba(224,53,75,0.08)' : 'var(--za-surface)',
                   color: stadtSlug === s.slug ? 'var(--za-gold-2)' : 'var(--za-fg-2)',
                   transition: 'all 240ms',
                 }}>
@@ -236,7 +236,7 @@ export default function PotenzialRechnerPage() {
                 <div className="panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Calculator size={16} /> Parameter
                   {angepasst && (
-                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '999px', background: 'rgba(42,111,219,0.10)', color: 'var(--za-gold)', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '999px', background: 'rgba(224,53,75,0.10)', color: 'var(--za-gold)', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                       Angepasst
                     </span>
                   )}
@@ -272,7 +272,7 @@ export default function PotenzialRechnerPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div className="panel fade-up" style={{ animationDelay: '300ms', textAlign: 'center', padding: '32px 22px' }}>
               <span className="panel-eyebrow">Potenzial pro Jahr</span>
-              <div style={{ fontFamily: "'Noto Serif', Georgia, serif", fontSize: '48px', letterSpacing: '-0.03em', color: 'var(--za-fg)', lineHeight: 1, marginTop: '8px' }}>
+              <div style={{ fontFamily: 'var(--za-font-display)', fontSize: '48px', letterSpacing: '-0.03em', color: 'var(--za-fg)', lineHeight: 1, marginTop: '8px' }}>
                 {fmtEuro(ergebnis.umsatzProJahrCent)}
                 <span style={{ fontSize: '24px', color: 'var(--za-gold)', marginLeft: '6px' }}>€</span>
               </div>
@@ -301,12 +301,12 @@ export default function PotenzialRechnerPage() {
               </div>
             </div>
 
-            <div className="panel fade-up" style={{ animationDelay: '580ms', background: 'linear-gradient(135deg, rgba(42,111,219,0.06), rgba(11,36,79,0.03))' }}>
+            <div className="panel fade-up" style={{ animationDelay: '580ms', background: 'linear-gradient(135deg, rgba(224,53,75,0.06), rgba(58,13,20,0.03))' }}>
               <span className="panel-eyebrow">Empfehlung</span>
               <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--za-fg)' }}>
                 Bei <strong>{fmtEuro(ergebnis.umsatzProJahrCent)} € Jahres-Potenzial</strong> empfehlen wir:
               </div>
-              <div style={{ marginTop: '8px', fontFamily: "'Noto Serif', Georgia, serif", fontSize: '20px', color: 'var(--za-gold-2)' }}>
+              <div style={{ marginTop: '8px', fontFamily: 'var(--za-font-display)', fontSize: '20px', color: 'var(--za-gold-2)' }}>
                 {empfohlenespaket}
               </div>
               <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--za-fg-3)' }}>
@@ -344,7 +344,7 @@ function SliderInput({ label, value, min, max, step, format, onChange, info }: {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
         <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--za-fg)' }}>{label}</label>
-        <span style={{ fontFamily: "'Noto Serif', Georgia, serif", fontSize: '14px', fontWeight: 600, color: 'var(--za-gold-2)' }}>
+        <span style={{ fontFamily: 'var(--za-font-display)', fontSize: '14px', fontWeight: 600, color: 'var(--za-gold-2)' }}>
           {format(value)}
         </span>
       </div>
@@ -359,7 +359,7 @@ function SliderInput({ label, value, min, max, step, format, onChange, info }: {
 function MiniKPI({ label, value, delay }: { label: string; value: string; delay: number }) {
   return (
     <div className="panel fade-up" style={{ animationDelay: `${delay}ms`, padding: '16px', textAlign: 'center' }}>
-      <div style={{ fontFamily: "'Noto Serif', Georgia, serif", fontSize: '22px', color: 'var(--za-fg)', letterSpacing: '-0.02em' }}>{value}</div>
+      <div style={{ fontFamily: 'var(--za-font-display)', fontSize: '22px', color: 'var(--za-fg)', letterSpacing: '-0.02em' }}>{value}</div>
       <div style={{ fontSize: '10px', color: 'var(--za-fg-3)', marginTop: '4px', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>{label}</div>
     </div>
   )

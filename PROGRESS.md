@@ -159,6 +159,12 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
   - Hex-Fixes: EntwurfForm (Check-Icon), KundenmeinungenPage (Sterne), ErgebnissePage (Header-Gradient → `--accent-grad`)
   - Self-Test: Build + `tsc --noEmit` + Lint (nur Bestands-Warnings) grün
   - Nicht angefasst (unbenutzte Legacy-Komponenten): components/landing/{Hero,Workflow,…}.tsx; offen: ob Design-Bundle-ui_kits (Dashboard/Builder/CustomerPortal) auch Admin-/Kunden-UI ersetzen sollen → Rückfrage an Felix
+- **Einschub (User-Auftrag): Landing-Bugfix weiße Schrift/Buttons, Commit `fad72b4`:** EntwurfForm (Optionsbuttons, Progress, Erfolgsscreen, Fehlerbox), ErgebnissePage + KundenmeinungenPage Inline-Texte von Dark-Theme-Weiß auf Token-Farben umgestellt
+- **Einschub (User-Auftrag): Apple-Red auf Admin-Dashboard + Kunden-Ansicht:**
+  - `admin.css` + `dashboard.css`: komplette Token-Wert-Remaps auf Apple Red (Klassennamen + `--za-*`-Namen unverändert, `--za-gold` ist jetzt semantisch Rot #E0354B); Aurora → Rosé-Töne, Noto Serif → Apple-System-Stack, Motion auf 160/200/220ms cubic-bezier(.22,.61,.36,1), Success-Flächen → #E4F7EC, Danger → #B3261E
+  - Inline-Blues/Noto-Serif gefixt in: admin/{page,demos,templates,potenzial-rechner}, (auth)/{login,register} (self-contained, inkl. Google-Fonts-Link entfernt), components/{site-editor,customer-sidebar,customer-welcome,help-center,analytics-dashboard}
+  - Blaustichige Neutral-Overlays/Grautöne → Ink-Basis rgba(23,24,26,x); Amber-Draft-Status und Chatbot-Lila bewusst behalten
+  - Self-Test: Build + `tsc --noEmit` + Lint (nur Bestands-Warning alt-text) grün
 
 ## Notizen für nächste Session
 - **Alle Phasen 0–H abgeschlossen.** Offen ist nur noch, was ein Mensch liefern muss → WARTELISTE.md (Migrationen 013–021 ausführen, Library seeden, Stripe-Test-/Webhook-Keys, Git-Remote + erster Push für CI, E2E-Freischaltung, echte Golden-Set-Firmen, Preis-Bestätigungen)

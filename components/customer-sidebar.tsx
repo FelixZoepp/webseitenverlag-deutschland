@@ -58,7 +58,7 @@ export default function CustomerSidebar({ siteId, siteName, siteStatus, siteDoma
           <div style={{
             width: '32px', height: '32px', borderRadius: '8px',
             background: 'var(--za-gold-grad)', display: 'grid', placeItems: 'center',
-            fontFamily: "'Noto Serif', Georgia, serif", fontSize: '14px', color: '#fff', flexShrink: 0,
+            fontFamily: 'var(--za-font-display)', fontSize: '14px', color: '#fff', flexShrink: 0,
           }}>
             {siteName.charAt(0)}
           </div>
@@ -144,7 +144,7 @@ export default function CustomerSidebar({ siteId, siteName, siteStatus, siteDoma
         <div style={{
           width: '28px', height: '28px', borderRadius: '50%',
           background: 'var(--za-gold-grad)', display: 'grid', placeItems: 'center',
-          fontFamily: "'Noto Serif', Georgia, serif", fontSize: '11px', color: '#fff',
+          fontFamily: 'var(--za-font-display)', fontSize: '11px', color: '#fff',
         }}>
           {customerName.charAt(0) || '?'}
         </div>

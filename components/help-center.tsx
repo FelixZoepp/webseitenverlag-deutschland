@@ -165,7 +165,7 @@ export default function HelpCenter({ customerPackage }: { customerPackage: strin
                 background: section === s.key ? 'var(--za-gold-grad)' : 'rgba(255,255,255,0.6)',
                 color: section === s.key ? '#fff' : 'var(--za-fg-3)',
                 borderColor: section === s.key ? 'transparent' : 'var(--za-border)',
-                boxShadow: section === s.key ? '0 4px 14px -4px rgba(42,111,219,0.50)' : 'none',
+                boxShadow: section === s.key ? '0 4px 14px -4px rgba(224,53,75,0.45)' : 'none',
                 transition: 'all 240ms',
               }}>
               {s.icon} {s.label}
@@ -237,7 +237,7 @@ export default function HelpCenter({ customerPackage }: { customerPackage: strin
               {UPSELLS.map((upsell, i) => (
                 <div key={i} className="glass fade-up" style={{
                   padding: '24px', animationDelay: `${i * 80}ms`,
-                  border: upsell.highlight ? '1px solid rgba(42,111,219,0.3)' : undefined,
+                  border: upsell.highlight ? '1px solid rgba(224,53,75,0.3)' : undefined,
                 }}>
                   <div style={{ position: 'relative', zIndex: 2 }}>
                     {upsell.highlight && (
@@ -249,14 +249,14 @@ export default function HelpCenter({ customerPackage }: { customerPackage: strin
                       }}>Beliebt</span>
                     )}
                     <div style={{ width: '16px', height: '16px', color: 'var(--za-gold)', marginBottom: '12px' }}>{upsell.icon}</div>
-                    <h3 style={{ fontFamily: "'Noto Serif', Georgia, serif", fontSize: '16px', color: 'var(--za-fg)', marginBottom: '6px' }}>{upsell.title}</h3>
+                    <h3 style={{ fontFamily: 'var(--za-font-display)', fontSize: '16px', color: 'var(--za-fg)', marginBottom: '6px' }}>{upsell.title}</h3>
                     <p style={{ fontSize: '12px', color: 'var(--za-fg-3)', lineHeight: 1.6, marginBottom: '12px' }}>{upsell.description}</p>
 
                     <div style={{
                       padding: '8px 12px', borderRadius: '8px', marginBottom: '14px',
-                      background: 'rgba(42,111,219,0.06)', display: 'inline-block',
+                      background: 'rgba(224,53,75,0.06)', display: 'inline-block',
                     }}>
-                      <span style={{ fontFamily: "'Noto Serif', Georgia, serif", fontSize: '15px', fontWeight: 700, color: 'var(--za-gold)' }}>{upsell.price}</span>
+                      <span style={{ fontFamily: 'var(--za-font-display)', fontSize: '15px', fontWeight: 700, color: 'var(--za-gold)' }}>{upsell.price}</span>
                     </div>
 
                     <ul style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>

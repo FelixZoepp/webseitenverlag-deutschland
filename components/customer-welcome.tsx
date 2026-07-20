@@ -77,7 +77,7 @@ export default function CustomerWelcome({ customerName, customerId, onComplete }
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,19,34,0.4)', backdropFilter: 'blur(12px)' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(23,24,26,0.4)', backdropFilter: 'blur(12px)' }}>
       <div className="glass" style={{ width: '100%', maxWidth: '600px', margin: '0 16px', maxHeight: '90vh', overflow: 'auto' }}>
         {/* Progress dots */}
         <div style={{ padding: '20px 28px 0', display: 'flex', justifyContent: 'center', gap: '8px', position: 'relative', zIndex: 2 }}>
@@ -111,7 +111,7 @@ export default function CustomerWelcome({ customerName, customerId, onComplete }
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', gap: '12px',
                   padding: '12px 16px', borderRadius: '12px',
-                  background: 'rgba(42,111,219,0.06)', border: '1px solid rgba(42,111,219,0.12)',
+                  background: 'rgba(224,53,75,0.06)', border: '1px solid rgba(224,53,75,0.12)',
                 }}>
                   <div style={{
                     width: '28px', height: '28px', borderRadius: '8px',
@@ -165,8 +165,8 @@ export default function CustomerWelcome({ customerName, customerId, onComplete }
           {step.id === 'ready' && (
             <div style={{
               padding: '16px 20px', borderRadius: '12px', marginBottom: '8px',
-              background: 'linear-gradient(135deg, rgba(42,111,219,0.08), rgba(11,36,79,0.04))',
-              border: '1px solid rgba(42,111,219,0.18)',
+              background: 'linear-gradient(135deg, rgba(224,53,75,0.08), rgba(58,13,20,0.04))',
+              border: '1px solid rgba(224,53,75,0.18)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <Sparkles style={{ width: '14px', height: '14px', color: 'var(--za-gold)' }} />

@@ -189,12 +189,12 @@ export default function SiteEditor({ site: initialSite, messages: initialMessage
               <div key={p.pageKey} style={{ position: 'relative' }} className="group">
                 <button onClick={() => handlePageSwitch(p.pageKey)}
                   className={`glass-nav-item ${currentPage === p.pageKey ? 'active' : ''}`}
-                  style={{ width: '100%', textAlign: 'left', cursor: 'pointer', background: currentPage === p.pageKey ? 'linear-gradient(135deg, rgba(42,111,219,0.14), rgba(11,36,79,0.06))' : 'transparent', borderColor: currentPage === p.pageKey ? 'rgba(42,111,219,0.28)' : 'transparent', color: currentPage === p.pageKey ? 'var(--za-gold-2)' : 'var(--za-fg-2)' }}>
+                  style={{ width: '100%', textAlign: 'left', cursor: 'pointer', background: currentPage === p.pageKey ? 'linear-gradient(135deg, rgba(224,53,75,0.12), rgba(58,13,20,0.04))' : 'transparent', borderColor: currentPage === p.pageKey ? 'rgba(224,53,75,0.26)' : 'transparent', color: currentPage === p.pageKey ? 'var(--za-gold-2)' : 'var(--za-fg-2)' }}>
                   {PAGE_ICONS[p.template] || <FileText className="w-4 h-4" />}
                   <span style={{ fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
                 </button>
                 {p.pageKey !== 'home' && pageMenu === p.pageKey && (
-                  <div style={{ position: 'absolute', right: '8px', top: '36px', background: '#fff', border: '1px solid var(--za-border)', borderRadius: '8px', boxShadow: '0 8px 24px rgba(15,30,60,0.12)', zIndex: 10, padding: '4px' }}>
+                  <div style={{ position: 'absolute', right: '8px', top: '36px', background: '#fff', border: '1px solid var(--za-border)', borderRadius: '8px', boxShadow: '0 8px 24px rgba(23,24,26,0.12)', zIndex: 10, padding: '4px' }}>
                     <button onClick={() => handleDeletePage(p.pageKey)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '11px', color: 'var(--za-danger)', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '4px', width: '100%' }}>
                       <Trash2 className="w-3 h-3" /> Löschen
                     </button>
@@ -215,7 +215,7 @@ export default function SiteEditor({ site: initialSite, messages: initialMessage
             <div style={{ margin: '8px 12px', borderTop: '1px solid var(--za-border)' }} />
             <button onClick={() => handlePageSwitch('_global')}
               className={`glass-nav-item ${isGlobalSettings ? 'active' : ''}`}
-              style={{ width: '100%', textAlign: 'left', cursor: 'pointer', background: isGlobalSettings ? 'linear-gradient(135deg, rgba(42,111,219,0.14), rgba(11,36,79,0.06))' : 'transparent', borderColor: isGlobalSettings ? 'rgba(42,111,219,0.28)' : 'transparent', color: isGlobalSettings ? 'var(--za-gold-2)' : 'var(--za-fg-2)' }}>
+              style={{ width: '100%', textAlign: 'left', cursor: 'pointer', background: isGlobalSettings ? 'linear-gradient(135deg, rgba(224,53,75,0.12), rgba(58,13,20,0.04))' : 'transparent', borderColor: isGlobalSettings ? 'rgba(224,53,75,0.26)' : 'transparent', color: isGlobalSettings ? 'var(--za-gold-2)' : 'var(--za-fg-2)' }}>
               <Palette className="w-4 h-4" /> <span style={{ fontSize: '12px' }}>Einstellungen</span>
             </button>
 
@@ -228,7 +228,7 @@ export default function SiteEditor({ site: initialSite, messages: initialMessage
                 {legalPages.map((p) => (
                   <button key={p.pageKey} onClick={() => handlePageSwitch(p.pageKey)}
                     className={`glass-nav-item ${currentPage === p.pageKey ? 'active' : ''}`}
-                    style={{ width: '100%', textAlign: 'left', cursor: 'pointer', background: currentPage === p.pageKey ? 'linear-gradient(135deg, rgba(42,111,219,0.14), rgba(11,36,79,0.06))' : 'transparent', borderColor: currentPage === p.pageKey ? 'rgba(42,111,219,0.28)' : 'transparent', color: currentPage === p.pageKey ? 'var(--za-gold-2)' : 'var(--za-fg-2)' }}>
+                    style={{ width: '100%', textAlign: 'left', cursor: 'pointer', background: currentPage === p.pageKey ? 'linear-gradient(135deg, rgba(224,53,75,0.12), rgba(58,13,20,0.04))' : 'transparent', borderColor: currentPage === p.pageKey ? 'rgba(224,53,75,0.26)' : 'transparent', color: currentPage === p.pageKey ? 'var(--za-gold-2)' : 'var(--za-fg-2)' }}>
                     <Scale className="w-4 h-4" /> <span style={{ fontSize: '12px' }}>{p.title}</span>
                   </button>
                 ))}
@@ -352,11 +352,11 @@ function ChatTab({ messages, input, setInput, sending, onSend, chatEndRef, curre
           <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', maxWidth: '85%' }}>
               <button onClick={() => onUpsellResponse('accept')} disabled={upsellResponding}
-                style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', fontSize: '11px', fontWeight: 600, background: 'linear-gradient(135deg, #5C9EE8, #2A6FDB)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: upsellResponding ? 0.5 : 1 }}>
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', fontSize: '11px', fontWeight: 600, background: 'var(--za-gold-grad)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: upsellResponding ? 0.5 : 1 }}>
                 <Zap style={{ width: '12px', height: '12px' }} /> Jetzt aktivieren
               </button>
               <button onClick={() => onUpsellResponse('later')} disabled={upsellResponding}
-                style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', fontSize: '11px', fontWeight: 500, background: 'rgba(15,30,60,0.06)', color: 'var(--za-fg-2)', border: '1px solid var(--za-border)', borderRadius: '8px', cursor: 'pointer', opacity: upsellResponding ? 0.5 : 1 }}>
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', fontSize: '11px', fontWeight: 500, background: 'rgba(23,24,26,0.05)', color: 'var(--za-fg-2)', border: '1px solid var(--za-border)', borderRadius: '8px', cursor: 'pointer', opacity: upsellResponding ? 0.5 : 1 }}>
                 <Clock style={{ width: '12px', height: '12px' }} /> Vielleicht später
               </button>
             </div>
@@ -508,7 +508,7 @@ function HistoryTab({ versions, onRollback }: { versions: ConfigVersion[]; onRol
             <div key={v.id} className="glass" style={{ padding: '12px 14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 2 }}>
                 <div>
-                  <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '999px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', ...(v.created_by === 'chatbot' ? { color: '#6B5BD4', background: 'rgba(107,91,212,0.10)' } : { color: 'var(--za-fg-3)', background: 'rgba(15,30,60,0.06)' }) }}>
+                  <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '999px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', ...(v.created_by === 'chatbot' ? { color: '#6B5BD4', background: 'rgba(107,91,212,0.10)' } : { color: 'var(--za-fg-3)', background: 'rgba(23,24,26,0.05)' }) }}>
                     {v.created_by === 'chatbot' ? 'KI' : v.created_by === 'user' ? 'Manuell' : 'System'}
                   </span>
                   {i === 0 && <span style={{ fontSize: '10px', color: 'var(--za-success)', fontWeight: 600, marginLeft: '8px' }}>Aktuell</span>}
@@ -539,7 +539,7 @@ function AddPageModal({ onAdd, onClose, existingKeys }: { onAdd: (t: string, ti:
   ].filter((t) => !existingKeys.includes(t.value))
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,19,34,0.3)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(23,24,26,0.3)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
       <div className="glass" style={{ padding: '28px', width: '100%', maxWidth: '420px', margin: '0 16px' }}>
         <h3 className="za-title" style={{ marginBottom: '20px', position: 'relative', zIndex: 2 }}>Neue Seite erstellen</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', zIndex: 2 }}>

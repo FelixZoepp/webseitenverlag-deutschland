@@ -98,7 +98,7 @@ export default function AnalyticsDashboard({ site }: { site: Site }) {
                     {data.topPages.map((p) => (
                       <div key={p.path} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
                         <span style={{ color: 'var(--za-fg)', fontWeight: 500, fontFamily: 'monospace' }}>{p.path}</span>
-                        <span style={{ fontFamily: "'Noto Serif', Georgia, serif", fontWeight: 600, color: 'var(--za-fg)' }}>{p.views}</span>
+                        <span style={{ fontFamily: 'var(--za-font-display)', fontWeight: 600, color: 'var(--za-fg)' }}>{p.views}</span>
                       </div>
                     ))}
                   </div>
@@ -119,7 +119,7 @@ export default function AnalyticsDashboard({ site }: { site: Site }) {
                     {data.topReferrers.map((r) => (
                       <div key={r.source} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
                         <span style={{ color: 'var(--za-fg)', fontWeight: 500 }}>{r.source}</span>
-                        <span style={{ fontFamily: "'Noto Serif', Georgia, serif", fontWeight: 600, color: 'var(--za-fg)' }}>{r.views}</span>
+                        <span style={{ fontFamily: 'var(--za-font-display)', fontWeight: 600, color: 'var(--za-fg)' }}>{r.views}</span>
                       </div>
                     ))}
                   </div>
@@ -139,10 +139,10 @@ function KPI({ icon, label, value, sub, delay }: { icon: React.ReactNode; label:
     <div className="glass fade-up" style={{ padding: '20px', animationDelay: `${delay}ms` }}>
       <div style={{ position: 'relative', zIndex: 2 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(42,111,219,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--za-gold)' }}>{icon}</div>
+          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(224,53,75,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--za-gold)' }}>{icon}</div>
           <span style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--za-fg-3)', fontWeight: 600 }}>{label}</span>
         </div>
-        <div style={{ fontFamily: "'Noto Serif', Georgia, serif", fontSize: '28px', fontWeight: 700, color: 'var(--za-fg)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+        <div style={{ fontFamily: 'var(--za-font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--za-fg)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
           {value.toLocaleString('de-DE')}
         </div>
         <span style={{ fontSize: '10px', color: 'var(--za-fg-4)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginTop: '4px' }}>{sub}</span>
