@@ -85,6 +85,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <div className="sb-section-label">Closer</div>
+            <Link href="/admin/leads" className="sb-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="16" height="16"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+              Leads
+            </Link>
             <Link href="/admin/demos" className="sb-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               Demo-Maschine

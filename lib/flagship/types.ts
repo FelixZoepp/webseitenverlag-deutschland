@@ -50,6 +50,9 @@ export interface MediaSlot {
   alt?: string
   /** Optionaler Hintergrund-Override des Slots (z. B. heller Verlauf für Nachher) */
   hintergrund?: string
+  /** Intrinsische Bildmaße (CLS + Konsistenz-Validator §4.3) */
+  breite?: number
+  hoehe?: number
 }
 
 /** Video-Slot für den Video-Hero (Growth-Level, via Higgsfield image-to-video) */

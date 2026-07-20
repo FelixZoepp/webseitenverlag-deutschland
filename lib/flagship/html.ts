@@ -72,8 +72,9 @@ export function mediaSlot(slot: MediaSlot, klassen: string, extraStyle = ''): st
   const style = [slot.hintergrund ? `background:${slot.hintergrund}` : '', extraStyle]
     .filter(Boolean)
     .join(';')
+  const masse = slot.breite && slot.hoehe ? ` width="${slot.breite}" height="${slot.hoehe}"` : ''
   const img = slot.datei
-    ? `<img src="${escAttr(slot.datei)}" alt="${escAttr(slot.alt || slot.label)}" onload="this.parentElement.classList.add('loaded')" onerror="this.remove()">`
+    ? `<img src="${escAttr(slot.datei)}" alt="${escAttr(slot.alt || slot.label)}"${masse} onload="this.parentElement.classList.add('loaded')" onerror="this.remove()">`
     : ''
   return `<div class="${klassen} media" data-label="${escAttr(slot.label)}"${style ? ` style="${escAttr(style)}"` : ''}>${img}</div>`
 }

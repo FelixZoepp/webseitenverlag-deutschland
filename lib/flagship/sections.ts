@@ -350,7 +350,7 @@ export function renderErgebnisse(e: ErgebnisseInhalt): string {
     inhalt = `<div class="gal">
       ${(e.bilder || [])
         .map((b, i) => `<figure class="rv media" style="--i:${i}" data-label="${escAttr(b.media.label)}">
-        ${b.media.datei ? `<img src="${escAttr(b.media.datei)}" alt="${escAttr(b.media.alt || b.media.label)}" onload="this.parentElement.classList.add('loaded')" onerror="this.remove()">` : ''}
+        ${b.media.datei ? `<img src="${escAttr(b.media.datei)}" alt="${escAttr(b.media.alt || b.media.label)}"${b.media.breite && b.media.hoehe ? ` width="${b.media.breite}" height="${b.media.hoehe}"` : ''} onload="this.parentElement.classList.add('loaded')" onerror="this.remove()">` : ''}
         <figcaption>${esc(b.caption)}</figcaption>
       </figure>`)
         .join('\n      ')}
@@ -387,6 +387,8 @@ export function renderZahlen(z: ZahlenInhalt): string {
 }
 
 export function renderStimmen(s: StimmenInhalt): string {
+  // §4.3: Kundenstimmen nur aus echten Profildaten — ohne Quotes entfällt die Sektion
+  if (s.quotes.length === 0) return ''
   const quotes = s.quotes
     .map((q, i) => `<div class="quote rv" style="--i:${i}">
         <span class="stars">★★★★★</span>
@@ -516,7 +518,7 @@ export function renderFooter(f: FooterInhalt, nav: NavInhalt, hell: boolean, fir
 }
 
 export function renderRibbon(): string {
-  return `<div class="ribbon"><i></i> Demo-Vorschau · Webseitenverlag Deutschland</div>`
+  return `<div class="ribbon"><i></i> Demo-Vorschau · Webseiten-Verlag Deutschland</div>`
 }
 
 export function sektionsReihenfolge(inhalte: FlagshipInhalte): string[] {
