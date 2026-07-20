@@ -8,6 +8,7 @@
  */
 import { getOwnedSite } from '@/lib/api-helpers'
 import { revalidateSite, revalidateHostMap } from '@/lib/hosting/site-cache'
+import { starteAsyncPublishQa } from '@/lib/qa-gate/publish-qa'
 import { NextResponse } from 'next/server'
 import { SiteConfig } from '@/types'
 
@@ -73,6 +74,9 @@ export async function POST(
     // Cache-Invalidierung (§1): neuer Live-Stand sofort sichtbar
     revalidateSite(params.siteId)
     if (!site.subdomain) revalidateHostMap() // Subdomain wurde gerade erst vergeben
+
+    // QA-Gate Baustein A: asynchroner Browser-QA-Lauf — blockiert die Response nie
+    starteAsyncPublishQa(params.siteId, 'publish')
 
     const url = marketingHost ? `https://${subdomain}.${marketingHost}` : null
     return NextResponse.json({ success: true, url, deploy: 'multi_tenant' })

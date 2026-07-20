@@ -59,12 +59,42 @@ export async function GET() {
     if (job.lead_id && !letzterJob.has(job.lead_id)) letzterJob.set(job.lead_id, job)
   }
 
+  // QA-Gate Baustein A: letzter Browser-QA-Report pro Site (Status + Screenshots)
+  const siteIds = Array.from(
+    new Set(Array.from(letzterJob.values()).map((j) => j.site_id).filter((s): s is string => Boolean(s)))
+  )
+  const { data: qaReports } = siteIds.length
+    ? await admin
+        .from('qa_reports')
+        .select('id, site_id, mode, status, report, screenshots, created_at')
+        .in('site_id', siteIds)
+        .order('created_at', { ascending: false })
+    : { data: [] as never[] }
+  const qaProSite = new Map<string, NonNullable<typeof qaReports>[number]>()
+  for (const report of qaReports ?? []) {
+    if (report.site_id && !qaProSite.has(report.site_id)) qaProSite.set(report.site_id, report)
+  }
+
   return NextResponse.json({
-    leads: (leads ?? []).map((lead) => ({
-      ...lead,
-      business_profile: profilProLead.get(lead.id) ?? null,
-      letzter_job: letzterJob.get(lead.id) ?? null,
-    })),
+    leads: (leads ?? []).map((lead) => {
+      const job = letzterJob.get(lead.id) ?? null
+      const qa = job?.site_id ? qaProSite.get(job.site_id) ?? null : null
+      return {
+        ...lead,
+        business_profile: profilProLead.get(lead.id) ?? null,
+        letzter_job: job,
+        qa_report: qa
+          ? {
+              id: qa.id,
+              status: qa.status as 'passed' | 'repaired' | 'failed',
+              fehler_grund:
+                (qa.report as { fehler_grund?: string | null } | null)?.fehler_grund ?? null,
+              screenshots: (qa.screenshots as { mobile?: string; desktop?: string } | null) ?? {},
+              created_at: qa.created_at,
+            }
+          : null,
+      }
+    }),
   })
 }
 

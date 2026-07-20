@@ -7,6 +7,9 @@
  *  - Wortgrenzen (Unicode): "Halle" matcht nicht in "Hallenbad".
  *  - Kundenstadt + alle ihre Namensbestandteile sind erlaubt
  *    ("Frankfurt am Main" erlaubt "Frankfurt"; "Halle (Saale)" erlaubt "Halle").
+ *  - Mehrdeutige Namensteile, die auch normale deutsche Wörter sind
+ *    ("oder", "essen", "halle", …), matchen nur case-sensitiv — sonst würde
+ *    jede Konjunktion "oder" als Frankfurt (Oder) gewertet.
  */
 
 /** Top-200 deutsche Städte nach Einwohnern (Stand: Destatis, gerundet) */
@@ -73,6 +76,13 @@ function escapeRegex(s: string): string {
 }
 
 /**
+ * Stadtnamen(-teile), die auch normale deutsche Wörter sind. Diese matchen
+ * nur case-sensitiv (großgeschrieben), damit z. B. die Konjunktion "oder"
+ * nicht als Frankfurt (Oder) und "im hof" nicht als Hof gewertet wird.
+ */
+const MEHRDEUTIGE_WOERTER = new Set(['oder', 'essen', 'halle', 'hof', 'löhne', 'bünde'])
+
+/**
  * Findet fremde Städte aus der Top-200-Blockliste in einem Text.
  * Die Kundenstadt (und ihre Namensbestandteile) ist ausgenommen.
  *
@@ -92,7 +102,15 @@ export function findeFremdeStaedte(text: string, kundenstadt: string): string[] 
     // "Halle (Saale)" soll auch als "Halle" gefunden werden.
     const kandidaten = Array.from(new Set<string>([stadt, ...bestandteile.filter((b) => b.length >= 4)]))
     for (const kandidat of kandidaten) {
-      const re = new RegExp(`(?<![\\p{L}\\p{N}-])${escapeRegex(kandidat)}(?![\\p{L}\\p{N}-])`, 'iu')
+      // Mehrdeutige Wörter nur case-sensitiv (großgeschrieben) matchen
+      const mehrdeutig = MEHRDEUTIGE_WOERTER.has(kandidat.toLowerCase())
+      const muster = mehrdeutig
+        ? kandidat.charAt(0).toUpperCase() + kandidat.slice(1).toLowerCase()
+        : kandidat
+      const re = new RegExp(
+        `(?<![\\p{L}\\p{N}-])${escapeRegex(muster)}(?![\\p{L}\\p{N}-])`,
+        mehrdeutig ? 'u' : 'iu'
+      )
       if (re.test(text)) {
         funde.add(stadt)
         break

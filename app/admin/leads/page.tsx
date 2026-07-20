@@ -20,6 +20,14 @@ interface JobInfo {
   created_at: string
 }
 
+interface QaInfo {
+  id: string
+  status: 'passed' | 'repaired' | 'failed'
+  fehler_grund: string | null
+  screenshots: { mobile?: string; desktop?: string }
+  created_at: string
+}
+
 interface LeadRow {
   id: string
   name: string | null
@@ -31,6 +39,7 @@ interface LeadRow {
   created_at: string
   business_profile: { id: string; firma: string; branche_key: string; stadt: string } | null
   letzter_job: JobInfo | null
+  qa_report: QaInfo | null
 }
 
 const JOB_STYLES: Record<string, { label: string; bg: string; fg: string }> = {
@@ -38,6 +47,12 @@ const JOB_STYLES: Record<string, { label: string; bg: string; fg: string }> = {
   demo_erstellt: { label: 'Demo erstellt', bg: 'rgba(224,53,75,0.10)', fg: '#E0354B' },
   demo_bereit: { label: 'Demo bereit', bg: '#E4F7EC', fg: '#1e8a70' },
   failed: { label: 'Fehlgeschlagen', bg: 'rgba(179,38,30,0.10)', fg: '#B3261E' },
+}
+
+const QA_STYLES: Record<QaInfo['status'], { label: string; bg: string; fg: string }> = {
+  passed: { label: 'QA bestanden', bg: '#E4F7EC', fg: '#1e8a70' },
+  repaired: { label: 'QA repariert', bg: 'rgba(212,168,40,0.12)', fg: '#a8821e' },
+  failed: { label: 'QA fehlgeschlagen', bg: 'rgba(179,38,30,0.10)', fg: '#B3261E' },
 }
 
 function formatDate(iso: string): string {
@@ -77,15 +92,38 @@ export default function LeadsPage() {
     }
   }
 
+  async function qaPruefen(lead: LeadRow) {
+    const siteId = lead.letzter_job?.site_id
+    if (!siteId) return
+    setBusyId(lead.id)
+    setError(null)
+    try {
+      const res = await fetch(`/api/admin/sites/${siteId}/qa`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok && data?.error) setError(data.error)
+      else if (data?.status === 'failed') setError(data.fehler_grund || 'Browser-QA fehlgeschlagen.')
+    } catch {
+      setError('Netzwerkfehler beim QA-Lauf.')
+    } finally {
+      setBusyId(null)
+      laden()
+    }
+  }
+
   async function menschGate(lead: LeadRow, bereit: boolean) {
     if (!lead.demo_id) return
     setBusyId(lead.id)
+    setError(null)
     try {
-      await fetch(`/api/admin/demos/${lead.demo_id}/freigeben`, {
+      const res = await fetch(`/api/admin/demos/${lead.demo_id}/freigeben`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bereit }),
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        if (data?.error) setError(data.error)
+      }
     } finally {
       setBusyId(null)
       laden()
@@ -132,6 +170,7 @@ export default function LeadsPage() {
                 <th>Kosten</th>
                 <th>Angelegt</th>
                 <th>Aktionen</th>
+                <th>Browser-QA</th>
                 <th>Mensch-Gate</th>
               </tr>
             </thead>
@@ -186,6 +225,47 @@ export default function LeadsPage() {
                           </Link>
                         )}
                       </div>
+                    </td>
+                    <td>
+                      {job?.site_id ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {lead.qa_report ? (
+                            <span style={{ display: 'inline-flex', width: 'fit-content', padding: '3px 10px', borderRadius: '999px', fontWeight: 600, fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', background: QA_STYLES[lead.qa_report.status].bg, color: QA_STYLES[lead.qa_report.status].fg }}>
+                              {QA_STYLES[lead.qa_report.status].label}
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '11px', color: 'var(--za-fg-3)' }}>Kein QA-Report</span>
+                          )}
+                          {lead.qa_report?.status === 'failed' && lead.qa_report.fehler_grund && (
+                            <div style={{ fontSize: '11px', color: '#B3261E', maxWidth: '280px', whiteSpace: 'pre-wrap' }}>
+                              {lead.qa_report.fehler_grund}
+                            </div>
+                          )}
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            {lead.qa_report?.screenshots.mobile && (
+                              <a href={lead.qa_report.screenshots.mobile} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: 'var(--za-fg-2)' }}>
+                                Mobile
+                              </a>
+                            )}
+                            {lead.qa_report?.screenshots.desktop && (
+                              <a href={lead.qa_report.screenshots.desktop} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: 'var(--za-fg-2)' }}>
+                                Desktop
+                              </a>
+                            )}
+                            <button
+                              onClick={() => qaPruefen(lead)}
+                              disabled={busy || job.status === 'laufend'}
+                              title="Browser-QA-Lauf starten (Chromium, mobile + desktop)"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--za-line, rgba(0,0,0,0.12))', background: 'transparent', color: 'var(--za-fg-2)', fontSize: '11px', fontWeight: 600, cursor: busy ? 'wait' : 'pointer' }}
+                            >
+                              {busy ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
+                              QA prüfen
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '11px', color: 'var(--za-fg-4)' }}>—</span>
+                      )}
                     </td>
                     <td>
                       {job && (job.status === 'demo_erstellt' || job.status === 'demo_bereit') && lead.demo_id ? (

@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/kosten-summary",
       "schedule": "30 6 * * *"
+    },
+    {
+      "path": "/api/cron/qa-scan",
+      "schedule": "0 2 * * *"
     }
   ]
 }

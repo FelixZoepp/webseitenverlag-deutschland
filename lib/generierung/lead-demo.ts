@@ -20,6 +20,7 @@ import {
   type BusinessProfil,
 } from './copy-slots'
 import { validiereKonsistenz, reportAlsText, type ValidatorReport } from './konsistenz-validator'
+import { browserQa } from '@/lib/qa-gate/browser-qa'
 
 export interface LeadDemoErgebnis {
   jobId: string
@@ -271,6 +272,38 @@ export async function generiereDemoFuerLead(
     if (demoFehler || !demo) throw new Error(`Demo anlegen fehlgeschlagen: ${demoFehler?.message}`)
 
     await admin.from('leads').update({ demo_id: demo.id }).eq('id', leadId)
+
+    // Browser-QA (QA-Gate Baustein A): Pflicht nach jeder Demo-Generierung.
+    // Ergebnis landet als qa_reports-Zeile; „Demo geprüft" ist ohne
+    // passed/repaired-Report gesperrt (Hard-Gate im Freigeben-Endpoint).
+    // Repariert die QA chirurgisch, wird die reparierte Config persistiert.
+    try {
+      const qa = await browserQa({
+        siteId: site.id,
+        mode: 'demo',
+        config,
+        profil,
+        renderOptionen: { demo: true, noindex: true },
+        generiereSlots: async (feedback) => {
+          const r = await generiereCopySlots(profil, brancheName, feedback)
+          kostenCent += r.kostenCent
+          copyVersuche += r.versuche
+          await jobUpdate(job.id, { kosten_cent: kostenCent, copy_versuche: copyVersuche })
+          return r.slots
+        },
+        admin,
+      })
+      if (qa.status === 'repaired') {
+        config = qa.config
+        await admin.from('sites').update({ config, draft_config: config }).eq('id', site.id)
+        await admin.from('demos').update({ config }).eq('id', demo.id)
+      }
+    } catch (e) {
+      // Browser nicht verfügbar (z. B. Vercel ohne BROWSER_QA_WS_ENDPOINT):
+      // Generierung nicht blockieren — das Freigeben-Gate verlangt den Report.
+      console.error('[browser-qa] Lauf nicht möglich:', e instanceof Error ? e.message : e)
+    }
+
     await jobUpdate(job.id, {
       status: 'demo_erstellt',
       demo_id: demo.id,

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { sendSlackNotification } from '@/lib/slack'
+import { starteAsyncPublishQa } from '@/lib/qa-gate/publish-qa'
 
 export async function POST(request: Request) {
   try {
@@ -52,6 +53,9 @@ export async function POST(request: Request) {
     await sendSlackNotification('vertrieb',
       `Webseite freigegeben: *${customer.company_name}* — Kunde hat live geschaltet!`
     )
+
+    // QA-Gate Baustein A: asynchroner Browser-QA-Lauf — Kunde wird nie blockiert
+    starteAsyncPublishQa(siteId, 'publish')
 
     return NextResponse.json({ success: true })
   } catch {

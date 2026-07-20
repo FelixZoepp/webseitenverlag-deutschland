@@ -167,7 +167,8 @@ function tokenKostenCent(input: number, output: number): number {
 
 export async function generiereCopySlots(
   profil: BusinessProfil,
-  brancheName: string
+  brancheName: string,
+  feedback?: string
 ): Promise<CopySlotsErgebnis> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY fehlt — Copy-Generierung nicht möglich.')
@@ -175,7 +176,9 @@ export async function generiereCopySlots(
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const schema = baueCopySlotsSchema(profil.leistungen.length)
   const { system, user } = bauePrompt(profil, brancheName)
-  const messages: Anthropic.MessageParam[] = [{ role: 'user', content: user }]
+  // QA-Reparatur: Fehler-Feedback des letzten Laufs an den Prompt anhängen
+  const userMitFeedback = feedback ? `${user}\n\nWICHTIGES FEEDBACK ZUM LETZTEN ENTWURF:\n${feedback}` : user
+  const messages: Anthropic.MessageParam[] = [{ role: 'user', content: userMitFeedback }]
 
   let kostenCent = 0
   let letzteFehler: string[] = []
