@@ -1,25 +1,8 @@
 import type { Metadata } from 'next'
-import { Fraunces, Inter_Tight, JetBrains_Mono } from 'next/font/google'
 import './marketing.css'
 
-// Selbst gehostet via next/font (kein Fremd-CDN)
-// Nur die tatsächlich genutzten Gewichte (600/700) statt Variable-Font mit
-// opsz+SOFT-Achsen — spart ~100 KB Font-Download und beschleunigt das LCP
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-  variable: '--font-fraunces',
-})
-const interTight = Inter_Tight({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-inter-tight',
-})
-const jetbrains = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-  variable: '--font-jetbrains',
-})
+// Apple-System-Font-Stack (siehe --font-ui in marketing.css) —
+// kein Font-Download nötig, bestes LCP
 
 export const metadata: Metadata = {
   title: 'Webseitenverlag Deutschland — Professionelle Webseiten ab 99 €/Monat',
@@ -44,8 +27,6 @@ export const metadata: Metadata = {
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${fraunces.variable} ${interTight.variable} ${jetbrains.variable} marketing-root`}>
-      {children}
-    </div>
+    <div className="marketing-root">{children}</div>
   )
 }

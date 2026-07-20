@@ -104,7 +104,7 @@ export default function EntwurfForm() {
               display: "flex", alignItems: "center", justifyContent: "center",
               margin: "0 auto 32px",
             }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" style={{ width: 40, height: 40 }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--red-500)" strokeWidth="2" style={{ width: 40, height: 40 }}>
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" />
               </svg>
             </div>

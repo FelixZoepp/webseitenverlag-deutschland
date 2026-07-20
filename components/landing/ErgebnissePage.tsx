@@ -108,7 +108,7 @@ export default function ErgebnissePage() {
                 {/* Header */}
                 <div style={{
                   padding: "28px 36px",
-                  background: i % 2 === 0 ? "var(--ink)" : "linear-gradient(135deg, var(--blue), #1e40af)",
+                  background: i % 2 === 0 ? "var(--gray-900)" : "var(--accent-grad)",
                   color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center",
                 }}>
                   <div>

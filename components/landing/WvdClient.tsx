@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 const reveal = {
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+  transition: { duration: 0.22, ease: "easeOut" },
   viewport: { once: true, margin: "-80px" },
 } as const;
 
@@ -298,7 +298,7 @@ export default function WvdClient() {
           </motion.div>
 
           <div style={{ textAlign: "center", marginTop: 48 }}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "clamp(20px, 2.5vw, 28px)", fontStyle: "italic", color: "var(--blue)", fontVariationSettings: '"opsz" 144, "SOFT" 80', lineHeight: 1.3 }}>
+            <p style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: "clamp(20px, 2.5vw, 28px)", letterSpacing: "-0.02em", color: "var(--red-500)", lineHeight: 1.3 }}>
               Das Problem ist nicht, dass du kein Budget hast.<br />
               Das Problem ist, dass das alte Modell nicht für dich gemacht wurde.
             </p>
@@ -360,11 +360,11 @@ export default function WvdClient() {
         <div className="beams" />
         <div className="container" style={{ position: "relative", zIndex: 2 }}>
           <div className="section-head">
-            <span className="eyebrow" style={{ color: "var(--blue)" }}>Was du bekommst</span>
-            <h2 className="display" style={{ color: "#fff", fontSize: "clamp(36px, 4.5vw, 52px)" }}>
+            <span className="eyebrow">Was du bekommst</span>
+            <h2 className="display" style={{ fontSize: "clamp(36px, 4.5vw, 52px)" }}>
               Alles inklusive. <span className="accent">Ohne Kompromisse.</span>
             </h2>
-            <p style={{ color: "rgba(255,255,255,0.7)" }}>
+            <p style={{ color: "var(--text-secondary)" }}>
               Design, Technik, SEO, Support – alles in einem Paket. Keine versteckten Kosten.
             </p>
           </div>
@@ -384,18 +384,18 @@ export default function WvdClient() {
               </div>
               <div className="card-visual">
                 <div style={{
-                  width: "100%", maxWidth: 340, background: "var(--cream)", borderRadius: 16,
-                  overflow: "hidden", boxShadow: "0 20px 50px rgba(0,0,0,0.4)",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  width: "100%", maxWidth: 340, background: "var(--surface-card)", borderRadius: 16,
+                  overflow: "hidden", boxShadow: "var(--shadow-lg)",
+                  border: "1px solid var(--border-default)",
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 14px", borderBottom: "1px solid var(--border)", background: "var(--cream-tint)" }}>
                     <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f87171" }} />
                     <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#fbbf24" }} />
                     <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ade80" }} />
-                    <span style={{ marginLeft: 8, fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--ink-soft)" }}>dein-betrieb.de</span>
+                    <span style={{ marginLeft: 8, fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--text-secondary)" }}>dein-betrieb.de</span>
                   </div>
                   <div style={{ padding: 16 }}>
-                    <div style={{ width: "75%", height: 10, borderRadius: 4, background: "rgba(37,99,235,0.2)", marginBottom: 8 }} />
+                    <div style={{ width: "75%", height: 10, borderRadius: 4, background: "var(--red-100)", marginBottom: 8 }} />
                     <div style={{ width: "100%", height: 8, borderRadius: 4, background: "#f1f5f9", marginBottom: 8 }} />
                     <div style={{ width: "85%", height: 8, borderRadius: 4, background: "#f1f5f9", marginBottom: 12 }} />
                     <div style={{ width: "50%", height: 28, borderRadius: 999, background: "var(--blue)" }} />
@@ -419,17 +419,17 @@ export default function WvdClient() {
                   {[40, 55, 35, 70, 50, 85, 65, 95].map((h, i) => (
                     <div key={i} style={{
                       flex: 1, height: `${h}%`, borderRadius: "6px 6px 0 0",
-                      background: i === 7 ? "var(--blue)" : "rgba(255,255,255,0.08)",
-                      border: i === 7 ? "none" : "1px solid rgba(255,255,255,0.06)",
-                      transition: "height 0.6s var(--smooth)",
+                      background: i === 7 ? "var(--red-500)" : "var(--gray-100)",
+                      border: "none",
+                      transition: "height 0.22s var(--ease-out)",
                     }} />
                   ))}
                 </div>
                 <div style={{
                   position: "absolute", top: 16, right: 20,
-                  background: "rgba(74, 222, 128, 0.15)", border: "1px solid rgba(74, 222, 128, 0.3)",
+                  background: "var(--success-soft)", border: "none",
                   borderRadius: 999, padding: "4px 12px",
-                  fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 600, color: "#4ade80",
+                  fontFamily: "var(--font-ui)", fontSize: 13, fontWeight: 600, color: "var(--green-500)",
                 }}>
                   +75%
                 </div>
@@ -542,11 +542,11 @@ export default function WvdClient() {
         <div className="beams" />
         <div className="container" style={{ maxWidth: 880, position: "relative", zIndex: 2 }}>
           <div className="section-head">
-            <span className="eyebrow" style={{ color: "var(--blue)" }}>Was bringt dir eine Webseite wirklich?</span>
-            <h2 className="display" style={{ color: "#fff", fontSize: "clamp(32px, 4.5vw, 52px)" }}>
+            <span className="eyebrow">Was bringt dir eine Webseite wirklich?</span>
+            <h2 className="display" style={{ fontSize: "clamp(32px, 4.5vw, 52px)" }}>
               Rechne es dir <span className="accent">selbst aus</span>.
             </h2>
-            <p style={{ color: "rgba(255,255,255,0.7)" }}>
+            <p style={{ color: "var(--text-secondary)" }}>
               Gib deine Daten ein und sieh, was eine sichtbare Webseite für dein Business bedeuten kann. Konservativ berechnet.
             </p>
           </div>
@@ -605,7 +605,7 @@ export default function WvdClient() {
 
           {/* Results */}
           {showResult && roi && (
-            <div style={{ animation: "fadeInUp 0.6s var(--smooth) forwards" }}>
+            <div style={{ animation: "fadeInUp 0.22s var(--ease-out) forwards" }}>
               {/* Funnel */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, marginBottom: 32 }}>
                 {[
@@ -617,36 +617,36 @@ export default function WvdClient() {
                 ].map((item, i) => (
                   <div key={i} style={{
                     padding: "24px 16px", borderRadius: 20, textAlign: "center" as const,
-                    border: item.highlight ? "2px solid var(--blue)" : "1px solid rgba(255,255,255,0.08)",
-                    background: item.highlight ? "rgba(37,99,235,0.12)" : "rgba(2,6,23,0.6)",
-                    backdropFilter: "blur(12px)",
+                    border: item.highlight ? "1px solid var(--red-200)" : "none",
+                    background: item.highlight ? "var(--red-050)" : "var(--surface-card)",
+                    boxShadow: "var(--shadow-sm)",
                     position: "relative" as const, overflow: "hidden",
-                    transition: "transform 0.3s, border-color 0.3s",
+                    transition: "transform 0.22s var(--ease-out), box-shadow 0.22s var(--ease-out)",
                   }}>
                     <div style={{
                       width: 40, height: 40, borderRadius: 12, margin: "0 auto 12px",
-                      background: item.highlight ? "rgba(37,99,235,0.2)" : "rgba(255,255,255,0.05)",
-                      border: `1px solid ${item.highlight ? "rgba(37,99,235,0.3)" : "rgba(255,255,255,0.08)"}`,
+                      background: item.highlight ? "var(--red-100)" : "var(--gray-050)",
+                      border: "none",
                       display: "flex", alignItems: "center", justifyContent: "center",
                     }}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke={item.highlight ? "var(--blue)" : "rgba(255,255,255,0.5)"} strokeWidth="1.8" style={{ width: 20, height: 20 }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke={item.highlight ? "var(--red-500)" : "var(--text-secondary)"} strokeWidth="1.8" style={{ width: 20, height: 20 }}>
                         {item.icon}
                       </svg>
                     </div>
                     <div className="display" style={{
-                      fontSize: item.highlight ? 32 : 26, color: item.highlight ? "var(--blue)" : "#fff",
+                      fontSize: item.highlight ? 32 : 26, color: item.highlight ? "var(--red-500)" : "var(--text-primary)",
                       marginBottom: 6,
                     }}>
                       {item.value}
                     </div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "rgba(255,255,255,0.6)", marginBottom: 4 }}>
+                    <div style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 10, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "var(--text-secondary)", marginBottom: 4 }}>
                       {item.label}
                     </div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "rgba(255,255,255,0.3)" }}>
+                    <div style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-tertiary)" }}>
                       {item.sub}
                     </div>
                     {i < 4 && (
-                      <div style={{ position: "absolute" as const, right: -8, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.15)", fontSize: 20, zIndex: 2 }}>→</div>
+                      <div style={{ position: "absolute" as const, right: -8, top: "50%", transform: "translateY(-50%)", color: "var(--gray-300)", fontSize: 20, zIndex: 2 }}>→</div>
                     )}
                   </div>
                 ))}
@@ -659,24 +659,25 @@ export default function WvdClient() {
                 {/* Our Model */}
                 <div style={{
                   padding: "32px 28px", borderRadius: 20,
-                  border: "2px solid var(--blue)", background: "rgba(37,99,235,0.08)",
+                  border: "1px solid var(--red-200)", background: "var(--red-050)",
+                  boxShadow: "var(--shadow-md)",
                 }}>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "var(--blue)", marginBottom: 16 }}>
+                  <div style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "var(--red-500)", marginBottom: 16 }}>
                     ✦ Mit Webseitenverlag Deutschland
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-                    <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }}>Deine Investition:</span>
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24, color: "#fff" }}>99€<span style={{ fontSize: 14, fontWeight: 400 }}>/Monat</span></span>
+                    <span style={{ color: "var(--text-secondary)", fontSize: 14 }}>Deine Investition:</span>
+                    <span style={{ fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 24, color: "var(--text-primary)" }}>99€<span style={{ fontSize: 14, fontWeight: 400 }}>/Monat</span></span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-                    <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }}>Potentieller Mehrumsatz:</span>
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24, color: "#4ade80" }}>{roi.umsatz.toLocaleString("de-DE")}€<span style={{ fontSize: 14, fontWeight: 400 }}>/Monat</span></span>
+                    <span style={{ color: "var(--text-secondary)", fontSize: 14 }}>Potentieller Mehrumsatz:</span>
+                    <span style={{ fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 24, color: "var(--green-500)" }}>{roi.umsatz.toLocaleString("de-DE")}€<span style={{ fontSize: 14, fontWeight: 400 }}>/Monat</span></span>
                   </div>
-                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 12, marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }}>Dein ROI:</span>
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 32, color: "var(--blue)", fontVariationSettings: '"opsz" 144, "SOFT" 80' }}>{roi.roiX}x</span>
+                  <div style={{ borderTop: "1px solid var(--red-200)", paddingTop: 12, marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                    <span style={{ color: "var(--text-secondary)", fontSize: 14 }}>Dein ROI:</span>
+                    <span style={{ fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 32, letterSpacing: "-0.02em", color: "var(--red-500)" }}>{roi.roiX}x</span>
                   </div>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 8 }}>
+                  <div style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-tertiary)", marginTop: 8 }}>
                     → Bereits im 1. Monat profitabel
                   </div>
                 </div>
@@ -684,24 +685,24 @@ export default function WvdClient() {
                 {/* Agency Model */}
                 <div style={{
                   padding: "32px 28px", borderRadius: 20,
-                  border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)",
+                  border: "1px solid var(--border-default)", background: "var(--gray-050)",
                 }}>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.4)", marginBottom: 16 }}>
+                  <div style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "var(--text-tertiary)", marginBottom: 16 }}>
                     Klassisches Agentur-Modell
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-                    <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Einmalzahlung:</span>
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24, color: "#f87171" }}>5.500€</span>
+                    <span style={{ color: "var(--text-tertiary)", fontSize: 14 }}>Einmalzahlung:</span>
+                    <span style={{ fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 24, color: "var(--danger-600)" }}>5.500€</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-                    <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>+ Hosting monatlich:</span>
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, color: "rgba(255,255,255,0.5)" }}>49€/Monat</span>
+                    <span style={{ color: "var(--text-tertiary)", fontSize: 14 }}>+ Hosting monatlich:</span>
+                    <span style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 18, color: "var(--text-secondary)" }}>49€/Monat</span>
                   </div>
-                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 12, marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Break-Even nach:</span>
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24, color: "rgba(255,255,255,0.5)" }}>{roi.breakEvenMonate} Monaten</span>
+                  <div style={{ borderTop: "1px solid var(--border-default)", paddingTop: 12, marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                    <span style={{ color: "var(--text-tertiary)", fontSize: 14 }}>Break-Even nach:</span>
+                    <span style={{ fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 24, color: "var(--text-secondary)" }}>{roi.breakEvenMonate} Monaten</span>
                   </div>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "rgba(255,255,255,0.25)", marginTop: 8 }}>
+                  <div style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-tertiary)", marginTop: 8 }}>
                     → Erst nach {roi.breakEvenMonate} Monaten im Plus
                   </div>
                 </div>
@@ -709,13 +710,13 @@ export default function WvdClient() {
 
               {/* CTA */}
               <div style={{ textAlign: "center" }}>
-                <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, color: "#fff", marginBottom: 24, fontStyle: "italic", fontVariationSettings: '"opsz" 144, "SOFT" 80' }}>
+                <p style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.01em", color: "var(--text-primary)", marginBottom: 24 }}>
                   {roi.gewinn.toLocaleString("de-DE")}€ mehr Gewinn pro Monat – für 99€ Einsatz.
                 </p>
                 <a href="/entwurf" className="btn btn-primary" style={{ fontSize: 17, padding: "20px 44px" }}>
                   <span>Diese Zahlen für mich realistisch machen →</span>
                 </a>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 16 }}>
+                <div style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-tertiary)", marginTop: 16 }}>
                   Kostenlos · 15 Min. · Unverbindlich
                 </div>
               </div>
@@ -747,20 +748,20 @@ export default function WvdClient() {
             ].map((t, i) => (
               <div key={i} style={{
                 padding: "28px 24px", borderRadius: 20,
-                border: "1px solid var(--border)", background: "var(--bg)",
+                background: "var(--surface-card)", boxShadow: "var(--shadow-sm)",
                 textAlign: "center" as const,
               }}>
                 <div style={{ display: "flex", justifyContent: "center", gap: 3, marginBottom: 12 }}>
                   {Array.from({ length: t.stars }).map((_, s) => (
-                    <svg key={s} viewBox="0 0 24 24" fill="#2563eb" style={{ width: 16, height: 16 }}>
+                    <svg key={s} viewBox="0 0 24 24" fill="var(--red-500)" style={{ width: 16, height: 16 }}>
                       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                     </svg>
                   ))}
                 </div>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, marginBottom: 6, fontVariationSettings: '"opsz" 24, "SOFT" 50' }}>
+                <div style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 18, marginBottom: 6, letterSpacing: "-0.01em" }}>
                   {t.name}
                 </div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--blue)", fontWeight: 600 }}>
+                <div style={{ fontFamily: "var(--font-ui)", fontSize: 13, color: "var(--red-500)", fontWeight: 600 }}>
                   {t.result}
                 </div>
               </div>
@@ -799,12 +800,13 @@ export default function WvdClient() {
             {/* Negative */}
             <div style={{
               padding: "40px 32px", borderRadius: 24,
-              background: "linear-gradient(135deg, #fef2f2, #fff)", border: "1px solid #fecaca",
+              background: "var(--surface-card)", border: "1px solid var(--border-default)",
+              boxShadow: "var(--shadow-sm)",
             }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "#ef4444", marginBottom: 20 }}>
+              <div style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 11, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "var(--danger-600)", marginBottom: 20 }}>
                 ✕ Wenn du nichts änderst
               </div>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600, marginBottom: 16, fontVariationSettings: '"opsz" 24, "SOFT" 50' }}>
+              <h3 style={{ fontFamily: "var(--font-ui)", fontSize: 24, fontWeight: 600, marginBottom: 16, letterSpacing: "-0.01em" }}>
                 In 6 Monaten…
               </h3>
               <ul style={{ listStyle: "none", display: "flex", flexDirection: "column" as const, gap: 12 }}>
@@ -814,8 +816,8 @@ export default function WvdClient() {
                   "Potenzielle Kunden googeln – und finden jemand anderen",
                   "Du arbeitest härter für weniger Ertrag",
                 ].map((item, i) => (
-                  <li key={i} style={{ display: "flex", gap: 10, fontSize: 15, lineHeight: 1.5, color: "var(--ink-soft)" }}>
-                    <span style={{ color: "#ef4444", flexShrink: 0 }}>✕</span> {item}
+                  <li key={i} style={{ display: "flex", gap: 10, fontSize: 15, lineHeight: 1.5, color: "var(--text-secondary)" }}>
+                    <span style={{ color: "var(--danger-600)", flexShrink: 0 }}>✕</span> {item}
                   </li>
                 ))}
               </ul>
@@ -824,12 +826,13 @@ export default function WvdClient() {
             {/* Positive */}
             <div style={{
               padding: "40px 32px", borderRadius: 24,
-              background: "linear-gradient(135deg, #eff6ff, #fff)", border: "1px solid #bfdbfe",
+              background: "linear-gradient(135deg, var(--success-soft), #fff)", border: "1px solid var(--success-soft)",
+              boxShadow: "var(--shadow-md)",
             }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "var(--blue)", marginBottom: 20 }}>
+              <div style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 11, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "var(--green-500)", marginBottom: 20 }}>
                 ✓ Wenn du jetzt startest
               </div>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600, marginBottom: 16, fontVariationSettings: '"opsz" 24, "SOFT" 50' }}>
+              <h3 style={{ fontFamily: "var(--font-ui)", fontSize: 24, fontWeight: 600, marginBottom: 16, letterSpacing: "-0.01em" }}>
                 In 30 Tagen…
               </h3>
               <ul style={{ listStyle: "none", display: "flex", flexDirection: "column" as const, gap: 12 }}>
@@ -839,8 +842,8 @@ export default function WvdClient() {
                   "Du wirkst professionell und baust Vertrauen auf, bevor der Kunde anruft",
                   "99€/Monat, die sich mit dem ersten Auftrag vielfach bezahlt machen",
                 ].map((item, i) => (
-                  <li key={i} style={{ display: "flex", gap: 10, fontSize: 15, lineHeight: 1.5, color: "var(--ink-soft)" }}>
-                    <span style={{ color: "var(--blue)", flexShrink: 0 }}>✓</span> {item}
+                  <li key={i} style={{ display: "flex", gap: 10, fontSize: 15, lineHeight: 1.5, color: "var(--text-secondary)" }}>
+                    <span style={{ color: "var(--green-500)", flexShrink: 0 }}>✓</span> {item}
                   </li>
                 ))}
               </ul>
@@ -885,18 +888,18 @@ export default function WvdClient() {
         <div className="container">
           <div className="cta-section">
             <div style={{ textAlign: "center", maxWidth: 680, margin: "0 auto" }}>
-              <span className="eyebrow" style={{ color: "var(--blue)", display: "block", marginBottom: 16 }}>Der nächste Schritt</span>
+              <span className="eyebrow" style={{ display: "inline-block", marginBottom: 16 }}>Der nächste Schritt</span>
               <h2 className="display" style={{ fontSize: "clamp(32px, 4.5vw, 52px)", marginBottom: 16 }}>
                 15 Minuten, die dein Business <span className="accent">verändern können</span>.
               </h2>
-              <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 17, lineHeight: 1.6, marginBottom: 36 }}>
+              <p style={{ color: "var(--text-secondary)", fontSize: 17, lineHeight: 1.6, marginBottom: 36 }}>
                 Kein Verkaufsgespräch. Kein Druck. Wir schauen uns gemeinsam an,
                 was eine Webseite für dein Business bringen kann – und ob wir der richtige Partner dafür sind.
               </p>
               <a href="/entwurf" className="btn btn-primary" style={{ fontSize: 18, padding: "22px 48px" }}>
                 <span>Kostenloses Erstgespräch buchen →</span>
               </a>
-              <div style={{ display: "flex", justifyContent: "center", gap: 32, marginTop: 28, fontFamily: "var(--font-mono)", fontSize: 12, color: "rgba(255,255,255,0.4)" }}>
+              <div style={{ display: "flex", justifyContent: "center", gap: 32, marginTop: 28, fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--text-tertiary)" }}>
                 <span>✓ 100% kostenlos</span>
                 <span>✓ 15 Minuten</span>
                 <span>✓ Unverbindlich</span>
@@ -914,7 +917,7 @@ export default function WvdClient() {
           <div className="footer-grid">
             <div className="footer-brand">
               <a href="#" className="logo">
-                <Image src="/logo.png" alt="Webseitenverlag Deutschland" width={160} height={50} style={{ height: 36, width: "auto", filter: "brightness(0) invert(1)" }} />
+                <Image src="/logo.png" alt="Webseitenverlag Deutschland" width={160} height={50} style={{ height: 36, width: "auto" }} />
               </a>
               <p>Professionelle Webseiten ab 99&thinsp;€/Monat. Keine Startgebühr. In wenigen Tagen online.</p>
             </div>
