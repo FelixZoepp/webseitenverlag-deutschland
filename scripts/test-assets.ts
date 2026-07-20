@@ -179,7 +179,7 @@ console.log('\n§3.3 Pflicht-Slot ⇒ harter Fail (nie Platzhalter)')
 
 wirft(
   () => assignAssetsAusKandidaten('site-a', 'maler', [], heroSlots, []),
-  'leere Bank + Pflicht-Slot wirft',
+  'leere Bank + Pflicht-Slot wirft [C-APPROVED]',
   'asset_bank: kein approved hero/16:9 für branche=maler'
 )
 const optionalSlots = validiereAssetSlots('t', {

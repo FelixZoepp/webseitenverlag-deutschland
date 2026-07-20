@@ -127,7 +127,7 @@ assert(schema.safeParse(gueltigeSlots()).success, 'zod-gueltig', 'Gültige Slots
 {
   const kaputt = gueltigeSlots()
   kaputt.seo_titel = 'X'.repeat(61)
-  assert(!schema.safeParse(kaputt).success, 'zod-limit', 'Zeichenlimit (seo_titel > 60) muss abgelehnt werden')
+  assert(!schema.safeParse(kaputt).success, 'zod-limit [C-LIMITS]', 'Zeichenlimit (seo_titel > 60) muss abgelehnt werden')
 }
 {
   const kaputt = gueltigeSlots()
@@ -145,7 +145,7 @@ assert(pruefeCopySlots(gueltigeSlots(), profil).length === 0, 'gate-bestanden', 
   const kaputt = gueltigeSlots()
   kaputt.hero_headline_zeilen = ['Saubere Räume', 'für Ihr Unternehmen']
   const gefunden = pruefeCopySlots(kaputt, profil)
-  assert(gefunden.some((f) => f.includes('Hero-Headline')), 'gate-stadt-h1', 'Fehlende Stadt in H1 muss beanstandet werden')
+  assert(gefunden.some((f) => f.includes('Hero-Headline')), 'gate-stadt-h1 [C-STADT-H1]', 'Fehlende Stadt in H1 muss beanstandet werden')
 }
 {
   const kaputt = gueltigeSlots()
@@ -155,7 +155,7 @@ assert(pruefeCopySlots(gueltigeSlots(), profil).length === 0, 'gate-bestanden', 
 {
   const kaputt = gueltigeSlots()
   kaputt.hero_lead = `Wir bieten ${FLOSKEL_BLACKLIST[0]} für Ihr Objekt.`
-  assert(pruefeCopySlots(kaputt, profil).some((f) => f.includes('Floskel')), 'gate-floskel', `Floskel "${FLOSKEL_BLACKLIST[0]}" muss beanstandet werden`)
+  assert(pruefeCopySlots(kaputt, profil).some((f) => f.includes('Floskel')), 'gate-floskel [R-FLOSKEL]', `Floskel "${FLOSKEL_BLACKLIST[0]}" muss beanstandet werden`)
 }
 assert(enthaeltStadt('Willkommen in [[Ludwigsburg]]', 'Ludwigsburg'), 'gate-highlight', 'Stadt in [[Highlight]] muss erkannt werden')
 
@@ -204,7 +204,7 @@ erwarteVerstoss(OK_HTML.replace('Ludwigsburg</h1>', 'Ludwigsburg und München</h
 {
   const c = synthConfig()
   ;(c.inhalte.hero.media as { datei?: string }).datei = undefined
-  erwarteVerstoss(OK_HTML, c, 'pflicht_slot_leer', 'validator-pflicht-slot')
+  erwarteVerstoss(OK_HTML, c, 'pflicht_slot_leer', 'validator-pflicht-slot [C-SLOTS]')
 }
 erwarteVerstoss(OK_HTML + '<img src="" alt="Leeres Bild hier" width="10" height="10">', synthConfig(), 'leerer_src', 'validator-leerer-src')
 erwarteVerstoss(OK_HTML + '<a href="#">Mehr</a>', synthConfig(), 'toter_link', 'validator-toter-link')
@@ -212,7 +212,7 @@ erwarteVerstoss(OK_HTML + '<p>M&amp;uuml;ll entsorgen</p>', synthConfig(), 'rohe
 erwarteVerstoss(OK_HTML + '<p>Lorem ipsum dolor</p>', synthConfig(), 'lorem', 'validator-lorem')
 erwarteVerstoss(OK_HTML + '<p>{{firma}}</p>', synthConfig(), 'token_rest', 'validator-token')
 erwarteVerstoss(OK_HTML + '<img src="/assets/bild-4.webp" alt="" width="1600" height="900">', synthConfig(), 'img_alt', 'validator-img-alt')
-erwarteVerstoss(OK_HTML + '<img src="/assets/bild-5.webp" alt="Blick in den Flur">', synthConfig(), 'img_dimensionen', 'validator-img-dim')
+erwarteVerstoss(OK_HTML + '<img src="/assets/bild-5.webp" alt="Blick in den Flur">', synthConfig(), 'img_dimensionen', 'validator-img-dim [R-IMG-DIM]')
 {
   const c = synthConfig()
   c.inhalte.hero.media.breite = 1000
@@ -226,8 +226,8 @@ erwarteVerstoss(OK_HTML + '<img src="/assets/bild-5.webp" alt="Blick in den Flur
   const report = validiereKonsistenz(OK_HTML, c, 'Ludwigsburg', META)
   assert(!report.verstoesse.some((v) => v.regel === 'aspect_ratio'), 'validator-ratio-toleranz', '±5 %-Toleranz muss kleine Abweichungen durchlassen')
 }
-erwarteVerstoss(OK_HTML + BILD(1), synthConfig(), 'doppeltes_bild', 'validator-doppelt')
-erwarteVerstoss(OK_HTML, synthConfig(), 'signature_paar', 'validator-paar-fehlt', null)
+erwarteVerstoss(OK_HTML + BILD(1), synthConfig(), 'doppeltes_bild', 'validator-doppelt [C-IMG-DUP]')
+erwarteVerstoss(OK_HTML, synthConfig(), 'signature_paar', 'validator-paar-fehlt [C-PAAR]', null)
 {
   const meta = JSON.parse(JSON.stringify(META)) as DemoAssetMeta
   ;(meta.paar as { pair_id?: string }).pair_id = undefined
@@ -236,7 +236,7 @@ erwarteVerstoss(OK_HTML, synthConfig(), 'signature_paar', 'validator-paar-fehlt'
 {
   const c = synthConfig()
   c.inhalte.stimmen.quotes = [{ text: 'Super!', autor: 'M. K.' }] as unknown as FlagshipConfig['inhalte']['stimmen']['quotes']
-  erwarteVerstoss(OK_HTML, c, 'erfundene_bewertungen', 'validator-bewertungen')
+  erwarteVerstoss(OK_HTML, c, 'erfundene_bewertungen', 'validator-bewertungen [C-REVIEWS]')
   const report = validiereKonsistenz(OK_HTML, c, 'Ludwigsburg', META, { echteBewertungen: true })
   assert(!report.verstoesse.some((v) => v.regel === 'erfundene_bewertungen'), 'validator-echte-bewertungen', 'Mit echten Bewertungen ist die Sektion erlaubt')
 }
