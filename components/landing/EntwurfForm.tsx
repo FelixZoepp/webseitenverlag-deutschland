@@ -100,7 +100,7 @@ export default function EntwurfForm() {
           <div className="container" style={{ textAlign: "center", maxWidth: 700 }}>
             <div style={{
               width: 80, height: 80, borderRadius: 20,
-              background: "rgba(37,99,235,0.15)", border: "1px solid rgba(37,99,235,0.3)",
+              background: "var(--red-050)", border: "1px solid var(--red-200)",
               display: "flex", alignItems: "center", justifyContent: "center",
               margin: "0 auto 32px",
             }}>
@@ -111,11 +111,11 @@ export default function EntwurfForm() {
             <h1 className="display large" style={{ fontSize: "clamp(36px, 5vw, 56px)", marginBottom: 20 }}>
               Vielen Dank<span className="accent">!</span>
             </h1>
-            <p style={{ fontSize: 19, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, marginBottom: 36 }}>
+            <p style={{ fontSize: 19, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 36 }}>
               Wir haben Ihre Anfrage erhalten und erstellen jetzt Ihren kostenlosen Webseiten-Entwurf.
-              Sie erhalten ihn innerhalb von <strong style={{ color: "#fff" }}>24 Stunden</strong> per E-Mail.
+              Sie erhalten ihn innerhalb von <strong style={{ color: "var(--text-primary)" }}>24 Stunden</strong> per E-Mail.
             </p>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 15, color: "var(--text-tertiary)", lineHeight: 1.6 }}>
               Bei Fragen erreichen Sie uns jederzeit per E-Mail.
             </p>
           </div>
@@ -137,7 +137,7 @@ export default function EntwurfForm() {
             <h1 className="display" style={{ fontSize: "clamp(32px, 4.5vw, 52px)", marginBottom: 16 }}>
               Ihr kostenloser <span className="accent">Webseiten-Entwurf</span>
             </h1>
-            <p style={{ fontSize: 17, color: "rgba(255,255,255,0.7)", maxWidth: 520, margin: "0 auto" }}>
+            <p style={{ fontSize: 17, color: "var(--text-secondary)", maxWidth: 520, margin: "0 auto" }}>
               Beantworten Sie 4 kurze Fragen und erhalten Sie innerhalb von 24h einen individuellen Entwurf für Ihre neue Webseite.
             </p>
           </div>
@@ -149,7 +149,7 @@ export default function EntwurfForm() {
                 key={i}
                 style={{
                   flex: 1, height: 4, borderRadius: 2,
-                  background: i < step ? "var(--blue)" : "rgba(255,255,255,0.12)",
+                  background: i < step ? "var(--red-500)" : "var(--gray-100)",
                   transition: "background 0.4s",
                 }}
               />
@@ -171,7 +171,7 @@ export default function EntwurfForm() {
               <h2 className="display" style={{ fontSize: "clamp(24px, 3vw, 36px)", marginBottom: 12 }}>
                 In welcher <span className="accent">Branche</span> sind Sie tätig?
               </h2>
-              <p style={{ fontSize: 15, color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>
+              <p style={{ fontSize: 15, color: "var(--text-secondary)", marginBottom: 32 }}>
                 So können wir Ihren Entwurf optimal auf Ihre Zielgruppe zuschneiden.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -181,9 +181,9 @@ export default function EntwurfForm() {
                     onClick={() => setData({ ...data, branche: b })}
                     style={{
                       padding: "16px 20px", borderRadius: 16, border: "1px solid",
-                      borderColor: data.branche === b ? "var(--blue)" : "rgba(255,255,255,0.1)",
-                      background: data.branche === b ? "rgba(37,99,235,0.15)" : "rgba(255,255,255,0.04)",
-                      color: data.branche === b ? "#fff" : "rgba(255,255,255,0.75)",
+                      borderColor: data.branche === b ? "var(--red-500)" : "var(--border-default)",
+                      background: data.branche === b ? "var(--red-050)" : "var(--surface-card)",
+                      color: data.branche === b ? "var(--text-primary)" : "var(--text-secondary)",
                       fontSize: 15, fontFamily: "var(--font-body)", textAlign: "left" as const,
                       cursor: "pointer", transition: "all 0.2s",
                       display: "flex", alignItems: "center", gap: 12,
@@ -191,8 +191,8 @@ export default function EntwurfForm() {
                   >
                     <span style={{
                       width: 20, height: 20, borderRadius: 6,
-                      border: data.branche === b ? "2px solid var(--blue)" : "2px solid rgba(255,255,255,0.2)",
-                      background: data.branche === b ? "var(--blue)" : "transparent",
+                      border: data.branche === b ? "2px solid var(--red-500)" : "2px solid var(--gray-300)",
+                      background: data.branche === b ? "var(--red-500)" : "transparent",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       flexShrink: 0, transition: "all 0.2s",
                     }}>
@@ -215,7 +215,7 @@ export default function EntwurfForm() {
               <h2 className="display" style={{ fontSize: "clamp(24px, 3vw, 36px)", marginBottom: 12 }}>
                 Wie viele <span className="accent">Mitarbeiter</span> hat Ihr Unternehmen?
               </h2>
-              <p style={{ fontSize: 15, color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>
+              <p style={{ fontSize: 15, color: "var(--text-secondary)", marginBottom: 32 }}>
                 Das hilft uns, den richtigen Umfang für Ihre Webseite einzuschätzen.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -225,9 +225,9 @@ export default function EntwurfForm() {
                     onClick={() => setData({ ...data, mitarbeiter: m })}
                     style={{
                       padding: "20px 24px", borderRadius: 16, border: "1px solid",
-                      borderColor: data.mitarbeiter === m ? "var(--blue)" : "rgba(255,255,255,0.1)",
-                      background: data.mitarbeiter === m ? "rgba(37,99,235,0.15)" : "rgba(255,255,255,0.04)",
-                      color: data.mitarbeiter === m ? "#fff" : "rgba(255,255,255,0.75)",
+                      borderColor: data.mitarbeiter === m ? "var(--red-500)" : "var(--border-default)",
+                      background: data.mitarbeiter === m ? "var(--red-050)" : "var(--surface-card)",
+                      color: data.mitarbeiter === m ? "var(--text-primary)" : "var(--text-secondary)",
                       fontSize: 16, fontFamily: "var(--font-body)", textAlign: "left" as const,
                       cursor: "pointer", transition: "all 0.2s",
                       display: "flex", alignItems: "center", gap: 12,
@@ -235,8 +235,8 @@ export default function EntwurfForm() {
                   >
                     <span style={{
                       width: 20, height: 20, borderRadius: 6,
-                      border: data.mitarbeiter === m ? "2px solid var(--blue)" : "2px solid rgba(255,255,255,0.2)",
-                      background: data.mitarbeiter === m ? "var(--blue)" : "transparent",
+                      border: data.mitarbeiter === m ? "2px solid var(--red-500)" : "2px solid var(--gray-300)",
+                      background: data.mitarbeiter === m ? "var(--red-500)" : "transparent",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       flexShrink: 0, transition: "all 0.2s",
                     }}>
@@ -259,7 +259,7 @@ export default function EntwurfForm() {
               <h2 className="display" style={{ fontSize: "clamp(24px, 3vw, 36px)", marginBottom: 12 }}>
                 Wie <span className="accent">schnell</span> brauchen Sie Ihre Webseite?
               </h2>
-              <p style={{ fontSize: 15, color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>
+              <p style={{ fontSize: 15, color: "var(--text-secondary)", marginBottom: 32 }}>
                 Wir richten uns nach Ihrem Zeitplan.
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -269,9 +269,9 @@ export default function EntwurfForm() {
                     onClick={() => setData({ ...data, zeitrahmen: z })}
                     style={{
                       padding: "20px 24px", borderRadius: 16, border: "1px solid",
-                      borderColor: data.zeitrahmen === z ? "var(--blue)" : "rgba(255,255,255,0.1)",
-                      background: data.zeitrahmen === z ? "rgba(37,99,235,0.15)" : "rgba(255,255,255,0.04)",
-                      color: data.zeitrahmen === z ? "#fff" : "rgba(255,255,255,0.75)",
+                      borderColor: data.zeitrahmen === z ? "var(--red-500)" : "var(--border-default)",
+                      background: data.zeitrahmen === z ? "var(--red-050)" : "var(--surface-card)",
+                      color: data.zeitrahmen === z ? "var(--text-primary)" : "var(--text-secondary)",
                       fontSize: 16, fontFamily: "var(--font-body)", textAlign: "left" as const,
                       cursor: "pointer", transition: "all 0.2s",
                       display: "flex", alignItems: "center", gap: 12,
@@ -279,8 +279,8 @@ export default function EntwurfForm() {
                   >
                     <span style={{
                       width: 20, height: 20, borderRadius: 6,
-                      border: data.zeitrahmen === z ? "2px solid var(--blue)" : "2px solid rgba(255,255,255,0.2)",
-                      background: data.zeitrahmen === z ? "var(--blue)" : "transparent",
+                      border: data.zeitrahmen === z ? "2px solid var(--red-500)" : "2px solid var(--gray-300)",
+                      background: data.zeitrahmen === z ? "var(--red-500)" : "transparent",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       flexShrink: 0, transition: "all 0.2s",
                     }}>
@@ -303,7 +303,7 @@ export default function EntwurfForm() {
               <h2 className="display" style={{ fontSize: "clamp(24px, 3vw, 36px)", marginBottom: 12 }}>
                 Fast geschafft – Ihre <span className="accent">Kontaktdaten</span>
               </h2>
-              <p style={{ fontSize: 15, color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>
+              <p style={{ fontSize: 15, color: "var(--text-secondary)", marginBottom: 32 }}>
                 Damit wir Ihnen den fertigen Entwurf zusenden können.
               </p>
               <div className="form-grid">
@@ -405,7 +405,7 @@ export default function EntwurfForm() {
 
           {/* Error */}
           {error && (
-            <div style={{ marginTop: 16, padding: "12px 20px", borderRadius: 12, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171", fontSize: 14 }}>
+            <div style={{ marginTop: 16, padding: "12px 20px", borderRadius: 12, background: "rgba(179,38,30,0.06)", border: "1px solid rgba(179,38,30,0.25)", color: "var(--danger-600)", fontSize: 14 }}>
               {error}
             </div>
           )}
@@ -413,7 +413,7 @@ export default function EntwurfForm() {
           {/* Trust line */}
           <div style={{
             marginTop: 48, display: "flex", justifyContent: "center", gap: 32,
-            fontFamily: "var(--font-mono)", fontSize: 12, color: "rgba(255,255,255,0.4)",
+            fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-tertiary)",
           }}>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 14, height: 14, color: "var(--blue)" }}>

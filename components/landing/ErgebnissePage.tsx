@@ -90,7 +90,7 @@ export default function ErgebnissePage() {
           <h1 className="display large" style={{ fontSize: "clamp(36px, 5vw, 60px)", marginBottom: 20 }}>
             Echte Unternehmer. <span className="accent">Echte Ergebnisse.</span>
           </h1>
-          <p style={{ fontSize: 19, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, maxWidth: 620, margin: "0 auto" }}>
+          <p style={{ fontSize: 19, color: "var(--text-secondary)", lineHeight: 1.6, maxWidth: 620, margin: "0 auto" }}>
             Keine Stock-Fotos, keine erfundenen Zahlen. Das sind die Geschichten von Selbstständigen und Unternehmen, die mit einer professionellen Webseite ihre Sichtbarkeit und ihren Umsatz gesteigert haben.
           </p>
         </div>
@@ -189,7 +189,7 @@ export default function ErgebnissePage() {
             <h2 className="display" style={{ fontSize: "clamp(32px, 4.5vw, 52px)", marginBottom: 16 }}>
               Bereit, die gleichen <span className="accent">Ergebnisse</span> zu erzielen?
             </h2>
-            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 17, maxWidth: 560, margin: "0 auto 36px" }}>
+            <p style={{ color: "var(--text-secondary)", fontSize: 17, maxWidth: 560, margin: "0 auto 36px" }}>
               15 Minuten. Kostenlos. Unverbindlich. Wir zeigen dir, was für dein Business möglich ist.
             </p>
             <a href="/entwurf" className="btn btn-primary" style={{ fontSize: 18, padding: "22px 48px" }}>

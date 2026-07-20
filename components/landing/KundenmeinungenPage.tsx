@@ -142,7 +142,7 @@ export default function KundenmeinungenPage() {
             Sie haben nicht 5.000&thinsp;€ investiert.{" "}
             <span className="accent">Trotzdem laufen ihre Aufträge.</span>
           </h1>
-          <p style={{ fontSize: 19, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, maxWidth: 660, margin: "0 auto 36px" }}>
+          <p style={{ fontSize: 19, color: "var(--text-secondary)", lineHeight: 1.6, maxWidth: 660, margin: "0 auto 36px" }}>
             Das sagen Handwerker, Berater und Selbstständige, die statt 5.000&thinsp;€ einmalig einfach 99&thinsp;€ im Monat investiert haben – und schon in den ersten Tagen Anfragen bekamen.
           </p>
           <Link href="/entwurf" className="btn btn-primary" style={{ fontSize: 17, padding: "20px 44px" }}>
@@ -197,10 +197,10 @@ export default function KundenmeinungenPage() {
                 }}>
                   <div style={{
                     width: 72, height: 72, borderRadius: "50%",
-                    background: "rgba(37,99,235,0.9)", display: "flex",
+                    background: "rgba(224,53,75,0.9)", display: "flex",
                     alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", transition: "transform 0.3s",
-                    boxShadow: "0 8px 32px rgba(37,99,235,0.4)",
+                    cursor: "pointer", transition: "transform 0.22s var(--ease-out)",
+                    boxShadow: "var(--shadow-accent)",
                   }}>
                     <svg viewBox="0 0 24 24" fill="#fff" style={{ width: 28, height: 28, marginLeft: 3 }}>
                       <path d="M8 5v14l11-7z" />
@@ -220,7 +220,7 @@ export default function KundenmeinungenPage() {
                   <span style={{
                     fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 500,
                     letterSpacing: "0.08em", textTransform: "uppercase",
-                    color: "var(--blue)", background: "rgba(37,99,235,0.08)",
+                    color: "var(--red-500)", background: "var(--red-050)",
                     padding: "4px 10px", borderRadius: 999, alignSelf: "flex-start",
                     marginBottom: 16,
                   }}>
@@ -309,7 +309,7 @@ export default function KundenmeinungenPage() {
             <h2 className="display" style={{ fontSize: "clamp(32px, 4.5vw, 52px)", marginBottom: 16 }}>
               Bereit für deine <span className="accent">ersten Anfragen</span>?
             </h2>
-            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 17, lineHeight: 1.6, maxWidth: 580, margin: "0 auto 32px" }}>
+            <p style={{ color: "var(--text-secondary)", fontSize: 17, lineHeight: 1.6, maxWidth: 580, margin: "0 auto 32px" }}>
               Du hast jetzt gelesen, was bei anderen funktioniert hat. Die gleiche Maschine kannst du in deinem Unternehmen haben – ab 99&thinsp;€ im Monat, ohne 5.000&thinsp;€ Vorabinvestition.
             </p>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, marginBottom: 32 }}>
@@ -318,8 +318,8 @@ export default function KundenmeinungenPage() {
                 "Alles inklusive: Design, Hosting, Pflege, Updates",
                 "Anfragen oft schon in den ersten Tagen",
               ].map((item, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-mono)", fontSize: 13, color: "rgba(255,255,255,0.8)" }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2" style={{ width: 18, height: 18, flexShrink: 0 }}>
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text-secondary)" }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--green-500)" strokeWidth="2" style={{ width: 18, height: 18, flexShrink: 0 }}>
                     <circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" />
                   </svg>
                   {item}
@@ -329,7 +329,7 @@ export default function KundenmeinungenPage() {
             <Link href="/entwurf" className="btn btn-primary" style={{ fontSize: 18, padding: "22px 48px" }}>
               <span>Jetzt kostenloses Erstgespräch buchen →</span>
             </Link>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 16 }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-tertiary)", marginTop: 16 }}>
               15 Minuten · Unverbindlich · Kein Verkaufsdruck
             </div>
           </div>
