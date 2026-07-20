@@ -154,7 +154,7 @@ ${funnelCss(design)}
   </div>
 </main>
 
-${opts.demo ? '<div class="ribbon"><i></i> Demo-Vorschau · Webseitenverlag Deutschland</div>' : ''}
+${opts.demo ? '<div class="ribbon"><i></i> Demo-Vorschau · Webseiten-Verlag Deutschland</div>' : ''}
 
 <script>
 ${js}

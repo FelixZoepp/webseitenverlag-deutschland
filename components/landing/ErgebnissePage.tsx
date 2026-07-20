@@ -72,7 +72,7 @@ export default function ErgebnissePage() {
       <nav>
         <div className="nav-inner">
           <a href="/" className="logo">
-            <Image src="/logo.png" alt="Webseitenverlag Deutschland" width={160} height={50} style={{ height: 40, width: "auto" }} priority />
+            <Image src="/logo.svg" alt="Webseiten-Verlag Deutschland" width={36} height={36} priority />Webseiten-Verlag <span>Deutschland</span>
           </a>
           <div className="nav-links">
             <a href="/">Startseite</a>
@@ -203,7 +203,7 @@ export default function ErgebnissePage() {
       <footer>
         <div className="container">
           <div className="footer-bottom">
-            <span>© 2026 Webseitenverlag Deutschland. Alle Rechte vorbehalten.</span>
+            <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
             <span><a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></span>
           </div>
         </div>

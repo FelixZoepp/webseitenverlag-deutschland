@@ -125,7 +125,7 @@ export async function POST(request: Request) {
     try {
       const resend = new Resend(apiKey)
       const fromEmail = process.env.FROM_EMAIL || 'noreply@resend.dev'
-      const fromName = process.env.FROM_NAME || 'Webseitenverlag Deutschland'
+      const fromName = process.env.FROM_NAME || 'Webseiten-Verlag Deutschland'
       const rows = Object.entries({
         Name: lead.name, Firma: lead.firma, 'E-Mail': lead.email, Telefon: lead.telefon,
         Website: lead.website, Branche: lead.branche, Nachricht: lead.nachricht,

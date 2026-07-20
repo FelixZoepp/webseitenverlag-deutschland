@@ -50,7 +50,7 @@ export async function generatePreCallBriefing(
     temperature: 0.4,
     messages: [{
       role: 'user',
-      content: `Du bist Assistent für Felix bei Webseitenverlag Deutschland.
+      content: `Du bist Assistent für Felix bei Webseiten-Verlag Deutschland.
 Erstelle ein strukturiertes Pre-Call-Briefing für den Onboarding-Call mit diesem Kunden:
 
 KUNDE: ${customer.company_name || '—'} (${customer.ansprechpartner || '—'})

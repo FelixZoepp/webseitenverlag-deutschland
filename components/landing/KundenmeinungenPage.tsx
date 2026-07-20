@@ -79,7 +79,7 @@ const SCHEMA = {
   "@context": "https://schema.org",
   "@type": "Service",
   name: "Webseiten-Erstellung im Abo (99€/Monat)",
-  provider: { "@type": "Organization", name: "Webseitenverlag Deutschland" },
+  provider: { "@type": "Organization", name: "Webseiten-Verlag Deutschland" },
   aggregateRating: { "@type": "AggregateRating", ratingValue: "5.0", reviewCount: "17" },
   review: [
     ...VIDEO_TESTIMONIALS.map((t) => ({
@@ -122,7 +122,7 @@ export default function KundenmeinungenPage() {
       <nav>
         <div className="nav-inner">
           <Link href="/" className="logo">
-            <Image src="/logo.png" alt="Webseitenverlag Deutschland" width={160} height={50} style={{ height: 40, width: "auto" }} priority />
+            <Image src="/logo.svg" alt="Webseiten-Verlag Deutschland" width={36} height={36} priority />Webseiten-Verlag <span>Deutschland</span>
           </Link>
           <div className="nav-links">
             <Link href="/">Startseite</Link>
@@ -359,7 +359,7 @@ export default function KundenmeinungenPage() {
       <footer>
         <div className="container">
           <div className="footer-bottom">
-            <span>© 2026 Webseitenverlag Deutschland. Alle Rechte vorbehalten.</span>
+            <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
             <span><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link></span>
           </div>
         </div>

@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Blog – Webseitenverlag Deutschland",
+  title: "Blog – Webseiten-Verlag Deutschland",
   description: "Praxiswissen rund um Webseiten, Online-Sichtbarkeit und digitale Kundengewinnung für Selbstständige und kleine Unternehmen.",
 };
 
@@ -56,7 +56,7 @@ export default function BlogPage() {
       <nav>
         <div className="nav-inner">
           <Link href="/" className="logo">
-            <Image src="/logo.png" alt="Webseitenverlag Deutschland" width={160} height={50} style={{ height: 40, width: "auto" }} priority />
+            <Image src="/logo.svg" alt="Webseiten-Verlag Deutschland" width={36} height={36} priority />Webseiten-Verlag <span>Deutschland</span>
           </Link>
           <div className="nav-links">
             <Link href="/">Startseite</Link>
@@ -132,7 +132,7 @@ export default function BlogPage() {
       <footer>
         <div className="container">
           <div className="footer-bottom">
-            <span>© 2026 Webseitenverlag Deutschland. Alle Rechte vorbehalten.</span>
+            <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
             <span><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link></span>
           </div>
         </div>

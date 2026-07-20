@@ -41,8 +41,8 @@ export default function BlogArticle() {
         "@context": "https://schema.org",
         "@type": "Article",
         "headline": "Webseite erstellen lassen: Was kostet das wirklich? (Ehrlicher Vergleich 2026)",
-        "author": { "@type": "Organization", "name": "Webseitenverlag Deutschland" },
-        "publisher": { "@type": "Organization", "name": "Webseitenverlag Deutschland" },
+        "author": { "@type": "Organization", "name": "Webseiten-Verlag Deutschland" },
+        "publisher": { "@type": "Organization", "name": "Webseiten-Verlag Deutschland" },
         "datePublished": "2026-05-14",
         "dateModified": "2026-05-14",
         "description": "Ehrlicher Kostenvergleich 2026: Agentur vs. Baukasten vs. Abo-Modell für professionelle Webseiten.",
@@ -52,7 +52,7 @@ export default function BlogArticle() {
       <nav>
         <div className="nav-inner">
           <Link href="/" className="logo">
-            <Image src="/logo.png" alt="Webseitenverlag Deutschland" width={160} height={50} style={{ height: 40, width: "auto" }} priority />
+            <Image src="/logo.svg" alt="Webseiten-Verlag Deutschland" width={36} height={36} priority />Webseiten-Verlag <span>Deutschland</span>
           </Link>
           <div className="nav-links">
             <Link href="/">Startseite</Link>
@@ -316,7 +316,7 @@ export default function BlogArticle() {
       <footer>
         <div className="container">
           <div className="footer-bottom">
-            <span>© 2026 Webseitenverlag Deutschland. Alle Rechte vorbehalten.</span>
+            <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
             <span><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link></span>
           </div>
         </div>

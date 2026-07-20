@@ -9,7 +9,7 @@ export const BRAND = {
   light: '#F9FAFB',
   company: 'ZH Digitalisierung UG',
   address: 'Rhinstraße 137A · 10315 Berlin',
-  brand: 'Webseitenverlag Deutschland',
+  brand: 'Webseiten-Verlag Deutschland',
 }
 
 export function createDoc(): PDFKit.PDFDocument {

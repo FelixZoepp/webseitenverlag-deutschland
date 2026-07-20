@@ -34,7 +34,7 @@ export default function WillkommenPage({
           </>
         )}
         <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.08)', color: '#6b675f', fontSize: '12px' }}>
-          Webseitenverlag Deutschland
+          Webseiten-Verlag Deutschland
         </div>
       </div>
     </div>

@@ -14,7 +14,7 @@ export default function Footer() {
               WVD<span className="text-[var(--blue)]">.</span>
             </a>
             <p className="max-w-[320px] text-sm leading-relaxed">
-              Webseitenverlag Deutschland &ndash; professionelle Webseiten ab 99&thinsp;&euro;/Monat.
+              Webseiten-Verlag Deutschland &ndash; professionelle Webseiten ab 99&thinsp;&euro;/Monat.
               In 24 Stunden online, ohne Startgebühr.
             </p>
           </div>
@@ -58,7 +58,7 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 font-[family-name:var(--font-mono)] text-xs tracking-[0.05em] text-white/40 md:flex-row">
-          <span>&copy; {new Date().getFullYear()} Webseitenverlag Deutschland. Alle Rechte vorbehalten.</span>
+          <span>&copy; {new Date().getFullYear()} Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
           <span>
             Made with &#9829; in Deutschland
           </span>

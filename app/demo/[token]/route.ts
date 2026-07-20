@@ -36,7 +36,7 @@ function demoBar(prospectName: string): string {
   return `
 <div style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#111;color:#fff;font-family:system-ui,sans-serif;font-size:13px;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 -2px 12px rgba(0,0,0,0.3)">
   <span style="background:#22c55e;width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0"></span>
-  <span>Demo-Vorschau für <strong>${escapeHtml(prospectName)}</strong> &middot; erstellt vom Webseitenverlag Deutschland</span>
+  <span>Demo-Vorschau für <strong>${escapeHtml(prospectName)}</strong> &middot; erstellt vom Webseiten-Verlag Deutschland</span>
 </div>
 <div style="height:44px"></div>`
 }

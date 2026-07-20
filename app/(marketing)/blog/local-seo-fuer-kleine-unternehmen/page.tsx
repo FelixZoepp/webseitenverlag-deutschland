@@ -19,7 +19,7 @@ const faqData = [
   { q: "Wie wichtig ist ein Google Unternehmensprofil?", a: "Sehr wichtig. Das Google Unternehmensprofil (früher Google My Business) ist der wichtigste Faktor für Local SEO. Es sorgt dafür, dass du in der Google-Kartenansicht erscheinst, die bei lokalen Suchen ganz oben angezeigt wird. Ohne Profil bist du dort unsichtbar." },
   { q: "Wie bekomme ich mehr Google-Bewertungen?", a: "Bitte zufriedene Kunden aktiv um eine Bewertung. Am besten direkt nach Abschluss eines Auftrags. Schicke ihnen den direkten Link zu deinem Google-Profil per E-Mail, SMS oder WhatsApp. Je einfacher du es machst, desto mehr Bewertungen bekommst du." },
   { q: "Wie lange dauert es, bis Local SEO wirkt?", a: "Erste Verbesserungen siehst du oft nach 4 bis 8 Wochen. Deutliche Ergebnisse – also regelmäßige Anfragen über Google – dauern in der Regel 3 bis 6 Monate. Local SEO ist eine langfristige Strategie, kein Sprint." },
-  { q: "Kann ich Local SEO selbst machen?", a: "Die Grundlagen schon: Google Unternehmensprofil einrichten, Bewertungen sammeln, lokale Keywords auf der Website verwenden. Für fortgeschrittene Maßnahmen wie technische SEO-Optimierung und strukturierte Daten lohnt sich professionelle Hilfe – die ist im Abo-Modell von Webseitenverlag Deutschland inklusive." },
+  { q: "Kann ich Local SEO selbst machen?", a: "Die Grundlagen schon: Google Unternehmensprofil einrichten, Bewertungen sammeln, lokale Keywords auf der Website verwenden. Für fortgeschrittene Maßnahmen wie technische SEO-Optimierung und strukturierte Daten lohnt sich professionelle Hilfe – die ist im Abo-Modell von Webseiten-Verlag Deutschland inklusive." },
 ];
 
 export default function BlogArticle() {
@@ -40,8 +40,8 @@ export default function BlogArticle() {
         "@context": "https://schema.org",
         "@type": "Article",
         "headline": "Local SEO für kleine Unternehmen – Der komplette Guide",
-        "author": { "@type": "Organization", "name": "Webseitenverlag Deutschland" },
-        "publisher": { "@type": "Organization", "name": "Webseitenverlag Deutschland" },
+        "author": { "@type": "Organization", "name": "Webseiten-Verlag Deutschland" },
+        "publisher": { "@type": "Organization", "name": "Webseiten-Verlag Deutschland" },
         "datePublished": "2026-05-10",
         "dateModified": "2026-05-10",
         "description": "Wie kleine Unternehmen mit Local SEO bei Google gefunden werden.",
@@ -51,7 +51,7 @@ export default function BlogArticle() {
       <nav>
         <div className="nav-inner">
           <Link href="/" className="logo">
-            <Image src="/logo.png" alt="Webseitenverlag Deutschland" width={160} height={50} style={{ height: 40, width: "auto" }} priority />
+            <Image src="/logo.svg" alt="Webseiten-Verlag Deutschland" width={36} height={36} priority />Webseiten-Verlag <span>Deutschland</span>
           </Link>
           <div className="nav-links">
             <Link href="/">Startseite</Link>
@@ -283,7 +283,7 @@ export default function BlogArticle() {
       <footer>
         <div className="container">
           <div className="footer-bottom">
-            <span>© 2026 Webseitenverlag Deutschland. Alle Rechte vorbehalten.</span>
+            <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
             <span><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link></span>
           </div>
         </div>

@@ -8,7 +8,7 @@ export default function RegisterPage() {
       </div>
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '400px' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <img src="/logo.png" alt="Webseitenverlag Deutschland" style={{ height: '56px', width: 'auto', margin: '0 auto' }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}><img src="/logo.svg" alt="Webseiten-Verlag Deutschland" style={{ height: '48px', width: '48px' }} /><span style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '-0.02em', color: '#17181A' }}>Webseiten-Verlag <span style={{ color: '#E0354B' }}>Deutschland</span></span></div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(22px) saturate(140%)', border: '1px solid rgba(23,24,26,0.07)', borderRadius: '16px', padding: '32px', textAlign: 'center', boxShadow: '0 1px 0 rgba(255,255,255,0.6) inset, 0 12px 36px -18px rgba(23,24,26,0.12)' }}>
           <h1 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.01em', color: '#17181A', marginBottom: '16px' }}>Registrierung</h1>

@@ -38,8 +38,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         {/* Sidebar */}
         <aside className="admin-sidebar">
           <div className="sb-brand">
-            <img src="/logo.png" alt="WD" style={{ height: '32px', width: 'auto' }} />
-            <span className="sb-word" style={{ fontSize: '10px' }}>Admin</span>
+            <img src="/logo.svg" alt="Webseiten-Verlag Deutschland" style={{ height: '32px', width: '32px' }} />
+            <span className="sb-word" style={{ fontSize: '10px' }}>Webseiten-Verlag · Admin</span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>

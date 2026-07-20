@@ -56,7 +56,7 @@ export default function About() {
           </h2>
           <p className="mb-5 text-[17px] leading-relaxed text-[var(--ink-soft)]">
             Wir sind <strong className="font-semibold text-[var(--ink)]">kein Website-Baukasten und keine teure Agentur</strong>.
-            Webseitenverlag Deutschland liefert professionelle, individuell gestaltete Webseiten &ndash; schnell, günstig und ohne versteckte Kosten.
+            Webseiten-Verlag Deutschland liefert professionelle, individuell gestaltete Webseiten &ndash; schnell, günstig und ohne versteckte Kosten.
           </p>
           <p className="text-[17px] leading-relaxed text-[var(--ink-soft)]">
             Unser Konzept: <strong className="font-semibold text-[var(--ink)]">Sie mieten Ihre Webseite ab 99&thinsp;&euro;/Monat</strong>.

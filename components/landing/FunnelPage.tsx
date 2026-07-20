@@ -201,7 +201,7 @@ export default function FunnelPage() {
       {/* Header */}
       <header className="border-b border-[var(--border)] bg-white/90 px-5 py-4 backdrop-blur-sm">
         <a href="/" className="text-[16px] font-bold tracking-tight text-[var(--ink)]">
-          Webseitenverlag <span className="font-semibold text-[var(--ink-soft)]">Deutschland</span>
+          Webseiten-Verlag <span className="font-semibold text-[var(--ink-soft)]">Deutschland</span>
         </a>
       </header>
 
@@ -236,7 +236,7 @@ export default function FunnelPage() {
             </p>
             <p className="mx-auto max-w-[360px] text-[14.5px] leading-relaxed text-[var(--ink-soft)]">
               Über <strong className="text-[var(--ink)]">200 Betriebe</strong> aus Handwerk,
-              Gastronomie und Gesundheit vertrauen dem Webseitenverlag.
+              Gastronomie und Gesundheit vertrauen dem Webseiten-Verlag.
             </p>
           </div>
         )}

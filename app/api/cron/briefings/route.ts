@@ -5,7 +5,7 @@ import { meldeJobFehler } from '@/lib/monitoring'
 import { Resend } from 'resend'
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@resend.dev'
-const FROM_NAME = process.env.FROM_NAME || 'Webseitenverlag Deutschland'
+const FROM_NAME = process.env.FROM_NAME || 'Webseiten-Verlag Deutschland'
 const FELIX_EMAIL = process.env.BRIEFING_EMAIL || 'felix@zoeppmedia.de'
 
 function getServiceClient() {

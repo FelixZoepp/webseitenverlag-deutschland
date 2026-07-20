@@ -165,7 +165,7 @@ export default function WvdClient() {
       <nav>
         <div className="nav-inner">
           <a href="#" className="logo">
-            <Image src="/logo.png" alt="Webseitenverlag Deutschland" width={160} height={50} style={{ height: 40, width: "auto" }} priority />
+            <Image src="/logo.svg" alt="Webseiten-Verlag Deutschland" width={36} height={36} priority />Webseiten-Verlag <span>Deutschland</span>
           </a>
           <div className="nav-links">
             <a href="#problem">Warum jetzt</a>
@@ -663,7 +663,7 @@ export default function WvdClient() {
                   boxShadow: "var(--shadow-md)",
                 }}>
                   <div style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "var(--red-500)", marginBottom: 16 }}>
-                    ✦ Mit Webseitenverlag Deutschland
+                    ✦ Mit Webseiten-Verlag Deutschland
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
                     <span style={{ color: "var(--text-secondary)", fontSize: 14 }}>Deine Investition:</span>
@@ -917,7 +917,7 @@ export default function WvdClient() {
           <div className="footer-grid">
             <div className="footer-brand">
               <a href="#" className="logo">
-                <Image src="/logo.png" alt="Webseitenverlag Deutschland" width={160} height={50} style={{ height: 36, width: "auto" }} />
+                <Image src="/logo.svg" alt="Webseiten-Verlag Deutschland" width={32} height={32} />Webseiten-Verlag <span>Deutschland</span>
               </a>
               <p>Professionelle Webseiten ab 99&thinsp;€/Monat. Keine Startgebühr. In wenigen Tagen online.</p>
             </div>
@@ -947,7 +947,7 @@ export default function WvdClient() {
             </div>
           </div>
           <div className="footer-bottom">
-            <span>© 2026 Webseitenverlag Deutschland. Alle Rechte vorbehalten.</span>
+            <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
             <span><a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></span>
           </div>
         </div>
