@@ -2,8 +2,7 @@
  * Auslieferung von Kundenseiten (Phase G, §11).
  *
  * Zentrale Stelle für alles, was beim Ausliefern/Exportieren einer Live-Site
- * gilt — egal ob multi_tenant (über unsere Infrastruktur) oder als statischer
- * Export für Kunden-Cloudflare:
+ * gilt (multi_tenant über unsere Infrastruktur, MVP-Finish §1):
  *  - gesperrt   → Sperrseite (Dunning Stufe 3 / Vertragsende), HTTP 503
  *  - noindex    → robots-Meta + X-Robots-Tag, bis "Website fertigstellen" durch ist
  *  - Rechtstexte → config.rechtstexte (aus den Wizard-Pflichtangaben) wird als
@@ -252,7 +251,7 @@ async function renderEngineSeite(
 }
 
 /**
- * Zusätzliche Dateien für den statischen Export (Cloudflare Pages Deploy):
+ * Zusätzliche Dateien für statische Exporte (z.B. ZIP-Download):
  * Impressum-/Datenschutz-Seiten aus config.rechtstexte.
  */
 export function rechtstexteDateien(

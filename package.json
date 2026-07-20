@@ -13,6 +13,7 @@
     "test:e2e": "playwright test",
     "test:kuendigung": "npx tsx scripts/test-kuendigung.ts",
     "test:flagship": "npx tsx scripts/test-flagship.ts",
+    "test:hosting": "npx tsx scripts/test-hosting.ts",
     "seed:branchen": "npx tsx scripts/seed-branchen.ts"
   },
   "dependencies": {

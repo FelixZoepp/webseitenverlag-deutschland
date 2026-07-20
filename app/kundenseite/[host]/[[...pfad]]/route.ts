@@ -1,23 +1,22 @@
 /**
- * Multi-Tenant-Auslieferung (Phase G, §11): Kundenseiten über unsere Infrastruktur.
+ * Multi-Tenant-Auslieferung (MVP-Finish §1): ALLE Sites (Demos + Live) rendern
+ * aus der DB über unsere Vercel-Infrastruktur.
  *
- * Die Middleware rewritet unbekannte Hosts (Subdomains von PRODUKTDOMAIN und
+ * Die Middleware rewritet unbekannte Hosts (Subdomains von MARKETING_HOST und
  * aktive Custom Domains) hierher: /kundenseite/<host>/<pfad>.
- * Lookup-Reihenfolge:
- *   1. Subdomain-Label unter *.MARKETING_HOST → sites.subdomain
- *   2. Voller Host → domains.hostname (status AKTIV)
- *   3. Voller Host → sites.domain (Altbestand)
  *
- * Leitplanken: gesperrt → 503-Sperrseite, noindex → robots-Meta + Header,
- * nur status='published' mit Live-config wird ausgeliefert.
+ * Caching: Host→Site-ID und (Site, Pfad)→HTML laufen über den Next-Data-Cache
+ * (lib/hosting/site-cache.ts) mit Tag `site:{id}` — Publish/Rollback
+ * invalidieren gezielt. Obendrauf CDN-Caching per s-maxage.
+ *
+ * Leitplanken: gesperrt → 503-Sperrseite, noindex/Demo → robots-Meta + Header,
+ * ausgeliefert werden nur status 'published' (Live) und 'demo' (immer noindex).
  */
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/admin'
-import { renderKundenseite, sperrSeite, mitNoindex, type SiteZeile } from '@/lib/auslieferung'
+import { resolveSiteIdCached, renderSiteCached } from '@/lib/hosting/site-cache'
+import { sperrSeite, mitNoindex } from '@/lib/auslieferung'
 
 export const dynamic = 'force-dynamic'
-
-const SITE_SPALTEN = 'id, name, template_id, config, status, gesperrt, noindex'
 
 function htmlAntwort(html: string, status: number, noindex: boolean): NextResponse {
   const headers: Record<string, string> = {
@@ -46,53 +45,24 @@ export async function GET(
   if (!host || host.length > 255 || !/^[a-z0-9.-]+$/.test(host)) return nichtGefunden()
 
   const pfad = (params.pfad || []).join('/')
-  const supabase = createAdminClient()
-  let site: SiteZeile | null = null
-
-  // 1. Subdomain unter der Produktdomain
-  const marketingHost = (process.env.NEXT_PUBLIC_MARKETING_HOST || '').split(':')[0].toLowerCase()
-  if (marketingHost && host.endsWith('.' + marketingHost)) {
-    const label = host.slice(0, -(marketingHost.length + 1))
-    if (label && !label.includes('.')) {
-      const { data } = await supabase.from('sites').select(SITE_SPALTEN).eq('subdomain', label).maybeSingle()
-      site = data as SiteZeile | null
-    }
-  }
-
-  // 2. Aktive Custom Domain
-  if (!site) {
-    const { data: domain } = await supabase
-      .from('domains')
-      .select('site_id')
-      .eq('hostname', host)
-      .eq('status', 'AKTIV')
-      .maybeSingle()
-    if (domain?.site_id) {
-      const { data } = await supabase.from('sites').select(SITE_SPALTEN).eq('id', domain.site_id).maybeSingle()
-      site = data as SiteZeile | null
-    }
-  }
-
-  // 3. Altbestand: sites.domain
-  if (!site) {
-    const { data } = await supabase.from('sites').select(SITE_SPALTEN).eq('domain', host).maybeSingle()
-    site = data as SiteZeile | null
-  }
-
-  if (!site || site.status !== 'published' || !site.config) return nichtGefunden()
-
-  if (site.gesperrt) {
-    return new NextResponse(sperrSeite(site.name), {
-      status: 503,
-      headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow' },
-    })
-  }
 
   try {
-    const html = await renderKundenseite(supabase, site, pfad)
-    if (!html) return nichtGefunden()
-    return htmlAntwort(html, 200, site.noindex === true)
-  } catch {
+    const siteId = await resolveSiteIdCached(host)
+    if (!siteId) return nichtGefunden()
+
+    const auslieferung = await renderSiteCached(siteId, pfad)
+
+    if (auslieferung.ergebnis === 'gesperrt') {
+      return new NextResponse(sperrSeite(auslieferung.name), {
+        status: 503,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow' },
+      })
+    }
+    if (auslieferung.ergebnis !== 'ok' || !auslieferung.html) return nichtGefunden()
+
+    return htmlAntwort(auslieferung.html, 200, auslieferung.noindex)
+  } catch (e) {
+    console.error('[kundenseite] Auslieferung fehlgeschlagen:', host, pfad, e)
     return nichtGefunden()
   }
 }

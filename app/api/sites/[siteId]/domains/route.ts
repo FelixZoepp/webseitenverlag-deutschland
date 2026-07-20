@@ -4,12 +4,14 @@
  *   POST → Domain anlegen:
  *     typ 'neuregistrierung' → Bestellung über Registrar (Mock bis Reseller-API,
  *       WARTELISTE.md) inkl. automatischem Nameserver-Setup → sofort AKTIV
- *     typ 'vorhanden'        → Status WARTET_AUF_DNS + erwartetes DNS-Ziel;
- *       Recheck über /domains/[domainId]/check
+ *     typ 'vorhanden'        → attachCustomDomain (Vercel Domains API, MVP-Finish §1):
+ *       Domain am Vercel-Projekt anmelden + Zeile mit Status WARTET_AUF_DNS/AKTIV;
+ *       ohne VERCEL_TOKEN als Stub (WARTELISTE). Recheck über /domains/[domainId]/check
  */
 import { getOwnedSite } from '@/lib/api-helpers'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { registriereDomain, registrarProvider, dnsZiel } from '@/lib/registrar'
+import { attachCustomDomain } from '@/lib/hosting/vercel-domains'
 import { NextResponse } from 'next/server'
 
 const HOSTNAME_REGEX = /^(?!-)[a-z0-9-]{1,63}(?<!-)(\.(?!-)[a-z0-9-]{1,63}(?<!-))+$/
@@ -99,17 +101,20 @@ export async function POST(
       return NextResponse.json({ domain }, { status: 201 })
     }
 
-    // Vorhandene Domain: Kunde muss DNS setzen, dann Recheck
+    // Vorhandene Domain: bei Vercel anmelden + Zeile upserten (MVP-Finish §1).
+    // Ohne VERCEL_TOKEN läuft attachCustomDomain als Stub — Zeile entsteht
+    // trotzdem, damit die DNS-Anleitung rausgehen kann (WARTELISTE).
+    const ergebnis = await attachCustomDomain(admin, params.siteId, hostname)
+    if (!ergebnis.ok) {
+      return NextResponse.json(
+        { error: ergebnis.fehler || 'Domain konnte nicht verknüpft werden.' },
+        { status: 502 }
+      )
+    }
     const { data: domain, error } = await admin
       .from('domains')
-      .insert({
-        site_id: params.siteId,
-        hostname,
-        typ,
-        status: 'WARTET_AUF_DNS',
-        dns_ziel: dnsZiel(),
-      })
-      .select()
+      .select('*')
+      .eq('hostname', hostname)
       .single()
     if (error) throw new Error(error.message)
     return NextResponse.json({ domain }, { status: 201 })

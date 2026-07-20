@@ -335,7 +335,7 @@ function renderPrivacyPage(_site: GlobalSiteConfig, page: PageEntry): string {
   <h3 style="font-size:1.1rem;margin-top:20px;margin-bottom:8px">Server-Log-Dateien</h3>
   <p>Der Provider der Seiten erhebt und speichert automatisch Informationen in so genannten Server-Log-Dateien, die Ihr Browser automatisch an uns übermittelt. Dies sind: Browsertyp und Browserversion, verwendetes Betriebssystem, Referrer URL, Hostname des zugreifenden Rechners, Uhrzeit der Serveranfrage, IP-Adresse. Eine Zusammenführung dieser Daten mit anderen Datenquellen wird nicht vorgenommen.</p>
   <h2>4. Hosting</h2>
-  <p>Diese Website wird bei Cloudflare gehostet. Details entnehmen Sie der Datenschutzerklärung von Cloudflare.</p>
+  <p>Diese Website wird bei Vercel gehostet. Details entnehmen Sie der Datenschutzerklärung von Vercel Inc.</p>
   <h2>5. Ihre Rechte</h2>
   <p>Sie haben jederzeit das Recht, unentgeltlich Auskunft über Herkunft, Empfänger und Zweck Ihrer gespeicherten personenbezogenen Daten zu erhalten. Sie haben außerdem ein Recht, die Berichtigung oder Löschung dieser Daten zu verlangen. Wenn Sie eine Einwilligung zur Datenverarbeitung erteilt haben, können Sie diese Einwilligung jederzeit für die Zukunft widerrufen.</p>
 </div>`

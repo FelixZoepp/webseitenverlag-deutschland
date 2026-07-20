@@ -17,6 +17,10 @@ Nicht gelöscht, sondern geparkt (Regel §0 Masterprompt). Vom Build ausgeschlos
 | `lib/payment.ts` | PaymentProvider-Stub, schrieb `rechnungs_posten`-Ledger | Stripe-Subscriptions (eigener Vertrag je Upsell-Buchung); `rechnungs_posten`-Ansichten bleiben lesend für Altdaten |
 | `lib/upsell-emails.ts` | Aktivierungs-Bestätigungsmail des alten Flows | Stripe/Portal-Mails des neuen Kaufwegs (Phase E/G) |
 | `app/api/admin/customers/[customerId]/upsells/[upsellId]/` | POST/DELETE-Aktivierung via Orchestrator + Invite-Mail mit totem `/dashboard/[siteId]/upgrade`-Link | Zahlungslink-Panel (`/api/admin/upsell-payment-link`) + Portal-Buchung; Katalog-GET-Route zeigt Kauf-Status aus `upsell_orders` (Phase H) |
+| `lib/cloudflare.ts` | Cloudflare-Pages-API (Projekt anlegen, Deployment, Direct Upload) für Kunden-Accounts | Multi-Tenant-Auslieferung über unsere Vercel-Infrastruktur (`lib/hosting/`, MVP-Finish §1) |
+| `lib/cloudflare-email.ts` | Reconnect-Mail bei ungültigem Kunden-CF-Token | entfällt — keine Kunden-Credentials mehr |
+| `app/api-sites/publish-mit-cloudflare.route.ts` | Alter Publish (rendert + deployt in Kunden-CF-Account) | `app/api/sites/[siteId]/publish/` (multi_tenant, Cache-Invalidierung via `revalidateSite`) |
+| `app/api-sites/rollback-mit-cloudflare.route.ts` | Alter Rollback inkl. CF-Redeploy | `app/api/sites/[siteId]/rollback/` (nur DB + `revalidateSite`) |
 
 Zugehörige tote Env-Vars: `DOCUSIGN_*`, `QONTO_API_ACTIVE`, `EASYBILL_API_ACTIVE` (Flags aus `lib/feature-flags.ts` entfernt).
 

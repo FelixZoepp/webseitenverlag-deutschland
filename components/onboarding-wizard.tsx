@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, ArrowLeft, Upload, Loader2, Globe, Key, FileText, Sparkles, Check, Package, Layout, Search } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Upload, Loader2, Globe, FileText, Sparkles, Check, Package, Layout, Search } from 'lucide-react'
 import Link from 'next/link'
-import { Customer } from '@/types'
 import { PACKAGES, PackageTier } from '@/lib/packages'
 
-type Step = 'package' | 'template' | 'info' | 'cloudflare' | 'transcript' | 'generating' | 'done'
+type Step = 'package' | 'template' | 'info' | 'transcript' | 'generating' | 'done'
 
 const TEMPLATE_OPTIONS = [
   // Fitness
@@ -65,7 +64,7 @@ const TEMPLATE_OPTIONS = [
 
 const INDUSTRIES = Array.from(new Set(TEMPLATE_OPTIONS.map((t) => t.industry)))
 
-export default function OnboardingWizard({ customer }: { customer: Customer }) {
+export default function OnboardingWizard() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('package')
   const [selectedPackage, setSelectedPackage] = useState<PackageTier>('business')
@@ -74,8 +73,6 @@ export default function OnboardingWizard({ customer }: { customer: Customer }) {
   const [templateSearch, setTemplateSearch] = useState('')
   const [siteName, setSiteName] = useState('')
   const [domain, setDomain] = useState('')
-  const [cfAccountId, setCfAccountId] = useState(customer.cloudflare_account_id || '')
-  const [cfApiToken, setCfApiToken] = useState(customer.cloudflare_api_token || '')
   const [transcript, setTranscript] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [siteId, setSiteId] = useState<string | null>(null)
@@ -102,8 +99,6 @@ export default function OnboardingWizard({ customer }: { customer: Customer }) {
           package: selectedPackage,
           templateId: selectedTemplate || undefined,
           domain: domain || undefined,
-          cloudflareAccountId: cfAccountId || undefined,
-          cloudflareApiToken: cfApiToken || undefined,
         }),
       })
       const data = await res.json()
@@ -128,7 +123,6 @@ export default function OnboardingWizard({ customer }: { customer: Customer }) {
     { key: 'package', label: 'Paket', icon: <Package className="w-4 h-4" /> },
     { key: 'template', label: 'Template', icon: <Layout className="w-4 h-4" /> },
     { key: 'info', label: 'Info', icon: <Globe className="w-4 h-4" /> },
-    { key: 'cloudflare', label: 'Hosting', icon: <Key className="w-4 h-4" /> },
     { key: 'transcript', label: 'Briefing', icon: <FileText className="w-4 h-4" /> },
     { key: 'generating', label: 'KI', icon: <Sparkles className="w-4 h-4" /> },
     { key: 'done', label: 'Fertig', icon: <Check className="w-4 h-4" /> },
@@ -312,37 +306,10 @@ export default function OnboardingWizard({ customer }: { customer: Customer }) {
               <button onClick={() => setStep('template')} className="flex items-center gap-2 px-5 py-2.5 text-gray-600 hover:text-gray-800 text-sm">
                 <ArrowLeft className="w-4 h-4" /> Template ändern
               </button>
-              <button onClick={() => setStep('cloudflare')} disabled={!siteName.trim()}
+              <button onClick={() => setStep('transcript')} disabled={!siteName.trim()}
                 className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 text-sm font-medium">
                 Weiter <ArrowRight className="w-4 h-4" />
               </button>
-            </div>
-          </div>
-        )}
-
-        {/* ===== STEP: CLOUDFLARE ===== */}
-        {step === 'cloudflare' && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Cloudflare-Zugangsdaten</h2>
-            <p className="text-sm text-gray-500 mb-6">Für das Hosting auf Cloudflare Pages.</p>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cloudflare Account-ID</label>
-                <input type="text" value={cfAccountId} onChange={(e) => setCfAccountId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cloudflare API-Token</label>
-                <input type="password" value={cfApiToken} onChange={(e) => setCfApiToken(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" />
-              </div>
-            </div>
-            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-xs text-amber-800">
-              Kann auch später nachgetragen werden.
-            </div>
-            <div className="mt-8 flex justify-between">
-              <button onClick={() => setStep('info')} className="flex items-center gap-2 px-5 py-2.5 text-gray-600 text-sm"><ArrowLeft className="w-4 h-4" /> Zurück</button>
-              <button onClick={() => setStep('transcript')} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium">Weiter <ArrowRight className="w-4 h-4" /></button>
             </div>
           </div>
         )}
@@ -374,7 +341,7 @@ export default function OnboardingWizard({ customer }: { customer: Customer }) {
             </div>
             {error && <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">{error}</div>}
             <div className="mt-8 flex justify-between">
-              <button onClick={() => setStep('cloudflare')} className="flex items-center gap-2 px-5 py-2.5 text-gray-600 text-sm"><ArrowLeft className="w-4 h-4" /> Zurück</button>
+              <button onClick={() => setStep('info')} className="flex items-center gap-2 px-5 py-2.5 text-gray-600 text-sm"><ArrowLeft className="w-4 h-4" /> Zurück</button>
               <button onClick={handleGenerate} disabled={transcript.trim().length < 20}
                 className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 text-sm font-medium">
                 <Sparkles className="w-4 h-4" /> Website generieren

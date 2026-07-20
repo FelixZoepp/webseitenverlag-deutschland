@@ -95,7 +95,7 @@ Erstelle das Briefing in diesem Format:
 ## Technisches
 - Template: ${site?.template_id || 'muss noch gewählt werden'}
 - Bilder: ${(bilder || []).length} hochgeladen
-- Cloudflare: ${customer.cloudflare_account_id ? 'Konfiguriert' : 'Noch nicht eingerichtet'}`,
+- Hosting: über unsere Infrastruktur (multi_tenant, kein Kunden-Setup nötig)`,
     }],
   })
   await erfasseNutzung('claude_tokens', {

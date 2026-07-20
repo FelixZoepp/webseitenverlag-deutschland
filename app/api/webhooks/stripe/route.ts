@@ -26,6 +26,7 @@ import {
   wirksamesKuendigungsdatum,
 } from '@/lib/contracts'
 import { getUpsellProduct, istPlanUpgrade, planUpgradeTier } from '@/config/upsells'
+import { revalidateSite } from '@/lib/hosting/site-cache'
 import { ADS_PRODUCT_KEY, generiereAdsEntwuerfe } from '@/lib/ads-starter'
 
 export const maxDuration = 60
@@ -682,8 +683,14 @@ async function kundenKontakt(
 async function setzeSiteSperre(supabase: SupabaseClient, contract: ContractRow, gesperrt: boolean) {
   if (contract.site_id) {
     await supabase.from('sites').update({ gesperrt }).eq('id', contract.site_id)
+    revalidateSite(contract.site_id)
   } else {
-    await supabase.from('sites').update({ gesperrt }).eq('customer_id', contract.customer_id)
+    const { data } = await supabase
+      .from('sites')
+      .update({ gesperrt })
+      .eq('customer_id', contract.customer_id)
+      .select('id')
+    for (const s of data || []) revalidateSite(s.id as string)
   }
 }
 

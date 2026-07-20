@@ -1,7 +1,9 @@
 import { getOwnedSite } from '@/lib/api-helpers'
-import { revalidateSite } from '@/lib/hosting/site-cache'
+import { renderTemplate } from '@/lib/template-renderer'
+import { deployToCloudflarePages } from '@/lib/cloudflare'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { SiteConfig } from '@/types'
 
 const RollbackSchema = z.object({
   version_id: z.string().uuid('Ungültige Versions-ID'),
@@ -15,7 +17,7 @@ export async function POST(
     const result = await getOwnedSite(params.siteId)
     if (!result.ok) return result.response
 
-    const { supabase } = result.data
+    const { supabase, customer, site } = result.data
 
     const body = await request.json()
     const parsed = RollbackSchema.safeParse(body)
@@ -57,15 +59,34 @@ export async function POST(
       description: `Rollback zu Version vom ${new Date(version.created_at).toLocaleString('de-DE')}`,
     })
 
-    // Cache-Invalidierung (§1): Rollback sofort live sichtbar
-    revalidateSite(params.siteId)
+    // Re-deploy if site was published and has Cloudflare credentials
+    let deployUrl: string | undefined
+    if (
+      (site.status as string) === 'published' &&
+      site.cloudflare_project_name &&
+      customer.cloudflare_account_id &&
+      customer.cloudflare_api_token
+    ) {
+      const html = renderTemplate(version.config as SiteConfig)
+      const deployResult = await deployToCloudflarePages(
+        {
+          accountId: customer.cloudflare_account_id,
+          apiToken: customer.cloudflare_api_token,
+        },
+        site.cloudflare_project_name as string,
+        html
+      )
+      if (deployResult.success) {
+        deployUrl = deployResult.url
+      }
+    }
 
     return NextResponse.json({
       success: true,
       config: version.config,
+      deployUrl,
     })
-  } catch (e) {
-    console.error('[rollback] Fehler:', e)
+  } catch {
     return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 })
   }
 }

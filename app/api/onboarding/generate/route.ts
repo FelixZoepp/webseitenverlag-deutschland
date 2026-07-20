@@ -10,8 +10,6 @@ const GenerateSchema = z.object({
   package: z.enum(['starter', 'business', 'growth']).default('starter'),
   templateId: z.string().optional(),
   domain: z.string().optional(),
-  cloudflareAccountId: z.string().optional(),
-  cloudflareApiToken: z.string().optional(),
 })
 
 export async function POST(request: Request) {
@@ -31,19 +29,8 @@ export async function POST(request: Request) {
       )
     }
 
-    const { siteName, transcript, domain, cloudflareAccountId, cloudflareApiToken, templateId } = parsed.data
+    const { siteName, transcript, domain, templateId } = parsed.data
     const packageTier = parsed.data.package as PackageTier
-
-    // Save Cloudflare credentials if provided
-    if (cloudflareAccountId || cloudflareApiToken) {
-      await supabase
-        .from('customers')
-        .update({
-          cloudflare_account_id: cloudflareAccountId || customer.cloudflare_account_id,
-          cloudflare_api_token: cloudflareApiToken || customer.cloudflare_api_token,
-        })
-        .eq('id', customer.id)
-    }
 
     // Generate site config from transcript based on package + template
     const generatedConfig = await generateSiteFromTranscript(transcript, siteName, packageTier, templateId)

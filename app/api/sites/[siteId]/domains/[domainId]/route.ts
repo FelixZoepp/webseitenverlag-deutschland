@@ -6,6 +6,7 @@
 import { getOwnedSite } from '@/lib/api-helpers'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { pruefeDnsEintrag, dnsZiel } from '@/lib/registrar'
+import { revalidateHostMap } from '@/lib/hosting/site-cache'
 import { NextResponse } from 'next/server'
 
 export async function POST(
@@ -51,6 +52,9 @@ export async function POST(
       .single()
     if (error) throw new Error(error.message)
 
+    // Neu AKTIV → Host-Map-Cache invalidieren, damit die Domain sofort auflöst
+    if (check.ok) revalidateHostMap()
+
     return NextResponse.json({ domain: aktualisiert, dns_ok: check.ok, gefunden: check.gefunden })
   } catch (e) {
     console.error('[domains/check] Fehler:', e)
@@ -73,6 +77,9 @@ export async function DELETE(
       .eq('id', params.domainId)
       .eq('site_id', params.siteId)
     if (error) throw new Error(error.message)
+
+    // Entfernte Domain darf nicht weiter aus dem Host-Map-Cache aufgelöst werden
+    revalidateHostMap()
 
     return NextResponse.json({ success: true })
   } catch (e) {

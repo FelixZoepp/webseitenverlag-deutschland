@@ -63,7 +63,7 @@ export function generiereDatenschutz(p: Pflichtangaben): string {
     `Telefon: ${p.telefon} · E-Mail: ${p.email}`,
     '',
     '2. Hosting',
-    'Diese Website wird bei einem externen Dienstleister gehostet (Cloudflare, Inc.). Beim Aufruf der Website werden automatisch Informationen in Server-Logfiles gespeichert (IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, Browsertyp). Diese Daten sind technisch erforderlich, um die Website anzuzeigen und die Stabilität und Sicherheit zu gewährleisten (Art. 6 Abs. 1 lit. f DSGVO).',
+    'Diese Website wird bei einem externen Dienstleister gehostet (Vercel Inc.). Beim Aufruf der Website werden automatisch Informationen in Server-Logfiles gespeichert (IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, Browsertyp). Diese Daten sind technisch erforderlich, um die Website anzuzeigen und die Stabilität und Sicherheit zu gewährleisten (Art. 6 Abs. 1 lit. f DSGVO).',
     '',
     '3. Kontaktformular',
     'Wenn Sie uns über das Kontaktformular Anfragen zukommen lassen, werden Ihre Angaben inklusive der von Ihnen angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und für den Fall von Anschlussfragen bei uns gespeichert (Art. 6 Abs. 1 lit. b DSGVO). Diese Daten geben wir nicht ohne Ihre Einwilligung weiter.',

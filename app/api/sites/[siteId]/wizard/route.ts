@@ -93,7 +93,8 @@ export async function PATCH(request: Request, { params }: { params: { siteId: st
       update.draft_config = config
       wizardStatus.fakten = 'erledigt'
     } else if (patch.schritt === 'domain') {
-      // Stub: Wunsch wird gespeichert, Cloudflare-Connect folgt in Phase G.
+      // Stub: Wunsch wird gespeichert, Domain-Anbindung läuft über die Vercel
+      // Domains API (lib/hosting/vercel-domains.ts) — Admin stößt sie an.
       // Scheitert/vertagt → Site läuft nahtlos auf multi_tenant weiter (§10.1).
       if (patch.wunsch_domain) wizardStatus.wunsch_domain = patch.wunsch_domain.toLowerCase().trim()
       wizardStatus.domain = patch.status

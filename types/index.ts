@@ -3,7 +3,9 @@ export interface Customer {
   user_id: string
   company_name: string | null
   contact_email: string | null
+  /** @deprecated Kunden-Cloudflare-Deployment aus MVP entfernt (siehe _legacy/) — DB-Spalte bleibt (additiv). */
   cloudflare_account_id: string | null
+  /** @deprecated Kunden-Cloudflare-Deployment aus MVP entfernt (siehe _legacy/) — DB-Spalte bleibt (additiv). */
   cloudflare_api_token: string | null
   created_at: string
 }
@@ -13,6 +15,7 @@ export interface Site {
   customer_id: string
   name: string
   domain: string | null
+  /** @deprecated Kunden-Cloudflare-Deployment aus MVP entfernt (siehe _legacy/) — DB-Spalte bleibt (additiv). */
   cloudflare_project_name: string | null
   template_id: string
   config: SiteConfig

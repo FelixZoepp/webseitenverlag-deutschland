@@ -5,8 +5,6 @@ import { z } from 'zod'
 const PatchCustomerSchema = z.object({
   company_name: z.string().optional(),
   contact_email: z.string().email().optional(),
-  cloudflare_account_id: z.string().optional(),
-  cloudflare_api_token: z.string().optional(),
   monthly_price: z.number().optional(),
   setup_fee: z.number().optional(),
   contract_years: z.number().optional(),

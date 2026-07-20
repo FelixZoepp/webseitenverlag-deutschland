@@ -27,7 +27,7 @@ export const PACKAGES: PackageDefinition[] = [
     features: [
       '1 professionelle Webseite (One-Pager)',
       'KI-Editor mit Chatbot',
-      'Hosting (Cloudflare)',
+      'Hosting inklusive',
       'Eigene Domain + SSL',
       'Mobile-optimiert',
       'Kontaktformular + Anfragen-Inbox',

@@ -27,5 +27,5 @@ export default async function OnboardingPage() {
 
   if (!customer) redirect('/login')
 
-  return <OnboardingWizard customer={customer} />
+  return <OnboardingWizard />
 }

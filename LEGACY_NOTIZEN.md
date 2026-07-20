@@ -110,6 +110,23 @@ Hero mit Accent-Wort · Sticky-Nav mit Glas + CTA · Trust-Leiste · Testimonial
 3. **3 parallele Renderer** (template-renderer, multipage-renderer, library/render) → nach F2/K1 nur noch der Library-Renderer.
 4. Unsplash-Platzhalter als Demo-Bilder: funktional ok, aber als Demo-Qualität deprecated → Asset-Bank/Higgsfield (F1).
 
+## 8. Cloudflare-Kundendeployment (MVP-Finish §1, 2026-07-20)
+
+Bewusst aus dem MVP entfernt (nach `/_legacy/` verschoben, nicht gelöscht):
+- **Was es war:** Kunden hinterlegten eigene Cloudflare-Credentials (`cloudflare_account_id`,
+  `cloudflare_api_token` an `customers`); Publish renderte HTML und lud es per Direct Upload
+  in ein CF-Pages-Projekt im Kunden-Account (`cloudflare_project_name` an `sites`).
+- **Warum raus:** Onboarding-Reibung (Kunde braucht CF-Account + API-Token), fremde
+  Infrastruktur ohne Kontrolle (Token läuft ab → Site tot, Reconnect-Mail-Flow),
+  kein zentrales Cache-/Sperr-/Noindex-Management. Widerspricht 0-Fulfillment-Vision.
+- **Ersetzt durch:** Multi-Tenant-Auslieferung aus der DB über unsere Vercel-Infrastruktur
+  (`middleware.ts` Host-Routing → `app/kundenseite/[host]/`, `lib/hosting/site-cache.ts`
+  mit Tag-Invalidierung, `lib/hosting/vercel-domains.ts` für Custom Domains).
+- **DB bleibt additiv:** Die drei CF-Spalten bleiben stehen (`@deprecated` in `types/index.ts`).
+- **Reaktivierung:** `_legacy/lib/cloudflare.ts` + `_legacy/lib/cloudflare-email.ts` +
+  `_legacy/app/api-sites/*-mit-cloudflare.route.ts` sind vollständig — als „Kunde will
+  eigenes Hosting"-Premium-Option denkbar, aber nicht MVP.
+
 ## Konsequenz für K1
 
 - **Sichern erledigt** (dieses Dokument): Farbwelten, Copy-Muster, Branchen-Wissen, Sektions-Patterns, Multipage-Struktur.
