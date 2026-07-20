@@ -151,6 +151,14 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
   - **DoD-Beweis:** `npm run test:assets` (`scripts/test-assets.ts`) — 32 Checks grün: Schema-Gate (snake_case, pair_with-Richtung/Aspect), Determinismus (gleiche Site ⇒ gleiches Bild, reihenfolge-unabhängig, Streuung über Sites), keine Duplikate, Paar-Kopplung (nie halb, ausgeblendet statt halb), harter Fail mit Soll-Meldung, Aspect ±5 % + min_width, Style-Ranking schlägt RNG (4 Seeds), Negativ-Regeln im Prompt, deutsche Alt-Texte
   - Self-Test: Build + `tsc --noEmit` + Lint (nur Bestands-Warnings) + `test:assets` (32) + `test:flagship` (463) + `test:hosting` (40) + `test:kuendigung` grün
   - **DoD-Rest auf WARTELISTE (Mensch/Key):** echter `HIGGSFIELD_API_KEY`/`FAL_API_KEY` fürs Seeding (Stubs nie approvebar) + Freigabe von ≥30 Assets inkl. 3 Paaren für die erste Ziel-Branche in `/admin/assets`
+- **Einschub (User-Auftrag): Apple-Red-Design-System auf Marketing-Seiten, Commit `1453fd2`:**
+  - Quelle: Claude-Design-Handoff `~/Downloads/apple-red-software-system/` (Rot #E0354B, helle Flächen, weiche Schatten statt harter Borders, Apple-System-Font, Motion 120–220ms ease-out, Success-Grün #2FBF71 für Vorteile)
+  - `marketing.css` komplett neue Token-Schicht + **Legacy-Aliasse** (`--blue`→red-500, `--dark`→gray-900, `--cream`→weiß, `--font-display/mono`→`--font-ui` …) — dadurch ziehen alle Unterseiten (Blog, Entwurf, Kundenmeinungen, Ergebnisse, Rechtliches) automatisch mit; alle Klassennamen unverändert
+  - `(marketing)/layout.tsx`: Google-Fonts (Fraunces/Inter Tight/JetBrains) entfernt → System-Stack (LCP-Gewinn, 0 Font-Downloads)
+  - `WvdClient.tsx`: dunkle Bento-/ROI-Sektionen → hell, Funnel-/Vergleichskarten als weiße Cards (Highlight = red-050), Konsequenzen-Karten im Vorteile-Stil (Success-Grün ✓ / Danger ✕), rote Sterne, Footer hell, framer-reveal 0.22s easeOut
+  - Hex-Fixes: EntwurfForm (Check-Icon), KundenmeinungenPage (Sterne), ErgebnissePage (Header-Gradient → `--accent-grad`)
+  - Self-Test: Build + `tsc --noEmit` + Lint (nur Bestands-Warnings) grün
+  - Nicht angefasst (unbenutzte Legacy-Komponenten): components/landing/{Hero,Workflow,…}.tsx; offen: ob Design-Bundle-ui_kits (Dashboard/Builder/CustomerPortal) auch Admin-/Kunden-UI ersetzen sollen → Rückfrage an Felix
 
 ## Notizen für nächste Session
 - **Alle Phasen 0–H abgeschlossen.** Offen ist nur noch, was ein Mensch liefern muss → WARTELISTE.md (Migrationen 013–021 ausführen, Library seeden, Stripe-Test-/Webhook-Keys, Git-Remote + erster Push für CI, E2E-Freischaltung, echte Golden-Set-Firmen, Preis-Bestätigungen)
