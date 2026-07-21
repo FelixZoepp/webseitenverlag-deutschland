@@ -137,3 +137,22 @@ export function naechsterPlan(tier: string | null | undefined): PlanDefinition |
   const idx = TIER_REIHENFOLGE.indexOf(getPlan(tier).tier)
   return idx >= 0 && idx < TIER_REIHENFOLGE.length - 1 ? PLANS[TIER_REIHENFOLGE[idx + 1]] : null
 }
+
+/**
+ * Render-Stufe der Template-Fabrik-Kompositionen (ab B2 „maler-landing-v1"):
+ * statisch = Onepager ohne Video · video = +Video/Galerie/Signature ·
+ * growth = +Unterseiten +Funktions-Module. Die Zuordnung Tier → Stufe lebt
+ * NUR hier (Master-Regel: config over hardcode).
+ */
+export type RenderStufe = 'statisch' | 'video' | 'growth'
+
+export function renderStufeFuerTier(tier: string | null | undefined): RenderStufe {
+  switch (getPlan(tier).tier) {
+    case 'business':
+      return 'video'
+    case 'growth':
+      return 'growth'
+    default:
+      return 'statisch'
+  }
+}

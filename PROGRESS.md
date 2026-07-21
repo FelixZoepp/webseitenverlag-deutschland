@@ -257,10 +257,22 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | Branche | B1 | Freigabe | B2 | B3 | B4 | B5-Optik | Assets | Demo-URL |
 |---|---|---|---|---|---|---|---|---|
 | 1 galabau | ✅ (T1-Seed) | ✅ | ✅ (`galabau-landing-v1`) | ✅ (`rezepte/REZEPTE_GALABAU.md`) | ✅ (test:galabau 130, LH 100/92/100) | ✅ (docs/screenshots/galabau/) | ⛔ Higgsfield-Key (WARTELISTE) | — (T3 offen) |
-| 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ⛔ **[ ] Mensch-Freigabe Steckbrief** | — | — | — | — | — | — |
+| 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | — | — | — | — | — |
 | 3–16 | — | — | — | — | — | — | — | — |
 
-Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0
+Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0 (Stub-Phase)
+
+## Arbeitsblock: Maler B2 — Theme + Komposition `maler-landing-v1` (Template-Fabrik)
+
+- **Theme `lib/flagship/themes/maler.ts`:** Salbei-Palette (#7BA88A Akzent, #F5F5F1 Hintergrund) als `KompositionTheme` — galabauCss ist theme-parametrisiert, keine galabau-Datei angefasst (Harte Regel 1).
+- **Komposition `lib/flagship/maler/` (9 Dateien):** `types.ts` (MalerConfig/MalerInhalte extends Galabau + wand/galerie/module/leistung_details, `istMalerKomposition`), `seed.ts` (Voss Maler & Lackierer, Osnabrück — verbatim aus Steckbrief), `asset-slots.ts` (21 GaLaBau-Slots + gal_01–06 Galerie = 27, zod-Gate beim Modul-Load), `copy-slots.ts` (GaLaBau-Basis + Wand/Galerie/Gebiet/Leistungs-Details, Verbatim-Felder firma/ort/telefon), `sections.ts` (Re-Exports der GaLaBau-Sektionen + neu: m-wand, m-galerie mit Filter, m-gebiet, m-reviews, m-leistung-kopf, Kontakt-Growth-Extras Rückruf-Checkbox/Datei-Anhang, WhatsApp-Bubble mit mechanischer wa.me-Nummer), `css.ts` (galabauCss(MALER_THEME) + Extra-CSS), `js.ts` (galabauJs + Wand-IIFE), `render.ts` (Landing + Unterseiten).
+- **Signature „Wand färbt sich":** nur `clip-path`/`--rolle` (0→1 aus Scroll-Position), Modi `einmal` (monotone Ratsche + Listener-Abbau) / `scrub` (nur growth + `signature_story:'on'`) / `fertig` (statisch, Unterseiten); CSS-Default `--rolle:1` ⇒ no-JS und `prefers-reduced-motion` zeigen die fertige Wand.
+- **3 Render-Stufen (Zuordnung NUR in `config/plans.ts` — `renderStufeFuerTier`):** statisch = Onepager ohne Video/Galerie/Module · video = +Galerie +Wand-Animation (Demo-Default) · growth = +Module (WhatsApp, Rückruf, Datei-Anhang, Einzugsgebiet; Reviews nur echte — Seed bewusst ohne) +Unterseiten `/leistungen/{slug}` (H1 „{Leistung} in Osnabrück", eigene FAQ/CTA), `/ueber-uns`, `/referenzen` (Galerie mit Filter). Legacy `opts.level='growth'` ≡ `stufe:'growth'`.
+- **Registrierung:** Dispatch in `lib/flagship/render.ts` (`istMalerKomposition` vor galabau), `SLOT_REGISTRY.maler` in `scripts/import-assets.ts`, `RenderStufe`/`renderStufeFuerTier` in `config/plans.ts`.
+- **Smoke-Beweis:** statisch/video/growth 42/45/47 kB HTML; Stufen-Gates über Marker geprüft (statisch ohne m-galerie/wa.me/m-gebiet, video mit m-galerie ohne Growth-Module, growth mit wa.me/49541000000 + m-gebiet + Rückruf, m-reviews korrekt weggelassen); alle 5 Leistungs-Slugs matchen `leistung_details`; unbekannter Pfad → null (404); 0 Copy-Verstöße; Dispatch-Gleichheit `renderFlagshipPage === renderMalerLanding`.
+- **Lint-Fix:** Variable `module` → `growthModule` (`@next/next/no-assign-module-variable`).
+- Selbsttest: `tsc --noEmit` ✅ · `next build` ✅ · Lint ✅ (nur Bestands-Warnings) · `test:galabau` 130 ✅ · `test:flagship` 463 ✅ — galabau unangetastet.
+- **Offen:** B3 Rezeptliste, B4 test-maler.ts + Lighthouse, B5 Optik-Screenshots ⛔ Freigabe, `frozen:true` erst nach B5.
 
 ## Arbeitsblock: Erste-Schritte-Dashboard (Get started, Kunden-Ansicht)
 

@@ -1,7 +1,7 @@
-# STECKBRIEF — Branche 2: Maler & Lackierer (B1, wartet auf Mensch-Freigabe)
+# STECKBRIEF — Branche 2: Maler & Lackierer (B1 ✅ freigegeben)
 
-> Status: ⛔ **Mensch-Freigabe ausstehend** (Checkbox in der Fortschritts-Matrix, PROGRESS.md).
-> Erst nach Freigabe startet B2 (Theme + Komposition `maler-landing-v1`).
+> Status: ✅ **Freigegeben von Felix am 2026-07-21** („maler freigegeben").
+> B2 (Theme + Komposition `maler-landing-v1`) läuft.
 
 ## Musterbetrieb
 

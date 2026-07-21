@@ -36,7 +36,7 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 ## Template-Fabrik (TEMPLATE_FABRIK_MASTER.md)
 - [ ] **Higgsfield-Assets galabau generieren** (Rezeptliste: `rezepte/REZEPTE_GALABAU.md`): Kette Hero → Video → BA-Paar beachten; Fertig-Kriterium ≥25 approved inkl. 1 Paar, 1 Hero, 1 Video. Import danach: `npx tsx scripts/import-assets.ts --branche galabau --dir <download-ordner> --approve` (Dateinamen = Slot-IDs mit Bindestrich, z. B. `hero-bg.jpg`, `ba-before.jpg`; Script + STUB-Test T2 sind fertig). Voraussetzungen lokal: `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` + Migration 022 ausgeführt; für Videos > 3 MB zusätzlich `ffmpeg` installiert (`brew install ffmpeg`)
 - [ ] **HIGGSFIELD_REZEPTE_MALER.md liefern**: Die Datei ist laut Auftrag vorhanden, war aber weder im Repo noch auf der Platte auffindbar (Spotlight + find über Home/Desktop/Downloads/Documents). Bitte Datei bereitstellen (z. B. nach `rezepte/REZEPTE_MALER.md`) — bis dahin leite ich die Maler-Rezeptliste in B3 aus der GaLaBau-Vorlage ab und gleiche sie später gegen deine Fassung ab
-- [ ] **Maler B1-Steckbrief freigeben** (`branchen/maler/STECKBRIEF.md`): Checkbox in der Fortschritts-Matrix (PROGRESS.md) — ohne Haken startet B2 nicht
+- [x] **Maler B1-Steckbrief freigeben** ✅ Felix 2026-07-21 („maler freigegeben") — B2 gestartet
 - [ ] **Hero-Video für die Marketing-Landing liefern** (Slot `hero_video_poster` + MP4 ≤ 3 MB): Die neue Hero-Video-Karte zeigt bis dahin nur die Poster-Fläche mit Play-Button; Inline-Play wird verdrahtet, sobald Poster + Video da sind (`components/landing/WvdClient.tsx`)
 
 ## Ein-Klick-Demo (MVP-Finish §4, Phase 3)

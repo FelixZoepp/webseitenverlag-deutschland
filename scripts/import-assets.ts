@@ -49,6 +49,10 @@ import {
   GALABAU_ASSET_SLOTS,
   slotKeyAusDateiname as galabauSlotKey,
 } from '../lib/flagship/galabau/asset-slots'
+import {
+  MALER_ASSET_SLOTS,
+  malerSlotKeyAusDateiname as malerSlotKey,
+} from '../lib/flagship/maler/asset-slots'
 import { altTextVorlage, stilFuerBranche } from '../config/asset-styles'
 import { VIDEO_GUIDELINES } from '../config/video-guidelines'
 
@@ -61,6 +65,7 @@ export const SLOT_REGISTRY: Record<
   { slots: AssetSlots; slotKey: (dateiname: string) => string | null }
 > = {
   galabau: { slots: GALABAU_ASSET_SLOTS, slotKey: galabauSlotKey },
+  maler: { slots: MALER_ASSET_SLOTS, slotKey: malerSlotKey },
 }
 
 const BUCKET = 'asset-bank'
