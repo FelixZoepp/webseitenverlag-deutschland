@@ -38,6 +38,10 @@ export const AssetSlotSchema = z.object({
    * false: Sektion des Slots wird ausgeblendet statt zu failen.
    */
   pflicht: z.boolean().optional(),
+  /** Medium des Slots (Default 'bild'). 'video' z. B. hero_video (Growth). */
+  medium: z.enum(['bild', 'video']).optional(),
+  /** Fallback-Slot-Key, wenn kein Asset vorhanden (z. B. hero_video → hero_bg) */
+  fallback: z.string().min(1).optional(),
 })
 export type AssetSlot = z.infer<typeof AssetSlotSchema>
 
