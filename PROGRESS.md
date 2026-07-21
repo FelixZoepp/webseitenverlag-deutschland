@@ -257,7 +257,7 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | Branche | B1 | Freigabe | B2 | B3 | B4 | B5-Optik | Assets | Demo-URL |
 |---|---|---|---|---|---|---|---|---|
 | 1 galabau | ✅ (T1-Seed) | ✅ | ✅ (`galabau-landing-v1`) | ✅ (`rezepte/REZEPTE_GALABAU.md`) | ✅ (test:galabau 130, LH 100/92/100) | ✅ (docs/screenshots/galabau/) | ⛔ Higgsfield-Key (WARTELISTE) | — (T3 offen) |
-| 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | — | — | — | — | — |
+| 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | ✅ (`rezepte/REZEPTE_MALER.md`) | — | — | — | — |
 | 3–16 | — | — | — | — | — | — | — | — |
 
 Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0 (Stub-Phase)
