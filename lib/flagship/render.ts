@@ -11,6 +11,8 @@
 import './asset-slots'
 import type { FlagshipConfig, FlagshipRenderOptionen, NavInhalt, UnterseitenSlug } from './types'
 import { UNTERSEITEN } from './types'
+import { istGalabauKomposition, type GalabauConfig } from './galabau/types'
+import { renderGalabauLanding } from './galabau/render'
 import { esc, escAttr, ICON_PATHS } from './html'
 import { flagshipCss } from './css'
 import { flagshipJs } from './js'
@@ -92,7 +94,9 @@ function multipageNavLinks(basisPfad: string): NavInhalt['links'] {
   return UNTERSEITEN.map((u) => ({ label: u.label, anker: `${basisPfad}/${u.slug}` }))
 }
 
-export function renderFlagshipPage(config: FlagshipConfig, opts: FlagshipRenderOptionen = {}): string {
+export function renderFlagshipPage(config: FlagshipConfig | GalabauConfig, opts: FlagshipRenderOptionen = {}): string {
+  // Kompositions-Dispatch: „galabau-landing-v1" hat eigenen Renderer (Auftrag T1)
+  if (istGalabauKomposition(config)) return renderGalabauLanding(config, opts)
   const { design, meta } = config
   // Produktstufen-Ansicht (Baustein C §C.3): Business-Level = kein Video-Hero.
   // undefined = alles rendern (Live-Seiten), 'growth' = Video-Look.
