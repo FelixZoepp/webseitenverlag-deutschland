@@ -257,10 +257,19 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | Branche | B1 | Freigabe | B2 | B3 | B4 | B5-Optik | Assets | Demo-URL |
 |---|---|---|---|---|---|---|---|---|
 | 1 galabau | ✅ (T1-Seed) | ✅ | ✅ (`galabau-landing-v1`) | ✅ (`rezepte/REZEPTE_GALABAU.md`) | ✅ (test:galabau 130, LH 100/92/100) | ✅ (docs/screenshots/galabau/) | ⛔ Higgsfield-Key (WARTELISTE) | — (T3 offen) |
-| 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | ✅ (`rezepte/REZEPTE_MALER.md`) | — | — | — | — |
+| 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | ✅ (`rezepte/REZEPTE_MALER.md`) | ✅ (test:maler 204, LH 100/92–95/100 auf allen 10 Seiten) | — | — | — |
 | 3–16 | — | — | — | — | — | — | — | — |
 
 Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0 (Stub-Phase)
+
+## Arbeitsblock: Maler B4 — Stresstest + Lighthouse (Template-Fabrik)
+
+- **Neu `scripts/test-maler.ts` (`npm run test:maler`):** 204 Prüfungen nach dem `test-galabau.ts`-Muster — Seed-Verbatim (Voss/Osnabrück/0541 000000), Stufen-Gates (statisch ohne Video/Galerie/Wand-JS · video mit `modus='einmal'` · growth mit wa.me/m-gebiet/Rückruf/Datei-Anhang nur mit submitZiel, m-reviews entfällt ohne echte Reviews), `signature_story:'on'`→scrub nur growth, alle 3 Unterseiten-Typen (Titles, H1 „{Leistung} in {Stadt}", Galerie-Filter-Buttons, unbekannter Pfad/Slug → null, basisPfad-Anker), Copy-Slot-Verstöße (zu_lang/fehlt), 27 Asset-Slots inkl. gal_01–06 + Dateinamen-Mapping, 3 fiese Datensätze (Langname GmbH & Co. KG escaped + JSON-LD, 3-Leistungen-Teilmenge → fehlende Unterseite null, Castrop-Rauxel verbatim), XSS-Escaping.
+- **Bug gefunden + gefixt (`sections.ts`):** `malerWhatsappNummer('+49 541 …')` ergab `4949…` (Vorwahl doppelt) — jetzt Early-Return, wenn Ziffern bereits mit `49` beginnen.
+- **Lighthouse (LHCI, Stub-Assets, `noindex:false` wie Live-Render):** alle 10 Seiten (3 Stufen + ueber-uns + referenzen + 5 `/leistungen/{slug}`) Perf 100 · A11y 92–95 · SEO 100 — Budget 90/95/90 überall erfüllt. Erster Lauf schlug nur wegen Demo-Default `noindex` fehl (`is-crawlable`), kein Template-Fehler.
+- **QUALITY_CHECKLIST/Golden-Set:** Checkliste ist aus `lib/qa-gate/regeln.ts` generiert (keine Hand-Edits, keine Branchen-Zeilen); Golden-Set kennt wie bei galabau keinen Branchen-Eintrag — Präzedenz galabau: Matrix-Zelle dokumentiert Test-Anzahl + LH-Werte.
+- Selbsttest: `tsc --noEmit` ✅ · `test:maler` 204 ✅ · `test:galabau` 130 ✅ · `test:flagship` 463 ✅ — galabau unangetastet.
+- **Offen:** B5 Optik-Screenshots ⛔ Freigabe, `frozen:true` erst nach B5.
 
 ## Arbeitsblock: Maler B2 — Theme + Komposition `maler-landing-v1` (Template-Fabrik)
 

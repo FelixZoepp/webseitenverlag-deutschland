@@ -178,9 +178,14 @@ export function renderMalerKontakt(
 </section>`
 }
 
-/** wa.me-Nummer mechanisch aus meta.telefon (0541 000000 → 49541000000) — nie LLM */
+/**
+ * wa.me-Nummer mechanisch aus meta.telefon — nie LLM.
+ * 0541 000000 → 49541000000 · +49 541 123456 → 49541123456 (keine doppelte Vorwahl).
+ */
 export function malerWhatsappNummer(telefon: string): string {
-  return '49' + telefon.replace(/\D/g, '').replace(/^0/, '')
+  const ziffern = telefon.replace(/\D/g, '')
+  if (ziffern.startsWith('49')) return ziffern
+  return '49' + ziffern.replace(/^0/, '')
 }
 
 /** Fixer WhatsApp-Button (Growth-Modul); entfällt ohne meta.telefon */
