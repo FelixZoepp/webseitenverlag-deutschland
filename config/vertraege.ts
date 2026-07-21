@@ -24,6 +24,17 @@ export const HAUPTPRODUKT_KONDITIONEN = {
   kuendigungsfrist_monate: 3,
 } as const
 
+/**
+ * Dunning-Zeitplan (Phase 5, §6.2): zeitbasiert ab dem ersten Zahlungsausfall.
+ * mahnTage[i] = Tag, ab dem Mahnstufe i+1 fällig ist (Tag 0/3/7),
+ * sperreNachTagen = Tag, ab dem die Site gesperrt wird (suspended).
+ * Werte NUR hier — Webhook, Cron und Tests lesen diese Config.
+ */
+export const DUNNING_ZEITPLAN = {
+  mahnTage: [0, 3, 7],
+  sperreNachTagen: 14,
+} as const
+
 /** Kurzform für Admin-UI und Logs, z. B. "24/12/3" */
 export function konditionenKurz(
   k: {

@@ -7,7 +7,8 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 - [x] **Library seeden** (erledigt 2026-07-15: 40 Sektionen, 8 Kompositionen, 15 Assets)
 - [ ] **Vercel Env-Vars setzen**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `LEAD_NOTIFY_EMAIL` (fehlen noch; `SUPABASE_SERVICE_ROLE_KEY` ist bereits gesetzt)
 - [ ] **Stripe-Webhook-Endpoint anlegen**: Dashboard → Webhooks → `https://<domain>/api/webhooks/stripe`, Events: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted` (alle 5 nötig für Verträge + Dunning, Phase E)
-- [ ] **Resend-Domain verifizieren** (für Zugangs-/Lead-Mails von eigener Domain)
+- [ ] **Resend-Domain verifizieren** (für Zugangs-/Lead-Mails von eigener Domain; ohne `RESEND_API_KEY` laufen Magic-Link-/Mahn-Mails als Log-Stub — Phase 5 DoD ist damit lokal nachweisbar, echte Mails erst nach Verifizierung)
+- [ ] **Phase-5-Testmode-Durchlauf ausführen** (DoD §6): braucht Stripe-**Test**-Keys + `STRIPE_WEBHOOK_SECRET` (siehe oben) + `stripe listen --forward-to localhost:3000/api/webhooks/stripe`. Kette: Checkout (card/sepa) → Webhook (idempotent via `processed_webhook_events`, Migration 032 ist bereits auf Prod) → Magic-Link-Mail (Log-Stub) → Login → Site live. Fehlzahlung simulieren: `invoice.payment_failed` triggern → Mahnstufe 1; Dunning-Cron (`/api/cron/dunning`, täglich 8:00, `CRON_SECRET`) eskaliert Tag 3/7 und sperrt ab Tag 14
 - [x] **Migration 021 ausführen** (erledigt 2026-07-15 via Supabase MCP)
 - [ ] **Slack-Webhooks anlegen** (optional, sonst Log-Stub): `SLACK_WEBHOOK_ERRORS` (#errors, Job-Fails) + `SLACK_WEBHOOK_MONEY` (#money, tägliche Kosten-Summary 6:30 Uhr)
 - [ ] **Sentry entscheiden**: bewusst NICHT eingebunden solange kein DSN existiert — Slack #errors + Vercel-Logs decken den Start ab. Wenn gewünscht: Sentry-Projekt anlegen, DSN liefern, dann bauen wir es ein

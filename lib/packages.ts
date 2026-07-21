@@ -10,6 +10,8 @@ export interface PackageDefinition {
   features: string[]
   /** Kurzbeschreibung für den Stripe-Checkout (max ~200 Zeichen) */
   stripeDescription: string
+  /** Einmalige Einrichtungsgebühr in € netto (0 = kein Setup-Posten im Checkout) */
+  setupFee: number
   seoLevel: 'basic' | 'local' | 'advanced'
   schemaOrg: boolean
   seoArticles: number
@@ -35,6 +37,7 @@ export const PACKAGES: PackageDefinition[] = [
       'DSGVO-Paket (Impressum, Datenschutz, Cookie-Banner)',
     ],
     stripeDescription: 'Professionelle One-Pager-Website mit eigener Domain, Hosting, KI-Editor, Kontaktformular, DSGVO-Paket & mobilem Design.',
+    setupFee: 0,
     seoLevel: 'basic',
     schemaOrg: false,
     seoArticles: 0,
@@ -56,6 +59,7 @@ export const PACKAGES: PackageDefinition[] = [
       'Erweiterte Templates',
     ],
     stripeDescription: 'Alles aus Starter + bis zu 5 Unterseiten, lokales SEO-Setup (Stadt + Branche), strukturierte Daten für Google & erweiterte Design-Templates.',
+    setupFee: 0,
     seoLevel: 'local',
     schemaOrg: true,
     seoArticles: 0,
@@ -76,6 +80,7 @@ export const PACKAGES: PackageDefinition[] = [
       'Monatlicher Performance-Report',
     ],
     stripeDescription: 'Das Komplettpaket: bis zu 10 Unterseiten, 4 SEO-Artikel/Monat, automatische Landing-Pages, Video-Header, Performance-Reports & Priority-Support.',
+    setupFee: 0,
     seoLevel: 'advanced',
     schemaOrg: true,
     seoArticles: 4,

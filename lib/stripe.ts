@@ -30,6 +30,8 @@ export async function createDemoCheckoutSession(params: {
   demoId: string
   prospectName: string
   paket: PackageTier
+  /** Optional: bereits bekannte Site (Demo-Site) für die Webhook-Metadata */
+  siteId?: string
 }): Promise<{ url: string; sessionId: string }> {
   const pkg = getPackage(params.paket)
 
@@ -41,42 +43,61 @@ export async function createDemoCheckoutSession(params: {
   const mitConsent = process.env.STRIPE_TOS_CONSENT === '1'
   const priceId = getStripePriceId(params.paket)
 
+  // Baustein C §C.4: Drei Stripe-Produkte — wenn eine Price-ID gepflegt ist
+  // (config/stripe-produkte.ts), zählt NUR die; sonst price_data-Fallback.
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    priceId
+      ? { quantity: 1, price: priceId }
+      : {
+          quantity: 1,
+          price_data: {
+            currency: 'eur',
+            recurring: { interval: 'month' },
+            unit_amount: pkg.price * 100,
+            product_data: {
+              name: `Website-Paket ${pkg.name} — ${params.prospectName}`,
+              description: pkg.stripeDescription,
+            },
+          },
+        },
+  ]
+
+  // Phase 5 (§6.1): Setup-Fee als einmaliger Posten — Wert aus lib/packages.ts
+  // (Config, 0 = kein Posten). Im Subscription-Mode ist das die erste Rechnung.
+  if (pkg.setupFee > 0) {
+    lineItems.push({
+      quantity: 1,
+      price_data: {
+        currency: 'eur',
+        unit_amount: pkg.setupFee * 100,
+        product_data: { name: `Einrichtung ${pkg.name} (einmalig)` },
+      },
+    })
+  }
+
+  // Phase 5 (§6.1): metadata {lead_id, site_id, plan} — demo_id/paket bleiben
+  // als Bestands-Schlüssel für den Webhook erhalten (additiv, kein Bruch).
+  const metadata = {
+    demo_id: params.demoId,
+    lead_id: params.demoId,
+    site_id: params.siteId || '',
+    paket: params.paket,
+    plan: params.paket,
+  }
+
   const session = await getStripe().checkout.sessions.create({
     mode: 'subscription',
     locale: 'de',
+    // §6.1: Karte + SEPA-Lastschrift für deutsche Handwerks-Kunden
+    payment_method_types: ['card', 'sepa_debit'],
     custom_text: {
       submit: { message: konditionen },
       ...(mitConsent ? { terms_of_service_acceptance: { message: konditionen } } : {}),
     },
     ...(mitConsent ? { consent_collection: { terms_of_service: 'required' as const } } : {}),
-    // Baustein C §C.4: Drei Stripe-Produkte — wenn eine Price-ID gepflegt ist
-    // (config/stripe-produkte.ts), zählt NUR die; sonst price_data-Fallback.
-    line_items: [
-      priceId
-        ? { quantity: 1, price: priceId }
-        : {
-            quantity: 1,
-            price_data: {
-              currency: 'eur',
-              recurring: { interval: 'month' },
-              unit_amount: pkg.price * 100,
-              product_data: {
-                name: `Website-Paket ${pkg.name} — ${params.prospectName}`,
-                description: pkg.stripeDescription,
-              },
-            },
-          },
-    ],
-    metadata: {
-      demo_id: params.demoId,
-      paket: params.paket,
-    },
-    subscription_data: {
-      metadata: {
-        demo_id: params.demoId,
-        paket: params.paket,
-      },
-    },
+    line_items: lineItems,
+    metadata,
+    subscription_data: { metadata },
     success_url: `${APP_URL}/willkommen?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${APP_URL}/`,
   })

@@ -92,8 +92,9 @@ export async function sendConfirmationToSender(
 }
 
 /**
- * Zahlungserinnerung / Mahnung (Dunning, Phase E).
- * Stufe 1 = freundliche Erinnerung, 2 = Mahnung mit Sperr-Ankündigung, 3 = Sperrung.
+ * Zahlungserinnerung / Mahnung (Dunning, Phase 5 — Zeitplan aus config/vertraege.ts).
+ * Stufe 1 = Erinnerung (Tag 0), 2 = Mahnung (Tag 3), 3 = letzte Mahnung (Tag 7),
+ * 4 = Sperr-Mitteilung (Tag 14, Site suspended).
  */
 export async function sendDunningEmail(
   toEmail: string,
@@ -110,11 +111,15 @@ export async function sendDunningEmail(
       text: `trotz Erinnerung ist die Zahlung f\u00fcr deine Website weiterhin offen. Bitte aktualisiere deine Zahlungsmethode zeitnah. Bleibt die Zahlung aus, m\u00fcssen wir deine Website vor\u00fcbergehend offline nehmen.`,
     },
     3: {
+      betreff: 'Letzte Mahnung — deine Website wird in K\u00fcrze deaktiviert',
+      text: `trotz mehrfacher Erinnerung ist die Zahlung f\u00fcr deine Website weiterhin offen. Bitte aktualisiere deine Zahlungsmethode jetzt — andernfalls m\u00fcssen wir deine Website in den n\u00e4chsten Tagen vor\u00fcbergehend offline nehmen.`,
+    },
+    4: {
       betreff: 'Deine Website wurde vor\u00fcbergehend deaktiviert',
-      text: `da die Zahlung mehrfach fehlgeschlagen ist, wurde deine Website vor\u00fcbergehend deaktiviert. Sobald die offene Zahlung beglichen ist, schalten wir sie automatisch wieder frei. Melde dich gerne, wenn wir helfen k\u00f6nnen.`,
+      text: `da die offene Zahlung trotz mehrfacher Mahnung nicht eingegangen ist, wurde deine Website vor\u00fcbergehend deaktiviert. Sobald die offene Zahlung beglichen ist, schalten wir sie automatisch wieder frei. Melde dich gerne, wenn wir helfen k\u00f6nnen.`,
     },
   }
-  const inhalt = stufen[Math.min(3, Math.max(1, mahnstufe))]
+  const inhalt = stufen[Math.min(4, Math.max(1, mahnstufe))]
   try {
     await getResend().emails.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
@@ -149,6 +154,35 @@ export async function sendSeoFreigabeEmail(
     return { success: true }
   } catch (err: unknown) {
     console.error('SEO freigabe mail error:', err instanceof Error ? err.message : err)
+    return { success: false, error: err instanceof Error ? err.message : 'Fehler' }
+  }
+}
+
+/**
+ * Magic-Link-Zugangsmail nach dem Checkout (Phase 5, §6.2).
+ * Ohne RESEND_API_KEY läuft der Log-Stub: Link wird geloggt statt gemailt
+ * (Testmode-DoD „Resend oder Log-Stub"), damit der Durchlauf lokal klappt.
+ */
+export async function sendMagicLinkEmail(
+  toEmail: string,
+  customerName: string,
+  magicLink: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!process.env.RESEND_API_KEY) {
+    console.log(`[MAIL-STUB] Magic-Link f\u00fcr ${toEmail}: ${magicLink}`)
+    return { success: true }
+  }
+  try {
+    await getResend().emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: toEmail,
+      subject: 'Dein Zugang zum Website-Dashboard',
+      html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3f4f6"><div style="max-width:600px;margin:0 auto;padding:24px"><div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)"><div style="background:#1f2937;padding:24px 32px"><h1 style="color:#fff;font-size:18px;margin:0">Webseiten-Verlag Deutschland</h1></div><div style="padding:32px"><h2 style="font-size:20px;color:#111827;margin:0 0 16px">Willkommen, ${customerName}!</h2><p style="color:#374151;line-height:1.6">Dein Website-Dashboard ist bereit. Mit einem Klick bist du eingeloggt — ganz ohne Passwort:</p><div style="margin-top:24px;text-align:center"><a href="${magicLink}" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">Jetzt einloggen</a></div><p style="color:#6b7280;font-size:13px;margin-top:24px">Der Link ist aus Sicherheitsgr\u00fcnden nur begrenzt g\u00fcltig. Danach kannst du dir auf der Login-Seite jederzeit einen neuen zusenden lassen.</p></div></div></div></body></html>`,
+      text: `Willkommen, ${customerName}!\n\nDein Website-Dashboard ist bereit. Logge dich mit diesem Link ein (ohne Passwort):\n${magicLink}\n\nDer Link ist nur begrenzt g\u00fcltig — auf der Login-Seite kannst du jederzeit einen neuen anfordern.`,
+    })
+    return { success: true }
+  } catch (err: unknown) {
+    console.error('Magic-Link mail error:', err instanceof Error ? err.message : err)
     return { success: false, error: err instanceof Error ? err.message : 'Fehler' }
   }
 }

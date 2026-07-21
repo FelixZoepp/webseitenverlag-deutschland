@@ -20,6 +20,7 @@
     "test:qa-gate": "npx tsx scripts/test-qa-gate.ts",
     "test:phase4": "npx tsx scripts/test-phase4.ts",
     "test:baustein-c": "npx tsx scripts/test-baustein-c.ts",
+    "test:phase5": "npx tsx scripts/test-phase5.ts",
     "seed:assets": "npx tsx scripts/seed-assets.ts",
     "seed:branchen": "npx tsx scripts/seed-branchen.ts"
   },

@@ -16,7 +16,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { randomBytes } from 'crypto'
 import Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
-import { sendDunningEmail, sendInvitationEmail } from '@/lib/email'
+import { sendDunningEmail, sendInvitationEmail, sendMagicLinkEmail } from '@/lib/email'
+import { stufeFuerTage, tageUeberfaellig } from '@/lib/dunning'
 import { getPackage, type PackageTier } from '@/lib/packages'
 import {
   createManualTask,
@@ -63,6 +64,36 @@ export async function POST(request: Request) {
 
   const supabase = getServiceClient()
 
+  // Phase 5 (§6.2): Idempotenz über Event-IDs (processed_webhook_events).
+  // Bereits verarbeitete Events (Stripe-Retry, doppelte Zustellung) werden
+  // ohne Seiteneffekt beantwortet. Die fachliche Idempotenz in den Handlern
+  // (z. B. demo.status === 'CONVERTED') bleibt als zweite Schicht bestehen.
+  const { data: bereitsVerarbeitet } = await supabase
+    .from('processed_webhook_events')
+    .select('event_id')
+    .eq('event_id', event.id)
+    .maybeSingle()
+  if (bereitsVerarbeitet) {
+    console.log(`[STRIPE] Event ${event.id} bereits verarbeitet — übersprungen`)
+    return OK()
+  }
+
+  const antwort = await verarbeiteEvent(supabase, event)
+
+  // Nur erfolgreich verarbeitete Events markieren — bei 500 soll der
+  // Stripe-Retry den Handler erneut ausführen können.
+  if (antwort.status === 200) {
+    const { error: markerError } = await supabase
+      .from('processed_webhook_events')
+      .insert({ event_id: event.id, event_type: event.type })
+    if (markerError) {
+      console.error(`[STRIPE] Idempotenz-Marker für ${event.id} fehlgeschlagen: ${markerError.message}`)
+    }
+  }
+  return antwort
+}
+
+async function verarbeiteEvent(supabase: SupabaseClient, event: Stripe.Event) {
   switch (event.type) {
     case 'checkout.session.completed':
       return handleCheckoutCompleted(supabase, event.data.object as Stripe.Checkout.Session)
@@ -276,18 +307,40 @@ async function handleCheckoutCompleted(supabase: SupabaseClient, session: Stripe
     }
   }
 
-  // 6. Zugangsmail senden (Fehler blockiert das Provisioning nicht — Stripe nicht erneut triggern)
+  // 6. Zugangsmail senden (Fehler blockiert das Provisioning nicht — Stripe nicht erneut triggern).
+  //    Phase 5 (§6.2): Magic-Link zuerst (passwortloser Erst-Login, Resend oder
+  //    Log-Stub) — schlägt der Link fehl, greift der Passwort-Fallback.
   const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://webseitenverlag-deutschland.vercel.app'}/login`
-  const mail = await sendInvitationEmail(email, companyName, loginUrl, tempPassword)
-  if (!mail.success) {
-    console.error(`[STRIPE] Zugangsmail an ${email} fehlgeschlagen: ${mail.error}`)
-    await createManualTask(supabase, {
-      typ: 'MAIL_FEHLGESCHLAGEN',
-      titel: `Zugangsmail fehlgeschlagen: ${companyName}`,
-      beschreibung: `Zugangsmail an ${email} kam nicht durch (${mail.error}). Passwort-Reset-Link manuell senden — das temporäre Passwort wird nicht gespeichert.`,
-      customer_id: customerId,
-      quelle: 'stripe-webhook',
+  let zugangOk = false
+  try {
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email,
+      options: { redirectTo: loginUrl },
     })
+    const magicLink = linkData?.properties?.action_link
+    if (!linkError && magicLink) {
+      const magicMail = await sendMagicLinkEmail(email, companyName, magicLink)
+      zugangOk = magicMail.success
+    } else if (linkError) {
+      console.error(`[STRIPE] Magic-Link für ${email} fehlgeschlagen: ${linkError.message}`)
+    }
+  } catch (err: unknown) {
+    console.error(`[STRIPE] Magic-Link für ${email} fehlgeschlagen:`, err instanceof Error ? err.message : err)
+  }
+
+  if (!zugangOk) {
+    const mail = await sendInvitationEmail(email, companyName, loginUrl, tempPassword)
+    if (!mail.success) {
+      console.error(`[STRIPE] Zugangsmail an ${email} fehlgeschlagen: ${mail.error}`)
+      await createManualTask(supabase, {
+        typ: 'MAIL_FEHLGESCHLAGEN',
+        titel: `Zugangsmail fehlgeschlagen: ${companyName}`,
+        beschreibung: `Weder Magic-Link noch Passwort-Mail an ${email} kam durch (${mail.error}). Passwort-Reset-Link manuell senden — das temporäre Passwort wird nicht gespeichert.`,
+        customer_id: customerId,
+        quelle: 'stripe-webhook',
+      })
+    }
   }
 
   console.log(`[STRIPE] Demo ${demoId} → Kunde ${customerId} provisioniert (${paket})`)
@@ -626,6 +679,7 @@ interface ContractRow {
   site_id: string | null
   status: string
   mahnstufe: number
+  zahlung_ueberfaellig_seit: string | null
   ende: string
   laufzeit_monate: number
   verlaengerung_monate: number
@@ -645,7 +699,7 @@ async function findContract(
   stripeCustomerId: string | null
 ): Promise<ContractRow | null> {
   const spalten =
-    'id, customer_id, site_id, status, mahnstufe, ende, laufzeit_monate, verlaengerung_monate, kuendigungsfrist_monate, gekuendigt_am'
+    'id, customer_id, site_id, status, mahnstufe, zahlung_ueberfaellig_seit, ende, laufzeit_monate, verlaengerung_monate, kuendigungsfrist_monate, gekuendigt_am'
   if (stripeSubscriptionId) {
     const { data } = await supabase
       .from('contracts')
@@ -727,23 +781,35 @@ async function handlePaymentFailed(supabase: SupabaseClient, invoice: Stripe.Inv
     return OK()
   }
 
-  const neueStufe = Math.min(3, (contract.mahnstufe ?? 0) + 1)
+  // Phase 5 (§6.2): zeitbasierte Mahnstufen (Tag 0/3/7 aus config/vertraege.ts).
+  // Der Webhook setzt den Überfälligkeits-Beginn und mailt die aktuell fällige
+  // Stufe; die Eskalation über die Zeit — inkl. Sperre nach 14 Tagen — treibt
+  // der tägliche Dunning-Cron, auch wenn Stripe keine weiteren Events sendet.
+  const heute = heuteIso()
+  const seit = contract.zahlung_ueberfaellig_seit ?? heute
+  const zielStufe = stufeFuerTage(tageUeberfaellig(seit, heute))
+
+  if (zielStufe <= (contract.mahnstufe ?? 0)) {
+    console.log(`[STRIPE] payment_failed → Vertrag ${contract.id} bleibt auf Mahnstufe ${contract.mahnstufe}`)
+    return OK()
+  }
+
   await supabase
     .from('contracts')
     .update({
-      mahnstufe: neueStufe,
-      zahlung_ueberfaellig_seit: contract.mahnstufe === 0 ? heuteIso() : undefined,
+      mahnstufe: zielStufe,
+      zahlung_ueberfaellig_seit: seit,
       updated_at: new Date().toISOString(),
     })
     .eq('id', contract.id)
 
   const kontakt = await kundenKontakt(supabase, contract.customer_id)
   if (kontakt.email) {
-    const mail = await sendDunningEmail(kontakt.email, kontakt.name, neueStufe)
+    const mail = await sendDunningEmail(kontakt.email, kontakt.name, zielStufe)
     if (!mail.success) {
       await createManualTask(supabase, {
         typ: 'MAIL_FEHLGESCHLAGEN',
-        titel: `Mahnmail (Stufe ${neueStufe}) fehlgeschlagen: ${kontakt.name}`,
+        titel: `Mahnmail (Stufe ${zielStufe}) fehlgeschlagen: ${kontakt.name}`,
         beschreibung: `Mahnmail an ${kontakt.email} kam nicht durch: ${mail.error}`,
         customer_id: contract.customer_id,
         contract_id: contract.id,
@@ -752,19 +818,7 @@ async function handlePaymentFailed(supabase: SupabaseClient, invoice: Stripe.Inv
     }
   }
 
-  if (neueStufe >= 3) {
-    await setzeSiteSperre(supabase, contract, true)
-    await createManualTask(supabase, {
-      typ: 'DUNNING_ESKALIERT',
-      titel: `Zahlung ausgefallen (Stufe 3) — Site gesperrt: ${kontakt.name}`,
-      beschreibung: `Dritte fehlgeschlagene Abbuchung. Site wurde automatisch gesperrt. Kunden kontaktieren / weiteres Vorgehen entscheiden.`,
-      customer_id: contract.customer_id,
-      contract_id: contract.id,
-      quelle: 'stripe-webhook',
-    })
-  }
-
-  console.log(`[STRIPE] payment_failed → Vertrag ${contract.id} Mahnstufe ${neueStufe}`)
+  console.log(`[STRIPE] payment_failed → Vertrag ${contract.id} Mahnstufe ${zielStufe} (überfällig seit ${seit})`)
   return OK()
 }
 
