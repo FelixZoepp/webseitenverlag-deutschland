@@ -116,5 +116,84 @@
       "email": null,
       "notizen": "Weder Website noch Google-Eintrag. Neueröffnung vor 6 Monaten."
     }
+  ],
+  "_hinweis_profile": "Flagship-Golden-Set (MVP-Finish §7.1). 8 Firmen-Profile im BusinessProfil-Format für die Ein-Klick-Demo-Engine — deckt die Edge-Cases langer Name, 3 Leistungen, 10 Leistungen, Umlaute/ß im Namen, Stadt mit Bindestrich, keine Bewertungen und zwei Branchen ab. Der CI-Check (npm run ci:golden-set) generiert alle 8 offline (deterministische Copy-Slots statt Claude), rendert die Flagship-Seite und prüft Konsistenz-Validator, Floskel-Blacklist und Stadt-Check.",
+  "profile": [
+    {
+      "edge": "langer_name",
+      "firma": "Gebäudereinigung Hoffmann-Siebert & Söhne Meisterbetrieb GmbH & Co. KG",
+      "brancheKey": "reinigung",
+      "stadt": "Dortmund",
+      "telefon": "0231 5551234",
+      "leistungen": ["Unterhaltsreinigung", "Glasreinigung", "Bauendreinigung", "Treppenhausreinigung"]
+    },
+    {
+      "edge": "drei_leistungen",
+      "firma": "Blitzblank Service",
+      "brancheKey": "reinigung",
+      "stadt": "Potsdam",
+      "telefon": "0331 2223344",
+      "leistungen": ["Unterhaltsreinigung", "Glasreinigung", "Grundreinigung"]
+    },
+    {
+      "edge": "zehn_leistungen",
+      "firma": "Saubermann Gebäudeservice",
+      "brancheKey": "reinigung",
+      "stadt": "Augsburg",
+      "telefon": "0821 9876543",
+      "leistungen": [
+        "Unterhaltsreinigung",
+        "Glasreinigung",
+        "Bauendreinigung",
+        "Grundreinigung",
+        "Teppichreinigung",
+        "Fassadenreinigung",
+        "Treppenhausreinigung",
+        "Büroreinigung",
+        "Praxisreinigung",
+        "Umzugsreinigung"
+      ]
+    },
+    {
+      "edge": "umlaute_name",
+      "firma": "Osteria Größenwahn",
+      "brancheKey": "restaurant_italienisch",
+      "stadt": "Würzburg",
+      "telefon": "0931 4455667",
+      "leistungen": ["Pasta fatta in casa", "Pizza aus dem Steinofen", "Weinbegleitung"]
+    },
+    {
+      "edge": "bindestrich_stadt",
+      "firma": "Reinigung Kessler",
+      "brancheKey": "reinigung",
+      "stadt": "Castrop-Rauxel",
+      "telefon": "02305 112233",
+      "leistungen": ["Unterhaltsreinigung", "Glasreinigung", "Bauendreinigung", "Grundreinigung"]
+    },
+    {
+      "edge": "keine_bewertungen",
+      "firma": "Ristorante Da Enzo",
+      "brancheKey": "restaurant_italienisch",
+      "stadt": "Bremerhaven",
+      "telefon": "0471 8899001",
+      "leistungen": ["Antipasti und Vorspeisen", "Hausgemachte Pasta", "Dolci und Dessert"],
+      "notizen": "Keine Google-Bewertungen vorhanden — die Stimmen-Sektion muss komplett entfallen."
+    },
+    {
+      "edge": "zweite_branche",
+      "firma": "Pizzeria La Nonna",
+      "brancheKey": "restaurant_italienisch",
+      "stadt": "Rostock",
+      "telefon": "0381 3334455",
+      "leistungen": ["Pizza aus dem Steinofen", "Pasta fatta in casa", "Mittagstisch", "Catering für Feiern"]
+    },
+    {
+      "edge": "umlaut_bindestrich_stadt",
+      "firma": "Glanzvoll Gebäudereinigung",
+      "brancheKey": "reinigung",
+      "stadt": "Übach-Palenberg",
+      "telefon": "02451 667788",
+      "leistungen": ["Unterhaltsreinigung", "Glasreinigung", "Treppenhausreinigung"]
+    }
   ]
 }

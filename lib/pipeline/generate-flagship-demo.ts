@@ -190,6 +190,27 @@ export interface FlagshipDemoErgebnis {
   videoJob?: VideoJobInfo
 }
 
+/**
+ * Ersetzungs-Paare für den Vorlagen-Ort inkl. Schreibvarianten: Seeds wie
+ * "Berlin-Friedrichshagen" nennen den Ort in Texten auch als
+ * "Berlin Friedrichshagen" (Leerzeichen) und schlicht "Berlin" — ohne diese
+ * Varianten bleibt die fremde Stadt im Text stehen (Konsistenz-Validator §4.3).
+ * Reihenfolge: längste Variante zuerst, damit split/join sauber greift.
+ */
+export function ortErsetzungsPaare(vorlagenOrt: string, neuerOrt: string): [string, string][] {
+  if (!vorlagenOrt || !neuerOrt || vorlagenOrt === neuerOrt) return []
+  const paare: [string, string][] = [[vorlagenOrt, neuerOrt]]
+  const mitLeerzeichen = vorlagenOrt.replace(/-/g, ' ')
+  if (mitLeerzeichen !== vorlagenOrt && mitLeerzeichen !== neuerOrt) {
+    paare.push([mitLeerzeichen, neuerOrt])
+  }
+  const basisOrt = vorlagenOrt.split(/[\s-]/)[0]
+  if (basisOrt && basisOrt !== vorlagenOrt && basisOrt !== neuerOrt) {
+    paare.push([basisOrt, neuerOrt])
+  }
+  return paare
+}
+
 /** Rekursiver String-Walk: ersetzt Vorlagen-Werte (Firma/Ort/Telefon) in allen Texten */
 function ersetzeUeberall<T>(wert: T, paare: [string, string][]): T {
   if (typeof wert === 'string') {
@@ -296,7 +317,7 @@ export async function personalisiereFlagshipConfig(
     paare.push([config.meta.firma, prospect.firma])
   }
   if (prospect.ort && config.meta.ort && config.meta.ort !== prospect.ort) {
-    paare.push([config.meta.ort, prospect.ort])
+    paare.push(...ortErsetzungsPaare(config.meta.ort, prospect.ort))
   }
   if (prospect.telefon && config.meta.telefon && config.meta.telefon !== prospect.telefon) {
     paare.push([config.meta.telefon, prospect.telefon])
@@ -383,7 +404,7 @@ export async function generiereFlagshipDemo(
     paare.push([config.meta.firma, prospect.firma])
   }
   if (prospect.ort && config.meta.ort && config.meta.ort !== prospect.ort) {
-    paare.push([config.meta.ort, prospect.ort])
+    paare.push(...ortErsetzungsPaare(config.meta.ort, prospect.ort))
   }
   if (prospect.telefon && config.meta.telefon && config.meta.telefon !== prospect.telefon) {
     paare.push([config.meta.telefon, prospect.telefon])
