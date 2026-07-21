@@ -5,7 +5,7 @@
  * Freigabe Felix 2026-07-21). Sie sind zugleich die Referenzlänge für die
  * Zeichenlimits (copy-slots.ts: Limit = Länge + 15 %).
  * meta.firma/ort/telefon VERBATIM — nie LLM-formuliert.
- * frozen wird ERST nach der B5-Optik-Freigabe gesetzt.
+ * frozen:true seit der B5-Optik-Freigabe (Felix 2026-07-22, „gib alle frei").
  */
 
 import type { MalerConfig } from './types'
@@ -14,6 +14,7 @@ export const malerLandingSeed: MalerConfig = {
   engine: 'flagship',
   komposition: 'maler-landing-v1',
   branche_key: 'maler',
+  frozen: true,
   meta: {
     firma: 'Voss Maler & Lackierer Meisterbetrieb',
     ort: 'Osnabrück',
