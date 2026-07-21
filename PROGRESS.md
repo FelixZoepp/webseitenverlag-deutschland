@@ -269,6 +269,15 @@ Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0
 - **Funktions-Check Dashboard (auf Felix' Frage):** Kein externes „Builder UI Kit" — Editor ist Eigenbau (`components/site-editor.tsx`, Chat/Manuell/Verlauf + Live-iframe). Status: Editor ✅, Vorschau ✅, Bilder+KI ✅, SEO-Blog-Workflow ✅, Domain verbinden ⚠️ (Vercel-Token fehlt, WARTELISTE), Domain-Neuregistrierung ⚠️ (Registrar-Mock, WARTELISTE).
 - Selbsttest: `tsc --noEmit` ✅ · `next build` ✅ · `lint` ✅ (nur vorbestehende Warnings in fremden Dateien).
 
+## Arbeitsblock: LANDING-UMBAU A — Hero-Split (Marketing-Landing)
+
+- **`components/landing/WvdClient.tsx` Hero umgebaut:** zentriertes Layout (`.hero-centered` + Video unten) → Links/Rechts-Split. Links: Badge-Pill „Professionelles Webdesign · Alles inklusive" → H1 mit festen Umbrüchen („Webseiten, die / Kunden bringen." + Akzent „Für unter 100 € / im Monat.", je max 2 Zeilen) → Sub (~34 Wörter, unverändert) → CTA-Zeile Primär „Kostenloses Erstgespräch buchen →" + Sekundär „Beispiele ansehen" (`#ergebnisse`) → 4 Trust-Pills (2×2 bei Platzmangel). Rechts: Video-Karte (`data-slot="hero_video_poster"`, Play-Button mit Akzent-Glow-Ring).
+- **`app/(marketing)/marketing.css`:** `.hero-split` 12-Spalten-Grid ≥1024px (`align-items:center`, links Sp. 1–6, Video Sp. 7–12 über `grid-row: 1 / span 5`); Video-Karte weißes Liquid-Glass (Radius 26, Doppel-Schatten, 16:9, Float ±4px/6s nur `transform`); Karo-Maske auf `at 30% 20%`; alte Klassen `.hero-centered`/`.video-hero-container` entfernt (nirgends mehr referenziert). Mobil <1024: Flex-Column mit `order` → Badge→H1→Sub→CTA→Video→Trust, linksbündig, 16px Padding. `prefers-reduced-motion`: Float, Grid-Pulse, Text-Reveal und Fade-Ins aus, alles sofort sichtbar.
+- **Abnahme A:** Screenshots `docs/screenshots/landing/hero-split-1440.png` + `hero-split-390.png` ✅ · H1-Unterkante 453px vs. Video-Mitte 468px (Delta 14px, eine Achse) ✅ · CLS 0.000 (PerformanceObserver, 1440) ✅ · nichts zentriert schwebend ✅.
+- Video-Quelle noch nicht vorhanden — Karte zeigt Poster-Fläche (Slot `hero_video_poster`); Inline-Play wird verdrahtet, sobald das Video-Asset da ist (WARTELISTE).
+- Bekanntes vorbestehendes Thema (nicht Teil dieses Umbaus): Nav-CTA läuft auf sehr schmalen Viewports (<400px) rechts an — separater Fix möglich.
+- Selbsttest: `tsc --noEmit` ✅ · `next build` ✅ · `lint` ✅ (nur vorbestehende Warnings).
+
 ## Notizen für nächste Session
 - **MVP-Finish Phasen 0–6 abgeschlossen (inkl. Bausteine A/B/C).** Rest = Mensch/Key-Punkte auf WARTELISTE.md (§8-Gesamtabnahme braucht Stripe-Test-Keys, Vercel-Envs, Asset-/Branchen-Freigaben, Git-Remote für CI)
 - **Alle Phasen 0–H abgeschlossen.** Offen ist nur noch, was ein Mensch liefern muss → WARTELISTE.md (Migrationen 013–021 ausführen, Library seeden, Stripe-Test-/Webhook-Keys, Git-Remote + erster Push für CI, E2E-Freischaltung, echte Golden-Set-Firmen, Preis-Bestätigungen)

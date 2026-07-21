@@ -192,22 +192,36 @@ export default function WvdClient() {
           ═══════════════════════════════════════ */}
       <section className="hero">
         <div className="animated-grid" id="heroGrid" />
-        <div className="container hero-centered">
+        <div className="container hero-split">
+          <span className="eyebrow hero-badge">Professionelles Webdesign · Alles inklusive</span>
           <h1 className="display large text-reveal" id="heroHeadline">
-            Webseiten, die Kunden bringen.
-            <span className="accent">Für unter 100€ im Monat.</span>
-            <span className="sub-line">Professionelles Webdesign · Keine Startgebühr · Alles inklusive</span>
+            Webseiten, die<br />Kunden bringen.
+            <span className="accent">Für unter 100 €<br />im Monat.</span>
           </h1>
           <p className="hero-lead">
             Professionelle Webseite erstellen lassen – ohne tausende Euro vorab.
-            <strong> Ab 99€/Monat, komplett fertig in wenigen Tagen.</strong>{" "}
+            <strong> Ab 99 €/Monat, komplett fertig in wenigen Tagen.</strong>{" "}
             Design, Hosting, SEO und Support inklusive. Damit du online gefunden wirst und neue Kunden gewinnst.
           </p>
           <div className="cta-row">
             <a href="/entwurf" className="btn btn-primary">
               <span>Kostenloses Erstgespräch buchen →</span>
             </a>
+            <a href="#ergebnisse" className="btn btn-ghost">
+              <span>Beispiele ansehen</span>
+            </a>
           </div>
+
+          {/* Video-Karte (rechts ab 1024px, mobil zwischen CTA und Trust-Pills) */}
+          <div className="hero-video-wrap">
+            <div className="hero-video-card" data-slot="hero_video_poster">
+              <div className="hero-video-poster" aria-hidden="true" />
+              <button className="video-play-btn" aria-label="Video abspielen">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+              </button>
+            </div>
+          </div>
+
           <div className="trust">
             <div className="trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></svg>
@@ -219,19 +233,12 @@ export default function WvdClient() {
             </div>
             <div className="trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" /></svg>
-              0€ Startgebühr
+              0 € Startgebühr
             </div>
             <div className="trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
               Monatlich kündbar
             </div>
-          </div>
-
-          {/* Video Container */}
-          <div className="video-hero-container">
-            <button className="video-play-btn" aria-label="Video abspielen">
-              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-            </button>
           </div>
         </div>
       </section>

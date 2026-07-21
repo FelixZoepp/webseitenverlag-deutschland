@@ -372,50 +372,82 @@ nav {
 }
 
 /* ========================================
-   VIDEO HERO
+   HERO SPLIT (Links Text / Rechts Video-Karte)
    ======================================== */
-.hero-centered {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
+.hero .animated-grid {
+  mask-image: radial-gradient(ellipse 70% 80% at 30% 20%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 30% 20%, black 30%, transparent 80%);
+}
+.hero-split {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 48px;
+  align-items: center;
   position: relative;
   z-index: 1;
+  text-align: left;
 }
-.hero-centered h1 {
-  font-size: clamp(44px, 5vw, 64px);
-  margin-bottom: 28px;
-  line-height: 1.1;
+.hero-split > .hero-badge,
+.hero-split > h1,
+.hero-split > .hero-lead,
+.hero-split > .cta-row,
+.hero-split > .trust {
+  grid-column: 1 / span 6;
 }
-.hero-centered .hero-lead {
-  max-width: 620px;
-  margin: 0 auto 36px;
+.hero-video-wrap {
+  grid-column: 7 / -1;
+  grid-row: 1 / span 5;
+  align-self: center;
+  opacity: 0;
+  animation: fadeInUp var(--dur-med) var(--ease-out) 0.3s forwards;
 }
-.hero-centered .cta-row {
-  justify-content: center;
+.hero-badge {
+  justify-self: start;
+  margin-bottom: 20px;
 }
-.hero-centered .trust {
-  justify-content: center;
+.hero-split h1 {
+  font-size: clamp(40px, 4.2vw, 56px);
+  margin-bottom: 24px;
+  line-height: 1.08;
 }
+.hero-split h1 .accent { margin-top: 10px; }
+.hero-split .hero-lead { margin-bottom: 32px; }
+.hero-split .cta-row { margin-bottom: 40px; }
+.hero-split .trust { max-width: 560px; }
 
-.video-hero-container {
-  max-width: 720px;
-  margin: 48px auto 0;
+/* Video-Karte: weißes Liquid-Glass, Radius 26, Doppel-Schatten, Float ±4px/6s */
+.hero-video-card {
   aspect-ratio: 16 / 9;
-  border-radius: var(--radius-xl);
+  width: 100%;
+  border-radius: 26px;
   overflow: hidden;
   position: relative;
   background: var(--surface-card);
-  box-shadow: var(--shadow-lg);
+  box-shadow:
+    0 2px 6px rgba(23, 24, 26, 0.06),
+    0 24px 64px rgba(23, 24, 26, 0.14);
   cursor: pointer;
+  animation: heroFloat 6s ease-in-out infinite;
   transition: box-shadow var(--dur-med) var(--ease-out);
-  opacity: 0;
-  animation: fadeInUp var(--dur-med) var(--ease-out) 0.8s forwards;
 }
-.video-hero-container:hover {
-  box-shadow: 0 4px 8px rgba(23,24,26,0.06), 0 24px 64px rgba(224, 53, 75, 0.18);
+.hero-video-card:hover {
+  box-shadow:
+    0 2px 6px rgba(23, 24, 26, 0.06),
+    0 24px 64px rgba(224, 53, 75, 0.18);
 }
-.video-hero-container img,
-.video-hero-container video {
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(4px); }
+  50%      { transform: translateY(-4px); }
+}
+.hero-video-poster {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 70% at 30% 20%, var(--red-050) 0%, transparent 70%),
+    linear-gradient(160deg, #FFFFFF 0%, #FDF3F4 100%);
+}
+.hero-video-card img,
+.hero-video-card video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -443,6 +475,34 @@ nav {
   width: 28px; height: 28px;
   fill: white;
   margin-left: 3px;
+}
+.hero-video-card .video-play-btn {
+  box-shadow: 0 0 0 10px rgba(224, 53, 75, 0.12), var(--shadow-accent);
+}
+
+/* Hero-Split mobil (<1024px): Badge → H1 → Sub → CTA → Video → Trust, linksbündig */
+@media (max-width: 1023px) {
+  .hero .container { padding: 0 16px; }
+  .hero-split {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-split .hero-badge   { order: 1; align-self: flex-start; }
+  .hero-split h1            { order: 2; }
+  .hero-split .hero-lead    { order: 3; }
+  .hero-split .cta-row      { order: 4; margin-bottom: 8px; }
+  .hero-video-wrap          { order: 5; margin: 24px 0 32px; align-self: stretch; }
+  .hero-split .trust        { order: 6; max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-video-card { animation: none; }
+  .animated-grid .grid-cell { animation: none; }
+  .text-reveal .word { animation: none; opacity: 1; transform: none; }
+  .hero-lead, .cta-row, .trust, .hero-video-wrap {
+    animation: none; opacity: 1; transform: none;
+  }
 }
 
 /* ========================================
