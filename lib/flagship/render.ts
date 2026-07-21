@@ -93,7 +93,13 @@ function multipageNavLinks(basisPfad: string): NavInhalt['links'] {
 }
 
 export function renderFlagshipPage(config: FlagshipConfig, opts: FlagshipRenderOptionen = {}): string {
-  const { design, inhalte, meta } = config
+  const { design, meta } = config
+  // Produktstufen-Ansicht (Baustein C §C.3): Business-Level = kein Video-Hero.
+  // undefined = alles rendern (Live-Seiten), 'growth' = Video-Look.
+  const inhalte =
+    opts.level === 'business' && config.inhalte.hero.video
+      ? { ...config.inhalte, hero: { ...config.inhalte.hero, video: undefined } }
+      : config.inhalte
   const hell = design.typo_modus === 'sans_bold_hell'
   const basisPfad = opts.basisPfad || ''
   const funnelUrl = funnelPfad(config, basisPfad)

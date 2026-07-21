@@ -184,11 +184,11 @@ Ich kann den gewünschten Inhalt als neue Sektion auf eine bestehende Seite einb
 ❌ Niemals Preise erfinden oder verhandeln
 ❌ Niemals technische Fehler ignorieren oder beschönigen
 
-${isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage, bildListe) : buildSinglePageEditorSection(bildListe)}
+${isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage, bildListe, ctx.paket) : buildSinglePageEditorSection(bildListe, ctx.paket)}
 `
 }
 
-function buildSinglePageEditorSection(bildListe?: string): string {
+function buildSinglePageEditorSection(bildListe?: string, tier?: PackageTier): string {
   return `# EDITOR-FELDER (Single-Page)
 
 Text-Pfade (update_text):
@@ -207,10 +207,10 @@ Bild-Pfade (swap_image_from_bank):
 Sektionen (add_section_from_library / reorder / toggle):
 - sections — Array mit {id, type, title, visible, order}
 
-${getOpsPrompt(bildListe)}`
+${getOpsPrompt(bildListe, tier)}`
 }
 
-function buildMultiPageEditorSection(currentPage: string, bildListe?: string): string {
+function buildMultiPageEditorSection(currentPage: string, bildListe?: string, tier?: PackageTier): string {
   return `# EDITOR-FUNKTIONEN (Multi-Page)
 
 Aktuell aktive Seite: "${currentPage}"
@@ -236,7 +236,7 @@ Für Page-Configs je nach Template:
 - services: pages.services.config.title / .intro / .items.<index>.title / .description
 - contact: pages.contact.config.title / .address / .email / .hours (Telefon gesperrt → Fakten-Check)
 
-${getOpsPrompt(bildListe)}`
+${getOpsPrompt(bildListe, tier)}`
 }
 
 // ============================================================

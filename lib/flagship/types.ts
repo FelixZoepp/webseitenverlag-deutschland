@@ -310,6 +310,12 @@ export interface FlagshipRenderOptionen {
   submitZiel?: string | null
   /** noindex erzwingen (Demos immer) */
   noindex?: boolean
+  /**
+   * Produktstufen-Ansicht (Baustein C §C.3): Demos rendern standardmäßig auf
+   * Business-Level (kein Video). 'growth' zeigt den Video-Look (?level=growth).
+   * undefined = alles rendern (Live-Seiten, Abwärtskompatibilität).
+   */
+  level?: 'business' | 'growth'
 }
 
 export type IconKey =

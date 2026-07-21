@@ -49,6 +49,8 @@ export async function GET(
   if (!token || token.length > 100) return notFoundPage('Dieser Demo-Link ist ungültig.')
   const url = new URL(request.url)
   const editMode = url.searchParams.has('edit')
+  // Baustein C §C.3: Demos rendern Business-Level; ?level=growth zeigt den Video-Look.
+  const level: 'business' | 'growth' = url.searchParams.get('level') === 'growth' ? 'growth' : 'business'
 
   const { data: demo } = await supabase
     .from('demos')
@@ -118,6 +120,7 @@ export async function GET(
         html = injectEditor(renderFlagshipPage(demo.config as unknown as FlagshipConfig, {
           demo: true,
           basisPfad: `/demo/${token}`,
+          level,
         }))
       }
     } catch (err) {

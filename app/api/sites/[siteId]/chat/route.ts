@@ -133,7 +133,8 @@ export async function POST(
         const bildMap = new Map<string, AufgeloestesBild>(
           editorAssets.map((a) => [a.id, { url: a.url, szeneTyp: a.szene_typ, quelle: a.quelle }])
         )
-        const ergebnis = applyPatch(currentConfig, opsParsed.data, bildMap)
+        // Baustein C §C.2: Plan-Gate serverseitig — nie nur UI.
+        const ergebnis = applyPatch(currentConfig, opsParsed.data, bildMap, customerContext.paket)
         if (!ergebnis.ok) {
           antwort = `${response}\n\n(Die Änderung wurde NICHT übernommen: ${ergebnis.fehler.join(' ')})`
         } else {

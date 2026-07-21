@@ -13,6 +13,12 @@
  */
 import { z } from 'zod'
 import { SiteConfig } from '@/types'
+import {
+  getPlan,
+  hatEditorFeature,
+  kleinsterPlanMitEditorFeature,
+  type EditorFeature,
+} from '@/config/plans'
 
 // ------------------------------------------------------------
 // Theme-Presets — die EINZIGE Quelle für Farbänderungen
@@ -110,6 +116,43 @@ const EINGESCHRAENKTE_PFADE: { muster: RegExp; maxLaenge: number; feld: string }
 const GESCHUETZTE_SEKTIONS_TYPEN = ['hero', 'kontakt', 'contact', 'cta-haupt']
 
 // ------------------------------------------------------------
+// Produktstufen-Gate (Baustein C §C.4) — NUR serverseitig, nie nur UI
+// ------------------------------------------------------------
+
+/** Welches Editor-Recht eine Op benötigt. toggle zählt als Struktur-Recht (reorder). */
+const OP_ZU_FEATURE: Record<PatchOp['op'], EditorFeature> = {
+  update_text: 'update_text',
+  swap_image_from_bank: 'swap_image_from_bank',
+  set_theme_preset: 'set_theme_preset',
+  add_section_from_library: 'add_section_from_library',
+  reorder: 'reorder',
+  toggle: 'reorder',
+}
+
+/** Kurzer Nutzen-Satz je Feature für die Upsell-Antwort (Editor als Verkäufer). */
+const FEATURE_NUTZEN: Partial<Record<EditorFeature, string>> = {
+  add_section_from_library: 'Neue Sektionen (z. B. FAQ, Galerie, Bewertungen) machen Ihre Seite ausführlicher und bringen mehr Anfragen',
+  reorder: 'Der flexible Seitenaufbau (umsortieren, ein-/ausblenden) lässt Sie die Seite an Ihre Schwerpunkte anpassen',
+  video_header: 'Ein Video-Header wirkt hochwertiger und hält Besucher länger auf der Seite',
+  scroll_story: 'Die Scroll-Story präsentiert Ihre Arbeit filmisch beim Scrollen',
+}
+
+/**
+ * pruefePlanRecht: serverseitiges Gate — liefert null (erlaubt) oder eine
+ * Upsell-Antwort (Nutzen + Preis + Upgrade-Hinweis), wenn die Op nicht im
+ * Plan des Kunden enthalten ist. Die Antwort ist bewusst verkäuferisch
+ * formuliert (Baustein C: „Editor als Verkäufer").
+ */
+export function pruefePlanRecht(tier: string, op: PatchOp['op']): string | null {
+  const feature = OP_ZU_FEATURE[op]
+  if (hatEditorFeature(tier, feature)) return null
+  const zielPlan = kleinsterPlanMitEditorFeature(feature)
+  const nutzen = FEATURE_NUTZEN[feature] || 'Diese Funktion erweitert Ihre Website'
+  if (!zielPlan) return `Diese Funktion ist in Ihrem Paket nicht enthalten.`
+  return `${nutzen}. Diese Funktion ist ab dem ${zielPlan.name}-Paket (${zielPlan.preis_hinweis}/Monat, Laufzeit wie Ihr bestehender Vertrag) enthalten — ein Upgrade schalten Sie mit einem Klick unter „Erweiterungen" frei, Ihre hinterlegte Zahlungsart wird anteilig verrechnet.`
+}
+
+// ------------------------------------------------------------
 // Bild-Bank (Phase 4, §5.1): swap_image_from_bank
 // ------------------------------------------------------------
 
@@ -169,16 +212,30 @@ interface SektionsEintrag {
  * `bilder`: von der Route VOR dem Aufruf aufgelöste Bank-Assets
  * (nur approved + Branche bzw. quelle='kunde' + eigene Site). Ein
  * swap_image_from_bank-Op mit einer ID, die hier fehlt, wird abgewiesen.
+ *
+ * `tier`: Produktstufe des Kunden (Baustein C). Ops, die der Plan nicht
+ * enthält, werden serverseitig mit einer Upsell-Antwort abgewiesen —
+ * das Gate hängt NIE nur an der UI.
  */
 export function applyPatch(
   config: SiteConfig,
   ops: PatchOp[],
-  bilder?: Map<string, AufgeloestesBild>
+  bilder?: Map<string, AufgeloestesBild>,
+  tier?: string
 ): Ergebnis {
   const fehler: string[] = []
   const neu = JSON.parse(JSON.stringify(config)) as SiteConfig
+  const plan = tier ? getPlan(tier) : null
 
   for (const op of ops) {
+    // Produktstufen-Gate (Baustein C): VOR jeder Anwendung serverseitig prüfen
+    if (tier) {
+      const gesperrtGrund = pruefePlanRecht(tier, op.op)
+      if (gesperrtGrund) {
+        fehler.push(gesperrtGrund)
+        continue
+      }
+    }
     if (op.op === 'update_text') {
       const gesperrt = GESPERRTE_PFADE.find((g) => g.muster.test(op.pfad))
       if (gesperrt) {
@@ -224,6 +281,14 @@ export function applyPatch(
       }
       setPfad(neu as unknown as Record<string, unknown>, segmente, asset.url)
     } else if (op.op === 'set_theme_preset') {
+      // Starter „Frozen Composition": nur die kuratierten Presets des Plans
+      if (plan?.erlaubteThemePresets && !plan.erlaubteThemePresets.includes(op.preset)) {
+        const erlaubt = plan.erlaubteThemePresets
+          .map((p) => `„${THEME_PRESETS[p]?.name || p}"`)
+          .join(', ')
+        fehler.push(`Im ${plan.name}-Paket stehen diese Design-Vorlagen zur Auswahl: ${erlaubt}. Die volle Vorlagen-Auswahl gibt es ab dem Business-Paket.`)
+        continue
+      }
       const preset = THEME_PRESETS[op.preset]
       if (neu.site && neu.site.colors) {
         neu.site.colors.primary = preset.primary
@@ -267,6 +332,21 @@ export function applyPatch(
         fehler.push('Der Hero-Bereich bleibt immer an erster Stelle.')
         continue
       }
+      // Kern-Sektionen bleiben fix (Baustein C §C.2): Hero/CTA/Kontakt behalten
+      // ihre Position — nur die übrigen Sektionen sind frei sortierbar.
+      // Greift nur mit gesetztem Plan (Produktstufen-Kontext); ohne Tier gilt
+      // weiterhin nur die Basis-Regel „Hero zuerst" (Abwärtskompatibilität).
+      if (plan) {
+        const sortiert = [...sections].sort((a, b) => (a.order || 0) - (b.order || 0))
+        const kernVerschoben = sortiert.some((s, altIndex) => {
+          if (!GESCHUETZTE_SEKTIONS_TYPEN.includes(s.type)) return false
+          return op.sectionIds.indexOf(s.id) !== altIndex
+        })
+        if (kernVerschoben) {
+          fehler.push('Hero, Haupt-Button und Kontakt sind Kern-Sektionen und behalten ihre Position — die übrigen Sektionen können Sie frei umsortieren.')
+          continue
+        }
+      }
       op.sectionIds.forEach((id, index) => {
         const s = sections.find((x) => x.id === id)
         if (s) s.order = index
@@ -309,9 +389,35 @@ export function formatiereBildListe(
     .join('\n')
 }
 
+/**
+ * Prompt-Baustein „Editor als Verkäufer" (Baustein C §C.2): beschreibt dem
+ * Modell die im Plan gesperrten Ops und wie es auf Wünsche danach reagiert.
+ */
+function getPlanGatePrompt(tier?: string): string {
+  if (!tier) return ''
+  const plan = getPlan(tier)
+  const alleOps = Object.keys(OP_ZU_FEATURE) as PatchOp['op'][]
+  const gesperrteOps = alleOps.filter((op) => !hatEditorFeature(tier, OP_ZU_FEATURE[op]))
+  if (gesperrteOps.length === 0 && !plan.erlaubteThemePresets) return ''
+  const zeilen: string[] = [`# PAKET-RECHTE (${plan.name}-Paket — serverseitig durchgesetzt)`]
+  if (gesperrteOps.length > 0) {
+    zeilen.push(
+      `Folgende Operationen sind im Paket des Kunden NICHT enthalten — NIE als Op senden: ${gesperrteOps.join(', ')}.`,
+      `Wünscht der Kunde so eine Funktion: KEIN patch_ops-Block. Antworte stattdessen als Verkäufer in 1–2 Sätzen: konkreter NUTZEN für seine Branche + Paket-Name + Preis (aus PAKET-PREISE unten) + Hinweis, dass das Upgrade unter „Erweiterungen" mit einem Klick freigeschaltet wird (hinterlegte Zahlungsart, anteilige Verrechnung, Laufzeit wie bestehender Vertrag). Bei Ablehnung: Thema ruhen lassen.`,
+      `PAKET-PREISE: Business ${getPlan('business').preis_hinweis}/Monat · Growth ${getPlan('growth').preis_hinweis}/Monat.`
+    )
+  }
+  if (plan.erlaubteThemePresets) {
+    zeilen.push(
+      `set_theme_preset: In diesem Paket sind NUR diese Presets erlaubt: ${plan.erlaubteThemePresets.join(', ')}. Andere Presets nie vorschlagen — die volle Auswahl gibt es ab Business.`
+    )
+  }
+  return zeilen.join('\n') + '\n\n'
+}
+
 /** Prompt-Baustein: beschreibt dem Modell das EINZIG erlaubte Patch-Format. */
-export function getOpsPrompt(bildListe?: string): string {
-  return `# ÄNDERUNGS-FORMAT (STRIKT)
+export function getOpsPrompt(bildListe?: string, tier?: string): string {
+  return `${getPlanGatePrompt(tier)}# ÄNDERUNGS-FORMAT (STRIKT)
 Du änderst die Website AUSSCHLIESSLICH über strukturierte Operationen — NIE über rohes HTML, CSS oder freie JSON-Objekte.
 
 Wenn der Kunde eine Änderung wünscht, antworte mit einer kurzen Bestätigung und häng GENAU EINEN Block an:

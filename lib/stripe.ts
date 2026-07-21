@@ -6,6 +6,7 @@
 import Stripe from 'stripe'
 import { getPackage, PackageTier } from './packages'
 import { vertragsKonditionenText } from '@/config/vertraege'
+import { getStripePriceId } from '@/config/stripe-produkte'
 
 let stripeClient: Stripe | null = null
 
@@ -38,6 +39,7 @@ export async function createDemoCheckoutSession(params: {
   // aktiv, wenn STRIPE_TOS_CONSENT=1 gesetzt ist (WARTELISTE).
   const konditionen = vertragsKonditionenText()
   const mitConsent = process.env.STRIPE_TOS_CONSENT === '1'
+  const priceId = getStripePriceId(params.paket)
 
   const session = await getStripe().checkout.sessions.create({
     mode: 'subscription',
@@ -47,19 +49,23 @@ export async function createDemoCheckoutSession(params: {
       ...(mitConsent ? { terms_of_service_acceptance: { message: konditionen } } : {}),
     },
     ...(mitConsent ? { consent_collection: { terms_of_service: 'required' as const } } : {}),
+    // Baustein C §C.4: Drei Stripe-Produkte — wenn eine Price-ID gepflegt ist
+    // (config/stripe-produkte.ts), zählt NUR die; sonst price_data-Fallback.
     line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency: 'eur',
-          recurring: { interval: 'month' },
-          unit_amount: pkg.price * 100,
-          product_data: {
-            name: `Website-Paket ${pkg.name} — ${params.prospectName}`,
-            description: pkg.stripeDescription,
+      priceId
+        ? { quantity: 1, price: priceId }
+        : {
+            quantity: 1,
+            price_data: {
+              currency: 'eur',
+              recurring: { interval: 'month' },
+              unit_amount: pkg.price * 100,
+              product_data: {
+                name: `Website-Paket ${pkg.name} — ${params.prospectName}`,
+                description: pkg.stripeDescription,
+              },
+            },
           },
-        },
-      },
     ],
     metadata: {
       demo_id: params.demoId,

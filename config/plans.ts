@@ -19,29 +19,73 @@ export type PlanFeature =
   | 'seo_prioritaet'     // SEO-Priorität (Artikel, Reports)
   | 'eigene_domain'      // eigene Domain — alle Pläne
 
+/**
+ * Editor-Rechte je Produktstufe (Baustein C §C.4).
+ *
+ * WICHTIG (Grundsatz §C): Die Stufen unterscheiden sich in Template-Level und
+ * Editor-Rechten — NIE in der Personalisierung der Texte. Copy-Slots werden in
+ * JEDER Stufe pro Kunde personalisiert, auch im Starter. Identische Texte über
+ * viele Kundenseiten wären Duplicate Content und damit SEO-Schaden für ALLE
+ * Kunden. „Fix" bei 99 € heißt: Struktur fix, nicht Texte fix.
+ */
+export type EditorFeature =
+  | 'update_text'              // Texte ändern (alle Stufen — Personalisierung!)
+  | 'swap_image_from_bank'     // Bildtausch aus freigegebener Bank (alle Stufen)
+  | 'set_theme_preset'         // Farb-Preset wechseln (Starter: nur Auswahl)
+  | 'add_section_from_library' // Sektions-Galerie (ab Business)
+  | 'reorder'                  // Sektionen umsortieren (ab Business, Kern fix)
+  | 'signature_section'        // branchenspezifische Signature-Section (ab Business)
+  | 'video_header'             // Video-Hero (nur Growth)
+  | 'scroll_story'             // Scroll-Story / Scrub-Video (nur Growth)
+
 export interface PlanDefinition {
   tier: PackageTier
   name: string
+  /** Preis-Hinweis für Upsell-Antworten — der echte Preis lebt NUR in Stripe. */
+  preis_hinweis: string
   maxUnterseiten: number // zusätzliche Seiten neben der Startseite
   features: PlanFeature[]
+  /** Serverseitig durchgesetzte Editor-Rechte (Baustein C — nie nur UI!). */
+  editorFeatures: EditorFeature[]
+  /**
+   * Erlaubte Theme-Presets (set_theme_preset). Starter: nur 3 kuratierte
+   * Presets („Frozen Composition"). null = alle Presets erlaubt.
+   */
+  erlaubteThemePresets: string[] | null
 }
+
+const STARTER_EDITOR: EditorFeature[] = ['update_text', 'swap_image_from_bank', 'set_theme_preset']
+const BUSINESS_EDITOR: EditorFeature[] = [
+  ...STARTER_EDITOR,
+  'add_section_from_library',
+  'reorder',
+  'signature_section',
+]
+const GROWTH_EDITOR: EditorFeature[] = [...BUSINESS_EDITOR, 'video_header', 'scroll_story']
 
 export const PLANS: Record<PackageTier, PlanDefinition> = {
   starter: {
     tier: 'starter',
     name: 'Starter',
+    preis_hinweis: '99 € netto',
     maxUnterseiten: 0, // Onepager
     features: ['eigene_domain'],
+    editorFeatures: STARTER_EDITOR,
+    erlaubteThemePresets: ['klar-blau', 'modern-anthrazit', 'warm-terracotta'],
   },
   business: {
     tier: 'business',
     name: 'Business',
+    preis_hinweis: '149 € netto',
     maxUnterseiten: 5,
     features: ['eigene_domain', 'unterseiten', 'bewertungs_widget', 'seo_basis'],
+    editorFeatures: BUSINESS_EDITOR,
+    erlaubteThemePresets: null,
   },
   growth: {
     tier: 'growth',
     name: 'Premium',
+    preis_hinweis: '249 € netto',
     maxUnterseiten: 10,
     features: [
       'eigene_domain',
@@ -52,6 +96,8 @@ export const PLANS: Record<PackageTier, PlanDefinition> = {
       'terminbuchung',
       'seo_prioritaet',
     ],
+    editorFeatures: GROWTH_EDITOR,
+    erlaubteThemePresets: null,
   },
 }
 
@@ -69,6 +115,19 @@ export function hasFeature(tier: string | null | undefined, feature: PlanFeature
 export function kleinsterPlanMitFeature(feature: PlanFeature): PlanDefinition | null {
   for (const tier of TIER_REIHENFOLGE) {
     if (PLANS[tier].features.includes(feature)) return PLANS[tier]
+  }
+  return null
+}
+
+/** Serverseitiges Editor-Gate (Baustein C): darf dieser Plan die Editor-Op nutzen? */
+export function hatEditorFeature(tier: string | null | undefined, feature: EditorFeature): boolean {
+  return getPlan(tier).editorFeatures.includes(feature)
+}
+
+/** Kleinster Plan mit dem Editor-Feature — für die Upsell-Antwort des Editors. */
+export function kleinsterPlanMitEditorFeature(feature: EditorFeature): PlanDefinition | null {
+  for (const tier of TIER_REIHENFOLGE) {
+    if (PLANS[tier].editorFeatures.includes(feature)) return PLANS[tier]
   }
   return null
 }

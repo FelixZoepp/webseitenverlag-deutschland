@@ -25,7 +25,7 @@ export interface QaRegel {
   /** String der in implementiertIn wörtlich vorkommen muss (Default: die Regel-ID) */
   marker?: string
   testRef: string
-  kategorie: 'Inhalt & Copy' | 'Bilder' | 'Technik' | 'SEO & Recht' | 'Video/Growth'
+  kategorie: 'Inhalt & Copy' | 'Bilder' | 'Technik' | 'SEO & Recht' | 'Video/Growth' | 'Produktstufen'
 }
 
 const T_QA = 'scripts/test-qa-gate.ts'
@@ -353,6 +353,58 @@ export const QA_REGELN: QaRegel[] = [
     marker: 'C-VIDEO-FALLBACK',
     testRef: T_QA,
     kategorie: 'Video/Growth',
+  },
+
+  // ------------------------------------------------------------ Produktstufen (Baustein C)
+  {
+    id: 'C-PLAN-GATE',
+    beschreibung: 'Editor-Ops werden SERVERSEITIG gegen die Plan-Matrix geprüft — gesperrte Features liefern die Upsell-Antwort statt Änderung.',
+    layer: 'config',
+    autofix: 'Kein Autofix — Gate weist die Op ab, Antwort enthält Nutzen + Paket + Preis.',
+    implementiertIn: 'lib/editor-ops.ts',
+    marker: 'pruefePlanRecht',
+    testRef: 'scripts/test-baustein-c.ts',
+    kategorie: 'Produktstufen',
+  },
+  {
+    id: 'C-STARTER-PRESETS',
+    beschreibung: 'Starter darf nur die 2–3 kuratierten Theme-Presets wählen (Frozen Composition).',
+    layer: 'config',
+    autofix: 'Kein Autofix — Abweisung mit Liste der erlaubten Presets.',
+    implementiertIn: 'config/plans.ts',
+    marker: 'erlaubteThemePresets',
+    testRef: 'scripts/test-baustein-c.ts',
+    kategorie: 'Produktstufen',
+  },
+  {
+    id: 'C-COPY-PERSONAL',
+    beschreibung: 'Copy-Slots werden in JEDER Stufe pro Kunde personalisiert — identische Texte wären Duplicate Content (SEO-Schaden für alle).',
+    layer: 'config',
+    autofix: 'Kein Autofix — Personalisierung ist Teil der Generierungs-Pipeline (Firmenname/Stadt im Copy-Prompt).',
+    implementiertIn: 'config/plans.ts',
+    marker: 'Duplicate Content',
+    testRef: 'scripts/test-baustein-c.ts',
+    kategorie: 'Produktstufen',
+  },
+  {
+    id: 'C-STARTER-FROZEN',
+    beschreibung: 'Starter nutzt pro Branche EINE fixe Komposition (library_pages.frozen) — Struktur/Reihenfolge/Preset unveränderlich.',
+    layer: 'config',
+    autofix: 'Kein Autofix — Struktur-Ops sind für Starter serverseitig gesperrt (C-PLAN-GATE).',
+    implementiertIn: 'supabase/migrations/031_frozen_composition.sql',
+    marker: 'frozen boolean',
+    testRef: 'scripts/test-baustein-c.ts',
+    kategorie: 'Produktstufen',
+  },
+  {
+    id: 'C-VIDEO-APPROVED',
+    beschreibung: 'Nur freigegebene Videos (quality_status=approved) sind einer Site zuweisbar; Zuweisung nur im Growth-Paket, immer mit Poster-Fallback.',
+    layer: 'config',
+    autofix: 'Kein Autofix — Zuweisung wird mit 409/403 abgewiesen.',
+    implementiertIn: 'app/api/admin/sites/[siteId]/video/route.ts',
+    marker: 'C-VIDEO-APPROVED',
+    testRef: 'scripts/test-baustein-c.ts',
+    kategorie: 'Produktstufen',
   },
 ]
 

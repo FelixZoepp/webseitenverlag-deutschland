@@ -7,7 +7,7 @@
 > Implementierung (Marker) und ihren Test (Regel-ID) geprüft.
 > Regel ohne Implementierung = Build-Fehler.
 
-Stand: 33 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (Playwright)
+Stand: 38 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (Playwright)
 
 ## Inhalt & Copy
 
@@ -66,6 +66,16 @@ Stand: 33 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (P
 | `B-VIDEO-ATTR` | Video hat muted, loop/scrub, playsinline und poster (kein Autoplay-Block, kein CLS). | Browser | Fallback auf statisches Hero-Bild + Video-Task in Admin-Queue. | `lib/qa-gate/browser-checks.ts` | `scripts/test-qa-gate.ts` |
 | `B-VIDEO-LAZY` | Poster ist LCP-Kandidat, Video lädt lazy (preload=metadata/none). | Browser | Fallback auf statisches Hero-Bild + Video-Task in Admin-Queue. | `lib/qa-gate/browser-checks.ts` | `scripts/test-qa-gate.ts` |
 | `C-VIDEO-FALLBACK` | Jedes Video hat ein statisches Fallback-Bild (poster/Hero-Bild) im Config. | Config | Poster aus Hero-Bild setzen; ohne Bild → Video entfernen. | `lib/qa-gate/render-checks.ts` | `scripts/test-qa-gate.ts` |
+
+## Produktstufen
+
+| ID | Regel | Layer | Autofix | Implementiert in | Test |
+|----|-------|-------|---------|------------------|------|
+| `C-PLAN-GATE` | Editor-Ops werden SERVERSEITIG gegen die Plan-Matrix geprüft — gesperrte Features liefern die Upsell-Antwort statt Änderung. | Config | Kein Autofix — Gate weist die Op ab, Antwort enthält Nutzen + Paket + Preis. | `lib/editor-ops.ts` | `scripts/test-baustein-c.ts` |
+| `C-STARTER-PRESETS` | Starter darf nur die 2–3 kuratierten Theme-Presets wählen (Frozen Composition). | Config | Kein Autofix — Abweisung mit Liste der erlaubten Presets. | `config/plans.ts` | `scripts/test-baustein-c.ts` |
+| `C-COPY-PERSONAL` | Copy-Slots werden in JEDER Stufe pro Kunde personalisiert — identische Texte wären Duplicate Content (SEO-Schaden für alle). | Config | Kein Autofix — Personalisierung ist Teil der Generierungs-Pipeline (Firmenname/Stadt im Copy-Prompt). | `config/plans.ts` | `scripts/test-baustein-c.ts` |
+| `C-STARTER-FROZEN` | Starter nutzt pro Branche EINE fixe Komposition (library_pages.frozen) — Struktur/Reihenfolge/Preset unveränderlich. | Config | Kein Autofix — Struktur-Ops sind für Starter serverseitig gesperrt (C-PLAN-GATE). | `supabase/migrations/031_frozen_composition.sql` | `scripts/test-baustein-c.ts` |
+| `C-VIDEO-APPROVED` | Nur freigegebene Videos (quality_status=approved) sind einer Site zuweisbar; Zuweisung nur im Growth-Paket, immer mit Poster-Fallback. | Config | Kein Autofix — Zuweisung wird mit 409/403 abgewiesen. | `app/api/admin/sites/[siteId]/video/route.ts` | `scripts/test-baustein-c.ts` |
 
 ## Ablauf (Baustein A)
 
