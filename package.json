@@ -24,6 +24,7 @@
     "test:phase6": "npx tsx scripts/test-phase6.ts",
     "test:galabau": "npx tsx scripts/test-galabau.ts",
     "test:maler": "npx tsx scripts/test-maler.ts",
+    "test:scrub": "npx tsx scripts/test-scrub.ts",
     "seed:assets": "npx tsx scripts/seed-assets.ts",
     "seed:branchen": "npx tsx scripts/seed-branchen.ts"
   },
