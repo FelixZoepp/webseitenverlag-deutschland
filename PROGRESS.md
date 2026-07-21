@@ -252,6 +252,16 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
   - **Screenshot-Harness-Hinweis:** fullPage-Captures zeigen Chromium-Stitching-Artefakte beim fixed Header (kein DOM-Bug, nur 1 `[data-kopf]`); Harness braucht `.rv{transition:none!important}` + langsamen Scroll, sonst Opacity-Transitions unfertig im Bild
   - **Offen (T2/T3):** `scripts/import-assets.ts` + erste GrünWerk-Demo; Higgsfield-Assets ⇒ WARTELISTE
 
+## Template-Fabrik — Fortschritts-Matrix (einzige Wahrheit, siehe TEMPLATE_FABRIK_MASTER.md)
+
+| Branche | B1 | Freigabe | B2 | B3 | B4 | B5-Optik | Assets | Demo-URL |
+|---|---|---|---|---|---|---|---|---|
+| 1 galabau | ✅ (T1-Seed) | ✅ | ✅ (`galabau-landing-v1`) | ✅ (`rezepte/REZEPTE_GALABAU.md`) | ✅ (test:galabau 130, LH 100/92/100) | ✅ (docs/screenshots/galabau/) | ⛔ Higgsfield-Key (WARTELISTE) | — (T3 offen) |
+| 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ⛔ **[ ] Mensch-Freigabe Steckbrief** | — | — | — | — | — | — |
+| 3–16 | — | — | — | — | — | — | — | — |
+
+Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0
+
 ## Notizen für nächste Session
 - **MVP-Finish Phasen 0–6 abgeschlossen (inkl. Bausteine A/B/C).** Rest = Mensch/Key-Punkte auf WARTELISTE.md (§8-Gesamtabnahme braucht Stripe-Test-Keys, Vercel-Envs, Asset-/Branchen-Freigaben, Git-Remote für CI)
 - **Alle Phasen 0–H abgeschlossen.** Offen ist nur noch, was ein Mensch liefern muss → WARTELISTE.md (Migrationen 013–021 ausführen, Library seeden, Stripe-Test-/Webhook-Keys, Git-Remote + erster Push für CI, E2E-Freischaltung, echte Golden-Set-Firmen, Preis-Bestätigungen)

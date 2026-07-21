@@ -33,6 +33,11 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
 - [ ] **Echter Bild-Key für die Asset-Bank** (`HIGGSFIELD_API_KEY` oder `FAL_API_KEY`): `npm run seed:assets -- --branche maler --count 30` erzeugt ohne Key nur STUB-Assets (`quelle='ai_mock'`) — die sind per Server-Regel **nie approvebar** (Freigabe wird mit 400 abgelehnt). Erst mit echtem Key entsteht freigebbares Material
 - [ ] **≥30 Assets inkl. 3 Paare für die erste Ziel-Branche freigeben** (`/admin/assets`): Seeding legt alles als `draft` an — Mensch-Gate. Grid filtert nach Branche/Szene/Status, Paare werden IMMER gemeinsam freigegeben/abgelehnt (Server erzwingt das), Alt-Texte in der Großansicht korrigierbar, „Regenerieren" nutzt den gespeicherten Prompt mit neuem Seed. DoD Phase 2 hängt an dieser Freigabe
 
+## Template-Fabrik (TEMPLATE_FABRIK_MASTER.md)
+- [ ] **Higgsfield-Assets galabau generieren** (Rezeptliste: `rezepte/REZEPTE_GALABAU.md`): Kette Hero → Video → BA-Paar beachten; Fertig-Kriterium ≥25 approved inkl. 1 Paar, 1 Hero, 1 Video
+- [ ] **HIGGSFIELD_REZEPTE_MALER.md liefern**: Die Datei ist laut Auftrag vorhanden, war aber weder im Repo noch auf der Platte auffindbar (Spotlight + find über Home/Desktop/Downloads/Documents). Bitte Datei bereitstellen (z. B. nach `rezepte/REZEPTE_MALER.md`) — bis dahin leite ich die Maler-Rezeptliste in B3 aus der GaLaBau-Vorlage ab und gleiche sie später gegen deine Fassung ab
+- [ ] **Maler B1-Steckbrief freigeben** (`branchen/maler/STECKBRIEF.md`): Checkbox in der Fortschritts-Matrix (PROGRESS.md) — ohne Haken startet B2 nicht
+
 ## Ein-Klick-Demo (MVP-Finish §4, Phase 3)
 - [ ] **5-Testfirmen-Lauf (DoD §4):** braucht (a) `ANTHROPIC_API_KEY` lokal/in Vercel für die Copy-Slots-Generierung (ohne Key greift der deterministische Fallback aus Formulardaten — funktioniert, aber ist nicht der DoD-Pfad) und (b) approvede Assets der Ziel-Branche in `/admin/assets` (sonst harter Fail „kein approved hero"). Danach: 5 Leads über `/admin/leads/neu` anlegen mit „Direkt generieren", Ergebnis + Kosten (≤ 1,50 €/Demo) in der Liste prüfen, je Demo das Mensch-Gate „Demo geprüft" setzen
 - [ ] **Lighthouse ≥90 auf generierten Demos**: erst nach dem 5-Testfirmen-Lauf messbar (generierte Demos sind self-contained Flagship-HTML — Offline-Werte der Engine liegen bei 0.92–0.99)
