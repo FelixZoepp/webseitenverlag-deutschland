@@ -15,6 +15,8 @@ import { istGalabauKomposition, type GalabauConfig } from './galabau/types'
 import { renderGalabauLanding } from './galabau/render'
 import { istMalerKomposition, type MalerConfig } from './maler/types'
 import { renderMalerLanding } from './maler/render'
+import { istScrubKomposition, type ScrubConfig } from './scrub/types'
+import { renderScrubStory } from './scrub/render'
 import { esc, escAttr, ICON_PATHS } from './html'
 import { flagshipCss } from './css'
 import { flagshipJs } from './js'
@@ -96,8 +98,9 @@ function multipageNavLinks(basisPfad: string): NavInhalt['links'] {
   return UNTERSEITEN.map((u) => ({ label: u.label, anker: `${basisPfad}/${u.slug}` }))
 }
 
-export function renderFlagshipPage(config: FlagshipConfig | GalabauConfig | MalerConfig, opts: FlagshipRenderOptionen = {}): string {
+export function renderFlagshipPage(config: FlagshipConfig | GalabauConfig | MalerConfig | ScrubConfig, opts: FlagshipRenderOptionen = {}): string {
   // Kompositions-Dispatch: feste Kompositions-Renderer statt Sektions-Baukasten
+  if (istScrubKomposition(config)) return renderScrubStory(config, opts)
   if (istMalerKomposition(config)) return renderMalerLanding(config, opts)
   if (istGalabauKomposition(config)) return renderGalabauLanding(config, opts)
   const { design, meta } = config
