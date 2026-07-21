@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 // PATCH: Slot-Zuordnung manuell ändern
@@ -50,6 +51,18 @@ export async function DELETE(
 
     if (bild?.storage_path) {
       await supabase.storage.from('kundenbilder').remove([bild.storage_path])
+
+      // Phase 4 (§5.2): zugehörigen Asset-Bank-Eintrag (quelle='kunde') mit
+      // entfernen — asset_bank ist RLS-admin-only → Admin-Client.
+      try {
+        await createAdminClient()
+          .from('asset_bank')
+          .delete()
+          .eq('quelle', 'kunde')
+          .eq('storage_path', bild.storage_path)
+      } catch (err) {
+        console.error('asset_bank-Löschung (kunde) fehlgeschlagen:', err)
+      }
     }
 
     await supabase.from('kunden_bilder').delete().eq('id', params.bildId)

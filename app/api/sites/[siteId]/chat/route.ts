@@ -1,7 +1,9 @@
 import { getOwnedSite } from '@/lib/api-helpers'
 import { chatWithClaude, type CustomerContext } from '@/lib/claude'
 import { getPackage, type PackageTier } from '@/lib/packages'
-import { PatchSchema, applyPatch } from '@/lib/editor-ops'
+import { PatchSchema, applyPatch, formatiereBildListe, type AufgeloestesBild } from '@/lib/editor-ops'
+import { getEditorAssets, type EditorAsset } from '@/lib/assets/repository'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NERV_SCHUTZ_TAGE } from '@/config/upsells'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -96,11 +98,24 @@ export async function POST(
     // Kunden-Kontext laden für Chatbot-Regeln
     const customerContext = await buildCustomerContext(supabase, customer, site)
 
+    // Tauschbare Bilder (§5.1): NUR approved Branchen-Bank + eigene
+    // Kunden-Uploads dieser Site. asset_bank ist RLS-admin-only → Admin-Client.
+    let editorAssets: EditorAsset[] = []
+    try {
+      editorAssets = await getEditorAssets(createAdminClient(), {
+        branche: customerContext.branche.toLowerCase(),
+        siteId: params.siteId,
+      })
+    } catch (err) {
+      console.error('Editor-Assets konnten nicht geladen werden:', err)
+    }
+
     const { response, patchOps, upsellSuggestion } = await chatWithClaude(
       chatMessages,
       currentConfig,
       isMultiPage ? currentPage || 'home' : undefined,
-      customerContext
+      customerContext,
+      formatiereBildListe(editorAssets)
     )
 
     // Bei Upsell-Vorschlag: NIE gleichzeitig Änderungen anwenden
@@ -113,8 +128,12 @@ export async function POST(
       if (!opsParsed.success) {
         antwort = `${response}\n\n(Hinweis: Die vorgeschlagene Änderung hatte ein ungültiges Format und wurde NICHT übernommen. Bitte formulieren Sie den Wunsch noch einmal.)`
       } else {
-        // 2. Leitplanken + Anwendung auf Kopie — ein Fehler weist alles ab
-        const ergebnis = applyPatch(currentConfig, opsParsed.data)
+        // 2. Leitplanken + Anwendung auf Kopie — ein Fehler weist alles ab.
+        // Bild-Ops nur gegen die vorab geladene, erlaubte Asset-Menge.
+        const bildMap = new Map<string, AufgeloestesBild>(
+          editorAssets.map((a) => [a.id, { url: a.url, szeneTyp: a.szene_typ, quelle: a.quelle }])
+        )
+        const ergebnis = applyPatch(currentConfig, opsParsed.data, bildMap)
         if (!ergebnis.ok) {
           antwort = `${response}\n\n(Die Änderung wurde NICHT übernommen: ${ergebnis.fehler.join(' ')})`
         } else {

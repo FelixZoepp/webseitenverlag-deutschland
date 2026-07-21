@@ -18,6 +18,7 @@
     "test:assets": "npx tsx scripts/test-assets.ts",
     "test:phase3": "npx tsx scripts/test-phase3.ts",
     "test:qa-gate": "npx tsx scripts/test-qa-gate.ts",
+    "test:phase4": "npx tsx scripts/test-phase4.ts",
     "seed:assets": "npx tsx scripts/seed-assets.ts",
     "seed:branchen": "npx tsx scripts/seed-branchen.ts"
   },

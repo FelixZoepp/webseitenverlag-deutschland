@@ -75,7 +75,8 @@ function buildBranchenTipps(branche: string): string {
 function buildEditorPrompt(
   ctx: CustomerContext,
   currentPage: string | undefined,
-  isMultiPage: boolean
+  isMultiPage: boolean,
+  bildListe?: string
 ): string {
   const pkg = getPackage(ctx.paket)
   const branchenTipp = buildBranchenTipps(ctx.branche)
@@ -183,11 +184,11 @@ Ich kann den gewünschten Inhalt als neue Sektion auf eine bestehende Seite einb
 ❌ Niemals Preise erfinden oder verhandeln
 ❌ Niemals technische Fehler ignorieren oder beschönigen
 
-${isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage) : buildSinglePageEditorSection()}
+${isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage, bildListe) : buildSinglePageEditorSection(bildListe)}
 `
 }
 
-function buildSinglePageEditorSection(): string {
+function buildSinglePageEditorSection(bildListe?: string): string {
   return `# EDITOR-FELDER (Single-Page)
 
 Text-Pfade (update_text):
@@ -200,16 +201,16 @@ Text-Pfade (update_text):
 - region — Regionsbezeichnung
 - services.<index>.title / .description, faqItems.<index>.question / .answer, stats.<index>.value / .label, reviews.<index>.text
 
-Bild-Pfade (swap_image_from_pool_or_upload):
+Bild-Pfade (swap_image_from_bank):
 - heroImageUrl, ctaImageUrl, ownerImageUrl, galleryImages.<index>
 
 Sektionen (add_section_from_library / reorder / toggle):
 - sections — Array mit {id, type, title, visible, order}
 
-${getOpsPrompt()}`
+${getOpsPrompt(bildListe)}`
 }
 
-function buildMultiPageEditorSection(currentPage: string): string {
+function buildMultiPageEditorSection(currentPage: string, bildListe?: string): string {
   return `# EDITOR-FUNKTIONEN (Multi-Page)
 
 Aktuell aktive Seite: "${currentPage}"
@@ -221,7 +222,7 @@ KONTEXT-REGELN:
 - Neue Sektionen: auf der aktuellen Seite, außer User sagt explizit anders
 - KEINE NEUEN PAGES ERSTELLEN. Bei "erstelle eine neue Seite" antworte: "Neue Seiten können Sie im Page-Manager links anlegen."
 
-KONFIG-STRUKTUR (Pfade für update_text / swap_image_from_pool_or_upload):
+KONFIG-STRUKTUR (Pfade für update_text / swap_image_from_bank):
 - site.name — Firmenname
 - site.branding.logoText — Logo-Text
 - site.footer.text — Footer-Text
@@ -235,7 +236,7 @@ Für Page-Configs je nach Template:
 - services: pages.services.config.title / .intro / .items.<index>.title / .description
 - contact: pages.contact.config.title / .address / .email / .hours (Telefon gesperrt → Fakten-Check)
 
-${getOpsPrompt()}`
+${getOpsPrompt(bildListe)}`
 }
 
 // ============================================================
@@ -246,7 +247,9 @@ export async function chatWithClaude(
   messages: { role: 'user' | 'assistant'; content: string }[],
   currentConfig: SiteConfig,
   currentPage?: string,
-  customerContext?: CustomerContext
+  customerContext?: CustomerContext,
+  /** Formatierte Liste tauschbarer Bank-Bilder (lib/editor-ops.formatiereBildListe). */
+  bildListe?: string
 ): Promise<{
   response: string
   /** Rohe, UNVALIDIERTE Ops aus dem <patch_ops>-Block — Validierung passiert serverseitig (lib/editor-ops). */
@@ -257,8 +260,8 @@ export async function chatWithClaude(
 
   // Fallback: wenn kein Kunden-Kontext, nutze einfachen Prompt
   const systemPrompt = customerContext
-    ? buildEditorPrompt(customerContext, currentPage, isMultiPage)
-    : (isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage) : buildSinglePageEditorSection())
+    ? buildEditorPrompt(customerContext, currentPage, isMultiPage, bildListe)
+    : (isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage, bildListe) : buildSinglePageEditorSection(bildListe))
 
   const configContext = `\n\nAktuelle Website-Konfiguration:\n${JSON.stringify(currentConfig, null, 2)}`
 

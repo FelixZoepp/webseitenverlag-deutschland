@@ -32,6 +32,8 @@ const SPALTEN =
 /**
  * Approved-Assets einer Branche laden. quality_status='approved' ist
  * NICHT parametrisierbar — das ist der Zweck dieser Funktion.
+ * quelle='kunde' ist hier IMMER ausgeschlossen: Kunden-Uploads gehören
+ * genau einer Site und dürfen nie in fremden Demos/Sites landen (Phase 4).
  */
 export async function getApprovedAssets(
   admin: SupabaseClient,
@@ -41,6 +43,7 @@ export async function getApprovedAssets(
     .from('asset_bank')
     .select(SPALTEN)
     .eq('quality_status', 'approved') // §3.2: fest verdrahtet, nie Aufrufer-Sache
+    .neq('quelle', 'kunde') // Phase 4: Kunden-Assets sind site-gebunden
     .contains('branchen', [filter.branche])
     .eq('medium', filter.medium ?? 'image')
     .order('created_at', { ascending: false })
@@ -49,6 +52,58 @@ export async function getApprovedAssets(
   const { data, error } = await q
   if (error) throw new Error(`asset_bank-Abfrage fehlgeschlagen: ${error.message}`)
   return (data ?? []) as ApprovedAsset[]
+}
+
+// ------------------------------------------------------------
+// Phase 4 (§5.1): Editor-Sicht — Branchen-Bank + eigene Kunden-Bilder
+// ------------------------------------------------------------
+
+/** Asset, wie der Chat-Editor es sieht (immer mit fertiger URL). */
+export interface EditorAsset {
+  id: string
+  url: string
+  szene_typ: string | null
+  quelle: string
+  alt_text_de: string | null
+}
+
+/**
+ * Alle Bilder, die der Chat-Editor einer Site anbieten darf:
+ *  - approved Branchen-Assets (ohne quelle='kunde')
+ *  - PLUS die eigenen Kunden-Uploads dieser Site (quelle='kunde', site_id)
+ * Andere Quellen existieren für den Editor nicht (swap_image_from_bank).
+ */
+export async function getEditorAssets(
+  admin: SupabaseClient,
+  filter: { branche: string; siteId: string }
+): Promise<EditorAsset[]> {
+  const [bank, kunde] = await Promise.all([
+    getApprovedAssets(admin, { branche: filter.branche }),
+    admin
+      .from('asset_bank')
+      .select(SPALTEN)
+      .eq('quality_status', 'approved')
+      .eq('quelle', 'kunde')
+      .eq('site_id', filter.siteId)
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) throw new Error(`asset_bank-Abfrage (kunde) fehlgeschlagen: ${error.message}`)
+        return (data ?? []) as ApprovedAsset[]
+      }),
+  ])
+
+  return [...kunde, ...bank].map((a) => ({
+    id: a.id,
+    // Kunden-Uploads liegen im Bucket 'kundenbilder' (eine Datei, geteilt mit
+    // kunden_bilder), Bank-Assets im Bucket 'asset-bank'.
+    url:
+      a.quelle === 'kunde'
+        ? admin.storage.from('kundenbilder').getPublicUrl(a.storage_path).data.publicUrl
+        : publicAssetUrl(admin, a.storage_path),
+    szene_typ: a.szene_typ ?? null,
+    quelle: a.quelle,
+    alt_text_de: a.alt_text_de ?? null,
+  }))
 }
 
 /** Public-URL eines Bank-Assets (Bucket asset-bank) */

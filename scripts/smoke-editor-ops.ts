@@ -4,7 +4,7 @@
  *  - Leitplanken: Telefon gesperrt, Hero nicht ausblendbar, Reorder nur Permutation
  *  - gültiger Patch geht durch, All-or-Nothing bei Teil-Fehler
  */
-import { PatchSchema, applyPatch, THEME_PRESETS } from '../lib/editor-ops'
+import { PatchSchema, applyPatch, THEME_PRESETS, type AufgeloestesBild } from '../lib/editor-ops'
 
 let fehler = 0
 function check(name: string, bedingung: boolean) {
@@ -60,12 +60,24 @@ check('Zod: __proto__-Pfad abgewiesen',
   check('All-or-Nothing: Misch-Patch komplett abgewiesen', !applyPatch(config, p).ok)
 }
 
-// 7. Bild-Swap: fremder Host abgewiesen, Unsplash erlaubt
+// 7. Bild-Swap (Phase 4): nur Asset-IDs aus der aufgelösten Bank-Menge
 {
-  const boese = PatchSchema.parse([{ op: 'swap_image_from_pool_or_upload', pfad: 'heroImageUrl', url: 'https://evil.example.com/x.jpg' }])
-  const gut = PatchSchema.parse([{ op: 'swap_image_from_pool_or_upload', pfad: 'heroImageUrl', url: 'https://images.unsplash.com/photo-2' }])
-  check('Bild: fremder Host abgewiesen', !applyPatch(config, boese).ok)
-  check('Bild: Unsplash-Host erlaubt', applyPatch(config, gut).ok)
+  const heroAssetId = '11111111-1111-4111-8111-111111111111'
+  const galerieAssetId = '22222222-2222-4222-8222-222222222222'
+  const bilder = new Map<string, AufgeloestesBild>([
+    [heroAssetId, { url: 'https://cdn.example.supabase.co/asset-bank/hero.webp', szeneTyp: 'hero', quelle: 'bank' }],
+    [galerieAssetId, { url: 'https://cdn.example.supabase.co/asset-bank/galerie.webp', szeneTyp: 'galerie', quelle: 'bank' }],
+  ])
+  const alteForm = PatchSchema.safeParse([{ op: 'swap_image_from_pool_or_upload', pfad: 'heroImageUrl', url: 'https://images.unsplash.com/photo-2' }])
+  check('Bild: alter URL-Op-Typ von Zod abgewiesen', !alteForm.success)
+  const unbekannt = PatchSchema.parse([{ op: 'swap_image_from_bank', pfad: 'heroImageUrl', assetId: '33333333-3333-4333-8333-333333333333' }])
+  check('Bild: unbekannte Asset-ID abgewiesen', !applyPatch(config, unbekannt, bilder).ok)
+  const falscheSzene = PatchSchema.parse([{ op: 'swap_image_from_bank', pfad: 'heroImageUrl', assetId: galerieAssetId }])
+  check('Bild: Galerie-Asset auf Hero-Pfad abgewiesen', !applyPatch(config, falscheSzene, bilder).ok)
+  const gut = PatchSchema.parse([{ op: 'swap_image_from_bank', pfad: 'heroImageUrl', assetId: heroAssetId }])
+  const r = applyPatch(config, gut, bilder)
+  check('Bild: Hero-Asset auf Hero-Pfad erlaubt',
+    r.ok && (r.config as Record<string, unknown>).heroImageUrl === 'https://cdn.example.supabase.co/asset-bank/hero.webp')
 }
 
 // 8. Theme: nur Presets

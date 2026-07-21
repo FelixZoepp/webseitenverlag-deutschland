@@ -1,11 +1,13 @@
 /**
- * Rechtstexte-Generator (§10.1 Schritt 1).
+ * Rechtstexte-Generator (§10.1 Schritt 1, Phase 4 §5.4).
  *
  * Aus den Pflichtangaben des Wizards werden Impressum und Datenschutzerklärung
- * generiert (Text-Bausteine, kein Abo-Produkt — Rechtstexte-Abo ist bewusst
- * verworfen). Juristische Endprüfung: WARTELISTE (Anwalt).
+ * generiert. Alle statischen Text-Bausteine liegen als Vorlage in
+ * config/rechtstexte-vorlagen.ts (Config over Hardcode) — hier werden nur
+ * Pflichtangaben eingesetzt. Juristische Endprüfung: WARTELISTE (Anwalt).
  */
 import { z } from 'zod'
+import { IMPRESSUM_VORLAGE, DATENSCHUTZ_VORLAGE } from '@/config/rechtstexte-vorlagen'
 
 export const PflichtangabenSchema = z.object({
   firmenname: z.string().min(2, 'Firmenname fehlt').max(200),
@@ -25,53 +27,55 @@ export const PflichtangabenSchema = z.object({
 export type Pflichtangaben = z.infer<typeof PflichtangabenSchema>
 
 export function generiereImpressum(p: Pflichtangaben): string {
+  const v = IMPRESSUM_VORLAGE
   const name = p.rechtsform ? `${p.firmenname} ${p.rechtsform}` : p.firmenname
   const teile: string[] = [
-    'Angaben gemäß § 5 DDG',
+    v.ueberschrift,
     '',
     name,
     p.strasse,
     `${p.plz} ${p.ort}`,
     '',
-    `Vertreten durch: ${p.inhaber}`,
+    `${v.vertretenDurch} ${p.inhaber}`,
     '',
-    'Kontakt:',
-    `Telefon: ${p.telefon}`,
-    `E-Mail: ${p.email}`,
+    v.kontaktUeberschrift,
+    `${v.telefonLabel} ${p.telefon}`,
+    `${v.emailLabel} ${p.email}`,
   ]
-  if (p.ust_id) teile.push('', `Umsatzsteuer-Identifikationsnummer gemäß § 27 a UStG: ${p.ust_id}`)
-  if (p.handelsregister) teile.push('', `Registereintrag: ${p.handelsregister}`)
-  if (p.aufsichtsbehoerde) teile.push('', `Zuständige Aufsichtsbehörde: ${p.aufsichtsbehoerde}`)
-  if (p.kammer) teile.push('', `Zuständige Kammer: ${p.kammer}`)
+  if (p.ust_id) teile.push('', `${v.ustIdLabel} ${p.ust_id}`)
+  if (p.handelsregister) teile.push('', `${v.registerLabel} ${p.handelsregister}`)
+  if (p.aufsichtsbehoerde) teile.push('', `${v.aufsichtsbehoerdeLabel} ${p.aufsichtsbehoerde}`)
+  if (p.kammer) teile.push('', `${v.kammerLabel} ${p.kammer}`)
   teile.push(
     '',
-    `Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV: ${p.inhaber}, ${p.strasse}, ${p.plz} ${p.ort}`,
+    `${v.inhaltlichVerantwortlich} ${p.inhaber}, ${p.strasse}, ${p.plz} ${p.ort}`,
     '',
-    'Plattform der EU-Kommission zur Online-Streitbeilegung: https://ec.europa.eu/consumers/odr',
-    'Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.'
+    v.odrHinweis,
+    v.streitbeilegungHinweis
   )
   return teile.join('\n')
 }
 
 export function generiereDatenschutz(p: Pflichtangaben): string {
+  const v = DATENSCHUTZ_VORLAGE
   const name = p.rechtsform ? `${p.firmenname} ${p.rechtsform}` : p.firmenname
   return [
-    'Datenschutzerklärung',
+    v.titel,
     '',
-    '1. Verantwortlicher',
+    v.verantwortlicherUeberschrift,
     `${name}, ${p.inhaber}, ${p.strasse}, ${p.plz} ${p.ort}`,
     `Telefon: ${p.telefon} · E-Mail: ${p.email}`,
     '',
-    '2. Hosting',
-    'Diese Website wird bei einem externen Dienstleister gehostet (Vercel Inc.). Beim Aufruf der Website werden automatisch Informationen in Server-Logfiles gespeichert (IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, Browsertyp). Diese Daten sind technisch erforderlich, um die Website anzuzeigen und die Stabilität und Sicherheit zu gewährleisten (Art. 6 Abs. 1 lit. f DSGVO).',
+    v.hostingUeberschrift,
+    v.hostingText,
     '',
-    '3. Kontaktformular',
-    'Wenn Sie uns über das Kontaktformular Anfragen zukommen lassen, werden Ihre Angaben inklusive der von Ihnen angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und für den Fall von Anschlussfragen bei uns gespeichert (Art. 6 Abs. 1 lit. b DSGVO). Diese Daten geben wir nicht ohne Ihre Einwilligung weiter.',
+    v.kontaktformularUeberschrift,
+    v.kontaktformularText,
     '',
-    '4. Ihre Rechte',
-    'Sie haben jederzeit das Recht auf Auskunft über Ihre gespeicherten personenbezogenen Daten, deren Herkunft und Empfänger und den Zweck der Datenverarbeitung sowie ein Recht auf Berichtigung, Sperrung oder Löschung dieser Daten (Art. 15–18 DSGVO). Außerdem steht Ihnen ein Beschwerderecht bei der zuständigen Aufsichtsbehörde zu (Art. 77 DSGVO).',
+    v.rechteUeberschrift,
+    v.rechteText,
     '',
-    '5. Speicherdauer',
-    'Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen.',
+    v.speicherdauerUeberschrift,
+    v.speicherdauerText,
   ].join('\n')
 }

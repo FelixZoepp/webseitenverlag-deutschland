@@ -1,9 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { getImageChecklist } from '@/lib/image-checklist'
+import { pruefeAspekt } from '@/lib/assets/aspekt'
+import sharp from 'sharp'
 import Anthropic from '@anthropic-ai/sdk'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+
+/** Sharp-Pipeline (§5.2): EXIF-Rotation, max. Breite, WebP — nie Originale ausliefern. */
+const MAX_BREITE = 2560
+const WEBP_QUALITAET = 82
 
 // GET: Alle Bilder eines Kunden für eine Site laden
 export async function GET(request: Request) {
@@ -47,7 +54,7 @@ export async function POST(request: Request) {
 
     const { data: customer } = await supabase
       .from('customers')
-      .select('id')
+      .select('id, branche')
       .eq('user_id', user.id)
       .single()
 
@@ -79,17 +86,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Datei zu groß (max 10MB)' }, { status: 400 })
     }
 
-    // In Supabase Storage hochladen
-    const ext = file.name.split('.').pop() || 'jpg'
-    const storagePath = `${customer.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`
-
+    // Sharp-Pipeline (§5.2): EXIF-Rotation → max. Breite → WebP.
+    // Es wird NIE das Original ausgeliefert, nur die verarbeitete Datei.
     const arrayBuffer = await file.arrayBuffer()
-    const fileBuffer = Buffer.from(arrayBuffer)
+    let webpBuffer: Buffer
+    let breite: number
+    let hoehe: number
+    try {
+      const { data, info } = await sharp(Buffer.from(arrayBuffer))
+        .rotate() // EXIF-Orientierung anwenden
+        .resize({ width: MAX_BREITE, withoutEnlargement: true })
+        .webp({ quality: WEBP_QUALITAET })
+        .toBuffer({ resolveWithObject: true })
+      webpBuffer = data
+      breite = info.width
+      hoehe = info.height
+    } catch {
+      return NextResponse.json({ error: 'Bild konnte nicht verarbeitet werden — bitte JPG, PNG oder WebP hochladen.' }, { status: 400 })
+    }
+
+    // Aspect-Check (§5.2): kompatible Slots + Auto-Crop-Vorschläge
+    const aspekt = pruefeAspekt(breite, hoehe)
+
+    const storagePath = `${customer.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.webp`
 
     const { error: uploadError } = await supabase.storage
       .from('kundenbilder')
-      .upload(storagePath, fileBuffer, {
-        contentType: file.type,
+      .upload(storagePath, webpBuffer, {
+        contentType: 'image/webp',
         upsert: false,
       })
 
@@ -110,8 +134,8 @@ export async function POST(request: Request) {
         dateiname: file.name,
         storage_path: storagePath,
         public_url: publicUrl,
-        mime_type: file.type,
-        groesse_bytes: file.size,
+        mime_type: 'image/webp',
+        groesse_bytes: webpBuffer.length,
       })
       .select()
       .single()
@@ -120,13 +144,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
+    // Phase 4 (§5.2): Kunden-Upload landet als quelle='kunde' in der Asset-Bank —
+    // site-gebunden (site_id), damit er NUR für diese Site sichtbar ist.
+    // asset_bank ist RLS-admin-only → Admin-Client.
+    try {
+      const admin = createAdminClient()
+      const { error: bankError } = await admin.from('asset_bank').insert({
+        storage_path: storagePath,
+        medium: 'image',
+        szene_typ: aspekt.kompatibleSlots[0] ?? null,
+        branchen: [(customer.branche as string | null)?.toLowerCase() || 'kunde'],
+        style_tags: [],
+        quelle: 'kunde',
+        site_id: siteId,
+        quality_status: 'approved',
+        breite,
+        hoehe,
+        aspect_ratio: aspekt.aspectRatio,
+        alt_text_de: file.name.replace(/\.[a-z0-9]+$/i, ''),
+      })
+      if (bankError) console.error('asset_bank-Eintrag (kunde) fehlgeschlagen:', bankError.message)
+    } catch (err) {
+      console.error('asset_bank-Eintrag (kunde) fehlgeschlagen:', err)
+    }
+
     // KI-Zuordnung im Hintergrund (nicht blockierend)
     if (templateId) {
       classifyImageWithAI(supabase, bild.id, publicUrl, templateId, siteId)
         .catch((err) => console.error('KI-Zuordnung fehlgeschlagen:', err))
     }
 
-    return NextResponse.json(bild, { status: 201 })
+    // Aspekt-Ergebnis (§5.2) mitliefern: kompatible Slots + Auto-Crop-Vorschläge
+    return NextResponse.json({ ...bild, aspekt }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Serverfehler' }, { status: 500 })
   }

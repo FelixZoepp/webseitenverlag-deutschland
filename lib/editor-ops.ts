@@ -58,9 +58,9 @@ const OpSchema = z.discriminatedUnion('op', [
     wert: z.string().max(2000),
   }),
   z.object({
-    op: z.literal('swap_image_from_pool_or_upload'),
+    op: z.literal('swap_image_from_bank'),
     pfad: PfadSchema,
-    url: z.string().url().max(1000),
+    assetId: z.string().uuid('Ungültige Asset-ID'),
   }),
   z.object({
     op: z.literal('set_theme_preset'),
@@ -109,12 +109,26 @@ const EINGESCHRAENKTE_PFADE: { muster: RegExp; maxLaenge: number; feld: string }
 /** Sektions-Typen, die nie versteckt/gelöscht werden dürfen (§10.2). */
 const GESCHUETZTE_SEKTIONS_TYPEN = ['hero', 'kontakt', 'contact', 'cta-haupt']
 
-const ERLAUBTE_BILD_HOSTS = ['images.unsplash.com']
-try {
-  const supabaseHost = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || '').hostname
-  if (supabaseHost) ERLAUBTE_BILD_HOSTS.push(supabaseHost)
-} catch {
-  // keine Supabase-URL gesetzt (Build-Zeit) — dann gilt nur die Stock-Liste
+// ------------------------------------------------------------
+// Bild-Bank (Phase 4, §5.1): swap_image_from_bank
+// ------------------------------------------------------------
+
+/** Aufgelöstes Bank-Asset — die Route lädt es VOR applyPatch aus der DB. */
+export interface AufgeloestesBild {
+  url: string
+  szeneTyp: string | null
+  quelle: string
+}
+
+/**
+ * Welche Szene-Typen ein Bild-Pfad akzeptiert (Slot-Typ-Filter §5.1).
+ * null = jede Szene erlaubt. Hero-Felder sind strikt: nur Hero-Szenen
+ * (bzw. Kunden-Bilder, deren Aspect-Check sie als hero eingestuft hat).
+ */
+export function erlaubteSzenenFuerPfad(pfad: string): string[] | null {
+  if (/hero/i.test(pfad)) return ['hero']
+  if (/(^|\.)(ownerImageUrl|teamImageUrl)$/.test(pfad)) return ['team', 'detail', 'galerie']
+  return null
 }
 
 // ------------------------------------------------------------
@@ -151,8 +165,16 @@ interface SektionsEintrag {
 /**
  * Wendet einen validierten Patch auf eine Kopie der Config an.
  * Ein Fehler in irgendeinem Op weist den gesamten Patch ab (§10.2).
+ *
+ * `bilder`: von der Route VOR dem Aufruf aufgelöste Bank-Assets
+ * (nur approved + Branche bzw. quelle='kunde' + eigene Site). Ein
+ * swap_image_from_bank-Op mit einer ID, die hier fehlt, wird abgewiesen.
  */
-export function applyPatch(config: SiteConfig, ops: PatchOp[]): Ergebnis {
+export function applyPatch(
+  config: SiteConfig,
+  ops: PatchOp[],
+  bilder?: Map<string, AufgeloestesBild>
+): Ergebnis {
   const fehler: string[] = []
   const neu = JSON.parse(JSON.stringify(config)) as SiteConfig
 
@@ -175,7 +197,7 @@ export function applyPatch(config: SiteConfig, ops: PatchOp[]): Ergebnis {
         continue
       }
       setPfad(neu as unknown as Record<string, unknown>, segmente, op.wert)
-    } else if (op.op === 'swap_image_from_pool_or_upload') {
+    } else if (op.op === 'swap_image_from_bank') {
       if (/(^|\.)logoUrl$/.test(op.pfad)) {
         fehler.push('Das Logo wird über den Bilder-Upload geändert, nicht per Chat.')
         continue
@@ -184,14 +206,14 @@ export function applyPatch(config: SiteConfig, ops: PatchOp[]): Ergebnis {
         fehler.push(`"${op.pfad}" ist kein Bild-Feld.`)
         continue
       }
-      let host = ''
-      try {
-        host = new URL(op.url).hostname
-      } catch {
-        /* unten abgefangen */
+      const asset = bilder?.get(op.assetId)
+      if (!asset) {
+        fehler.push('Dieses Bild steht für Ihre Website nicht zur Verfügung — ich biete nur freigegebene Bilder Ihrer Branche und Ihre eigenen Uploads an.')
+        continue
       }
-      if (!ERLAUBTE_BILD_HOSTS.includes(host)) {
-        fehler.push('Bilder kommen nur aus Ihrem Upload-Pool oder unserer Stock-Bibliothek.')
+      const erlaubt = erlaubteSzenenFuerPfad(op.pfad)
+      if (erlaubt && (!asset.szeneTyp || !erlaubt.includes(asset.szeneTyp))) {
+        fehler.push(`Dieses Bild passt vom Format nicht auf das Feld "${op.pfad}" (benötigt: ${erlaubt.join('/')}). Ich schlage gern ein passendes Bild vor.`)
         continue
       }
       const segmente = op.pfad.split('.')
@@ -200,7 +222,7 @@ export function applyPatch(config: SiteConfig, ops: PatchOp[]): Ergebnis {
         fehler.push(`Das Bild-Feld "${op.pfad}" existiert nicht.`)
         continue
       }
-      setPfad(neu as unknown as Record<string, unknown>, segmente, op.url)
+      setPfad(neu as unknown as Record<string, unknown>, segmente, asset.url)
     } else if (op.op === 'set_theme_preset') {
       const preset = THEME_PRESETS[op.preset]
       if (neu.site && neu.site.colors) {
@@ -273,8 +295,22 @@ export function applyPatch(config: SiteConfig, ops: PatchOp[]): Ergebnis {
   return { ok: true, config: neu }
 }
 
+/** Formatiert die Editor-Bildliste für den Prompt (nur diese IDs sind tauschbar). */
+export function formatiereBildListe(
+  bilder: { id: string; szene_typ: string | null; quelle: string; alt_text_de: string | null }[]
+): string {
+  if (bilder.length === 0) return 'Aktuell sind keine Tausch-Bilder verfügbar — biete den Bilder-Upload an.'
+  return bilder
+    .slice(0, 40)
+    .map((b) => {
+      const herkunft = b.quelle === 'kunde' ? 'eigenes Kundenbild' : 'Branchen-Bank'
+      return `- ${b.id} · Szene: ${b.szene_typ || 'unbestimmt'} · ${herkunft}${b.alt_text_de ? ` · ${b.alt_text_de}` : ''}`
+    })
+    .join('\n')
+}
+
 /** Prompt-Baustein: beschreibt dem Modell das EINZIG erlaubte Patch-Format. */
-export function getOpsPrompt(): string {
+export function getOpsPrompt(bildListe?: string): string {
   return `# ÄNDERUNGS-FORMAT (STRIKT)
 Du änderst die Website AUSSCHLIESSLICH über strukturierte Operationen — NIE über rohes HTML, CSS oder freie JSON-Objekte.
 
@@ -286,15 +322,21 @@ Wenn der Kunde eine Änderung wünscht, antworte mit einer kurzen Bestätigung u
 
 Erlaubte Operationen (nichts anderes existiert):
 1. {"op": "update_text", "pfad": "<feldpfad>", "wert": "<neuer Text>"} — Textfelder ändern
-2. {"op": "swap_image_from_pool_or_upload", "pfad": "<bildfeldpfad>", "url": "<URL aus Upload-Pool/Stock>"} — Bild tauschen
+2. {"op": "swap_image_from_bank", "pfad": "<bildfeldpfad>", "assetId": "<ID aus VERFÜGBARE BILDER>"} — Bild tauschen
 3. {"op": "set_theme_preset", "preset": "<${Object.keys(THEME_PRESETS).join(' | ')}>"} — Farbschema (NIE freie HEX-Werte)
 4. {"op": "add_section_from_library", "typ": "<${ERLAUBTE_SEKTIONS_TYPEN.join(' | ')}>", "titel": "<Titel>"} — Sektion ergänzen
 5. {"op": "reorder", "sectionIds": ["id1", "id2", ...]} — Reihenfolge (alle bestehenden IDs, Hero bleibt vorn)
 6. {"op": "toggle", "sectionId": "<id>", "sichtbar": true|false} — Sektion ein-/ausblenden (Hero/Kontakt nie)
 
+# VERFÜGBARE BILDER (swap_image_from_bank — NUR diese IDs, nie URLs, nie erfundene IDs)
+${bildListe || 'Aktuell sind keine Tausch-Bilder verfügbar — biete den Bilder-Upload an.'}
+- Hero-Bildfelder (Pfad enthält "hero") NUR mit Bildern der Szene "hero" belegen.
+- Galerie-/Inhaltsbilder: jede Szene erlaubt, wähle inhaltlich passend.
+
 Regeln:
 - Pfade zeigen auf BESTEHENDE Felder der Konfiguration (siehe unten), z.B. "tagline" oder "pages.home.config.hero.headline".
 - Telefonnummer, Logo, Impressum/Datenschutz und Farben per Text-Op sind gesperrt — erkläre dem Kunden freundlich den richtigen Weg.
+- GESPERRTE BEREICHE (Hero-Struktur, Haupt-Button/CTA, Kontakt-Sektion, Rechtstexte): NIE einen Op versuchen. Stattdessen in 1–2 Sätzen BEGRÜNDEN, warum das geschützt ist (konversionskritisch bzw. rechtliche Pflicht), und eine konkrete ALTERNATIVE anbieten (z.B. Text im Hero ändern statt Hero entfernen, Design-Vorlage statt freier Farbe, Support für Rechtsfragen).
 - Änderungen landen im ENTWURF. Sag dem Kunden: prüfen in der Vorschau, dann "Veröffentlichen" klicken.
 - Bei reinen Fragen: KEIN patch_ops-Block.`
 }
