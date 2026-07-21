@@ -290,6 +290,17 @@ Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0
 - **Abnahme B:** Screenshots `docs/screenshots/landing/bento-1440.png` + `bento-390.png` ✅ · 1440: große Zelle 392×643 links, 4 gleiche Zellen 392px rechts 2×2 ✅ · 390: einspaltig, große zuerst ✅ · Mockups DOM-only ✅ · max 3 Ebenen je Mockup ✅.
 - Selbsttest: `tsc --noEmit` ✅ · `next build` ✅ · `lint` ✅ (nur vorbestehende Warnings).
 
+## Arbeitsblock: T2 — Asset-Import-Script (GaLaBau → Template-Fabrik)
+
+- **`scripts/import-assets.ts` neu:** `npx tsx scripts/import-assets.ts --branche galabau --dir <ordner> [--approve] [--stub]`. Zwei Phasen:
+  - `planeImport()` (pur, ohne DB): Dateiname→Slot per `slotKeyAusDateiname` (Vertrag rezepte/REZEPTE_GALABAU.md, unbekannte Namen werden abgelehnt — kein Raten), Duplikat-Slots abgelehnt, sharp-Validierung (min_width, Aspect ±5 % wie lib/assets/aspekt.ts), `ba_before`+`ba_after` bekommen automatisch dieselbe `pair_id` (nur wenn BEIDE da, halbe Paare → Warnung), fehlende Pflicht-Slots werden gemeldet.
+  - `fuehreImportAus()` (DB): WebP(82)+AVIF(55) in srcset-Stufen 480/960/1600 (wie lib/assets/pipeline.ts), Upload nach Bucket `asset-bank` unter `{branche}/{yyyy-mm}/{assetId}/{breite}.{format}`, `asset_bank`-Insert mit style_tags aus `stilFuerBranche`, `quality_status` draft (oder approved bei `--approve`). Video: ≤3 MB (config/video-guidelines.ts), größere per ffmpeg transkodiert (1280px, ohne Ton), Poster = hero_bg aus demselben Import oder approved Hero aus der Bank; Varianten-Shape wie Admin-Video-Route (`video_url`/`poster_url`/`groesse_bytes`).
+  - `--stub`: quelle='ai_mock' → NIE approvebar (Regel aus /admin/assets), `--approve` wird erzwungen ignoriert. Ohne Stub: quelle='demo_generiert'.
+  - `SLOT_REGISTRY` (Config over Hardcode): neue Branchen tragen Slots + Dateinamen-Mapping ein (Fabrik B2).
+- **Selbsttest `scripts/test-import-assets.ts` (STUB-Fallback laut Auftrag):** 13/13 ✅ — 3 sharp-generierte Stub-Bilder (hero-bg 1920×1080, ba-after/ba-before 1600×1200) korrekt geplant inkl. gemeinsamer pair_id; Ablehnungen geprüft (unbekannter Name `foo.jpg`, zu klein `svc-01.jpg` 800px, falscher Aspect `about-detail.jpg` 16:9 statt 4:3); fehlendePflicht = 13 Slots (hero_video + Avatare optional) ✅; unbekannte Branche wirft mit Registry-Hinweis ✅; halbes Paar → Warnung + ohne pair_id ✅. DB-Phase (STUB-Insert + Cleanup) im Test enthalten, aktuell übersprungen: `SUPABASE_SERVICE_ROLE_KEY` fehlt lokal (WARTELISTE).
+- **DoD T2 (≥25 approved Assets inkl. Paar/Hero/Video) offen:** braucht echte Higgsfield-Assets + Service-Role-Key + ausgeführte Migration 022 → WARTELISTE. Script + Vertrag stehen; Import ist dann ein Einzeiler.
+- Selbsttest: `tsc --noEmit` ✅ · `next build` ✅ · `lint` ✅ (nur vorbestehende Warnings).
+
 ## Notizen für nächste Session
 - **MVP-Finish Phasen 0–6 abgeschlossen (inkl. Bausteine A/B/C).** Rest = Mensch/Key-Punkte auf WARTELISTE.md (§8-Gesamtabnahme braucht Stripe-Test-Keys, Vercel-Envs, Asset-/Branchen-Freigaben, Git-Remote für CI)
 - **Alle Phasen 0–H abgeschlossen.** Offen ist nur noch, was ein Mensch liefern muss → WARTELISTE.md (Migrationen 013–021 ausführen, Library seeden, Stripe-Test-/Webhook-Keys, Git-Remote + erster Push für CI, E2E-Freischaltung, echte Golden-Set-Firmen, Preis-Bestätigungen)
