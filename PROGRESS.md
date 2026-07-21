@@ -262,6 +262,13 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 
 Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0
 
+## Arbeitsblock: Erste-Schritte-Dashboard (Get started, Kunden-Ansicht)
+
+- **Neu `components/erste-schritte-dashboard.tsx`:** Standard-Ansicht für Kunden nach dem Livegang — große Live-Vorschau (iframe `/api/sites/{siteId}/preview`, Browser-Chrome mit Domain/Sitename) + Get-started-Checkliste mit Erledigt-Status: Webseite live ✓, Bilder hochladen, Eigene Domain verbinden (KEINE/AUSSTEHEND/AKTIV aus `domains`-Tabelle), Ersten Blog-Beitrag freigeben (Zähler FREIGEGEBEN/WARTET_AUF_FREIGABE aus `seo_landingpages`), Angaben vervollständigen (Wizard-Fortschritt). Jeder offene Schritt mit CTA auf die passende Unterseite.
+- **`app/dashboard/[siteId]/page.tsx` Phase 4a:** `!isAdmin && siteIsLive && view !== 'editor'` → Erste-Schritte-Übersicht (Daten parallel via `Promise.all`); Editor weiterhin über `?view=editor` bzw. Button „Webseite bearbeiten". Admin- und Freigabe-Flows unverändert.
+- **Funktions-Check Dashboard (auf Felix' Frage):** Kein externes „Builder UI Kit" — Editor ist Eigenbau (`components/site-editor.tsx`, Chat/Manuell/Verlauf + Live-iframe). Status: Editor ✅, Vorschau ✅, Bilder+KI ✅, SEO-Blog-Workflow ✅, Domain verbinden ⚠️ (Vercel-Token fehlt, WARTELISTE), Domain-Neuregistrierung ⚠️ (Registrar-Mock, WARTELISTE).
+- Selbsttest: `tsc --noEmit` ✅ · `next build` ✅ · `lint` ✅ (nur vorbestehende Warnings in fremden Dateien).
+
 ## Notizen für nächste Session
 - **MVP-Finish Phasen 0–6 abgeschlossen (inkl. Bausteine A/B/C).** Rest = Mensch/Key-Punkte auf WARTELISTE.md (§8-Gesamtabnahme braucht Stripe-Test-Keys, Vercel-Envs, Asset-/Branchen-Freigaben, Git-Remote für CI)
 - **Alle Phasen 0–H abgeschlossen.** Offen ist nur noch, was ein Mensch liefern muss → WARTELISTE.md (Migrationen 013–021 ausführen, Library seeden, Stripe-Test-/Webhook-Keys, Git-Remote + erster Push für CI, E2E-Freischaltung, echte Golden-Set-Firmen, Preis-Bestätigungen)

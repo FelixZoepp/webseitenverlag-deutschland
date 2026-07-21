@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import SiteEditor from '@/components/site-editor'
 import CustomerOnboardingFlow from '@/components/customer-onboarding-flow'
 import KundenStatusDashboard from '@/components/kunden-status-dashboard'
+import ErsteSchritteDashboard from '@/components/erste-schritte-dashboard'
 import FreigabeBanner from '@/components/freigabe-banner'
 import WizardBanner from '@/components/wizard-banner'
 import { wizardFortschritt, WizardStatus } from '@/lib/wizard'
@@ -93,6 +94,49 @@ export default async function SiteEditorPage({
         onboardingTermin={customer.onboarding_termin_am as string | null}
         hasBilder={(bilderCount || 0) > 0}
         previewAvailable={true}
+      />
+    )
+  }
+
+  // ──── Phase 4a: Erste Schritte (live geschaltet, Get-started-Übersicht) ────
+  // Standard-Ansicht für Kunden nach dem Livegang: große Vorschau + nächste
+  // Schritte (Bilder, Domain, Blog/SEO, Angaben). Editor über ?view=editor.
+  if (!isAdmin && siteIsLive && searchParams.view !== 'editor') {
+    const [{ data: domains }, { count: seoFreigegebenCount }, { count: seoOffenCount }] = await Promise.all([
+      supabase
+        .from('domains')
+        .select('hostname, status')
+        .eq('site_id', params.siteId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('seo_landingpages')
+        .select('*', { count: 'exact', head: true })
+        .eq('site_id', params.siteId)
+        .eq('status', 'FREIGEGEBEN'),
+      supabase
+        .from('seo_landingpages')
+        .select('*', { count: 'exact', head: true })
+        .eq('site_id', params.siteId)
+        .eq('status', 'WARTET_AUF_FREIGABE'),
+    ])
+
+    const aktiveDomain = (domains || []).find((d) => d.status === 'AKTIV')
+    const wartendeDomain = (domains || []).find((d) => d.status !== 'AKTIV' && d.status !== 'FEHLER')
+    const startFortschritt = wizardFortschritt((site.wizard_status as WizardStatus) || {})
+
+    return (
+      <ErsteSchritteDashboard
+        siteId={params.siteId}
+        siteName={(site.name as string) || 'Ihre Webseite'}
+        customerName={(customer.company_name as string) || (customer.contact_email as string) || 'Kunde'}
+        domainStatus={aktiveDomain ? 'AKTIV' : wartendeDomain ? 'AUSSTEHEND' : 'KEINE'}
+        domainHostname={aktiveDomain?.hostname || wartendeDomain?.hostname || null}
+        seoFreigegeben={seoFreigegebenCount || 0}
+        seoOffen={seoOffenCount || 0}
+        hasBilder={(bilderCount || 0) > 0}
+        wizardBearbeitet={startFortschritt.bearbeitet}
+        wizardGesamt={startFortschritt.gesamt}
+        wizardFertig={Boolean(site.fertiggestellt_am) || startFortschritt.bearbeitet >= startFortschritt.gesamt}
       />
     )
   }
