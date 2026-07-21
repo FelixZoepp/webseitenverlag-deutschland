@@ -132,3 +132,17 @@ Bewusst aus dem MVP entfernt (nach `/_legacy/` verschoben, nicht gelöscht):
 - **Sichern erledigt** (dieses Dokument): Farbwelten, Copy-Muster, Branchen-Wissen, Sektions-Patterns, Multipage-Struktur.
 - **Nach `/_legacy/` verschieben (nicht löschen):** alle 39 `lib/templates/*.ts`, `template-renderer.ts`, `multipage-renderer.ts`, `template-catalog.ts`, `template-configs.ts`, `template-schemas.ts`, `templates/business-multipage/` — bleiben als Rollback-Referenz für Bestands-Configs.
 - **Reihenfolge bleibt:** LEGACY_NOTIZEN (✓) → F2 (Flagship-Zerlegung) → Migration der Aufrufer (`app/demo/[token]`, preview/fertigstellen/rollback, `lib/auslieferung.ts`) → dann erst `/_legacy/`.
+
+## GaLaBau-Handoff: SF Pro Display (T1.2, Font-Fix)
+
+- **Was es war:** Das Design-Handoff `Apple Red Software System-handoff-4.zip`
+  (`project/tokens/fonts.css`) liefert `SF-Pro-Display-Regular.otf` als Primär-Font mit.
+- **Warum nicht im Repo:** Apples SF-Pro-Lizenz erlaubt keine Web-Auslieferung an
+  Endnutzer (nur Mockups/Apps auf Apple-Plattformen). Die Datei wurde bewusst NICHT
+  ins Repo kopiert und wird nicht ausgeliefert.
+- **Ersetzt durch:** Inter Tight (SIL Open Font License) als Variable Font, self-hosted
+  unter `public/fonts/inter-tight/` (latin + latin-ext, weight 100–900). Das Handoff
+  selbst nennt "Inter Tight" bereits als font-family im Body — SF Pro war nur Fallback-
+  Deko im Token-File. Eingebunden per `@font-face` im galabau-Renderer-CSS
+  (`lib/flagship/galabau/css.ts`), damit die gerenderten Seiten self-contained bleiben
+  (keine Fremd-CDNs, Masterprompt-Regel).
