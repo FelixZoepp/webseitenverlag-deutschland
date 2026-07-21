@@ -257,10 +257,20 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | Branche | B1 | Freigabe | B2 | B3 | B4 | B5-Optik | Assets | Demo-URL |
 |---|---|---|---|---|---|---|---|---|
 | 1 galabau | ✅ (T1-Seed) | ✅ | ✅ (`galabau-landing-v1`) | ✅ (`rezepte/REZEPTE_GALABAU.md`) | ✅ (test:galabau 130, LH 100/92/100) | ✅ (docs/screenshots/galabau/) | ⛔ Higgsfield-Key (WARTELISTE) | — (T3 offen) |
-| 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | ✅ (`rezepte/REZEPTE_MALER.md`) | ✅ (test:maler 204, LH 100/92–95/100 auf allen 10 Seiten) | — | — | — |
+| 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | ✅ (`rezepte/REZEPTE_MALER.md`) | ✅ (test:maler 204, LH 100/92–95/100 auf allen 10 Seiten) | ⛔ Freigabe Felix (docs/screenshots/maler/) | ⛔ Higgsfield-Key (WARTELISTE) | — |
 | 3–16 | — | — | — | — | — | — | — | — |
 
 Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0 (Stub-Phase)
+
+## Arbeitsblock: Maler B5 — Optik-Screenshots aller 3 Stufen (Template-Fabrik)
+
+- **9 Playwright-Screenshots in `docs/screenshots/maler/`** (Stub-Assets, `reducedMotion:'reduce'` ⇒ Reveals sofort sichtbar + Wand im fertigen Salbei-Zustand — kein langsamer Scroll nötig):
+  - Stufe statisch: [statisch-desktop.png](docs/screenshots/maler/statisch-desktop.png) · [statisch-mobile.png](docs/screenshots/maler/statisch-mobile.png) · [statisch-vp-hero.png](docs/screenshots/maler/statisch-vp-hero.png)
+  - Stufe video: [video-desktop.png](docs/screenshots/maler/video-desktop.png) · [video-mobile.png](docs/screenshots/maler/video-mobile.png) · [video-vp-hero.png](docs/screenshots/maler/video-vp-hero.png)
+  - Stufe growth: [growth-desktop.png](docs/screenshots/maler/growth-desktop.png) · [growth-mobile.png](docs/screenshots/maler/growth-mobile.png) · [growth-vp-hero.png](docs/screenshots/maler/growth-vp-hero.png)
+- Desktop 1440 fullPage · Mobile 390 fullPage (@2x) · Hero-Viewport 1440×900; Quelle: `.lighthouse/maler/stufe-*.html` (identischer Render wie Lighthouse, `noindex:false`).
+- Sichtprüfung: Signature-Wand fertig (Salbei, Tags ALTWEISS/SALBEI), Growth-Kontakt mit Rückruf-Checkbox (Datei-Anhang korrekt NICHT ohne submitZiel), Footer verbatim (Osnabrück · Belm · Georgsmarienhütte, 0541 000000). Fixed-Header-Stitching wie bei galabau harness-bedingt möglich, kein DOM-Bug.
+- **⛔ STOP Optik-Freigabe Felix:** `frozen:true` für `maler-landing-v1` erst NACH Freigabe; Matrix-Spalte B5-Optik bleibt bis dahin ⛔.
 
 ## Arbeitsblock: Maler B4 — Stresstest + Lighthouse (Template-Fabrik)
 
