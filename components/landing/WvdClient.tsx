@@ -377,106 +377,115 @@ export default function WvdClient() {
           </div>
 
           <motion.div {...reveal}>
-          <div className="bento-grid">
-            {/* Row 1: 2 wide cards */}
-            <div className="bento-card wide">
-              <div className="card-content">
-                <div className="bento-icon-glow">
-                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
-                </div>
-                <h3>24/7 Online</h3>
-                <p className="bento-text">
-                  Deine Webseite arbeitet rund um die Uhr für dich. Kunden finden dich, auch wenn du gerade arbeitest, schläfst oder im Urlaub bist.
-                </p>
+          <div className="features-bento">
+            {/* 1 — In Tagen live (große Zelle, Browser-Mockup) */}
+            <div className="fb-card fb-web">
+              <div className="fb-head">
+                <h3>In Tagen live</h3>
+                <p className="bento-text">Vom Erstgespräch zur fertigen Webseite — professionell aufgebaut und sofort erreichbar.</p>
               </div>
-              <div className="card-visual">
-                <div style={{
-                  width: "100%", maxWidth: 340, background: "var(--surface-card)", borderRadius: 16,
-                  overflow: "hidden", boxShadow: "var(--shadow-lg)",
-                  border: "1px solid var(--border-default)",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 14px", borderBottom: "1px solid var(--border)", background: "var(--cream-tint)" }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f87171" }} />
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#fbbf24" }} />
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ade80" }} />
-                    <span style={{ marginLeft: 8, fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--text-secondary)" }}>dein-betrieb.de</span>
+              <div className="fb-visual">
+                <div className="fb-browser">
+                  <div className="fb-browser-bar">
+                    <span className="fb-dot" style={{ background: "#F87171" }} />
+                    <span className="fb-dot" style={{ background: "#FBBF24" }} />
+                    <span className="fb-dot" style={{ background: "#4ADE80" }} />
+                    <span className="fb-url">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                      malermeister-krause.de
+                    </span>
+                    <span className="fb-live"><span className="fb-live-dot" />Live</span>
                   </div>
-                  <div style={{ padding: 16 }}>
-                    <div style={{ width: "75%", height: 10, borderRadius: 4, background: "var(--red-100)", marginBottom: 8 }} />
-                    <div style={{ width: "100%", height: 8, borderRadius: 4, background: "#f1f5f9", marginBottom: 8 }} />
-                    <div style={{ width: "85%", height: 8, borderRadius: 4, background: "#f1f5f9", marginBottom: 12 }} />
-                    <div style={{ width: "50%", height: 28, borderRadius: 999, background: "var(--blue)" }} />
+                  <div className="fb-site">
+                    <div className="fb-site-hero">
+                      <div className="fb-site-headline" />
+                      <div className="fb-site-sub" />
+                    </div>
+                    <div className="fb-site-cards">
+                      <div className="fb-site-card"><span /><span /></div>
+                      <div className="fb-site-card"><span /><span /></div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bento-card wide">
-              <div className="card-content">
-                <div className="bento-icon-glow">
-                  <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>
-                </div>
-                <h3>Conversion Optimiert</h3>
-                <p className="bento-text">
-                  Jede Seite ist so aufgebaut, dass Besucher zu Kunden werden. Klare Struktur, starke Texte, schnelle Ladezeiten.
-                </p>
+            {/* 2 — Sie schreiben, die KI baut (Chat-Szene) */}
+            <div className="fb-card fb-editor">
+              <div className="fb-head">
+                <h3>Sie schreiben, die KI baut</h3>
+                <p className="bento-text">Änderungswunsch im Chat — die Seite passt sich an. Ohne Agentur, ohne Wartezeit.</p>
               </div>
-              <div className="card-visual">
-                <div style={{ width: "100%", maxWidth: 280, display: "flex", alignItems: "flex-end", gap: 8, height: 140 }}>
-                  {[40, 55, 35, 70, 50, 85, 65, 95].map((h, i) => (
-                    <div key={i} style={{
-                      flex: 1, height: `${h}%`, borderRadius: "6px 6px 0 0",
-                      background: i === 7 ? "var(--red-500)" : "var(--gray-100)",
-                      border: "none",
-                      transition: "height 0.22s var(--ease-out)",
-                    }} />
-                  ))}
-                </div>
-                <div style={{
-                  position: "absolute", top: 16, right: 20,
-                  background: "var(--success-soft)", border: "none",
-                  borderRadius: 999, padding: "4px 12px",
-                  fontFamily: "var(--font-ui)", fontSize: 13, fontWeight: 600, color: "var(--green-500)",
-                }}>
-                  +75%
+              <div className="fb-visual">
+                <div className="fb-chat">
+                  <div className="fb-bubble-user">Mach die Überschrift größer</div>
+                  <div className="fb-answer-card">
+                    <span className="fb-answer-headline">Malerbetrieb Krause</span>
+                    <span className="fb-answer-line" />
+                  </div>
+                  <span className="fb-published">✓ Veröffentlicht</span>
                 </div>
               </div>
             </div>
 
-            {/* Row 2: 3 regular cards */}
-            <div className="bento-card">
-              <div className="card-content">
-                <div className="bento-icon-glow">
-                  <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+            {/* 3 — Bei Google gefunden (Such-Snippet) */}
+            <div className="fb-card fb-google">
+              <div className="fb-head">
+                <h3>Bei Google gefunden</h3>
+                <p className="bento-text">Lokale Suchbegriffe, saubere Technik — Ihre Kunden finden Sie dort, wo sie suchen.</p>
+              </div>
+              <div className="fb-visual">
+                <div className="fb-search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+                  Maler Wiesbaden
                 </div>
-                <h3>SEO Inklusive</h3>
-                <p className="bento-text">
-                  Google-Optimierung von Anfang an. Damit du gefunden wirst, wenn Kunden in deiner Region suchen.
-                </p>
+                <div className="fb-snippet">
+                  <span className="fb-snippet-top"><span className="fb-favicon" />Malermeister Krause — Maler in Wiesbaden</span>
+                  <span className="fb-snippet-url">malermeister-krause.de</span>
+                </div>
+                <span className="fb-rank">Platz 1</span>
               </div>
             </div>
 
-            <div className="bento-card">
-              <div className="card-content">
-                <div className="bento-icon-glow">
-                  <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
+            {/* 4 — Anfragen direkt aufs Handy (Notification-Stapel) */}
+            <div className="fb-card fb-anfragen">
+              <div className="fb-head">
+                <h3>Anfragen direkt aufs Handy</h3>
+                <p className="bento-text">Jede Anfrage landet sofort bei Ihnen — per E-Mail und aufs Handy.</p>
+              </div>
+              <div className="fb-visual">
+                <div className="fb-stack">
+                  <div className="fb-notif fb-notif-3" aria-hidden="true" />
+                  <div className="fb-notif fb-notif-2" aria-hidden="true" />
+                  <div className="fb-notif fb-notif-1">
+                    <span className="fb-avatar">S</span>
+                    <span className="fb-notif-text">
+                      <strong>Neue Anfrage · vor 2 Min</strong>
+                      Guten Tag, wir bräuchten ein Angebot für…
+                    </span>
+                    <span className="fb-arrow">→</span>
+                  </div>
                 </div>
-                <h3>Fertig in Tagen</h3>
-                <p className="bento-text">
-                  Keine monatelangen Projekte. Deine Webseite steht in wenigen Tagen – professionell und startklar.
-                </p>
               </div>
             </div>
 
-            <div className="bento-card">
-              <div className="card-content">
-                <div className="bento-icon-glow">
-                  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+            {/* 5 — Alles inklusive (Checkliste + Preis-Pill) */}
+            <div className="fb-card fb-inklusive">
+              <div className="fb-head">
+                <h3>Alles inklusive</h3>
+                <p className="bento-text">Ein Preis, keine versteckten Kosten — Technik und Pflege übernehmen wir.</p>
+              </div>
+              <div className="fb-visual">
+                <div className="fb-checks">
+                  <span>Design <em>✓</em></span>
+                  <span>Hosting <em>✓</em></span>
+                  <span>SEO <em>✓</em></span>
+                  <span>Support <em>✓</em></span>
                 </div>
-                <h3>Support Inklusive</h3>
-                <p className="bento-text">
-                  Persönlicher Ansprechpartner. Änderungen, Updates, Fragen – wir sind für dich da.
-                </p>
+                <div className="fb-price-row">
+                  <span className="fb-price">99 €/Monat</span>
+                  <span className="fb-dsgvo">DSGVO</span>
+                </div>
               </div>
             </div>
           </div>

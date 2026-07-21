@@ -278,6 +278,18 @@ Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0
 - Bekanntes vorbestehendes Thema (nicht Teil dieses Umbaus): Nav-CTA läuft auf sehr schmalen Viewports (<400px) rechts an — separater Fix möglich.
 - Selbsttest: `tsc --noEmit` ✅ · `next build` ✅ · `lint` ✅ (nur vorbestehende Warnings).
 
+## Arbeitsblock: LANDING-UMBAU B — 5er-Bento mit DOM-Mini-Mockups (Marketing-Landing)
+
+- **`components/landing/WvdClient.tsx` Features-Sektion umgebaut:** alte `.bento-grid` (5 Icon-Karten „24/7 Online" etc.) → `.features-bento` mit 5 Zellen und Mini-Mockups komplett aus DOM+CSS (keine Bilder, keine Icon-Fonts als Hauptmotiv). Section-Head „Was du bekommst / Alles inklusive. Ohne Kompromisse." unverändert.
+  1. **„In Tagen live"** (große Zelle links): Browser-Mockup mit Ampel-Punkten, URL-Pill `malermeister-krause.de` mit Schloss, grüner Live-Badge (Punkt pulsiert 1×), Mini-Website (Farbflächen-Hero + 2 Karten). Hero-Fläche wechselt alle 3 s durch 3 Branchen-Farben (#3FA463 GaLaBau → #7BA88A Maler → #2E6FA8 SHK, `fbBrancheCycle` 9 s).
+  2. **„Sie schreiben, die KI baut":** Chat-Szene — Nutzer-Bubble „Mach die Überschrift größer", Antwort-Karte „Malerbetrieb Krause" (Headline morpht beim Hover `scale(1.18)`, einmalig), Pill „✓ Veröffentlicht".
+  3. **„Bei Google gefunden":** Such-Pill mit Lupe „Maler Wiesbaden", EIN Snippet (Favicon-Punkt, blaue Titelzeile, grüne URL-Zeile), Pill „Platz 1" — keine Google-Logos.
+  4. **„Anfragen direkt aufs Handy":** 3 gestapelte Notification-Karten; oberste mit Avatar „S", „Neue Anfrage · vor 2 Min", Anfrage-Text, Akzent-Pfeil; untere 2 versetzt + geblurrt; Hover fächert um 4 px.
+  5. **„Alles inklusive":** Checkliste Design/Hosting/SEO/Support ✓, Preis-Pill „99 €/Monat" mit Glow-Ring, „DSGVO"-Chip.
+- **`app/(marketing)/marketing.css`:** `.features-bento` als `grid-template-areas` („web web editor editor google google" / „web web anfragen anfragen inklusive inklusive") — 1 große links, 4 gleiche rechts 2×2; ≤1024px 2-spaltig (web volle Breite), ≤768px einspaltig (große zuerst). Zellen `--surface-card`, Radius 26, Doppel-Schatten, Hover `translateY(-3px)`; Illustrationsfläche `--gray-050` mit 4er-Karo (`background-size: 22px`, ohne Maske), Mikro-Texte 10–12px, je Zelle EIN bewegtes Element. Alte Klassen `.bento-grid`/`.bento-card`/`.card-visual`/`.bento-icon-glow` inkl. Media-Query-Referenzen entfernt (`.bento-section`/`.beams` bleiben — werden vom Rechner mitgenutzt). `prefers-reduced-motion`: Branchen-Cycle, Live-Pulse und Hover-Transitions aus.
+- **Abnahme B:** Screenshots `docs/screenshots/landing/bento-1440.png` + `bento-390.png` ✅ · 1440: große Zelle 392×643 links, 4 gleiche Zellen 392px rechts 2×2 ✅ · 390: einspaltig, große zuerst ✅ · Mockups DOM-only ✅ · max 3 Ebenen je Mockup ✅.
+- Selbsttest: `tsc --noEmit` ✅ · `next build` ✅ · `lint` ✅ (nur vorbestehende Warnings).
+
 ## Notizen für nächste Session
 - **MVP-Finish Phasen 0–6 abgeschlossen (inkl. Bausteine A/B/C).** Rest = Mensch/Key-Punkte auf WARTELISTE.md (§8-Gesamtabnahme braucht Stripe-Test-Keys, Vercel-Envs, Asset-/Branchen-Freigaben, Git-Remote für CI)
 - **Alle Phasen 0–H abgeschlossen.** Offen ist nur noch, was ein Mensch liefern muss → WARTELISTE.md (Migrationen 013–021 ausführen, Library seeden, Stripe-Test-/Webhook-Keys, Git-Remote + erster Push für CI, E2E-Freischaltung, echte Golden-Set-Firmen, Preis-Bestätigungen)
