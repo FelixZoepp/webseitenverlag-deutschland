@@ -150,6 +150,7 @@ export default function CrmPage() {
     setDragLeadId(null)
     setDropStage(null)
     if (!id) return
+    if (busy) return
     const lead = leads.find((l) => l.id === id)
     if (!lead || lead.crm_stage === stageKey) return
     stageWechseln(lead, stageKey)
@@ -208,11 +209,11 @@ export default function CrmPage() {
                     <button
                       key={lead.id}
                       onClick={() => oeffnen(lead)}
-                      draggable
+                      draggable={!busy}
                       onDragStart={(e) => { e.dataTransfer.setData('text/plain', lead.id); e.dataTransfer.effectAllowed = 'move'; setDragLeadId(lead.id) }}
                       onDragEnd={() => { setDragLeadId(null); setDropStage(null) }}
                       className="panel"
-                      style={{ padding: '12px 14px', textAlign: 'left', cursor: 'grab', width: '100%', borderLeft: `3px solid ${stage.accent}`, opacity: dragLeadId === lead.id ? 0.4 : 1 }}
+                      style={{ padding: '12px 14px', textAlign: 'left', cursor: busy ? 'default' : 'grab', width: '100%', borderLeft: `3px solid ${stage.accent}`, opacity: dragLeadId === lead.id ? 0.4 : 1 }}
                     >
                       <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--za-fg)' }}>{lead.firma || lead.name || 'Ohne Namen'}</div>
                       {lead.firma && lead.name && (
