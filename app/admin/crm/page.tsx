@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { RefreshCw, X, Loader2, Phone, Mail, Globe, StickyNote } from 'lucide-react'
+import { anzeigeName } from '@/lib/crm/anzeige-name'
 
 type CrmStage = 'neuer_lead' | 'erstgespraech' | 'closing_terminiert' | 'closing_no_show' | 'closed' | 'verloren'
 
@@ -28,12 +29,14 @@ interface CrmLead {
   created_at: string
   notizen_anzahl: number
   letzte_notiz: string | null
+  letzte_notiz_autor: string | null
 }
 
 interface Notiz {
   id: string
   text: string
   created_at: string
+  autor: string | null
 }
 
 const STAGES: { key: CrmStage; label: string; accent: string }[] = [
@@ -238,7 +241,7 @@ export default function CrmPage() {
                       </div>
                       {lead.letzte_notiz && (
                         <div style={{ fontSize: '10px', color: 'var(--za-fg-3)', marginTop: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
-                          „{lead.letzte_notiz}“
+                          {anzeigeName(lead.letzte_notiz_autor) ? `${anzeigeName(lead.letzte_notiz_autor)}: ` : ''}„{lead.letzte_notiz}”
                         </div>
                       )}
                     </button>
@@ -347,7 +350,9 @@ export default function CrmPage() {
                   {notizen.map((n) => (
                     <div key={n.id} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '8px', padding: '10px 12px' }}>
                       <div style={{ fontSize: '12px', color: 'var(--za-fg)', whiteSpace: 'pre-wrap' }}>{n.text}</div>
-                      <div style={{ fontSize: '10px', color: 'var(--za-fg-3)', marginTop: '4px' }}>{formatDate(n.created_at)}</div>
+                      <div style={{ fontSize: '10px', color: 'var(--za-fg-3)', marginTop: '4px' }}>
+                        {[anzeigeName(n.autor), formatDate(n.created_at)].filter(Boolean).join(' · ')}
+                      </div>
                     </div>
                   ))}
                 </div>
