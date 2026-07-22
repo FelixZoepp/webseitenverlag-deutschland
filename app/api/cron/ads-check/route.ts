@@ -11,6 +11,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { AdsEntwurf } from '@/lib/ads-starter'
 import { meldeJobFehler } from '@/lib/monitoring'
+import { istCronAutorisiert } from '@/lib/cron-auth'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -34,8 +35,7 @@ async function zielUrlErreichbar(url: string | null): Promise<boolean | null> {
 }
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!istCronAutorisiert(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

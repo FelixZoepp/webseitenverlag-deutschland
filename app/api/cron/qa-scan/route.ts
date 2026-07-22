@@ -11,6 +11,7 @@ import type { FlagshipConfig } from '@/lib/flagship/types'
 import { browserQa } from '@/lib/qa-gate/browser-qa'
 import { profilAusConfig } from '@/lib/qa-gate/publish-qa'
 import { revalidateSite } from '@/lib/hosting/site-cache'
+import { istCronAutorisiert } from '@/lib/cron-auth'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -18,8 +19,7 @@ export const maxDuration = 300
 const MAX_SITES_PRO_LAUF = 20
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!istCronAutorisiert(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

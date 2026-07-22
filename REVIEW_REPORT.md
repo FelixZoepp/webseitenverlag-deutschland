@@ -9,8 +9,8 @@ Start: 2026-07-23 · Branch: `chore/master-review` · Prompt: `MASTER_REVIEW_PRO
 | 0 Selbstkontrolle (Journal + Regeln) | Gerüst steht, Regel-Beweise in Kap. 6 | 🟡 in Arbeit |
 | 1 Die 9 Stationen | geprüft — 11 Befunde (0×P0, 4×P1, Rest P2/Zielbild) | 🟡 |
 | 2 E2E-Generalprobe | Suite gebaut (15 Stationen), grüner Lauf blockiert durch fehlende Env-Keys (B-12) | 🟡 |
-| 3 Demo-Qualität (Budget-Läufe) | Drehbücher ✓ (3.4-Text), Budget-Läufe blockiert (B-14) | 🟡 |
-| 4 SEO-Automatik | nicht begonnen | ⚪ |
+| 3 Demo-Qualität (Budget-Läufe) | Drehbücher ✓ (3.4-Text), Text-Läufe möglich (Anthropic-Key da), Video/Assets blockiert (B-14) | 🟡 |
+| 4 SEO-Automatik | geprüft — B-15 P0 (Cron-Auth-Bypass) im Code gefixt + Verhinderungs-Regel; 4 weitere Befunde (B-16..B-19); D-Ops CRON_SECRET offen | 🟡 |
 | 5 Sicherheits-Review | nicht begonnen | ⚪ |
 
 Ampel-Legende: 🟢 OK (bewiesen) · 🟡 Risiko/in Arbeit · 🔴 P0 offen · ⚪ ausstehend
@@ -119,12 +119,17 @@ Existenz = Beweis), Library-Fallback ohne LLM überspringt QA-Gate-Kette.
 
 **Befunde:**
 
-- **B-12 · P1 · Generalprobe kann nicht grün laufen — Env-Keys fehlen lokal
-  und in CI.** `.env.local` enthält nur Supabase + Resend;
-  `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `CRON_SECRET`,
-  `ANTHROPIC_API_KEY` fehlen → Suite skippt. Abschluss-Kriterium Kap. 6
-  („Generalprobe läuft grün als CI-Suite") ist damit D-Ops-blockiert.
-  Fix = D-Ops mit Felix: Stripe-Test-Keys + Secrets in `.env.local`/Vercel.
+- **B-12 · P1 · Generalprobe kann nicht grün laufen — Env-Keys fehlen bzw.
+  sind leere Platzhalter.** *(Korrigiert nach Production-Pull
+  `vercel env pull --environment=production`:)* `.env.local` (Development-
+  Scope) enthält nur Supabase + Resend. In **Production** existieren
+  `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `HIGGSFIELD_API_KEY`,
+  `HIGGSFIELD_API_SECRET` zwar als Variablen, sind aber **leere Strings**
+  (`""`); `CRON_SECRET` fehlt in allen Umgebungen komplett. Einzig
+  `ANTHROPIC_API_KEY` ist real gesetzt (sk-ant-…). → Suite skippt.
+  Abschluss-Kriterium Kap. 6 („Generalprobe läuft grün als CI-Suite")
+  bleibt D-Ops-blockiert. Fix = D-Ops mit Felix: Stripe-Test-Keys +
+  Webhook-Secret + CRON_SECRET befüllen.
 - **B-13 · P1 · Kein CI-Workflow existiert.** `.github/workflows/` fehlt
   komplett — weder `test:e2e` noch die Kap.-1-Beweis-Suiten (qa-gate,
   golden-set, phase5) laufen automatisiert. „Bleibt als Dauer-CI-Lauf"
@@ -141,19 +146,71 @@ Verwandlung. Typecheck grün.
 
 **Blockiert (3.1–3.3, 3.4-Generierung, 3.5 Kosten-Report):**
 
-- **B-14 · P1 · Generierungs-Keys fehlen komplett — Budget-Läufe unmöglich.**
-  Die Pipeline braucht `ANTHROPIC_API_KEY` (lib/generierung, lib/pipeline)
-  plus `HIGGSFIELD_API_KEY`/`HIGGSFIELD_API_SECRET` oder `FAL_API_KEY`
+- **B-14 · P1 · Asset-Keys leer — Video-Kette blockiert; Text-Läufe möglich.**
+  *(Korrigiert nach Production-Pull:)* `ANTHROPIC_API_KEY` ist in Vercel
+  Production **real gesetzt** und lokal via `.env.review-prod.local`
+  verfügbar ⇒ LLM-basierte Text-/Kompositions-Läufe (GaLaBau-Testläufe,
+  Determinismus-Check, Growth-Unterseiten) sind lokal startbar.
+  `HIGGSFIELD_API_KEY`/`HIGGSFIELD_API_SECRET` existieren als Variablen,
+  sind aber **leere Strings**; `FAL_API_KEY` fehlt
   (lib/assets/higgsfield.ts:354–355 baut die Provider-Kette nur bei
-  gesetzten Keys). Keiner davon ist in `.env.local` oder Shell-Env vorhanden
-  (`.env.local` stammt aus `vercel env pull` ⇒ auch in Vercel fehlen sie).
-  Damit sind die 3 GaLaBau-Testläufe, der Determinismus-Check, die
-  Video-Kette, die Growth-Unterseiten und der Premium-Scroll-Prototyp
-  nicht startbar. Fix = D-Ops mit Felix (gleiche Sitzung wie B-04/B-12).
+  gesetzten Keys). Damit bleiben Video-Kette und Asset-Generierung
+  D-Ops-blockiert. Fix = D-Ops mit Felix (gleiche Sitzung wie B-04/B-12).
 - **Nebenbefund:** `galabau` existiert nicht in `branchen_profile`
   (17 Einträge, GaLaBau fehlt; die 16 START_BRANCHEN + `reiterhof`).
   Für die GaLaBau-Läufe muss die Branche vorab geseedet oder der
   Flagship-Pfad ohne Branchen-Profil genutzt werden — beim Budget-Lauf klären.
+
+### Kapitel 4 — SEO-Automatik (Stand 2026-07-23)
+
+**Geprüft:** alle 6 Cron-Routen (`app/api/cron/*/route.ts`), `vercel.json`
+(6 Cron-Einträge), Flagship-/Library-Renderer (JSON-LD, OG, Meta),
+SEO-Landingpage-Pipeline (`lib/seo-plan.ts`), noindex-Logik, Admin-UI.
+
+**Befunde:**
+
+- **B-15 · P0 (Code gefixt, D-Ops offen) · „Bearer undefined"-Bypass auf
+  allen 6 Cron-Routen + Crons de facto tot.** Jede Route verglich
+  `authHeader !== \`Bearer ${process.env.CRON_SECRET}\``. Da `CRON_SECRET`
+  nirgends gesetzt ist (B-12): (a) literaler Header `Bearer undefined`
+  autorisierte jeden Angreifer — u. a. Dunning-Cron (fremde Sites sperrbar)
+  und seo-plan (LLM-Kosten-Missbrauch mit dem **echten** Production-
+  Anthropic-Key); (b) legitime Vercel-Cron-Aufrufe liefen ins 401, weil
+  Vercel den Auth-Header nur bei gesetztem Secret sendet ⇒ Briefings,
+  SEO-Plan, Dunning, QA-Scan, Kosten-Summary, Ads-Check laufen in
+  Production **gar nicht**. **Fix (sofort, TDD):** `lib/cron-auth.ts`
+  (`istCronAutorisiert`, fail-closed), alle 6 Routen umgestellt;
+  Verhinderungs-Regel `npm run test:cron-auth` (Unit-Tests + Quelltext-Scan
+  aller Cron-Routen, vor Fix 12 rote Checks) — Journal **J-006**.
+  test:phase5-Assertions angepasst, beide Suiten grün, tsc grün.
+  **D-Ops offen:** `CRON_SECRET` in Vercel setzen, sonst bleiben die Crons
+  (jetzt sicher) tot.
+- **B-16 · P1 · `og:image` fehlt in Flagship- und Library-Renderer.**
+  `lib/flagship/render.ts` und `lib/library/render.ts` setzen kein
+  `og:image`/`og:title`-Set — geteilte Demo-/Kunden-Links haben keine
+  Social-Preview. (Nur der Alt-Pfad `multipage-renderer` hat OG-Tags.)
+- **B-17 · P1 · Library-Renderer ohne LocalBusiness-JSON-LD.**
+  `lib/flagship/render.ts:34–48` injiziert LocalBusiness/Restaurant-JSON-LD;
+  `lib/library/render.ts:316–327` rendert nur title+description. Betrifft
+  alle Library-Demos **und die SEO-Unterseiten des Abos** — ausgerechnet
+  das SEO-Produkt liefert Seiten ohne strukturierte Daten.
+- **B-18 · P1 · Keine sitemap.xml/robots.txt pro Kundenseite.**
+  `fertigstellen/route.ts:14`: „Sitemap-Einreichung + Domain-Connect folgen
+  in Phase G" — nicht gebaut. QA-Gate R-SITEMAP
+  (lib/qa-gate/render-checks.ts:153–165) prüft bei publish nur canonical.
+  Live-Kundenseiten sind für Google nur über Crawling ohne Sitemap
+  auffindbar.
+- **B-19 · P2 · SEO-Unterseiten durchlaufen nicht die Demo-QA-Gates.**
+  `lib/seo-plan.ts:172` nutzt nur `technischerSeoCheck` (Z. 69–89:
+  Wortzahl, H1, Title-Länge) — kein Browser-QA, kein Konsistenz-Validator,
+  keine Render-Checks wie bei Demos. Monatlich automatisch generierte
+  Kundenseiten haben damit schwächere Qualitätssicherung als die Demo.
+- **Positiv:** noindex-Logik korrekt (X-Robots-Tag + meta-Injection für
+  Demos; live-Seiten indexierbar); Keyword-Wahl `${branche} ${ort}` +
+  Modifier mit Slug-Dedupe; seo-plan idempotent pro Site+Monat
+  (UNIQUE + Vorab-Check); Freigabe-Workflow (WARTET_AUF_FREIGABE → Mail →
+  1-Klick) vorhanden. Kein manueller Cron-Trigger im Admin (deckt sich
+  mit B-11).
 
 ## Beweise (Screenshots/Logs)
 

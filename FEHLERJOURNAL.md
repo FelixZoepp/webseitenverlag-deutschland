@@ -73,4 +73,30 @@ im Master-Review verifiziert/gebaut werden.
 
 ## Neue Einträge (Master-Review 2026-07-23 ff.)
 
-_(noch keine)_
+### J-006 · „Bearer undefined"-Bypass + tote Crons (alle 6 Cron-Routen)
+- **Datum:** 2026-07-23 (Master-Review Kap. 4, Befund B-15, P0)
+- **Fehler:** Alle 6 Cron-Routen (`briefings`, `seo-plan`, `ads-check`,
+  `kosten-summary`, `qa-scan`, `dunning`) prüften
+  `authHeader !== \`Bearer ${process.env.CRON_SECRET}\``. Da `CRON_SECRET`
+  in keiner Vercel-Umgebung gesetzt ist, hatte das zwei Folgen:
+  (a) **Bypass:** Jeder, der den literalen Header `Bearer undefined` sendet,
+  war autorisiert — inkl. Dunning-Manipulation (Sites sperren) und
+  LLM-Kosten-Missbrauch (seo-plan mit echtem Anthropic-Production-Key).
+  (b) **Tote Crons:** Vercel sendet den Auth-Header nur bei gesetztem
+  Secret — die legitimen Cron-Aufrufe liefen ohne Header und wären nach
+  Setzen des Secrets weiter gelaufen, aber bis dahin war jede Route
+  gleichzeitig offen für den Bypass.
+- **Root Cause:** String-Vergleich gegen ein Template-Literal ohne
+  Unset-Guard: `undefined` wird zu `"Bearer undefined"` interpoliert —
+  ein erratbarer, konstanter „Schlüssel". Fail-open statt fail-closed.
+- **Fix:** `lib/cron-auth.ts` → `istCronAutorisiert(request)`:
+  fail-closed (kein Secret ⇒ immer 401), konstanter Vergleich nur bei
+  gesetztem Secret. Alle 6 Routen umgestellt. D-Ops offen: `CRON_SECRET`
+  in Vercel setzen (sonst bleiben die Crons tot — aber sicher tot).
+- **VERHINDERUNGS-REGEL:** `npm run test:cron-auth`
+  (scripts/test-cron-auth.ts): (1) Unit-Tests am Helper — ohne Secret wird
+  auch `Bearer undefined`/`Bearer ` abgelehnt; mit Secret nur der korrekte
+  Header akzeptiert. (2) Quelltext-Scan über **alle** `app/api/cron/*/route.ts`:
+  jede Route muss `istCronAutorisiert` nutzen, das alte Muster
+  `Bearer ${process.env.CRON_SECRET}` ist verboten. Vor dem Fix: 12 rote
+  Checks (Beweis), danach grün. Regel-Status: ✅
