@@ -138,7 +138,7 @@ export default function CrmPage() {
       }
       if (data?.notiz) {
         setNotizen((prev) => [data.notiz, ...prev])
-        setLeads((prev) => prev.map((l) => (l.id === aktiv.id ? { ...l, notizen_anzahl: l.notizen_anzahl + 1, letzte_notiz: data.notiz.text } : l)))
+        setLeads((prev) => prev.map((l) => (l.id === aktiv.id ? { ...l, notizen_anzahl: l.notizen_anzahl + 1, letzte_notiz: data.notiz.text, letzte_notiz_autor: data.notiz.autor ?? null } : l)))
       }
       setNeueNotiz('')
     } catch {
@@ -194,7 +194,7 @@ export default function CrmPage() {
                 style={{
                   minWidth: '250px', width: '250px', flexShrink: 0,
                   borderRadius: '10px',
-                  outline: dropStage === stage.key ? `2px dashed ${stage.accent}` : 'none',
+                  outline: dropStage === stage.key ? `2px dashed ${stage.accent}` : '2px dashed transparent',
                   outlineOffset: '2px',
                   transition: 'outline-color 120ms',
                 }}
