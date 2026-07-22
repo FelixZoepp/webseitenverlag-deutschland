@@ -9,7 +9,7 @@ Start: 2026-07-23 · Branch: `chore/master-review` · Prompt: `MASTER_REVIEW_PRO
 | 0 Selbstkontrolle (Journal + Regeln) | Gerüst steht, Regel-Beweise in Kap. 6 | 🟡 in Arbeit |
 | 1 Die 9 Stationen | geprüft — 11 Befunde (0×P0, 4×P1, Rest P2/Zielbild) | 🟡 |
 | 2 E2E-Generalprobe | Suite gebaut (15 Stationen), grüner Lauf blockiert durch fehlende Env-Keys (B-12) | 🟡 |
-| 3 Demo-Qualität (Budget-Läufe) | nicht begonnen | ⚪ |
+| 3 Demo-Qualität (Budget-Läufe) | Drehbücher ✓ (3.4-Text), Budget-Läufe blockiert (B-14) | 🟡 |
 | 4 SEO-Automatik | nicht begonnen | ⚪ |
 | 5 Sicherheits-Review | nicht begonnen | ⚪ |
 
@@ -130,6 +130,30 @@ Existenz = Beweis), Library-Fallback ohne LLM überspringt QA-Gate-Kette.
   golden-set, phase5) laufen automatisiert. „Bleibt als Dauer-CI-Lauf"
   (Kap.-2-Anspruch) ist unerfüllt; Workflow-Datei anlegen, sobald Secrets
   verfügbar sind.
+
+### Kapitel 3 — Demo-Qualität (Stand 2026-07-23)
+
+**Erledigt (3.4 Text-Teil):** `config/story-drehbuecher.ts` (Commit ace8aea) —
+5-Akt-Drehbücher (je Akt Name + genau 1 Satz) für alle 16 START_BRANCHEN
+plus GaLaBau als Premium-Scroll-Referenz („Hang-Verwandlung"). HWG-Branchen
+(Zahnarzt, Physio) bewusst als Praxis-Erlebnis-Story statt Behandlungs-
+Verwandlung. Typecheck grün.
+
+**Blockiert (3.1–3.3, 3.4-Generierung, 3.5 Kosten-Report):**
+
+- **B-14 · P1 · Generierungs-Keys fehlen komplett — Budget-Läufe unmöglich.**
+  Die Pipeline braucht `ANTHROPIC_API_KEY` (lib/generierung, lib/pipeline)
+  plus `HIGGSFIELD_API_KEY`/`HIGGSFIELD_API_SECRET` oder `FAL_API_KEY`
+  (lib/assets/higgsfield.ts:354–355 baut die Provider-Kette nur bei
+  gesetzten Keys). Keiner davon ist in `.env.local` oder Shell-Env vorhanden
+  (`.env.local` stammt aus `vercel env pull` ⇒ auch in Vercel fehlen sie).
+  Damit sind die 3 GaLaBau-Testläufe, der Determinismus-Check, die
+  Video-Kette, die Growth-Unterseiten und der Premium-Scroll-Prototyp
+  nicht startbar. Fix = D-Ops mit Felix (gleiche Sitzung wie B-04/B-12).
+- **Nebenbefund:** `galabau` existiert nicht in `branchen_profile`
+  (17 Einträge, GaLaBau fehlt; die 16 START_BRANCHEN + `reiterhof`).
+  Für die GaLaBau-Läufe muss die Branche vorab geseedet oder der
+  Flagship-Pfad ohne Branchen-Profil genutzt werden — beim Budget-Lauf klären.
 
 ## Beweise (Screenshots/Logs)
 
