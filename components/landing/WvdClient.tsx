@@ -7,6 +7,13 @@ import { motion } from "framer-motion";
 /** Live-Demo GrünWerk GaLaBau (T3, Felix 2026-07-22: Demo auf der Landingpage). */
 const DEMO_URL = "/demo/VQDzw4LlCT82KT4_X3xU3rL1Rwq3k21A";
 
+/** Beispiel-Demos (Higgsfield, Felix 2026-07-22: eigene Reihe unter den Ergebnissen). */
+const BEISPIEL_DEMOS = [
+  { name: "Solar", url: "https://sonnenstrom-journey.higgsfield.app" },
+  { name: "Dachdecker", url: "https://dachmeister.higgsfield.app" },
+  { name: "Garten", url: "https://garden-scroll.higgsfield.app" },
+];
+
 const reveal = {
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
@@ -810,6 +817,31 @@ export default function WvdClient() {
             <a href="/kundenmeinungen" className="btn btn-primary" style={{ fontSize: 16, padding: "18px 40px" }}>
               <span>Alle Kundenergebnisse ansehen →</span>
             </a>
+          </div>
+
+          {/* Beispiel-Demos (Higgsfield) */}
+          <div style={{ marginTop: 40 }}>
+            <div style={{ fontFamily: "var(--font-ui)", fontSize: 13, color: "var(--ink-soft)", fontWeight: 600, marginBottom: 14 }}>
+              Weitere Beispiel-Demos:
+            </div>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" as const }}>
+              {BEISPIEL_DEMOS.map((demo) => (
+                <a
+                  key={demo.name}
+                  href={demo.url}
+                  target="_blank"
+                  rel="noopener"
+                  style={{
+                    fontFamily: "var(--font-ui)", fontSize: 14, fontWeight: 600,
+                    color: "inherit", textDecoration: "none",
+                    padding: "10px 20px", borderRadius: 999,
+                    background: "var(--surface-card)", boxShadow: "var(--shadow-sm)",
+                  }}
+                >
+                  {demo.name} →
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </section>
