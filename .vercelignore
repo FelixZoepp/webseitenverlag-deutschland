@@ -1,0 +1,10 @@
+.assets-work
+docs/screenshots
+.env.local
+.env.*.local
+coverage
+.lighthouse
+.lighthouseci
+test-results
+playwright-report
+.claude
