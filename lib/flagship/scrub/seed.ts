@@ -6,9 +6,10 @@
  * Cyan #00e5ff). Meta-Felder (Firma/Ort/Telefon) sind Musterdaten und werden
  * bei echten Kunden VERBATIM aus business_profiles ersetzt — nie LLM.
  *
- * frames ist im Seed absichtlich NICHT gesetzt: ohne generierte Assets rendert
- * die Komposition den statischen Poster-Modus. Die Frame-Sequenz (240 Bilder)
- * entsteht erst aus den 5 Higgsfield-Clips (rezepte/REZEPTE_SCRUB_PV.md).
+ * frames IST gesetzt (Scrub-Modus aktiv): 303 WebP-Frames (12 fps, 540p,
+ * 4,87 MB gesamt) unter public/media/pv/frames/, extrahiert aus den 5
+ * seam-gelockten Higgsfield-Clips (rezepte/REZEPTE_SCRUB_PV.md). Poster
+ * poster-01…05.jpg (1920×1080) dienen als Fallback (no-JS/reduced-motion).
  */
 
 import type { ScrubConfig } from './types'
@@ -48,7 +49,10 @@ export const scrubStorySeed: ScrubConfig = {
         align: 'left',
         poster: {
           label: 'PV Szene 1 — Abendhaus mit Solardach',
+          datei: '/media/pv/poster-01.jpg',
           alt: 'Modernes Haus mit Photovoltaik-Dach in der Abenddämmerung, Sonne hinter dem First',
+          breite: 1920,
+          hoehe: 1080,
         },
       },
       {
@@ -61,7 +65,10 @@ export const scrubStorySeed: ScrubConfig = {
         align: 'right',
         poster: {
           label: 'PV Szene 2 — Modul-Nahaufnahme',
+          datei: '/media/pv/poster-02.jpg',
           alt: 'Extreme Nahaufnahme goldglühender Solarzellen',
+          breite: 1920,
+          hoehe: 1080,
         },
       },
       {
@@ -74,7 +81,10 @@ export const scrubStorySeed: ScrubConfig = {
         align: 'left',
         poster: {
           label: 'PV Szene 3 — Stromfluss durch Kabel',
+          datei: '/media/pv/poster-03.jpg',
           alt: 'Cyanfarbene Stromströme fließen entlang von Kupferkabeln',
+          breite: 1920,
+          hoehe: 1080,
         },
       },
       {
@@ -87,7 +97,10 @@ export const scrubStorySeed: ScrubConfig = {
         align: 'right',
         poster: {
           label: 'PV Szene 4 — Haus erwacht',
+          datei: '/media/pv/poster-04.jpg',
           alt: 'Haus in der Dämmerung, Fenster leuchten warm auf',
+          breite: 1920,
+          hoehe: 1080,
         },
       },
       {
@@ -100,7 +113,10 @@ export const scrubStorySeed: ScrubConfig = {
         align: 'left',
         poster: {
           label: 'PV Szene 5 — Batteriespeicher',
+          datei: '/media/pv/poster-05.jpg',
           alt: 'Batteriespeicher mit cyanfarbenen LED-Ladeanzeigen neben Wechselrichter',
+          breite: 1920,
+          hoehe: 1080,
         },
         aktionen: [
           { label: 'Angebot anfordern', href: '#kontakt', variante: 'primaer' },
@@ -108,6 +124,13 @@ export const scrubStorySeed: ScrubConfig = {
         ],
       },
     ],
+    frames: {
+      pfad_muster: '/media/pv/frames/frame-NUM.webp',
+      gesamt: 303,
+      ziffern: 4,
+      fps: 12,
+      vorlade: 20,
+    },
     kontakt: {
       pill: 'Kostenlos & unverbindlich',
       h2: 'Dein Dach. Dein Strom. Dein Angebot.',
