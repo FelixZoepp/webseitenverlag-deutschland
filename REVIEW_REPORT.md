@@ -9,7 +9,7 @@ Start: 2026-07-23 · Branch: `chore/master-review` · Prompt: `MASTER_REVIEW_PRO
 | 0 Selbstkontrolle (Journal + Regeln) | Gerüst steht, Regel-Beweise in Kap. 6 | 🟡 in Arbeit |
 | 1 Die 9 Stationen | geprüft — 11 Befunde (0×P0, 4×P1, Rest P2/Zielbild) | 🟡 |
 | 2 E2E-Generalprobe | Suite gebaut (15 Stationen), grüner Lauf blockiert durch fehlende Env-Keys (B-12) | 🟡 |
-| 3 Demo-Qualität (Budget-Läufe) | Drehbücher ✓ (3.4-Text), Text-Läufe möglich (Anthropic-Key da), Video/Assets blockiert (B-14) | 🟡 |
+| 3 Demo-Qualität (Budget-Läufe) | Drehbücher ✓, Determinismus ✅ bewiesen (0 €), GaLaBau-Läufe = Zielbild-Lücke (B-20), Growth-Unterseiten fehlen (B-21), Video/Assets D-Ops-blockiert (B-14) | 🟡 |
 | 4 SEO-Automatik | geprüft — B-15 P0 (Cron-Auth-Bypass) im Code gefixt + Verhinderungs-Regel; 4 weitere Befunde (B-16..B-19); D-Ops CRON_SECRET offen | 🟡 |
 | 5 Sicherheits-Review | nicht begonnen | ⚪ |
 
@@ -160,6 +160,39 @@ Verwandlung. Typecheck grün.
   (17 Einträge, GaLaBau fehlt; die 16 START_BRANCHEN + `reiterhof`).
   Für die GaLaBau-Läufe muss die Branche vorab geseedet oder der
   Flagship-Pfad ohne Branchen-Profil genutzt werden — beim Budget-Lauf klären.
+
+**Abschluss Kap. 3 (2026-07-23, nach Code-Recherche + Beweis-Lauf):**
+
+- **Determinismus ✅ bewiesen.** `personalisiereFlagshipConfig`
+  (lib/pipeline/generate-flagship-demo.ts:292) ist rein mechanisch —
+  verbatim-Ersetzung von Firma/Ort/Telefon, **kein LLM-Call**. Beweis:
+  `scripts/review-determinismus.ts` (Doppel-Lauf „Malerbetrieb Krause GmbH,
+  Mainz" gegen approved `maler`-Profil): identische SHA-256-Hashes über
+  Config (`ca2d58ee…`) und gerendertes HTML (`faae0c2c…`). LLM (temperature
+  0.3/0.4, kein seed-Param) steckt nur im Branchen-Seeding und Premium-Pfad
+  — nicht im Verkaufs-Demo-Pfad.
+- **B-20 · P1 · GaLaBau-Musterbetriebs-Läufe sind ohne Bau-Auftrag
+  unmöglich — kein Personalisierungs-Codepfad für Kompositionen.**
+  `personalisiereFlagshipConfig` verarbeitet nur `FlagshipConfig` und
+  crasht auf `GalabauConfig` (dokumentiert in
+  scripts/generate-galabau-demo.ts:1–19); `galabau` fehlt in
+  `branchen_profile` und START_BRANCHEN; das einzige Erzeugungs-Script ist
+  GrünWerk-hardcoded (Seed + Asset-Fill, keine Firma/Ort-Ersetzung).
+  Leistungs-Karten „3–10" sind nur Kommentar (keine Validierung), es gibt
+  genau 5 Asset-Slots (svc_01–05) — ab der 6. Leistung Platzhalter.
+  ⇒ Die geforderten 3 Läufe (3/5/8 Leistungen) sind als **Zielbild-Lücke**
+  dokumentiert, nicht durchführbar. Kein P0: GaLaBau ist nicht verkäuflich
+  angebunden (nicht in START_BRANCHEN), kein bestehender Verkaufspfad bricht.
+- **B-21 · P1 · Growth-Unterseiten „{Leistung} in {Stadt}" existieren
+  nicht.** `renderUnterseite` (lib/flagship/render.ts:207–232) liefert
+  4 feste Unterseiten (leistungen/ergebnisse/ueber-uns/kontakt) — keine
+  Seite je Leistung, kein Title/H1-Muster „{Leistung} in {Stadt}", keine
+  Sitemap dazu (hängt mit B-18 zusammen). Kontaktformular-Testsubmit je
+  Leistungsseite damit gegenstandslos.
+- **Video-Stufe + Premium-Scroll-Bau:** weiterhin D-Ops-blockiert (B-14,
+  Higgsfield-Keys leer). Text-Drehbücher für alle 16 Branchen ✓ (ace8aea).
+- **Kosten-Report:** 0,00 € — alle durchführbaren Kap.-3-Teile kamen ohne
+  LLM-/Higgsfield-Call aus (Personalisierung ist mechanisch).
 
 ### Kapitel 4 — SEO-Automatik (Stand 2026-07-23)
 
