@@ -4,6 +4,9 @@ import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
+/** Live-Demo GrünWerk GaLaBau (T3, Felix 2026-07-22: Demo auf der Landingpage). */
+const DEMO_URL = "/demo/VQDzw4LlCT82KT4_X3xU3rL1Rwq3k21A";
+
 const reveal = {
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
@@ -758,36 +761,56 @@ export default function WvdClient() {
           <motion.div {...reveal}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 48 }}>
             {[
-              { name: "Grünwerk GaLaBau", result: "+340% Anfragen", stars: 5 },
+              { name: "Grünwerk GaLaBau", result: "+340% Anfragen", stars: 5, demo: DEMO_URL },
               { name: "Praxis Dr. Weber", result: "Warteliste nach 4 Wochen", stars: 5 },
               { name: "Elektro Schuster", result: "5 neue Aufträge/Woche", stars: 5 },
-            ].map((t, i) => (
-              <div key={i} style={{
+            ].map((t, i) => {
+              const inhalt = (
+                <>
+                  <div style={{ display: "flex", justifyContent: "center", gap: 3, marginBottom: 12 }}>
+                    {Array.from({ length: t.stars }).map((_, s) => (
+                      <svg key={s} viewBox="0 0 24 24" fill="var(--red-500)" style={{ width: 16, height: 16 }}>
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <div style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 18, marginBottom: 6, letterSpacing: "-0.01em" }}>
+                    {t.name}
+                  </div>
+                  <div style={{ fontFamily: "var(--font-ui)", fontSize: 13, color: "var(--red-500)", fontWeight: 600 }}>
+                    {t.result}
+                  </div>
+                </>
+              );
+              const kartenStil = {
                 padding: "28px 24px", borderRadius: 20,
                 background: "var(--surface-card)", boxShadow: "var(--shadow-sm)",
                 textAlign: "center" as const,
-              }}>
-                <div style={{ display: "flex", justifyContent: "center", gap: 3, marginBottom: 12 }}>
-                  {Array.from({ length: t.stars }).map((_, s) => (
-                    <svg key={s} viewBox="0 0 24 24" fill="var(--red-500)" style={{ width: 16, height: 16 }}>
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                  ))}
+              };
+              return t.demo ? (
+                <a key={i} href={t.demo} target="_blank" rel="noopener" style={{ ...kartenStil, display: "block", color: "inherit", textDecoration: "none" }}>
+                  {inhalt}
+                  <div style={{ fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--ink-soft)", fontWeight: 600, marginTop: 10 }}>
+                    Live-Demo ansehen →
+                  </div>
+                </a>
+              ) : (
+                <div key={i} style={kartenStil}>
+                  {inhalt}
                 </div>
-                <div style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 18, marginBottom: 6, letterSpacing: "-0.01em" }}>
-                  {t.name}
-                </div>
-                <div style={{ fontFamily: "var(--font-ui)", fontSize: 13, color: "var(--red-500)", fontWeight: 600 }}>
-                  {t.result}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           </motion.div>
 
-          <a href="/kundenmeinungen" className="btn btn-primary" style={{ fontSize: 16, padding: "18px 40px" }}>
-            <span>Alle Kundenergebnisse ansehen →</span>
-          </a>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" as const }}>
+            <a href={DEMO_URL} target="_blank" rel="noopener" className="btn btn-ghost" style={{ fontSize: 16, padding: "18px 40px" }}>
+              <span>Live-Demo ansehen</span>
+            </a>
+            <a href="/kundenmeinungen" className="btn btn-primary" style={{ fontSize: 16, padding: "18px 40px" }}>
+              <span>Alle Kundenergebnisse ansehen →</span>
+            </a>
+          </div>
         </div>
       </section>
 
