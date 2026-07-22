@@ -256,11 +256,20 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 
 | Branche | B1 | Freigabe | B2 | B3 | B4 | B5-Optik | Assets | Demo-URL |
 |---|---|---|---|---|---|---|---|---|
-| 1 galabau | ✅ (T1-Seed) | ✅ | ✅ (`galabau-landing-v1`) | ✅ (`rezepte/REZEPTE_GALABAU.md`) | ✅ (test:galabau 130, LH 100/92/100) | ✅ (docs/screenshots/galabau/) | ⛔ Higgsfield-Key (WARTELISTE) | — (T3 offen) |
+| 1 galabau | ✅ (T1-Seed) | ✅ | ✅ (`galabau-landing-v1`) | ✅ (`rezepte/REZEPTE_GALABAU.md`) | ✅ (test:galabau 130, LH 100/92/100) | ✅ (docs/screenshots/galabau/) | ✅ **21/21 approved** (Lauf 2026-07-22, 58,25 Credits) | — (T3 offen) |
 | 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | ✅ (`rezepte/REZEPTE_MALER.md`) | ✅ (test:maler 204, LH 100/92–95/100 auf allen 10 Seiten) | ✅ **[x] Felix 2026-07-22** (docs/screenshots/maler/, `frozen:true`) | ⛔ Higgsfield-Key (WARTELISTE) | — |
 | 3–16 | — | — | — | — | — | — | — | — |
 
-Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0 (Stub-Phase) · scrub-premium/pv **232 Higgsfield-Credits** (Asset-Lauf 2026-07-22: 7 Entry Still + 5×45 Videos, Reserve 14 unangetastet)
+Kosten-Log je Branche (Cent): galabau **58,25 Higgsfield-Credits** (Asset-Lauf 2026-07-22: 15 Stills gpt_image_2/nano_banana_2 + 1 Video seedance_2_0, Balance 1044,92→986,67) · maler 0 (Stub-Phase) · scrub-premium/pv **232 Higgsfield-Credits** (Asset-Lauf 2026-07-22: 7 Entry Still + 5×45 Videos, Reserve 14 unangetastet)
+
+## Arbeitsblock: GaLaBau-Asset-Lauf — 21/21 Slots generiert + importiert (approved)
+
+- **Freigabe:** Felix 2026-07-22 („gib galabau frei") — kompletter Lauf nach `rezepte/REZEPTE_GALABAU.md`, Ketten-Logik eingehalten (Hero zuerst → Video aus Hero → BA NACHHER zuerst, VORHER als image-to-image via nano_banana_2 → Avatare als lokale sharp-Crops, keine eigene Generierung).
+- **Generiert:** 15 Stills (gpt_image_2, 2k) + 1 Hero-Video (seedance_2_0, 5 s 1080p, ffmpeg CRF 26 → **1,6 MB** ≤ 3-MB-Limit, `-an +faststart`). QA-Stichproben ✓: BA-Paar pixel-konsistent (Haus/Horizont/Bäume identisch), svc-01/why-3 ohne lesbaren Text (Bleistiftlinien unleserlich), Team/Kontakt nur von hinten (keine Gesichter, keine Logos).
+- **Import:** `npx tsx scripts/import-assets.ts --branche galabau --dir .assets-work/galabau/import --approve` ⇒ **21 importiert, 0 Fehler** (alle Slots inkl. avatar_1–4 als 1:1-Crops aus team-1..3 + why-1, BA-Paar mit gemeinsamer pair_id).
+- **Stolperstein behoben:** `SUPABASE_SERVICE_ROLE_KEY` fehlte lokal → aus Vercel (Production) gezogen. Der dort gespeicherte Wert endete auf ein literales `\n` (beim Anlegen via echo ohne -n) ⇒ „Failed to base64url decode the signature" bei allen 21 Uploads. Fix: `\n` aus der Zeile in `.env.local` entfernt — zweiter Lauf 21/21 grün. **Merke:** Vercel-Secret selbst enthält weiter das `\n` (bei Neu-Pull erneut strippen oder Secret einmal neu setzen).
+- **Kosten:** 58,25 Credits (Balance 1044,92 → 986,67, ultra) — deutlich unter der 150er-Schätzung, da gpt_image_2-Stills günstiger als kalkuliert.
+- **Nächster Schritt:** T3 — erste GaLaBau-Demo (GrünWerk) mit echten Assets rendern.
 
 ## Arbeitsblock: GaLaBau-Rezeptliste komplettiert — Motiv-Prompts nach Maler-Muster
 
