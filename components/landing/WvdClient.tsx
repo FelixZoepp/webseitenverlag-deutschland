@@ -186,15 +186,25 @@ export default function WvdClient() {
           </div>
           <a href="/entwurf" className="nav-cta">Kostenloses Erstgespräch</a>
           <button
-            style={{ display: "none", background: "none", border: "none", cursor: "pointer" }}
+            className="nav-burger"
             onClick={() => setMobileMenu(!mobileMenu)}
             aria-label="Menü"
+            aria-expanded={mobileMenu}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 24, height: 24 }}>
               {mobileMenu ? <path d="M6 6l12 12M6 18L18 6" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
             </svg>
           </button>
         </div>
+        {mobileMenu && (
+          <div className="nav-mobile-menu">
+            <a href="#problem" onClick={() => setMobileMenu(false)}>Warum jetzt</a>
+            <a href="#rechner" onClick={() => setMobileMenu(false)}>ROI-Rechner</a>
+            <a href="#ablauf" onClick={() => setMobileMenu(false)}>Ablauf</a>
+            <a href="/kundenmeinungen" onClick={() => setMobileMenu(false)}>Kundenmeinungen</a>
+            <a href="/blog" onClick={() => setMobileMenu(false)}>Blog</a>
+          </div>
+        )}
       </nav>
 
       {/* ═══════════════════════════════════════
@@ -256,7 +266,7 @@ export default function WvdClient() {
       {/* ═══════════════════════════════════════
           2. PROBLEM-AGITATION – "Kennst du das?"
           ═══════════════════════════════════════ */}
-      <section id="problem" style={{ background: "var(--cream)", padding: "96px 0" }}>
+      <section id="problem" style={{ background: "var(--cream)" }}>
         <div className="container" style={{ maxWidth: 1100 }}>
           <div className="section-head">
             <span className="eyebrow">Kommt dir das bekannt vor?</span>
@@ -326,7 +336,7 @@ export default function WvdClient() {
       {/* ═══════════════════════════════════════
           3. DIE WENDE – Guide-Positionierung
           ═══════════════════════════════════════ */}
-      <section style={{ padding: "96px 0" }}>
+      <section>
         <div className="container about-grid">
           <div className="about-text">
             <span className="eyebrow">Warum es heute anders geht</span>
@@ -373,7 +383,7 @@ export default function WvdClient() {
       {/* ═══════════════════════════════════════
           3b. FEATURES – 5er Bento
           ═══════════════════════════════════════ */}
-      <section className="bento-section" style={{ padding: "120px 0" }}>
+      <section className="bento-section">
         <div className="beams" />
         <div className="container" style={{ position: "relative", zIndex: 2 }}>
           <div className="section-head">
@@ -564,7 +574,7 @@ export default function WvdClient() {
       {/* ═══════════════════════════════════════
           5. ROI-RECHNER – Das Herzstück
           ═══════════════════════════════════════ */}
-      <section id="rechner" className="bento-section" style={{ padding: "120px 0" }}>
+      <section id="rechner" className="bento-section">
         <div className="beams" />
         <div className="container" style={{ maxWidth: 880, position: "relative", zIndex: 2 }}>
           <div className="section-head">
@@ -633,7 +643,7 @@ export default function WvdClient() {
           {showResult && roi && (
             <div style={{ animation: "fadeInUp 0.22s var(--ease-out) forwards" }}>
               {/* Funnel */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, marginBottom: 32 }}>
+              <div className="roi-funnel" style={{ marginBottom: 32 }}>
                 {[
                   { label: "Google-Suchen/Monat", value: roi.suchvolumen.toLocaleString("de-DE"), sub: `„${branche} ${stadt}"`, icon: <path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4-3-9s1.34-9 3-9" /> },
                   { label: "Klicken auf Top-Seiten", value: roi.klicks.toString(), sub: "~3.5% CTR", icon: <><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></> },
@@ -672,16 +682,14 @@ export default function WvdClient() {
                       {item.sub}
                     </div>
                     {i < 4 && (
-                      <div style={{ position: "absolute" as const, right: -8, top: "50%", transform: "translateY(-50%)", color: "var(--gray-300)", fontSize: 20, zIndex: 2 }}>→</div>
+                      <div className="roi-pfeil" style={{ position: "absolute" as const, right: -8, top: "50%", transform: "translateY(-50%)", color: "var(--gray-300)", fontSize: 20, zIndex: 2 }}>→</div>
                     )}
                   </div>
                 ))}
               </div>
 
               {/* The Big Comparison */}
-              <div style={{
-                display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 32,
-              }}>
+              <div className="roi-vergleich" style={{ marginBottom: 32 }}>
                 {/* Our Model */}
                 <div style={{
                   padding: "32px 28px", borderRadius: 20,
@@ -754,7 +762,7 @@ export default function WvdClient() {
       {/* ═══════════════════════════════════════
           6. SOCIAL PROOF – Teaser → Unterseite
           ═══════════════════════════════════════ */}
-      <section id="ergebnisse" style={{ padding: "96px 0", background: "var(--cream)" }}>
+      <section id="ergebnisse" style={{ background: "var(--cream)" }}>
         <div className="container" style={{ maxWidth: 900, textAlign: "center" }}>
           <span className="eyebrow" style={{ display: "block", marginBottom: 20 }}>Echte Ergebnisse</span>
           <h2 className="display" style={{ fontSize: "clamp(36px, 4.5vw, 56px)", marginBottom: 16 }}>
@@ -766,7 +774,7 @@ export default function WvdClient() {
 
           {/* Preview Cards */}
           <motion.div {...reveal}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 48 }}>
+          <div className="ergebnis-cards" style={{ marginBottom: 48 }}>
             {[
               { name: "Grünwerk GaLaBau", result: "+340% Anfragen", stars: 5, demo: DEMO_URL },
               { name: "Praxis Dr. Weber", result: "Warteliste nach 4 Wochen", stars: 5 },
@@ -864,10 +872,10 @@ export default function WvdClient() {
       {/* ═══════════════════════════════════════
           7. KONSEQUENZEN + VISION
           ═══════════════════════════════════════ */}
-      <section style={{ padding: "96px 0" }}>
+      <section>
         <div className="container" style={{ maxWidth: 900 }}>
           <motion.div {...reveal}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+          <div className="konsequenzen-grid">
             {/* Negative */}
             <div style={{
               padding: "40px 32px", borderRadius: 24,
@@ -927,7 +935,7 @@ export default function WvdClient() {
       {/* ═══════════════════════════════════════
           8. FAQ
           ═══════════════════════════════════════ */}
-      <section id="faq" style={{ background: "var(--bg)", padding: "96px 0" }}>
+      <section id="faq" style={{ background: "var(--bg)" }}>
         <div className="container" style={{ maxWidth: 800 }}>
           <div className="section-head">
             <span className="eyebrow">Letzte Fragen?</span>
@@ -955,7 +963,7 @@ export default function WvdClient() {
       {/* ═══════════════════════════════════════
           FINALER CTA
           ═══════════════════════════════════════ */}
-      <section id="contact" style={{ padding: "96px 0" }}>
+      <section id="contact">
         <div className="container">
           <div className="cta-section">
             <div style={{ textAlign: "center", maxWidth: 680, margin: "0 auto" }}>

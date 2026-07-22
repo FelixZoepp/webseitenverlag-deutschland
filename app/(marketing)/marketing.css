@@ -1383,3 +1383,51 @@ footer {
     linear-gradient(to bottom, rgba(23, 24, 26, 0.035) 1px, transparent 1px);
   background-size: 44px 44px;
 }
+
+/* ========================================
+   LANDING MOBIL (Felix 2026-07-22)
+   ======================================== */
+
+/* Burger-Menü: nur auf Mobil sichtbar */
+.nav-burger {
+  display: none;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-primary);
+  padding: 4px;
+}
+.nav-mobile-menu {
+  display: none;
+  flex-direction: column;
+  padding: 8px 20px 16px;
+  border-top: 1px solid var(--border-default);
+  background: rgba(255, 255, 255, 0.97);
+}
+.nav-mobile-menu a {
+  padding: 12px 4px;
+  font-size: 16px; font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-default);
+}
+.nav-mobile-menu a:last-child { border-bottom: none; }
+
+/* Grids (Desktop-Standard) */
+.roi-funnel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.roi-vergleich { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.ergebnis-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.konsequenzen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+
+@media (max-width: 768px) {
+  .nav-burger { display: flex; align-items: center; }
+  .nav-mobile-menu { display: flex; }
+  .nav-cta { font-size: 13px; padding: 8px 14px; }
+  .logo { font-size: 18px; }
+
+  .roi-funnel { grid-template-columns: 1fr; }
+  .roi-pfeil { display: none; }
+  .roi-vergleich { grid-template-columns: 1fr; }
+  .ergebnis-cards { grid-template-columns: 1fr; }
+  .konsequenzen-grid { grid-template-columns: 1fr; gap: 20px; }
+
+  .bento-section { padding: 72px 0; }
+  .section-head { margin-bottom: 40px; }
+}
