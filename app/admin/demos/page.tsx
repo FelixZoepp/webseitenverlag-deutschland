@@ -448,7 +448,7 @@ export default function DemosPage() {
                     const info = { starter: { emoji: '🥉', label: 'Starter', preis: '99' }, business: { emoji: '🥈', label: 'Business', preis: '149' }, growth: { emoji: '🥇', label: 'Growth', preis: '249' } }[p]
                     const aktiv = paket === p
                     return (
-                      <button key={p} type="button" onClick={() => setPaket(p)} disabled={generating}
+                      <button key={p} type="button" onClick={() => { setPaket(p); if (p === 'starter') setScrollAnimationen(false) }} disabled={generating}
                         style={{ flex: 1, padding: '8px 4px', background: aktiv ? 'var(--za-gold-grad)' : 'rgba(255,255,255,0.7)', color: aktiv ? '#fff' : 'var(--za-fg-2)', border: aktiv ? 'none' : '1px solid var(--za-border)', borderRadius: '8px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', lineHeight: '1.3' }}>
                         {info.emoji}<br />{info.label}<br /><span style={{ fontSize: '10px', opacity: 0.8 }}>{info.preis} €</span>
                       </button>
@@ -517,10 +517,10 @@ export default function DemosPage() {
               </div>
               <div>
                 <label style={labelStyle}>Extras</label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: scrollAnimationen ? 'rgba(212,168,40,0.08)' : 'rgba(255,255,255,0.7)', border: `1px solid ${scrollAnimationen ? 'var(--za-gold)' : 'var(--za-border)'}`, borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: 'var(--za-fg-2)', transition: '.15s' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: scrollAnimationen ? 'rgba(212,168,40,0.08)' : 'rgba(255,255,255,0.7)', border: `1px solid ${scrollAnimationen ? 'var(--za-gold)' : 'var(--za-border)'}`, borderRadius: '8px', cursor: paket === 'starter' ? 'not-allowed' : 'pointer', opacity: paket === 'starter' ? 0.5 : 1, fontSize: '12px', fontWeight: 600, color: 'var(--za-fg-2)', transition: '.15s' }}>
                   <input type="checkbox" checked={scrollAnimationen} onChange={(e) => setScrollAnimationen(e.target.checked)}
-                    style={{ width: '16px', height: '16px', accentColor: 'var(--za-gold)' }} disabled={generating} />
-                  Scroll-Animationen (Premium)
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--za-gold)' }} disabled={generating || paket === 'starter'} />
+                  {paket === 'starter' ? 'Scroll-Animationen — ab Business' : 'Scroll-Animationen (Scroll-Video + Effekte)'}
                 </label>
               </div>
             </div>
