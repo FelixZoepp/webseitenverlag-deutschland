@@ -74,6 +74,45 @@ export function wirksamesKuendigungsdatum(
 }
 
 // ------------------------------------------------------------
+// Upsell-Kopplung (§10.4 + Entscheidung 2026-07-22)
+// ------------------------------------------------------------
+
+export interface HauptvertragKonditionen {
+  ende: string
+  verlaengerung_monate: number
+  kuendigungsfrist_monate: number
+}
+
+/**
+ * Konditionen für einen neuen Upsell-Vertrag: Upsell-Abos übernehmen
+ * Restlaufzeit (`ende`), Verlängerung und Kündigungsfrist des aktiven
+ * Hauptvertrags — ein Kündigungstermin für alles. Da beide Verträge
+ * dasselbe `ende` und dieselbe Verlängerung haben, bleiben sie über
+ * `wirksamesKuendigungsdatum` dauerhaft synchron.
+ *
+ * Ohne aktiven Hauptvertrag: Fallback auf die Config-Werte des Produkts
+ * (config/upsells.ts, heutiges Verhalten — monatlich kündbar).
+ */
+export function gekoppelteUpsellKonditionen(
+  hauptVertrag: HauptvertragKonditionen | null,
+  produkt: { laufzeitMonate: number; verlaengerungMonate: number; kuendigungsfristMonate: number },
+  beginn: string
+): { ende: string; verlaengerung_monate: number; kuendigungsfrist_monate: number } {
+  if (hauptVertrag) {
+    return {
+      ende: hauptVertrag.ende,
+      verlaengerung_monate: hauptVertrag.verlaengerung_monate,
+      kuendigungsfrist_monate: hauptVertrag.kuendigungsfrist_monate,
+    }
+  }
+  return {
+    ende: vertragsende(beginn, Math.max(1, produkt.laufzeitMonate)),
+    verlaengerung_monate: produkt.verlaengerungMonate,
+    kuendigungsfrist_monate: produkt.kuendigungsfristMonate,
+  }
+}
+
+// ------------------------------------------------------------
 // Manuelle Aufgaben (Zero-Fulfillment-Ausnahmen)
 // ------------------------------------------------------------
 
