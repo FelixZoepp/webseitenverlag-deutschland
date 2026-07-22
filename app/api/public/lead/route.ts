@@ -119,9 +119,9 @@ export async function POST(request: Request) {
   }
 
   // Benachrichtigung an Vertrieb — Fehler blockieren den Lead nicht
-  const notifyTo = process.env.LEAD_NOTIFY_EMAIL || process.env.FROM_EMAIL
+  const notifyTo = ['hendrik@hoffmann-wd.de', 'felix@zoeppmedia.de']
   const apiKey = process.env.RESEND_API_KEY
-  if (notifyTo && apiKey) {
+  if (apiKey) {
     try {
       const resend = new Resend(apiKey)
       const fromEmail = process.env.FROM_EMAIL || 'noreply@resend.dev'
@@ -138,8 +138,8 @@ export async function POST(request: Request) {
         from: `${fromName} <${fromEmail}>`,
         to: notifyTo,
         replyTo: lead.email,
-        subject: `Neuer Lead: ${lead.firma || lead.name}${lead.branche ? ` (${lead.branche})` : ''}`,
-        html: `<h2 style="font-family:sans-serif;color:#2563eb">Neue Anfrage über die Landing-Page</h2><table style="font-family:sans-serif;font-size:15px;border-collapse:collapse;width:100%;max-width:600px">${rows}</table><p style="font-family:sans-serif;font-size:13px;color:#94a3b8;margin-top:24px">Lead-ID: ${inserted.id} · im Admin unter Leads sichtbar</p>`,
+        subject: 'Neuer Lead Webseitenverlag Deutschland',
+        html: `<h2 style="font-family:sans-serif;color:#2563eb">Neuer Lead Webseitenverlag Deutschland</h2><p style="font-family:sans-serif;font-size:14px;color:#374151">Eingegangen über <a href="https://www.webseitenverlag-deutschland.de/anfrage">webseitenverlag-deutschland.de/anfrage</a></p><table style="font-family:sans-serif;font-size:15px;border-collapse:collapse;width:100%;max-width:600px">${rows}</table><p style="font-family:sans-serif;font-size:13px;color:#94a3b8;margin-top:24px">Lead-ID: ${inserted.id} · im Admin unter Leads sichtbar</p>`,
       })
     } catch (err) {
       console.error('Lead notification email failed:', err)

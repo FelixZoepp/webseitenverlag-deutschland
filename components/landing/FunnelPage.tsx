@@ -214,14 +214,13 @@ export default function FunnelPage() {
               Der kostenlose Website-Check
             </p>
             <h1 className="mb-5 text-[34px] font-extrabold leading-[1.12] tracking-tight text-[var(--ink)] sm:text-[40px]">
-              Wie viel Potenzial steckt in Ihrem Betrieb?
+              In 60 Sekunden zu Ihrer kostenlosen Demo
             </h1>
             <p className="mx-auto mb-9 max-w-[380px] text-[16.5px] leading-relaxed text-[var(--ink-soft)]">
-              Finden Sie in 60 Sekunden heraus, ob sich eine professionelle Website für Sie lohnt
-              &ndash; inklusive kostenlosem Entwurf.
+              Kurz Fragen beantworten &ndash; und wir machen die Webseite fertig.
             </p>
             <button type="button" onClick={() => setSchritt(0)} className={btnCls}>
-              Jetzt Check starten <span aria-hidden="true">→</span>
+              Jetzt die eigene Webseite konfigurieren <span aria-hidden="true">→</span>
             </button>
             <p className="mt-4 font-[family-name:var(--font-mono)] text-[12px] tracking-[0.12em] text-[var(--ink-soft)]">
               Kostenlos · {GESAMT} kurze Fragen
