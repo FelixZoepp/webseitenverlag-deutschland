@@ -58,6 +58,8 @@ export default function CrmPage() {
   const [notizenLaden, setNotizenLaden] = useState(false)
   const [neueNotiz, setNeueNotiz] = useState('')
   const [busy, setBusy] = useState(false)
+  const [dragLeadId, setDragLeadId] = useState<string | null>(null)
+  const [dropStage, setDropStage] = useState<CrmStage | null>(null)
 
   const laden = useCallback(async () => {
     const res = await fetch('/api/admin/crm')
@@ -90,8 +92,13 @@ export default function CrmPage() {
   }
 
   async function stageWechseln(lead: CrmLead, stage: CrmStage) {
+    if (lead.crm_stage === stage) return
+    const vorher = lead.crm_stage
     setBusy(true)
     setError(null)
+    // Optimistisch: Karte wechselt sofort die Spalte, bei Fehler Rollback.
+    setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, crm_stage: stage } : l)))
+    setAktiv((prev) => (prev && prev.id === lead.id ? { ...prev, crm_stage: stage } : prev))
     try {
       const res = await fetch(`/api/admin/leads/${lead.id}`, {
         method: 'PATCH',
@@ -100,13 +107,12 @@ export default function CrmPage() {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => null)
-        setError(data?.error || 'Stage-Wechsel fehlgeschlagen.')
-        return
+        throw new Error(data?.error || 'Stage-Wechsel fehlgeschlagen.')
       }
-      setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, crm_stage: stage } : l)))
-      setAktiv((prev) => (prev && prev.id === lead.id ? { ...prev, crm_stage: stage } : prev))
-    } catch {
-      setError('Netzwerkfehler beim Stage-Wechsel.')
+    } catch (e) {
+      setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, crm_stage: vorher } : l)))
+      setAktiv((prev) => (prev && prev.id === lead.id ? { ...prev, crm_stage: vorher } : prev))
+      setError(e instanceof Error ? e.message : 'Netzwerkfehler beim Stage-Wechsel.')
     } finally {
       setBusy(false)
     }
@@ -139,6 +145,16 @@ export default function CrmPage() {
     }
   }
 
+  function handleDrop(stageKey: CrmStage) {
+    const id = dragLeadId
+    setDragLeadId(null)
+    setDropStage(null)
+    if (!id) return
+    const lead = leads.find((l) => l.id === id)
+    if (!lead || lead.crm_stage === stageKey) return
+    stageWechseln(lead, stageKey)
+  }
+
   return (
     <div className="fade-up">
       <div className="topbar">
@@ -166,7 +182,19 @@ export default function CrmPage() {
           {STAGES.map((stage) => {
             const spalte = leads.filter((l) => l.crm_stage === stage.key)
             return (
-              <div key={stage.key} style={{ minWidth: '250px', width: '250px', flexShrink: 0 }}>
+              <div
+                key={stage.key}
+                onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (dropStage !== stage.key) setDropStage(stage.key) }}
+                onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDropStage((prev) => (prev === stage.key ? null : prev)) }}
+                onDrop={(e) => { e.preventDefault(); handleDrop(stage.key) }}
+                style={{
+                  minWidth: '250px', width: '250px', flexShrink: 0,
+                  borderRadius: '10px',
+                  outline: dropStage === stage.key ? `2px dashed ${stage.accent}` : 'none',
+                  outlineOffset: '2px',
+                  transition: 'outline-color 120ms',
+                }}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 4px 10px' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '999px', background: stage.accent }} />
                   <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--za-fg-2)' }}>{stage.label}</span>
@@ -180,8 +208,11 @@ export default function CrmPage() {
                     <button
                       key={lead.id}
                       onClick={() => oeffnen(lead)}
+                      draggable
+                      onDragStart={(e) => { e.dataTransfer.setData('text/plain', lead.id); e.dataTransfer.effectAllowed = 'move'; setDragLeadId(lead.id) }}
+                      onDragEnd={() => { setDragLeadId(null); setDropStage(null) }}
                       className="panel"
-                      style={{ padding: '12px 14px', textAlign: 'left', cursor: 'pointer', width: '100%', borderLeft: `3px solid ${stage.accent}` }}
+                      style={{ padding: '12px 14px', textAlign: 'left', cursor: 'grab', width: '100%', borderLeft: `3px solid ${stage.accent}`, opacity: dragLeadId === lead.id ? 0.4 : 1 }}
                     >
                       <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--za-fg)' }}>{lead.firma || lead.name || 'Ohne Namen'}</div>
                       {lead.firma && lead.name && (
