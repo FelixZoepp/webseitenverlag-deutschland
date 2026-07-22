@@ -26,6 +26,7 @@
 
 # Asset-Arbeitsverzeichnis (Higgsfield-Rohmaterial, Clips, Zwischenframes)
 /.assets-work/
+/assets/maler/
 
 # debug
 npm-debug.log*
