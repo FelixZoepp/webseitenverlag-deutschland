@@ -8,8 +8,12 @@
  *   - vier Bausteine: Stripe-Checkout (price_data aus dieser Datei),
  *     Provisioning-Job, Portal-Kachel, diese Zeile hier.
  *
- * Jede Buchung mit monatlichem Anteil erzeugt einen EIGENEN contracts-Eintrag
- * mit eigener Laufzeit (laufzeit/verlaengerung/kuendigungsfrist unten).
+ * Jede Buchung mit monatlichem Anteil erzeugt einen EIGENEN contracts-Eintrag.
+ * Kopplung (2026-07-22): Der Upsell-Vertrag übernimmt Restlaufzeit, Verlängerung
+ * und Kündigungsfrist des aktiven Hauptvertrags (lib/contracts.ts →
+ * gekoppelteUpsellKonditionen) — ein Kündigungstermin für alles. Die Felder
+ * laufzeit/verlaengerung/kuendigungsfrist unten sind nur noch der FALLBACK,
+ * wenn beim Kauf kein aktiver Hauptvertrag existiert.
  *
  * Bewusst verworfen (NICHT bauen): Anruf-Tracking, Lead-Alarm-SMS,
  * Rechtstexte-Abo, Profi-E-Mail-Adresse, Anfrage-Konfigurator, Foto-Veredelung.

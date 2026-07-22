@@ -21,7 +21,9 @@ import { stufeFuerTage, tageUeberfaellig } from '@/lib/dunning'
 import { getPackage, type PackageTier } from '@/lib/packages'
 import {
   createManualTask,
+  gekoppelteUpsellKonditionen,
   heuteIso,
+  type HauptvertragKonditionen,
   STANDARD_KONDITIONEN,
   vertragsende,
   wirksamesKuendigungsdatum,
@@ -498,6 +500,25 @@ async function handleUpsellCheckout(supabase: SupabaseClient, session: Stripe.Ch
 
     if (!existingContract) {
       const beginn = heuteIso()
+      // Kopplung (2026-07-22): Upsell übernimmt Restlaufzeit + Konditionen
+      // des aktiven Hauptvertrags — ein Kündigungstermin für alles.
+      const { data: hauptVertrag } = await supabase
+        .from('contracts')
+        .select('ende, verlaengerung_monate, kuendigungsfrist_monate')
+        .eq('customer_id', customerId)
+        .eq('status', 'AKTIV')
+        .not('paket', 'like', 'upsell:%')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (!hauptVertrag) {
+        console.warn('[STRIPE] Kein aktiver Hauptvertrag für Upsell-Kopplung — Fallback auf Config-Konditionen')
+      }
+      const konditionen = gekoppelteUpsellKonditionen(
+        (hauptVertrag as HauptvertragKonditionen | null),
+        produkt,
+        beginn
+      )
       const { data: contract, error: contractError } = await supabase
         .from('contracts')
         .insert({
@@ -506,10 +527,10 @@ async function handleUpsellCheckout(supabase: SupabaseClient, session: Stripe.Ch
           paket: `upsell:${productKey}`,
           monatsrate_cent: monatCent,
           laufzeit_monate: produkt.laufzeitMonate,
-          verlaengerung_monate: produkt.verlaengerungMonate,
-          kuendigungsfrist_monate: produkt.kuendigungsfristMonate,
+          verlaengerung_monate: konditionen.verlaengerung_monate,
+          kuendigungsfrist_monate: konditionen.kuendigungsfrist_monate,
           beginn,
-          ende: vertragsende(beginn, Math.max(1, produkt.laufzeitMonate)),
+          ende: konditionen.ende,
           status: 'AKTIV',
           stripe_customer_id: stripeCustomerId,
           stripe_subscription_id: stripeSubscriptionId,
