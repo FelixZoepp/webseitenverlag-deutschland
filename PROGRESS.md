@@ -256,7 +256,7 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 
 | Branche | B1 | Freigabe | B2 | B3 | B4 | B5-Optik | Assets | Demo-URL |
 |---|---|---|---|---|---|---|---|---|
-| 1 galabau | ✅ (T1-Seed) | ✅ | ✅ (`galabau-landing-v1`) | ✅ (`rezepte/REZEPTE_GALABAU.md`) | ✅ (test:galabau 130, LH 100/92/100) | ✅ (docs/screenshots/galabau/) | ✅ **21/21 approved** (Lauf 2026-07-22, 58,25 Credits) | — (T3 offen) |
+| 1 galabau | ✅ (T1-Seed) | ✅ | ✅ (`galabau-landing-v1`) | ✅ (`rezepte/REZEPTE_GALABAU.md`) | ✅ (test:galabau 130, LH 100/92/100) | ✅ (docs/screenshots/galabau/) | ✅ **21/21 approved** (Lauf 2026-07-22, 58,25 Credits) | ✅ `/demo/VQDzw4LlCT82KT4_X3xU3rL1Rwq3k21A` (lokal verifiziert; Prod erst nach SERVICE_ROLE_KEY-Fix) |
 | 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | ✅ (`rezepte/REZEPTE_MALER.md`) | ✅ (test:maler 204, LH 100/92–95/100 auf allen 10 Seiten) | ✅ **[x] Felix 2026-07-22** (docs/screenshots/maler/, `frozen:true`) | ⛔ Higgsfield-Key (WARTELISTE) | — |
 | 3–16 | — | — | — | — | — | — | — | — |
 
@@ -371,6 +371,15 @@ Kosten-Log je Branche (Cent): galabau **58,25 Higgsfield-Credits** (Asset-Lauf 2
 - **Selbsttest `scripts/test-import-assets.ts` (STUB-Fallback laut Auftrag):** 13/13 ✅ — 3 sharp-generierte Stub-Bilder (hero-bg 1920×1080, ba-after/ba-before 1600×1200) korrekt geplant inkl. gemeinsamer pair_id; Ablehnungen geprüft (unbekannter Name `foo.jpg`, zu klein `svc-01.jpg` 800px, falscher Aspect `about-detail.jpg` 16:9 statt 4:3); fehlendePflicht = 13 Slots (hero_video + Avatare optional) ✅; unbekannte Branche wirft mit Registry-Hinweis ✅; halbes Paar → Warnung + ohne pair_id ✅. DB-Phase (STUB-Insert + Cleanup) im Test enthalten, aktuell übersprungen: `SUPABASE_SERVICE_ROLE_KEY` fehlt lokal (WARTELISTE).
 - **DoD T2 (≥25 approved Assets inkl. Paar/Hero/Video) offen:** braucht echte Higgsfield-Assets + Service-Role-Key + ausgeführte Migration 022 → WARTELISTE. Script + Vertrag stehen; Import ist dann ein Einzeiler.
 - Selbsttest: `tsc --noEmit` ✅ · `next build` ✅ · `lint` ✅ (nur vorbestehende Warnings).
+
+## Arbeitsblock: T3 — Erste GaLaBau-Demo (GrünWerk Wiesbaden) aus der Asset-Bank
+
+- **`scripts/generate-galabau-demo.ts` neu** (`npx tsx scripts/generate-galabau-demo.ts [--neu]`): kein bestehender Codepfad erzeugt Kompositions-Demos (`personalisiereFlagshipConfig` crasht auf GalabauConfig), das Rendering selbst funktioniert (`renderFlagshipPage` dispatcht per Type-Guard auf `renderGalabauLanding`). Script füllt den Seed (bereits GrünWerk Wiesbaden verbatim — keine Personalisierung nötig) mit den 21 approved Assets und legt/aktualisiert die demos-Zeile (`template_id flagship:galabau`, engine flagship, status GENERIERT, kosten 0).
+- **Slot-Zuordnung — Stolperfalle dokumentiert:** `asset_bank.alt_text_de` trägt KEINEN Slot-Bezug (`altTextVorlage` nutzt `brancheName` = „Galabau", nicht den Dateinamen). Einzige deterministische Verbindung sind die Asset-ID-Präfixe aus dem T2-Import-Log → im Script als `SLOT_ASSET_PREFIXE` (21 Einträge) festgehalten; jede Zuordnung wird zusätzlich gegen `szene_typ`/`medium` des Slots validiert, fehlende Pflicht-Slots brechen ab. Bei künftigen Re-Importen Tabelle aktualisieren.
+- **Demo angelegt:** ID `8d6de282-ea6d-45c3-811d-1c2e885f8d96`, URL `/demo/VQDzw4LlCT82KT4_X3xU3rL1Rwq3k21A`. Lauf: 21 approved Assets gefunden, **21/21 Slots aufgelöst** (Bilder = Public-URL der größten WebP-Variante inkl. intrinsischer Maße, Hero-Video aus `varianten.video_url` + Poster).
+- **Verifikation (Render aus der DB via `renderFlagshipPage`):** HTML 42 kB, **20 `<img>` alle mit asset-bank-src** (0 Platzhalter), Firma + Telefon verbatim ✓, Growth-Video eingebunden ✓, Hero-URL HTTP 200 `image/webp` ✓. `data-label`-Attribute im HTML sind reine Container-Attribute (kein Platzhalter-Indikator).
+- **Prod-Hinweis:** `/demo/[token]` fällt auf Vercel wegen des defekten `SUPABASE_SERVICE_ROLE_KEY` (literales `\n`, WARTELISTE) auf den Anon-Key zurück — Demo-URL funktioniert auf Prod erst nach Key-Fix; lokal vollständig verifiziert.
+- Selbsttest: `tsc --noEmit` ✅ · `next build` ✅ · `lint` ✅ (nur vorbestehende Warnings) · `test:galabau` ✅.
 
 ## Notizen für nächste Session
 - **MVP-Finish Phasen 0–6 abgeschlossen (inkl. Bausteine A/B/C).** Rest = Mensch/Key-Punkte auf WARTELISTE.md (§8-Gesamtabnahme braucht Stripe-Test-Keys, Vercel-Envs, Asset-/Branchen-Freigaben, Git-Remote für CI)
