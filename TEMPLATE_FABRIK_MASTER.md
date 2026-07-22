@@ -32,7 +32,7 @@ Pro Branche entsteht **genau EINE Komposition** `{branche}-landing-v1` mit **dre
 Alles andere (Sektions-Reihenfolge, Animations-Grammatik, Copy-/Asset-Slot-Verträge,
 Verbatim-Regeln, Test-Muster) wird von `galabau-landing-v1` übernommen.
 
-## 3. Die 16 Branchen
+## 3. Die 17 Branchen
 
 | Nr | Branche | 5 Leistungen | Akzent | Signature | B/A-Motiv |
 |---|---|---|---|---|---|
@@ -52,6 +52,7 @@ Verbatim-Regeln, Test-Muster) wird von `galabau-landing-v1` übernommen.
 | 14 | Kosmetik | — | Rosé `#C98A8A` | **HWG beachten!** | kein Heilversprechen |
 | 15 | Physiotherapie | — | Petrol `#2F8577` | **kein B/A, HWG!** | kein B/A |
 | 16 | Restaurant | Speisekarten-Sektion `menu_items[]` statt svc-Karten — einzige strukturelle Abweichung | Bordeaux `#8A3038` | Speisekarte | kein B/A |
+| 17 | Photovoltaik (PV) ✅ Engine fertig | PV-Anlage, Batteriespeicher, Wallbox, Wartung & Service (Seed „Solarflow") | Sonnengelb `#f5ff5a` / Cyan `#00e5ff` auf `#07090c` | **Premium Scroll-Scrub** (`scrub-story-v1`, 5 seam-locked Videos) — eigene Engine statt Landing-Komposition | kein B/A (Scroll-Story) |
 
 Fehlende Zellen („—") werden im jeweiligen B1-Steckbrief gefüllt und dort freigegeben.
 

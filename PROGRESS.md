@@ -259,6 +259,7 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | 1 galabau | ✅ (T1-Seed) | ✅ | ✅ (`galabau-landing-v1`) | ✅ (`rezepte/REZEPTE_GALABAU.md`) | ✅ (test:galabau 130, LH 100/92/100) | ✅ (docs/screenshots/galabau/) | ✅ **21/21 approved** (Lauf 2026-07-22, 58,25 Credits) | ✅ `/demo/VQDzw4LlCT82KT4_X3xU3rL1Rwq3k21A` (lokal verifiziert; Prod erst nach SERVICE_ROLE_KEY-Fix) |
 | 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | ✅ (`rezepte/REZEPTE_MALER.md`) | ✅ (test:maler 204, LH 100/92–95/100 auf allen 10 Seiten) | ✅ **[x] Felix 2026-07-22** (docs/screenshots/maler/, `frozen:true`) | ⛔ Higgsfield-Key (WARTELISTE) | — |
 | 3–16 | — | — | — | — | — | — | — | — |
+| 17 pv (Scrub) | ✅ (Seed Solarflow, Felix: eigene Branche 2026-07-22) | ✅ | ✅ (`scrub-story-v1`) | ✅ (`rezepte/REZEPTE_SCRUB_PV.md`) | ✅ (test:flagship inkl. Scrub) | ✅ (public/media/pv) | ✅ 5 Videos + Poster (232 Credits) | — (Demo auf Zuruf) |
 
 Kosten-Log je Branche (Cent): galabau **58,25 Higgsfield-Credits** (Asset-Lauf 2026-07-22: 15 Stills gpt_image_2/nano_banana_2 + 1 Video seedance_2_0, Balance 1044,92→986,67) · maler 0 (Stub-Phase) · scrub-premium/pv **232 Higgsfield-Credits** (Asset-Lauf 2026-07-22: 7 Entry Still + 5×45 Videos, Reserve 14 unangetastet)
 
