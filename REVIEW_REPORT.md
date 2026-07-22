@@ -11,7 +11,7 @@ Start: 2026-07-23 · Branch: `chore/master-review` · Prompt: `MASTER_REVIEW_PRO
 | 2 E2E-Generalprobe | Suite gebaut (15 Stationen), grüner Lauf blockiert durch fehlende Env-Keys (B-12) | 🟡 |
 | 3 Demo-Qualität (Budget-Läufe) | Drehbücher ✓, Determinismus ✅ bewiesen (0 €), GaLaBau-Läufe = Zielbild-Lücke (B-20), Growth-Unterseiten fehlen (B-21), Video/Assets D-Ops-blockiert (B-14) | 🟡 |
 | 4 SEO-Automatik | geprüft — B-15 P0 (Cron-Auth-Bypass) im Code gefixt + Verhinderungs-Regel; 4 weitere Befunde (B-16..B-19); D-Ops CRON_SECRET offen | 🟡 |
-| 5 Sicherheits-Review | nicht begonnen | ⚪ |
+| 5 Sicherheits-Review | 8/8 Punkte geprüft — Isolation mit Zweitkunden BEWIESEN (10/10), Webhooks/Uploads/Secrets OK; 2×P1 (B-24 npm-Vulns, B-25 Missbrauch/Kosten-Cap), 3×P2 | 🟡 |
 
 Ampel-Legende: 🟢 OK (bewiesen) · 🟡 Risiko/in Arbeit · 🔴 P0 offen · ⚪ ausstehend
 
@@ -244,6 +244,78 @@ SEO-Landingpage-Pipeline (`lib/seo-plan.ts`), noindex-Logik, Admin-UI.
   (UNIQUE + Vorab-Check); Freigabe-Workflow (WARTET_AUF_FREIGABE → Mail →
   1-Klick) vorhanden. Kein manueller Cron-Trigger im Admin (deckt sich
   mit B-11).
+
+### Kapitel 5 — Sicherheits-Review (geprüft 2026-07-23)
+
+**Methodik:** 3 parallele Explore-Audits (Isolation/AuthZ, Chat-Editor/XSS,
+Webhooks/Uploads/Secrets) — alle kritischen Claims danach selbst verifiziert
+(Datei:Zeile, Live-SQL gegen Supabase, `npm audit`). Zusätzlich zwei
+Live-Beweise gegen die echte Datenbank: Anon-Key-REST-Test und der vom
+Prompt geforderte **Zweitkunden-Test** (`scripts/review-rls-zweitkunde.ts`).
+
+**Verdikt je Prüfpunkt:**
+
+| # | Punkt | Verdikt | Kern-Beleg |
+|---|---|---|---|
+| 1 | Mandanten-Isolation (RLS) | 🟢 BEWIESEN | RLS aktiv auf allen 34 public-Tabellen (Live-SQL); Anon-Key liefert `[]` auf customers/contracts/sites/demos/leads/email_logs/nutzungs_events; Zweitkunden-Test 10/10 grün |
+| 2 | AuthZ auf API-Routen | 🟢 mit 1 Randnotiz | 35 Admin-Routen `requireAdmin()`, 19 Site-Routen `getOwnedSite()`; Ausnahme B-22 |
+| 3 | Chat-Editor / XSS | 🟢 mit 1 Randnotiz | Zod `discriminatedUnion` (6 Ops, max 20/Patch), gesperrte Pfade, `esc()`-Kette in allen Renderern; Randnotiz B-23 |
+| 4 | Stripe-Webhooks | 🟢 | fail-closed Signaturprüfung (fehlendes Secret ⇒ 500, `app/api/webhooks/stripe/route.ts:47-66`), Idempotenz via `processed_webhook_events`, Preise ausschließlich server-seitig aus `getPackage()` |
+| 5 | Uploads | 🟢 | MIME-Whitelist + 10-MB-Limit + Sharp-Re-Encode nach WebP — SVG/Polyglot-Dateien werden dadurch effektiv neutralisiert |
+| 6 | Secrets & Dependencies | 🟡 | Repo enthält nur Platzhalter (`.env.local.example`), Client-Bundle sauber (NEXT_PUBLIC nur Supabase-URL+Anon-Key); ABER `npm audit` rot → B-24 |
+| 7 | Missbrauch / Kosten | 🟡 | Chat-Limit 50/Tag + Formular 5/h/IP + Honeypot vorhanden; ABER kein Cap auf LLM-Kosten, Lücken bei Paid-Routen → B-25 |
+| 8 | Betrieb (Rollback/Monitoring/Backup) | 🟢 mit 1 Randnotiz | Rollback-Route existiert und ist getestet; `meldeJobFehler` → Slack `#errors`; Backups Supabase-managed; Randnotiz B-26 |
+
+**Zweitkunden-Beweis (Punkt 1, Live gegen Produktions-Supabase):**
+`npx tsx scripts/review-rls-zweitkunde.ts` legt per Service-Role zwei komplette
+Testkunden an (Auth-User + `customers` + `sites`), loggt sich als Kunde A mit dem
+**Anon-Key** ein und greift auf Kunde B zu. Ergebnis 10/10 PASS:
+eigene Daten sichtbar (Positiv-Kontrolle), fremde `customers`-/`sites`-Zeilen
+weder per ID noch per Vollscan sichtbar, UPDATE/DELETE auf fremde Zeilen
+treffen 0 Zeilen, Service-Kontrolle bestätigt Site B unverändert. Cleanup
+automatisch, Exit 1 bei jeder Verletzung — wiederholbar als Regressionstest.
+Nebenbefund dabei: Trigger `on_auth_user_created` legt pro Auth-User automatisch
+eine `customers`-Zeile an (RLS-korrekt auf `user_id` gescoped, FK-Cascade räumt
+auf — kein Leak, aber wichtig für Test-Asserts).
+
+**Befunde:**
+
+- **B-22 (P2) · `kunden_bilder`-Routen ohne expliziten Ownership-Filter.**
+  `app/api/customer/bilder/[bildId]` PATCH/DELETE filtert nur über `bildId`
+  und verlässt sich für die Mandanten-Trennung allein auf RLS. RLS greift
+  (bewiesen), aber Defense-in-Depth fehlt: Alle anderen Kunden-Routen filtern
+  zusätzlich explizit auf `customer_id`. Ein späteres versehentliches
+  Service-Role-Refactoring würde hier still die Isolation verlieren.
+- **B-23 (P2) · `innerHTML` mit nicht escaptem SVG-Pfad.**
+  `lib/flagship/js.ts:93` schreibt `d.i` (Icon-Pfad) per `innerHTML` ins DOM.
+  Derzeit stammen die Werte ausschließlich aus dem read-only `ICON_PATHS`-
+  Objekt — kein aktiver XSS-Vektor. Wird die Quelle je editierbar
+  (Chat-Editor-Op auf Icons), entsteht ein Vektor. Escaping oder
+  `createElementNS` wäre die dauerhafte Absicherung.
+- **B-24 (P1) · `npm audit` (prod): 3 Vuln-Gruppen, davon 2 high.**
+  (a) `next` 14.2.35 — 4 Advisories (u. a. GHSA-9g9p/-h25m/-ggv3/-3x4c:
+  DoS via Image-Optimierung, HTTP-Request-Smuggling, Cache-Poisoning),
+  Fix erst in next@16 (Breaking). (b) `ws` 8.0.0–8.20.1 high (2 Advisories),
+  Fix via `npm audit fix`. (c) `postcss` <8.5.10 moderate (im next-Bundle).
+  Vor erstem zahlenden Kunden mindestens `ws` fixen und next-Upgrade-Pfad
+  entscheiden.
+- **B-25 (P1) · Kein Kosten-Cap, Rate-Limit-Lücken auf Paid-Routen.**
+  Öffentliche Flächen sind limitiert (Chat 50/Tag, Formulare 5/h/IP,
+  Honeypot). Aber: (a) Admin-/Kunden-Routen, die LLM-Kosten auslösen, haben
+  kein Rate-Limit; (b) `app/api/onboarding/generate` prüft den Kill-Switch
+  `generierungGesperrt()` NICHT (authentifiziert via
+  `getAuthenticatedCustomer()`, Z. 17 — darum P1, nicht P0); (c) der
+  Kosten-Alarm ist nur ein Post-hoc-Slack-Ping ohne hartes Threshold-Cap —
+  ein Amok-Loop würde erst nach Kostenanfall gemeldet, nicht gestoppt.
+- **B-26 (P2) · Stilles Error-Logging auf 3 Pfaden.**
+  Chat-Editor, Upsell-Checkout und Form-Submit loggen Fehler nur per
+  `console.error` statt über `meldeJobFehler` → Slack. Fehler auf diesen
+  umsatzrelevanten Pfaden fallen im Betrieb nicht auf.
+
+**Positiv:** Isolation dreifach bewiesen (SQL-Policy-Audit + Anon-REST +
+Zweitkunden-Login); Stripe-Kette durchgehend fail-closed und idempotent;
+Upload-Pipeline neutralisiert gefährliche Formate per Re-Encode; keine
+Secrets im Repo oder Client-Bundle; Rollback-Pfad existiert und ist getestet.
 
 ## Beweise (Screenshots/Logs)
 
