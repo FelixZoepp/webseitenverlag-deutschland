@@ -593,9 +593,11 @@ export async function generiereFlagshipDemo(
   }
 
   if (config.inhalte.ergebnisse.variante === 'ba_slider' && config.inhalte.ergebnisse.paare) {
-    for (let i = 0; i < config.inhalte.ergebnisse.paare.length; i++) {
-      const paarDef = config.inhalte.ergebnisse.paare[i]
-      if (paarDef.nachher.datei && paarDef.vorher.datei) continue
+    // Parallel statt sequentiell (Felix 2026-07-22): sequentiell sprengte bei
+    // Templates mit mehreren Paaren (z. B. maler-landing-v1) das Vercel
+    // maxDuration-Limit von 300s — Funktion wurde gekillt, DB-Update fiel aus.
+    const paarAufgaben = config.inhalte.ergebnisse.paare.map(async (paarDef, i) => {
+      if (paarDef.nachher.datei && paarDef.vorher.datei) return
 
       for (let durchlauf = 1; durchlauf <= MAX_ASSET_DURCHLAEUFE; durchlauf++) {
         try {
@@ -623,13 +625,14 @@ export async function generiereFlagshipDemo(
           kostenCent += ergebnisPaar.nachher.kostenCent + ergebnisPaar.vorher.kostenCent
           paarDef.nachher.datei = ergebnisPaar.nachher.publicUrl
           paarDef.vorher.datei = ergebnisPaar.vorher.publicUrl
-          break
+          return
         } catch (e) {
           // Kein throw — Pflicht-Validierung am Ende fängt fehlende Slots
           warnungen.push(`Ergebnis-Paar ${i + 1} Durchlauf ${durchlauf} fehlgeschlagen: ${(e as Error).message}`)
         }
       }
-    }
+    })
+    await Promise.all(paarAufgaben)
   }
 
   // Pflicht-Validierung: ALLE Asset-Slots müssen befüllt sein
