@@ -8,7 +8,7 @@ Start: 2026-07-23 · Branch: `chore/master-review` · Prompt: `MASTER_REVIEW_PRO
 |---|---|---|
 | 0 Selbstkontrolle (Journal + Regeln) | Gerüst steht, Regel-Beweise in Kap. 6 | 🟡 in Arbeit |
 | 1 Die 9 Stationen | geprüft — 11 Befunde (0×P0, 4×P1, Rest P2/Zielbild) | 🟡 |
-| 2 E2E-Generalprobe | nicht begonnen | ⚪ |
+| 2 E2E-Generalprobe | Suite gebaut (15 Stationen), grüner Lauf blockiert durch fehlende Env-Keys (B-12) | 🟡 |
 | 3 Demo-Qualität (Budget-Läufe) | nicht begonnen | ⚪ |
 | 4 SEO-Automatik | nicht begonnen | ⚪ |
 | 5 Sicherheits-Review | nicht begonnen | ⚪ |
@@ -90,6 +90,46 @@ Screenshots mobile+desktop in `docs/review/`.
 | `npm run ci:golden-set` | 10 Firmen (Library) + 8 Profile (Flagship), 0 Verstöße — inkl. Konsistenz-Validator, keine fremden Städte, keine erfundenen Bewertungen (deckt J-001 teilweise) |
 | `npm run test:phase5` | alle grün (Magic-Link, Dunning 0/3/7→14, SEO-Abo/Cron/Freigabe) |
 | `npx tsx scripts/smoke-editor-ops.ts` | 13/13 (Zod-Ops, Pfad-Gates, Reorder-Regeln) |
+
+### Kapitel 2 — E2E-Generalprobe (Suite gebaut 2026-07-23)
+
+**Artefakt:** `e2e/generalprobe.spec.ts` (Commit b3824ab) — ein durchgehender
+Playwright-Lauf mit 15 Stationen, jeder Pfeil = Assertion + Screenshot
+(`test-results/generalprobe/`):
+
+1. Ad-Klick (UTM-Landing) → 2. /entwurf-Formular → Lead → 3. Admin-Lead mit
+Business-Profil (GaLaBau, Leipzig, 3 Leistungen) → 4. Demo generieren
+(Flagship mit LLM, sonst Library-Fallback) → 5. QA-Gate + Freigeben →
+6. Demo-Link mobil (iPhone 13, noindex-Assert) → 7. Testmode-Kauf via
+Stripe-Webhook-Simulation (`generateTestHeaderString`) → Kunde + Site +
+Vertrag 24/12 + Auth-User → 8. Kunden-Login → 9. Wizard-PATCHes →
+10. Chat-Edit (LLM-gated) → 11. Publish → Site live über Host-Routing →
+12. Cron qa-scan → 13. SEO-Upsell-Kauf + Unterseiten-Freigabe (LLM-gated) →
+14. Zahlung fehlschlagen → Mahnkette 0/3/7 per Zeitreise (Rückdatierung
+`zahlung_ueberfaelig_seit` + Cron) → Tag 14 Suspend → 503-Wartungsseite →
+15. invoice.paid → entsperrt → Site wieder 200. Cleanup FK-korrekt in afterAll.
+
+**Verifiziert:** `npx tsc --noEmit` grün; ohne Env-Keys skippt die Suite
+sauber (1 skipped, keine Fehler). Sicherheits-Guard: bricht hart ab, wenn
+`STRIPE_SECRET_KEY` kein `sk_test_`-Key ist.
+
+**Dokumentierte Zielbild-Abweichungen (im Suite-Kopf):** kein 7-Schritte-Wizard
+(B-05, Lead via Admin-API), Magic-Link-Mail wird nicht geklickt (Auth-User-
+Existenz = Beweis), Library-Fallback ohne LLM überspringt QA-Gate-Kette.
+
+**Befunde:**
+
+- **B-12 · P1 · Generalprobe kann nicht grün laufen — Env-Keys fehlen lokal
+  und in CI.** `.env.local` enthält nur Supabase + Resend;
+  `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `CRON_SECRET`,
+  `ANTHROPIC_API_KEY` fehlen → Suite skippt. Abschluss-Kriterium Kap. 6
+  („Generalprobe läuft grün als CI-Suite") ist damit D-Ops-blockiert.
+  Fix = D-Ops mit Felix: Stripe-Test-Keys + Secrets in `.env.local`/Vercel.
+- **B-13 · P1 · Kein CI-Workflow existiert.** `.github/workflows/` fehlt
+  komplett — weder `test:e2e` noch die Kap.-1-Beweis-Suiten (qa-gate,
+  golden-set, phase5) laufen automatisiert. „Bleibt als Dauer-CI-Lauf"
+  (Kap.-2-Anspruch) ist unerfüllt; Workflow-Datei anlegen, sobald Secrets
+  verfügbar sind.
 
 ## Beweise (Screenshots/Logs)
 
