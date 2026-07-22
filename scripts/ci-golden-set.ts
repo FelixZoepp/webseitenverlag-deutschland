@@ -411,6 +411,20 @@ function pruefeProfil(profil: GoldenProfil): void {
   const fremde = findeFremdeStaedte(html, profil.stadt)
   check(`${label}: keine fremden Städte`, fremde.length === 0, fremde.join(', '))
 
+  // 4b. FEHLERJOURNAL J-001: Vorlagen-Firma/-Ort dürfen NIE im personalisierten
+  // HTML auftauchen (verbatim-Ersetzung, keine erfundene Fremdmarke).
+  const seed = FLAGSHIP_SEEDS[profil.brancheKey]
+  const vorlagenFirma = seed?.meta.firma ?? ''
+  if (vorlagenFirma && vorlagenFirma !== profil.firma) {
+    const escaped = vorlagenFirma.replace(/&/g, '&amp;')
+    check(`${label}: Vorlagen-Firma "${vorlagenFirma}" NICHT im HTML [J-001]`,
+      !html.includes(vorlagenFirma) && !html.includes(escaped))
+  }
+  const vorlagenOrt = seed?.meta.ort ?? ''
+  if (vorlagenOrt && vorlagenOrt !== profil.stadt) {
+    check(`${label}: Vorlagen-Ort "${vorlagenOrt}" NICHT im HTML [J-001]`, !html.includes(vorlagenOrt))
+  }
+
   // 5. Floskel-Blacklist auf dem fertigen HTML (Seed-Texte + Slots gemeinsam)
   const floskeln = FLOSKEL_BLACKLIST.filter((f) => html.toLowerCase().includes(f.toLowerCase()))
   check(`${label}: keine Floskeln im HTML`, floskeln.length === 0, floskeln.join('; '))

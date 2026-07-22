@@ -24,8 +24,12 @@ im Master-Review verifiziert/gebaut werden.
   Ersetzung via `ersetzeUeberall` (lib/pipeline/generate-flagship-demo.ts);
   Konsistenz-Validator prüft Fremdstadt/Fremdname.
 - **VERHINDERUNGS-REGEL:** Konsistenz-Validator (QA-Gate) schlägt fehl, wenn
-  Vorlagen-Firma/-Ort im gerenderten HTML auftaucht. Regel-Status: ⚠️ OFFEN —
-  im Review beweisen (Test mit Vorlagen-Name im Assert).
+  Vorlagen-Firma/-Ort im gerenderten HTML auftaucht. Regel-Status: ✅
+  (Master-Review 2026-07-23): `npm run ci:golden-set` asserted je Flagship-Profil
+  explizit, dass die Vorlagen-Firma („ReiniFix"/„PANE VINO", raw + escaped) und
+  der Vorlagen-Ort NICHT im HTML stehen (scripts/ci-golden-set.ts, Check 4b
+  [J-001]); fremde Städte zusätzlich via `fremde_stadt`-Regel
+  (scripts/test-phase3.ts, validator-fremde-stadt). 16/16 Asserts grün.
 
 ### J-002 · Sichtbare „0+"-Zähler auf der Seite
 - **Datum:** Historie (vor 2026-07-23)
@@ -34,8 +38,12 @@ im Master-Review verifiziert/gebaut werden.
   interpretiert statt die Kachel wegzulassen.
 - **Fix:** Kennzahlen ohne Wert werden nicht gerendert.
 - **VERHINDERUNGS-REGEL:** Render-Test asserted, dass „0+" in keinem generierten
-  HTML vorkommt. Regel-Status: ⚠️ OFFEN — im Review als Assert in Golden-Set/
-  QA-Gate nachweisen.
+  HTML vorkommt. Regel-Status: ✅ (Master-Review 2026-07-23): Validator-Regel
+  `null_zaehler` (lib/generierung/konsistenz-validator.ts, `/\b0\+/` auf
+  sichtbarem Text — matcht „0+", nicht „10+"/„250+") läuft im harten QA-Gate
+  jeder Generierung UND im Golden-Set (Validator-Check je Profil). Tests:
+  scripts/test-phase3.ts `validator-null-zaehler [J-002]` + Gegenprobe
+  `validator-zaehler-ok [J-002]`. Grün.
 
 ### J-003 · Platzhalter „wird vom System generiert" im Footer
 - **Datum:** Historie (vor 2026-07-23)
@@ -45,7 +53,13 @@ im Master-Review verifiziert/gebaut werden.
 - **Fix:** Platzhalter entfernt.
 - **VERHINDERUNGS-REGEL:** QA-Gate mit Verbots-Liste interner Strings
   („wird vom System generiert", „TODO", „Platzhalter", „Lorem") über das
-  gesamte HTML. Regel-Status: ⚠️ OFFEN — Liste + Test im Review verifizieren.
+  gesamte HTML. Regel-Status: ✅ (Master-Review 2026-07-23): `INTERNE_STRINGS`-
+  Verbots-Liste + `lorem`-Regel in lib/generierung/konsistenz-validator.ts
+  (Regel `interner_string`, sichtbarer Text — Attribute/Kommentare zählen
+  nicht, sonst False-Positives durch alt-Texte). Tests:
+  scripts/test-phase3.ts `validator-interner-string [J-003]` +
+  `validator-todo [J-003]` + bestehendes `validator-lorem`. Läuft in jedem
+  QA-Gate und im Golden-Set. Grün.
 
 ### J-004 · Sektionen bei Bildfehlern still ausgeblendet
 - **Datum:** Historie (vor 2026-07-23)
@@ -56,7 +70,11 @@ im Master-Review verifiziert/gebaut werden.
 - **Fix:** `fehlendePflichtSlots` — Demo wird NICHT gespeichert, wenn
   Pflicht-Slots leer sind (generate-flagship-demo.ts).
 - **VERHINDERUNGS-REGEL:** Pflicht-Slot-Validierung wirft hart; Test deckt den
-  Pfad ab. Regel-Status: ⚠️ OFFEN — Testabdeckung im Review beweisen.
+  Pfad ab. Regel-Status: ✅ (Master-Review 2026-07-23, verifiziert):
+  `npm run test:assets` §3.3 „Pflicht-Slot ⇒ harter Fail (nie Platzhalter)"
+  beweist: leere Bank + Pflicht-Slot wirft [C-APPROVED]; zusätzlich
+  Validator-Regel `pflicht_slot_leer` (konsistenz-validator.ts) mit Test
+  `validator-pflicht-slot [C-SLOTS]` (scripts/test-phase3.ts). Beide grün.
 
 ### J-005 · SF-Pro-Lizenzdatei im Kunden-Handoff
 - **Datum:** Historie (vor 2026-07-23)
@@ -67,7 +85,11 @@ im Master-Review verifiziert/gebaut werden.
 - **Fix:** SF Pro entfernt, nur lizenzfreie Fonts (Google Fonts/self-hosted OFL).
 - **VERHINDERUNGS-REGEL:** CI-Scan: Export/Public-Verzeichnisse dürfen keine
   Dateien matchen auf `(SF-?Pro|\.dfont|Apple)` u. ä.; Font-Whitelist.
-  Regel-Status: ⚠️ OFFEN — Scan im Review einrichten oder nachweisen.
+  Regel-Status: ✅ (Master-Review 2026-07-23, gebaut): `npm run test:fonts`
+  (scripts/test-font-lizenz.ts) scannt public/ + export/ + handoff/ —
+  (a) verbotene Namensmuster (sf-pro, .dfont, apple, helvetica, segoe),
+  (b) jede Font-Datei muss auf der expliziten Whitelist stehen (aktuell nur
+  2× InterTight woff2, OFL). 315 Dateien gescannt, grün.
 
 ---
 

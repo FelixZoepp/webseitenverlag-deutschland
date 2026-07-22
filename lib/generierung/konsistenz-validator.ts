@@ -106,10 +106,27 @@ function pruefeRoheEntities(html: string): ValidatorVerstoss[] {
     : []
 }
 
+/**
+ * Verbots-Liste interner Strings im sichtbaren Text (FEHLERJOURNAL J-003).
+ * Jeder Treffer heißt: interner Zustand ist auf die Kundenseite durchgesickert.
+ */
+const INTERNE_STRINGS = ['wird vom System generiert', 'TODO', 'Platzhalter'] as const
+
 function pruefePlatzhalter(html: string): ValidatorVerstoss[] {
   const verstoesse: ValidatorVerstoss[] = []
-  if (/lorem/i.test(sichtbarerText(html))) {
+  const text = sichtbarerText(html)
+  if (/lorem/i.test(text)) {
     verstoesse.push({ regel: 'lorem', detail: 'Platzhaltertext "Lorem" gefunden.' })
+  }
+  for (const s of INTERNE_STRINGS) {
+    if (text.includes(s)) {
+      verstoesse.push({ regel: 'interner_string', detail: `Interner String "${s}" im sichtbaren Text.` })
+    }
+  }
+  // FEHLERJOURNAL J-002: leere Kennzahl rendert als "0+" — Kachel muss entfallen.
+  // \b0\+ matcht "0+", aber nicht "10+"/"250+" (keine Wortgrenze innerhalb der Zahl).
+  if (/\b0\+/.test(text)) {
+    verstoesse.push({ regel: 'null_zaehler', detail: 'Sichtbarer "0+"-Zähler gefunden — leere Kennzahl darf nicht rendern.' })
   }
   if (html.includes('{{')) {
     verstoesse.push({ regel: 'token_rest', detail: 'Unaufgelöstes Template-Token "{{" gefunden.' })

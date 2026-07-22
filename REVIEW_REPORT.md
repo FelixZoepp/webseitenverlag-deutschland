@@ -6,12 +6,13 @@ Start: 2026-07-23 · Branch: `chore/master-review` · Prompt: `MASTER_REVIEW_PRO
 
 | Kapitel | Status | Ampel |
 |---|---|---|
-| 0 Selbstkontrolle (Journal + Regeln) | Gerüst steht, Regel-Beweise in Kap. 6 | 🟡 in Arbeit |
+| 0 Selbstkontrolle (Journal + Regeln) | Alle Journal-Regeln J-001..J-006 maschinell gebaut/verifiziert und grün (Kap. 6) | 🟢 |
 | 1 Die 9 Stationen | geprüft — 11 Befunde (0×P0, 4×P1, Rest P2/Zielbild) | 🟡 |
 | 2 E2E-Generalprobe | Suite gebaut (15 Stationen), grüner Lauf blockiert durch fehlende Env-Keys (B-12) | 🟡 |
 | 3 Demo-Qualität (Budget-Läufe) | Drehbücher ✓, Determinismus ✅ bewiesen (0 €), GaLaBau-Läufe = Zielbild-Lücke (B-20), Growth-Unterseiten fehlen (B-21), Video/Assets D-Ops-blockiert (B-14) | 🟡 |
 | 4 SEO-Automatik | geprüft — B-15 P0 (Cron-Auth-Bypass) im Code gefixt + Verhinderungs-Regel; 4 weitere Befunde (B-16..B-19); D-Ops CRON_SECRET offen | 🟡 |
 | 5 Sicherheits-Review | 8/8 Punkte geprüft — Isolation mit Zweitkunden BEWIESEN (10/10), Webhooks/Uploads/Secrets OK; 2×P1 (B-24 npm-Vulns, B-25 Missbrauch/Kosten-Cap), 3×P2 | 🟡 |
+| 6 Abschluss | Journal-Regeln J-001..J-005 nachgebaut/verifiziert (alle ✅), Backlog befüllt (15 Einträge), Generalprobe lokal grün — als CI-Kriterium offen (B-13) | 🟡 |
 
 Ampel-Legende: 🟢 OK (bewiesen) · 🟡 Risiko/in Arbeit · 🔴 P0 offen · ⚪ ausstehend
 
@@ -316,6 +317,39 @@ auf — kein Leak, aber wichtig für Test-Asserts).
 Zweitkunden-Login); Stripe-Kette durchgehend fail-closed und idempotent;
 Upload-Pipeline neutralisiert gefährliche Formate per Re-Encode; keine
 Secrets im Repo oder Client-Bundle; Rollback-Pfad existiert und ist getestet.
+
+### Kapitel 6 — Abschluss (2026-07-23)
+
+**Journal-Regeln (Wiederholungs-Verbot scharf gestellt):** Alle Einträge
+J-001..J-006 haben jetzt eine **maschinelle** Verhinderungs-Regel, gebaut
+oder verifiziert und grün gelaufen:
+
+| Journal | Regel | Beweis |
+|---|---|---|
+| J-001 Erfundene Marke | Golden-Set Check 4b: Vorlagen-Firma/-Ort NIE im HTML | `npm run ci:golden-set` — 16/16 Asserts |
+| J-002 „0+"-Zähler | Validator-Regel `null_zaehler` (`/\b0\+/`, sichtbarer Text) | test-phase3 `validator-null-zaehler` + Gegenprobe („10+"/„250+" ok) |
+| J-003 Interne Platzhalter | `INTERNE_STRINGS`-Verbots-Liste im Validator | test-phase3 `validator-interner-string` + `validator-todo` |
+| J-004 Still ausgeblendete Sektionen | Pflicht-Slot wirft hart | `npm run test:assets` §3.3 + `validator-pflicht-slot` |
+| J-005 SF-Pro-Lizenz | Font-Scan mit Verbots-Muster + Whitelist | `npm run test:fonts` — 315 Dateien, grün |
+| J-006 Cron-Auth-Bypass | fail-closed Helper + Quelltext-Scan aller Cron-Routen | `npm run test:cron-auth` |
+
+**Generalprobe (lokal, 2026-07-23) — alle Suiten grün:**
+test:phase3 (43), test:qa-gate (68), test:maler (204), test:galabau (130),
+test:flagship (469), ci:golden-set (8 Profile), test:assets, test:fonts (315
+Dateien), test:cron-auth, test:rls (10/10 Zweitkunden-Beweis).
+
+**Abschluss-Kriterium „Generalprobe läuft grün als CI-Suite": NICHT erfüllt.**
+Alle Suiten existieren und sind lokal grün, aber es gibt keinen CI-Workflow,
+der sie erzwingt (B-13) — und der E2E-Teil (Kap. 2) bleibt durch fehlende
+Env-Keys blockiert (B-12, D-Ops). Erst wenn beides steht, ist das
+Wiederholungs-Verbot auch gegen künftige Pushes scharf. → Backlog Nr. 6 + 1.
+
+**Backlog:** `OPTIMIERUNGS_BACKLOG.md` mit 15 Einträgen befüllt (sortiert
+Umsatzwirkung ÷ Aufwand, ausschließlich aus Befunden B-01..B-26).
+
+**Offene D-Ops (Felix):** CRON_SECRET in Vercel (dringend, sonst Crons tot),
+Stripe-Test-Keys + Webhook-Secret, Higgsfield-Keys, BROWSER_QA_WS_ENDPOINT,
+CI-Workflow aktivieren.
 
 ## Beweise (Screenshots/Logs)
 
