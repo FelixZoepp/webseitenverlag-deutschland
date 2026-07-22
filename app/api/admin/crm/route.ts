@@ -25,16 +25,19 @@ export async function GET() {
   const { data: notes } = leadIds.length
     ? await admin
         .from('lead_notes')
-        .select('id, lead_id, text, created_at')
+        .select('id, lead_id, text, autor, created_at')
         .in('lead_id', leadIds)
         .order('created_at', { ascending: false })
     : { data: [] as never[] }
 
-  const notizenProLead = new Map<string, { anzahl: number; letzte: string | null }>()
+  const notizenProLead = new Map<string, { anzahl: number; letzte: string | null; letzterAutor: string | null }>()
   for (const note of notes ?? []) {
-    const eintrag = notizenProLead.get(note.lead_id) ?? { anzahl: 0, letzte: null }
+    const eintrag = notizenProLead.get(note.lead_id) ?? { anzahl: 0, letzte: null, letzterAutor: null }
     eintrag.anzahl += 1
-    if (!eintrag.letzte) eintrag.letzte = note.text
+    if (!eintrag.letzte) {
+      eintrag.letzte = note.text
+      eintrag.letzterAutor = note.autor ?? null
+    }
     notizenProLead.set(note.lead_id, eintrag)
   }
 
@@ -43,6 +46,7 @@ export async function GET() {
       ...lead,
       notizen_anzahl: notizenProLead.get(lead.id)?.anzahl ?? 0,
       letzte_notiz: notizenProLead.get(lead.id)?.letzte ?? null,
+      letzte_notiz_autor: notizenProLead.get(lead.id)?.letzterAutor ?? null,
     })),
   })
 }

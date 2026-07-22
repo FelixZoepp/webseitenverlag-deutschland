@@ -18,7 +18,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('lead_notes')
-    .select('id, text, created_at')
+    .select('id, text, autor, created_at')
     .eq('lead_id', leadId)
     .order('created_at', { ascending: false })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -42,8 +42,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('lead_notes')
-    .insert({ lead_id: leadId, text: parsed.data.text })
-    .select('id, text, created_at')
+    .insert({ lead_id: leadId, text: parsed.data.text, autor: auth.data.user.email ?? null })
+    .select('id, text, autor, created_at')
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
