@@ -262,6 +262,14 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 
 Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0 (Stub-Phase) · scrub-premium/pv **232 Higgsfield-Credits** (Asset-Lauf 2026-07-22: 7 Entry Still + 5×45 Videos, Reserve 14 unangetastet)
 
+## Arbeitsblock: GaLaBau-Rezeptliste komplettiert — Motiv-Prompts nach Maler-Muster
+
+- **Anlass:** Auftrag-B-Stresstest (2026-07-22) fand als einzige Lücke: `rezepte/REZEPTE_GALABAU.md` war das einzige Rezept ohne Motiv-Prompts (nur Vertrag). Jetzt nach dem Muster von `rezepte/REZEPTE_MALER.md` ausformuliert — reine Doku, keine Engine-Datei angefasst (galabau bleibt frozen).
+- **Stil-Modul ergänzt:** `config/asset-styles.ts` hat keinen galabau-Eintrag (fallbackStil greift) ⇒ Rezept definiert den verbindlichen Stil selbst, abgeleitet aus der Seed-Stimmung „Gartenanlage am Abend": golden hour, Pflanzengrün + Natursteintöne, `BASIS_NEGATIV`-Verweis.
+- **Motiv-Spalte für alle 21 Slots:** Motive 1:1 aus den `media.label`-Feldern des GrünWerk-Seeds (`lib/flagship/galabau/seed.ts`) abgeleitet — svc_01–05 matchen die 5 Leistungs-Karten (Gartenplanung/Pflaster/Pflege/Bewässerung/Zaun), why_1–3 die Warum-Karten, BA-Paar „fertiger Garten"/„Baustelle", Team-Rollen lt. Seed. Slot-Zählung gegen `asset-slots.ts` verifiziert (21 ✓).
+- **Ketten-Logik ergänzt:** hero-video Motiv-Idee (Wind in Gräsern, Beleuchtung glimmt, Lichtstimmung konstant) + Hinweis, dass `BRANCHEN_VIDEO_STIL` keinen galabau-Eintrag hat (`DEFAULT_VIDEO_STIL` greift, Rezept-Stil im Prompt mitgeben).
+- Asset-Lauf selbst bleibt ⛔ Credits-Freigabe (WARTELISTE „Higgsfield-Assets galabau generieren") — Rezept ist jetzt aber ohne Rückfrage ausführbar.
+
 ## Arbeitsblock: Scrub-PV Asset-Lauf — Higgsfield-Kette komplett, Scrub-Modus AKTIV
 
 - **Freigabe:** Felix 2026-07-22 („gib alle credits frei, generiere die assets"). Verbrauch **232 von 246 Credits** (7 Entry Still gpt_image_2 2k + 5×45 seedance_2_0 5s/1080p/std/epic).
