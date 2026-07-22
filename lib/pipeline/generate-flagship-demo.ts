@@ -22,7 +22,7 @@ import type { ProspectData } from './prospect-data'
 const BUCKET = 'asset-bank'
 
 /** M5: Branchen-spezifische Video-Bewegungs-Prompts für Flagships ohne style_prompts */
-const VIDEO_PROMPTS: Record<string, { loop: string; scrub: string }> = {
+export const FLAGSHIP_VIDEO_PROMPTS: Record<string, { loop: string; scrub: string }> = {
   reinigung: {
     loop: 'Extreme close-up of a grimy glass surface — an invisible force wipes across from left to right, revealing crystal-clear sparkling glass with bright daylight streaming through. Water droplets bead and roll off the clean surface. Static camera, no person visible, no text, no logos.',
     scrub: 'Wide shot of a neglected dusty office space transforming into an immaculate clean room — dust disappears from surfaces, floors begin to gleam, windows clear up, everything shines. Static camera, no person, smooth continuous transformation, no text, no logos.',
@@ -667,7 +667,7 @@ export async function generiereFlagshipDemo(
     } else if (styleProfil?.style_prompts) {
       videoPrompt = baueVideoPrompt(styleProfil)
     } else {
-      const branchenVideo = VIDEO_PROMPTS[brancheKey]
+      const branchenVideo = FLAGSHIP_VIDEO_PROMPTS[brancheKey]
       if (branchenVideo) {
         videoPrompt = branchenVideo.loop
       } else {

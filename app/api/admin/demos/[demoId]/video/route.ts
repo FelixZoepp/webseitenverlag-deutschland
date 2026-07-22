@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/auth-helpers'
 import { generiereVideo } from '@/lib/assets/pipeline'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { FlagshipConfig } from '@/lib/flagship/types'
+import { FLAGSHIP_VIDEO_PROMPTS } from '@/lib/pipeline/generate-flagship-demo'
 
 export const maxDuration = 300
 
@@ -71,7 +72,13 @@ export async function POST(
   }
 
   const brancheKey = demo.branche || config.branche_key || ''
-  const videoPrompt = VIDEO_PROMPTS[brancheKey]
+  // Scroll-Animationen-Extra: Scrub-Video (Verwandlung an Scroll gekoppelt) statt Loop.
+  // Branchen ohne Scrub-Prompt fallen still auf Loop zurück (Spec 2026-07-22).
+  const scrubPrompt = config.scroll_animationen === true
+    ? FLAGSHIP_VIDEO_PROMPTS[brancheKey]?.scrub
+    : undefined
+  const videoPrompt = scrubPrompt
+    || VIDEO_PROMPTS[brancheKey]
     || `Cinematic 4K, static camera. Close-up scene related to ${brancheKey}. Subtle ambient motion, gentle material movement. Seamless 5-second loop. No face, no text, no logos.`
 
   try {
@@ -86,7 +93,7 @@ export async function POST(
       return NextResponse.json({ error: 'Video-Generierung lieferte keine URL' }, { status: 500 })
     }
 
-    config.inhalte.hero.video = { src: video.videoUrl, poster: heroUrl, modus: 'loop' }
+    config.inhalte.hero.video = { src: video.videoUrl, poster: heroUrl, modus: scrubPrompt ? 'scrub' : 'loop' }
 
     const assetMeta = (demo.asset_meta || {}) as Record<string, unknown>
     assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
