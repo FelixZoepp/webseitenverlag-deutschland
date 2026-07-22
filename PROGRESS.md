@@ -260,7 +260,18 @@ Branch: `refactor/mission-v2` · Basis-Commit: `55a67fa` (wip: stand vor mission
 | 2 maler | ✅ (`branchen/maler/STECKBRIEF.md`) | ✅ **[x] Felix 2026-07-21** | ✅ (`maler-landing-v1`) | ✅ (`rezepte/REZEPTE_MALER.md`) | ✅ (test:maler 204, LH 100/92–95/100 auf allen 10 Seiten) | ✅ **[x] Felix 2026-07-22** (docs/screenshots/maler/, `frozen:true`) | ⛔ Higgsfield-Key (WARTELISTE) | — |
 | 3–16 | — | — | — | — | — | — | — | — |
 
-Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0 (Stub-Phase) · scrub-premium/pv 0 (Stub-Phase)
+Kosten-Log je Branche (Cent): galabau 0 (Stub-Phase) · maler 0 (Stub-Phase) · scrub-premium/pv **232 Higgsfield-Credits** (Asset-Lauf 2026-07-22: 7 Entry Still + 5×45 Videos, Reserve 14 unangetastet)
+
+## Arbeitsblock: Scrub-PV Asset-Lauf — Higgsfield-Kette komplett, Scrub-Modus AKTIV
+
+- **Freigabe:** Felix 2026-07-22 („gib alle credits frei, generiere die assets"). Verbrauch **232 von 246 Credits** (7 Entry Still gpt_image_2 2k + 5×45 seedance_2_0 5s/1080p/std/epic).
+- **Seam-locked Kette exakt nach `rezepte/REZEPTE_SCRUB_PV.md`:** Entry Still → V1–V5 **sequentiell** (letzter Frame Clip N via `ffmpeg -ss 00:00:04.9` = start_image Clip N+1), QA je Clip vor dem nächsten (Seam-Vergleich, Bewegungsrichtung, Farbsprünge). Job-IDs: Entry afdc0b0e · V1 60b1c763 · V2 5c18a39b · V3 88805351 · V4 5bf5c464 · V5 c691e596. **V5-QA-Fall:** Endframe zeigt Wohnzimmer statt Speicher — Mittel-Frame-Extraktion (2.5s) belegt Speicher-Wandeinheit mit Cyan-LEDs im Clip ⇒ Motiv vorhanden, keine Neugenerierung nötig.
+- **Frame-Budget-Pivot (≤5 MB):** Guide-Pfad (concat → jpg fps=24) ergab 34 MB; JPEG schafft das Budget nicht (beste Variante 5.24 MB bei miserabler Qualität). Lösung: **WebP via sharp** (lokales ffmpeg ohne libwebp) — hochwertige jpg-Quellframes (q:v 2) → sharp `.webp({quality:45, effort:6})`, fps 12, 540p ⇒ **303 Frames, 4,87 MB** ✓. Poster 1920×1080 via sharp mozjpeg q72 (145/125/61/62/87 KB).
+- **Installiert `public/media/pv/`:** poster-01…05.jpg + frames/frame-0001…0303.webp (6,0 MB gesamt). `seed.ts`: alle 5 Szenen-Poster mit `datei`/`breite`/`hoehe`, `inhalte.frames` gesetzt (`/media/pv/frames/frame-NUM.webp`, gesamt 303, ziffern 4, fps 12, vorlade 20) ⇒ **Scrub-Modus aktiv**. Engine formatagnostisch (`pfad_muster`-Replace) — keine Engine-Änderung nötig.
+- **`scripts/test-scrub.ts` → 140 Prüfungen:** Abschnitte 1/5b auf Klon-ohne-frames umgestellt (Modus-Mechanik-Intention erhalten); **neuer Abschnitt 6 „seed-assets"**: frames-Config, Seed rendert Canvas, erster/letzter Frame existiert, Frame gesamt+1 existiert NICHT, Dateianzahl === gesamt, Gesamtbytes ≤ 5 MB, alle 5 Poster-Dateien vorhanden — schützt dauerhaft gegen Config/Asset-Drift.
+- **Screenshots `docs/screenshots/scrub/`:** [scrub-desktop-1440.png](docs/screenshots/scrub/scrub-desktop-1440.png) (Szene 1, Canvas aktiv: Abendhaus + Sonnen-Flare) · [scrub-scrolled-1440.png](docs/screenshots/scrub/scrub-scrolled-1440.png) (55 % Scroll = Szene 3, Cyan-Stromfluss über Modulen, Dots + Copy) · [scrub-mobile-390.png](docs/screenshots/scrub/scrub-mobile-390.png) — Sichtprüfung ✓ (Poster→Canvas-Übergang, Scroll-Scrub zeichnet korrekten Frame).
+- Arbeitsdateien (Clips, Seams, Quellframes) in `.assets-work/` (gitignored, nicht committet).
+- Selbsttest: `tsc --noEmit` ✅ · `test:scrub` **140** ✅ · `test:galabau` 130 ✅ · `test:maler` 204 ✅ · `test:flagship` 463 ✅ · Build ✅.
 
 ## Arbeitsblock: Premium Scroll-Scrub — Engine `scrub-story-v1` + PV-Seed (Solarflow)
 
