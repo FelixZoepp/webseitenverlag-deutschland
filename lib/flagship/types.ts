@@ -286,6 +286,8 @@ export interface FlagshipConfig {
   herkunft?: { quellen?: string[]; generator?: string }
   /** Premium-Animationen: parallax auf Bildern, staggered reveals, smoothere Übergänge */
   premium_animationen?: boolean
+  /** Scroll-Animationen-Extra: Scroll-Video-Header (Scrub) + Signature-Story (Demo-Formular) */
+  scroll_animationen?: boolean
   /** Multipage: Sektionen auf eigene Unterseiten verteilen (Business/Growth) */
   seiten_modus?: 'onepager' | 'multipage'
 }

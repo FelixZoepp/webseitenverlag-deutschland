@@ -78,6 +78,7 @@ export async function POST(request: Request) {
     }
     if (body?.scrollAnimationen === true) {
       designOverrides.premium_animationen = true
+      designOverrides.scroll_animationen = true
     }
 
     // Phase 1: Nur Personalisierung (OHNE Asset-Generierung) — sofort zurück

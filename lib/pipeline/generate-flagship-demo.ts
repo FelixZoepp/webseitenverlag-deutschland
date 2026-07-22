@@ -16,6 +16,7 @@ import { getApprovedAssets } from '@/lib/assets/repository'
 import { baueAssetPrompt, baueVideoPrompt } from '@/lib/seeding/seed-branche'
 import type { BranchenProfil } from '@/lib/seeding/schema'
 import type { FlagshipConfig, FlagshipDesign } from '@/lib/flagship/types'
+import { istMalerKomposition } from '@/lib/flagship/maler/types'
 import type { ProspectData } from './prospect-data'
 
 const BUCKET = 'asset-bank'
@@ -100,6 +101,8 @@ export interface DesignOverrides {
   brandfarbe?: string
   /** Premium-Animationen aktivieren (Parallax, staggered reveals) */
   premium_animationen?: boolean
+  /** Scroll-Animationen-Extra: Scrub-Video-Header + Signature-Story (gebündelt) */
+  scroll_animationen?: boolean
 }
 
 /** Dunkelt eine Hex-Farbe um ~25% ab (für akzent1_tief) */
@@ -124,7 +127,7 @@ const DUNKEL_TOKENS: Partial<FlagshipDesign['tokens']> = {
 }
 
 /** Wendet Design-Overrides auf die geklonte Config an */
-function wendeDesignOverridesAn(config: FlagshipConfig, overrides: DesignOverrides): void {
+export function wendeDesignOverridesAn(config: FlagshipConfig, overrides: DesignOverrides): void {
   if (overrides.typo_modus && overrides.typo_modus !== config.design.typo_modus) {
     const hell = overrides.typo_modus === 'sans_bold_hell'
     config.design.typo_modus = overrides.typo_modus
@@ -139,6 +142,11 @@ function wendeDesignOverridesAn(config: FlagshipConfig, overrides: DesignOverrid
   }
   if (overrides.premium_animationen) {
     config.premium_animationen = true
+  }
+  if (overrides.scroll_animationen) {
+    config.scroll_animationen = true
+    // Kompositionen mit Signature-Story (aktuell maler-landing-v1): Story einschalten
+    if (istMalerKomposition(config)) config.signature_story = 'on'
   }
 }
 /** DoD-Grenze (BF §6): Kosten pro Demo in Cent */

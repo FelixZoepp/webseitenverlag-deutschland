@@ -16,6 +16,7 @@ import { renderFlagshipPage, renderUnterseite } from '../lib/flagship/render'
 import { renderAnfrageSeite } from '../lib/flagship/anfrage'
 import type { FlagshipConfig, UnterseitenSlug } from '../lib/flagship/types'
 import { UNTERSEITEN } from '../lib/flagship/types'
+import { wendeDesignOverridesAn } from '../lib/pipeline/generate-flagship-demo'
 
 let fehler = 0
 let geprueft = 0
@@ -232,6 +233,38 @@ for (const m of PFLICHT_MARKER) {
   assert(onepagerHtml.includes(`<!-- sektion:${m} -->`), 'onepager', `Sektionsmarker "${m}" fehlt im Onepager`)
 }
 console.log('  onepager: ok (alle Sektionen vorhanden)')
+
+// ------------------------------------------------------------
+// Scroll-Animationen-Extra (Spec 2026-07-22)
+// ------------------------------------------------------------
+{
+  const basis = klon(Object.values(FLAGSHIP_SEEDS)[0])
+
+  // Override setzt beide Flags
+  const mitFlag = klon(basis)
+  wendeDesignOverridesAn(mitFlag, { scroll_animationen: true, premium_animationen: true })
+  assert(mitFlag.scroll_animationen === true, 'scroll-extra', 'Override setzt scroll_animationen nicht')
+  assert(mitFlag.premium_animationen === true, 'scroll-extra', 'Override setzt premium_animationen nicht')
+
+  // Ohne Override bleibt das Flag aus
+  const ohneFlag = klon(basis)
+  wendeDesignOverridesAn(ohneFlag, {})
+  assert(ohneFlag.scroll_animationen === undefined, 'scroll-extra', 'Flag darf ohne Override nicht gesetzt sein')
+
+  // Render: Scrub-Modus am Hero
+  const scrubConfig = klon(basis)
+  scrubConfig.scroll_animationen = true
+  scrubConfig.inhalte.hero.video = { src: '/media/test.mp4', poster: '/media/test.jpg', modus: 'scrub' }
+  const scrubHtml = renderFlagshipPage(scrubConfig, { demo: true, basisPfad: '/demo/test' })
+  assert(scrubHtml.includes('data-modus="scrub"'), 'scroll-extra', 'Hero rendert nicht data-modus="scrub"')
+  assert(scrubHtml.includes('class="vhero scrub"'), 'scroll-extra', 'Hero hat keine .scrub-Klasse')
+
+  // Render: Loop bleibt Default
+  const loopConfig = klon(basis)
+  loopConfig.inhalte.hero.video = { src: '/media/test.mp4', poster: '/media/test.jpg', modus: 'loop' }
+  const loopHtml = renderFlagshipPage(loopConfig, { demo: true, basisPfad: '/demo/test' })
+  assert(loopHtml.includes('data-modus="loop"'), 'scroll-extra', 'Hero rendert nicht data-modus="loop"')
+}
 
 console.log(`\n${geprueft} Prüfungen, ${fehler} Fehler`)
 if (fehler > 0) process.exit(1)
