@@ -1,13 +1,16 @@
 /**
  * Premium — Stresstest Komposition „scrub-story-v1".
  *
- * Prüft: Seed rendert vollständig (Poster-Modus ohne frames), Scrub-Modus mit
- * frames (Canvas, Loader, Dots, Progress), Verbatim-Felder, Formularvertrag,
- * Copy-Slot-Limits, Asset-Slot-Mapping (10 Slots) und 3 fiese Datensätze:
- * sehr langer Firmenname · nur 3 Szenen · Stadt mit Bindestrich.
+ * Prüft: Poster-Modus (Klon ohne frames), Scrub-Modus mit frames (Canvas,
+ * Loader, Dots, Progress), Verbatim-Felder, Formularvertrag, Copy-Slot-Limits,
+ * Asset-Slot-Mapping (10 Slots), 3 fiese Datensätze (langer Firmenname ·
+ * nur 3 Szenen · Bindestrich-Stadt) und Seed-Assets auf Platte (303 Frames
+ * ≤ 5 MB + 5 Poster, public/media/pv).
  *
  * Aufruf: npm run test:scrub
  */
+import fs from 'node:fs'
+import path from 'node:path'
 import { renderFlagshipPage } from '../lib/flagship/render'
 import { renderScrubStory } from '../lib/flagship/scrub/render'
 import { scrubStorySeed } from '../lib/flagship/scrub/seed'
@@ -44,10 +47,12 @@ function pruefeGrundregeln(name: string, html: string) {
   assert(html.includes('inter-tight'), name, 'Self-hosted Font fehlt')
 }
 
-/* ---------- 1. Seed (ohne frames = statischer Poster-Modus) ---------- */
+/* ---------- 1. Poster-Modus (Klon ohne frames = statischer Fallback) ---------- */
 {
   const name = 'seed-statisch'
-  const html = renderScrubStory(scrubStorySeed)
+  const ohneFrames = klon(scrubStorySeed)
+  delete ohneFrames.inhalte.frames
+  const html = renderScrubStory(ohneFrames)
   pruefeGrundregeln(name, html)
 
   // Modus: ohne frames KEIN Canvas/Scrub-Markup, stattdessen Poster-Sektionen
@@ -87,7 +92,7 @@ function pruefeGrundregeln(name: string, html: string) {
   assert(!renderScrubStory(scrubStorySeed, { noindex: false }).includes('content="noindex"'), name, 'noindex:false wirkt nicht')
 
   // Dispatch + Guard
-  assert(renderFlagshipPage(scrubStorySeed) === html, name, 'Dispatch renderFlagshipPage ≠ renderScrubStory')
+  assert(renderFlagshipPage(ohneFrames) === html, name, 'Dispatch renderFlagshipPage ≠ renderScrubStory')
   assert(istScrubKomposition(scrubStorySeed), name, 'Type-Guard erkennt Seed nicht')
   assert(!istScrubKomposition({ komposition: 'maler-landing-v1' }), name, 'Type-Guard matcht fremde Komposition')
 
@@ -192,8 +197,9 @@ function pruefeGrundregeln(name: string, html: string) {
   pruefeGrundregeln(name, htmlLang)
   assert(htmlLang.includes('Sonnenkraft &amp; Söhne'), name, 'Langer Firmenname fehlt (escaped)')
 
-  // 5b: nur 3 Szenen
+  // 5b: nur 3 Szenen (ohne frames → Poster-Sektionen zählbar)
   const drei = klon(scrubStorySeed)
+  delete drei.inhalte.frames
   drei.inhalte.szenen = drei.inhalte.szenen.slice(0, 3)
   const htmlDrei = renderScrubStory(drei)
   pruefeGrundregeln(name, htmlDrei)
@@ -208,6 +214,39 @@ function pruefeGrundregeln(name: string, html: string) {
   pruefeGrundregeln(name, htmlStadt)
   assert(htmlStadt.includes('Garmisch-Partenkirchen'), name, 'Bindestrich-Stadt fehlt')
   assert(htmlStadt.includes('tel:+4908821123456'), name, 'tel:-Link nicht mechanisch bereinigt')
+}
+
+/* ---------- 6. Seed-Assets (frames + Poster existieren auf Platte) ---------- */
+{
+  const name = 'seed-assets'
+  const frames = scrubStorySeed.inhalte.frames
+  assert(!!frames, name, 'Seed hat keine frames-Config (Scrub-Modus inaktiv)')
+  if (frames) {
+    // Seed rendert jetzt den Scrub-Modus
+    const html = renderScrubStory(scrubStorySeed)
+    assert(html.includes('<canvas class="ss-canvas"'), name, 'Seed rendert keinen Canvas trotz frames')
+
+    const publicDir = path.join(__dirname, '..', 'public')
+    const pfad = (n: number) =>
+      path.join(publicDir, frames.pfad_muster.replace('NUM', String(n).padStart(frames.ziffern, '0')))
+    assert(fs.existsSync(pfad(1)), name, `Erster Frame fehlt: ${pfad(1)}`)
+    assert(fs.existsSync(pfad(frames.gesamt)), name, `Letzter Frame fehlt: ${pfad(frames.gesamt)}`)
+    assert(!fs.existsSync(pfad(frames.gesamt + 1)), name, `Frame ${frames.gesamt + 1} existiert — gesamt zu klein`)
+
+    const frameDir = path.dirname(pfad(1))
+    const dateien = fs.readdirSync(frameDir)
+    assert(dateien.length === frames.gesamt, name, `Frame-Anzahl ${dateien.length} ≠ gesamt ${frames.gesamt}`)
+    const bytes = dateien.reduce((s, f) => s + fs.statSync(path.join(frameDir, f)).size, 0)
+    assert(bytes <= 5 * 1024 * 1024, name, `Frame-Sequenz ${(bytes / 1024 / 1024).toFixed(2)} MB > 5 MB Budget`)
+
+    // Poster-Pflicht-Slots liegen auf Platte und stehen im Seed
+    scrubStorySeed.inhalte.szenen.forEach((szene, i) => {
+      assert(!!szene.poster.datei, name, `Szene ${i + 1}: poster.datei fehlt im Seed`)
+      if (szene.poster.datei) {
+        assert(fs.existsSync(path.join(publicDir, szene.poster.datei)), name, `Poster fehlt: ${szene.poster.datei}`)
+      }
+    })
+  }
 }
 
 /* ---------- Ergebnis ---------- */
