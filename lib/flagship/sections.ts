@@ -90,7 +90,7 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
   const poster = hero.media.datei || ''
   return `<!-- sektion:hero -->
 <header class="vhero" id="top">
-  ${poster ? `<img class="vhero-img" src="${escAttr(poster)}" alt="${escAttr(hero.media.alt || hero.media.label)}" loading="eager">` : ''}
+  ${poster ? `<img class="vhero-img" src="${escAttr(poster)}" alt="${escAttr(hero.media.alt || hero.media.label)}" width="1440" height="900" loading="eager">` : ''}
   <div class="vshade"></div>
   <div class="wrap vinner">
     <div class="rv in" style="max-width:640px">
