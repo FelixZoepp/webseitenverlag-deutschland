@@ -61,11 +61,12 @@ jobs:
           npm run test:crm
           npm run test:scrub
 
-      - name: Conversion & SEO (Badge, Sitemap/Robots, JSON-LD)
+      - name: Conversion & SEO (Badge, Sitemap/Robots, JSON-LD, Blog)
         run: |
           npm run test:demo-badge
           npm run test:seo-plattform
           npm run test:jsonld
+          npm run test:blog
 
       - name: Kosten-Schranke (B-25, jede LLM-Route braucht das Gate)
         run: npm run test:kosten-cap

@@ -7,7 +7,7 @@
 > Implementierung (Marker) und ihren Test (Regel-ID) geprüft.
 > Regel ohne Implementierung = Build-Fehler.
 
-Stand: 40 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (Playwright)
+Stand: 41 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (Playwright)
 
 ## Inhalt & Copy
 
@@ -58,6 +58,7 @@ Stand: 40 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (P
 | `B-RECHT` | Impressum und Datenschutz sind verlinkt (kein #, kein leerer href). | Browser | Links aus Sektions-Config reparieren; sonst failed + manual_task. | `lib/qa-gate/browser-checks.ts` | `scripts/test-qa-gate.ts` |
 | `B-NOINDEX` | Demo trägt noindex; Live-Site trägt KEIN noindex. | Browser | Re-Render mit korrekter noindex-Option. | `lib/qa-gate/browser-checks.ts` | `scripts/test-qa-gate.ts` |
 | `R-SITEMAP` | Live-Sites: canonical gesetzt; Sitemap-Route liefert die Site aus. | Render | Kein Autofix — Hosting-Bug → failed + manual_task. | `lib/qa-gate/render-checks.ts` | `scripts/test-qa-gate.ts` |
+| `R-BLOG-REGISTRY` | Jeder Blog-Artikel hat einen Eintrag in lib/blog/artikel.ts mit Pflichtfeldern. Sitemap liest aus veroeffentlichteArtikel(). | Render | Kein Autofix — fehlenden Registry-Eintrag oder Bild manuell ergänzen. | `lib/blog/artikel.ts` | `scripts/test-blog.ts` |
 
 ## Video/Growth
 

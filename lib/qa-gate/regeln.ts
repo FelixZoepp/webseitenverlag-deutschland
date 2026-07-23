@@ -417,6 +417,16 @@ export const QA_REGELN: QaRegel[] = [
     kategorie: 'Produktstufen',
   },
   {
+    id: 'R-BLOG-REGISTRY',
+    beschreibung: 'Jeder Blog-Artikel hat einen Eintrag in lib/blog/artikel.ts mit Pflichtfeldern. Sitemap liest aus veroeffentlichteArtikel().',
+    layer: 'render',
+    autofix: 'Kein Autofix — fehlenden Registry-Eintrag oder Bild manuell ergänzen.',
+    implementiertIn: 'lib/blog/artikel.ts',
+    marker: 'veroeffentlichteArtikel',
+    testRef: 'scripts/test-blog.ts',
+    kategorie: 'SEO & Recht',
+  },
+  {
     id: 'R-MOBILE-CLIP',
     beschreibung: 'Kein horizontales Scrollen auf Mobile: jede Renderer-Basis (Flagship, GalaBau/Maler, Scrub, Bibliothek) trägt overflow-x:hidden;overflow-x:clip auf html UND body — iOS Safari ignoriert body allein; clip erhält position:sticky.',
     layer: 'render',

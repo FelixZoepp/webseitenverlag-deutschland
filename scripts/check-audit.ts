@@ -14,6 +14,9 @@ const AUSNAHMEN: Record<string, string> = {
     'Alle Advisories erst in next@16 gefixt (Major-Breaking: async cookies()/params). ' +
     'Migration = eigene Entscheidung, siehe OPTIMIERUNGS_BACKLOG Nr. 7. ' +
     'ws (High) wurde gefixt; Rest-Risiko dokumentiert.',
+  postcss:
+    'Transitives Dependency von next@14 (postcss@8.4.31 gelockt). ' +
+    'Fix erst in postcss@8.5.12+ — kommt automatisch mit next@16-Migration.',
 }
 
 let fehler = 0

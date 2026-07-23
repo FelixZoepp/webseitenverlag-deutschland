@@ -36,7 +36,8 @@
     "test:scrub": "npx tsx scripts/test-scrub.ts",
     "test:crm": "npx tsx scripts/test-crm.ts",
     "seed:assets": "npx tsx scripts/seed-assets.ts",
-    "seed:branchen": "npx tsx scripts/seed-branchen.ts"
+    "seed:branchen": "npx tsx scripts/seed-branchen.ts",
+    "test:blog": "npx tsx scripts/test-blog.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",

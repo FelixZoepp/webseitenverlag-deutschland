@@ -4,14 +4,35 @@ import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-/** Live-Demo GrünWerk GaLaBau (T3, Felix 2026-07-22: Demo auf der Landingpage). */
+/** Live-Demo GrünWerk GaLaBau */
 const DEMO_URL = "/demo/VQDzw4LlCT82KT4_X3xU3rL1Rwq3k21A";
 
-/** Beispiel-Demos (Higgsfield, Felix 2026-07-22: eigene Reihe unter den Ergebnissen). */
+/** Beispiel-Demos mit Screenshots, Branche und Kundenwunsch */
 const BEISPIEL_DEMOS = [
-  { name: "Solar", url: "https://sonnenstrom-journey.higgsfield.app" },
-  { name: "Dachdecker", url: "https://dachmeister.higgsfield.app" },
-  { name: "Garten", url: "https://garden-scroll.higgsfield.app" },
+  {
+    branche: "GaLaBau",
+    url: DEMO_URL,
+    bild: "/beispiele/galabau.webp",
+    wunsch: "Wollte endlich Anfragen über Google statt nur Empfehlungen.",
+  },
+  {
+    branche: "Solar / PV",
+    url: "https://sonnenstrom-journey.higgsfield.app",
+    bild: "/beispiele/solar.webp",
+    wunsch: "Hatte keine Website — Kunden kamen nur per Mundpropaganda.",
+  },
+  {
+    branche: "Dachdecker",
+    url: "https://dachmeister.higgsfield.app",
+    bild: "/beispiele/dachdecker.webp",
+    wunsch: "Wollte mich von den großen Portalen unabhängig machen.",
+  },
+  {
+    branche: "Gartengestaltung",
+    url: "https://garden-scroll.higgsfield.app",
+    bild: "/beispiele/garten.webp",
+    wunsch: "Meine alte Website hat nie jemanden zum Anrufen gebracht.",
+  },
 ];
 
 const reveal = {
@@ -763,59 +784,73 @@ export default function WvdClient() {
           6. SOCIAL PROOF – Teaser → Unterseite
           ═══════════════════════════════════════ */}
       <section id="ergebnisse" style={{ background: "var(--cream)" }}>
-        <div className="container" style={{ maxWidth: 900, textAlign: "center" }}>
+        <div className="container" style={{ maxWidth: 1000, textAlign: "center" }}>
           <span className="eyebrow" style={{ display: "block", marginBottom: 20 }}>Echte Ergebnisse</span>
           <h2 className="display" style={{ fontSize: "clamp(36px, 4.5vw, 56px)", marginBottom: 16 }}>
             Was unsere Kunden <span className="accent">erleben</span>.
           </h2>
           <p style={{ color: "var(--ink-soft)", fontSize: 18, maxWidth: 580, margin: "0 auto 48px" }}>
-            Handwerker, Berater, Praxen – sie alle haben den gleichen Schritt gewagt. Hier sind ihre Geschichten und Ergebnisse.
+            Handwerker, Berater, Praxen – sie alle haben den gleichen Schritt gewagt. Hier sind ihre Ergebnisse.
           </p>
 
-          {/* Preview Cards */}
           <motion.div {...reveal}>
-          <div className="ergebnis-cards" style={{ marginBottom: 48 }}>
-            {[
-              { name: "Grünwerk GaLaBau", result: "+340% Anfragen", stars: 5, demo: DEMO_URL },
-              { name: "Praxis Dr. Weber", result: "Warteliste nach 4 Wochen", stars: 5 },
-              { name: "Elektro Schuster", result: "5 neue Aufträge/Woche", stars: 5 },
-            ].map((t, i) => {
-              const inhalt = (
-                <>
-                  <div style={{ display: "flex", justifyContent: "center", gap: 3, marginBottom: 12 }}>
-                    {Array.from({ length: t.stars }).map((_, s) => (
-                      <svg key={s} viewBox="0 0 24 24" fill="var(--red-500)" style={{ width: 16, height: 16 }}>
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
-                    ))}
+            <div className="demo-grid" style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: 24,
+              marginBottom: 48,
+            }}>
+              {BEISPIEL_DEMOS.map((demo) => (
+                <a
+                  key={demo.branche}
+                  href={demo.url}
+                  target="_blank"
+                  rel="noopener"
+                  className="demo-card"
+                  style={{
+                    display: "flex", gap: 20, alignItems: "center",
+                    padding: 20, borderRadius: 20, textAlign: "left",
+                    background: "var(--surface-card)", boxShadow: "var(--shadow-sm)",
+                    color: "inherit", textDecoration: "none",
+                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                  }}
+                >
+                  <div className="demo-card-img" style={{
+                    flexShrink: 0, width: 200, height: 125,
+                    borderRadius: 12, overflow: "hidden", position: "relative",
+                    background: "var(--gray-100)",
+                  }}>
+                    <Image
+                      src={demo.bild}
+                      alt={`Demo ${demo.branche}`}
+                      fill
+                      style={{ objectFit: "cover" }}
+                      sizes="200px"
+                    />
                   </div>
-                  <div style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 18, marginBottom: 6, letterSpacing: "-0.01em" }}>
-                    {t.name}
-                  </div>
-                  <div style={{ fontFamily: "var(--font-ui)", fontSize: 13, color: "var(--red-500)", fontWeight: 600 }}>
-                    {t.result}
-                  </div>
-                </>
-              );
-              const kartenStil = {
-                padding: "28px 24px", borderRadius: 20,
-                background: "var(--surface-card)", boxShadow: "var(--shadow-sm)",
-                textAlign: "center" as const,
-              };
-              return t.demo ? (
-                <a key={i} href={t.demo} target="_blank" rel="noopener" style={{ ...kartenStil, display: "block", color: "inherit", textDecoration: "none" }}>
-                  {inhalt}
-                  <div style={{ fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--ink-soft)", fontWeight: 600, marginTop: 10 }}>
-                    Live-Demo ansehen →
+                  <div>
+                    <div style={{
+                      fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 18,
+                      marginBottom: 8, letterSpacing: "-0.01em",
+                    }}>
+                      {demo.branche}
+                    </div>
+                    <p style={{
+                      fontFamily: "var(--font-ui)", fontSize: 14, lineHeight: 1.5,
+                      color: "var(--ink-soft)", fontStyle: "italic", margin: 0,
+                    }}>
+                      &ldquo;{demo.wunsch}&rdquo;
+                    </p>
+                    <div style={{
+                      fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--red-500)",
+                      fontWeight: 600, marginTop: 10,
+                    }}>
+                      Demo ansehen →
+                    </div>
                   </div>
                 </a>
-              ) : (
-                <div key={i} style={kartenStil}>
-                  {inhalt}
-                </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
           </motion.div>
 
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" as const }}>
@@ -825,31 +860,6 @@ export default function WvdClient() {
             <a href="/kundenmeinungen" className="btn btn-primary" style={{ fontSize: 16, padding: "18px 40px" }}>
               <span>Alle Kundenergebnisse ansehen →</span>
             </a>
-          </div>
-
-          {/* Beispiel-Demos (Higgsfield) */}
-          <div style={{ marginTop: 40 }}>
-            <div style={{ fontFamily: "var(--font-ui)", fontSize: 13, color: "var(--ink-soft)", fontWeight: 600, marginBottom: 14 }}>
-              Weitere Beispiel-Demos:
-            </div>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" as const }}>
-              {BEISPIEL_DEMOS.map((demo) => (
-                <a
-                  key={demo.name}
-                  href={demo.url}
-                  target="_blank"
-                  rel="noopener"
-                  style={{
-                    fontFamily: "var(--font-ui)", fontSize: 14, fontWeight: 600,
-                    color: "inherit", textDecoration: "none",
-                    padding: "10px 20px", borderRadius: 999,
-                    background: "var(--surface-card)", boxShadow: "var(--shadow-sm)",
-                  }}
-                >
-                  {demo.name} →
-                </a>
-              ))}
-            </div>
           </div>
         </div>
       </section>
