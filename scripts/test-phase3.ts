@@ -211,6 +211,16 @@ erwarteVerstoss(OK_HTML + '<a href="#">Mehr</a>', synthConfig(), 'toter_link', '
 erwarteVerstoss(OK_HTML + '<p>M&amp;uuml;ll entsorgen</p>', synthConfig(), 'rohe_entities', 'validator-entities')
 erwarteVerstoss(OK_HTML + '<p>Lorem ipsum dolor</p>', synthConfig(), 'lorem', 'validator-lorem')
 erwarteVerstoss(OK_HTML + '<p>{{firma}}</p>', synthConfig(), 'token_rest', 'validator-token')
+// FEHLERJOURNAL J-003: Verbots-Liste interner Strings im sichtbaren Text
+erwarteVerstoss(OK_HTML + '<footer>wird vom System generiert</footer>', synthConfig(), 'interner_string', 'validator-interner-string [J-003]')
+erwarteVerstoss(OK_HTML + '<p>TODO: Texte einsetzen</p>', synthConfig(), 'interner_string', 'validator-todo [J-003]')
+// FEHLERJOURNAL J-002: sichtbarer "0+"-Zähler = leere Kennzahl
+erwarteVerstoss(OK_HTML + '<div class="stat"><b>0+</b> Projekte</div>', synthConfig(), 'null_zaehler', 'validator-null-zaehler [J-002]')
+{
+  // Gegenprobe: echte Zähler wie "250+" oder "10+" dürfen NICHT auslösen
+  const report = validiereKonsistenz(OK_HTML + '<div class="stat"><b>250+</b> Projekte, <b>10+</b> Jahre</div>', synthConfig(), 'Ludwigsburg', META)
+  assert(!report.verstoesse.some((v) => v.regel === 'null_zaehler'), 'validator-zaehler-ok [J-002]', `"250+"/"10+" dürfen nicht als "0+" gelten. Report: ${reportAlsText(report)}`)
+}
 erwarteVerstoss(OK_HTML + '<img src="/assets/bild-4.webp" alt="" width="1600" height="900">', synthConfig(), 'img_alt', 'validator-img-alt')
 erwarteVerstoss(OK_HTML + '<img src="/assets/bild-5.webp" alt="Blick in den Flur">', synthConfig(), 'img_dimensionen', 'validator-img-dim [R-IMG-DIM]')
 {

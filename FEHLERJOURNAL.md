@@ -1,0 +1,124 @@
+# FEHLERJOURNAL — Selbstkontrolle (Dauerregel)
+
+> Jeder gefundene Fehler bekommt einen Eintrag:
+> `Datum · Fehler · Root Cause · Fix · VERHINDERUNGS-REGEL`.
+> Die Verhinderungs-Regel muss **maschinell** sein (Test, Lint-Regel, Zod-Schema,
+> CI-Check) — nie nur „besser aufpassen".
+> **Wiederholungs-Verbot:** Tritt ein Fehler erneut auf, der hier steht, ist das
+> ein P0 gegen den Prozess — erst die Regel härten, dann weiterarbeiten.
+
+Regel-Status: ✅ = maschinelle Regel existiert und läuft · ⚠️ OFFEN = Regel muss
+im Master-Review verifiziert/gebaut werden.
+
+---
+
+## Startbestände (Historie, vor Master-Review 2026-07-23)
+
+### J-001 · Erfundene Marke in Demo (Friseur Schmidt/Lichtwerk)
+- **Datum:** Historie (vor 2026-07-23)
+- **Fehler:** Demo zeigte eine vom LLM erfundene Firmierung statt des verbatim
+  übergebenen Prospect-Namens.
+- **Root Cause:** Firmenname lief durch LLM-formulierte Texte statt mechanischer
+  Ersetzung; keine Validierung „meta.firma erscheint verbatim, keine Fremdmarke".
+- **Fix:** meta.firma/ort/telefon VERBATIM aus business_profiles; mechanische
+  Ersetzung via `ersetzeUeberall` (lib/pipeline/generate-flagship-demo.ts);
+  Konsistenz-Validator prüft Fremdstadt/Fremdname.
+- **VERHINDERUNGS-REGEL:** Konsistenz-Validator (QA-Gate) schlägt fehl, wenn
+  Vorlagen-Firma/-Ort im gerenderten HTML auftaucht. Regel-Status: ✅
+  (Master-Review 2026-07-23): `npm run ci:golden-set` asserted je Flagship-Profil
+  explizit, dass die Vorlagen-Firma („ReiniFix"/„PANE VINO", raw + escaped) und
+  der Vorlagen-Ort NICHT im HTML stehen (scripts/ci-golden-set.ts, Check 4b
+  [J-001]); fremde Städte zusätzlich via `fremde_stadt`-Regel
+  (scripts/test-phase3.ts, validator-fremde-stadt). 16/16 Asserts grün.
+
+### J-002 · Sichtbare „0+"-Zähler auf der Seite
+- **Datum:** Historie (vor 2026-07-23)
+- **Fehler:** Stat-Zähler rendert „0+" wenn keine Kennzahl vorhanden.
+- **Root Cause:** Zähler-Sektion rendert bedingungslos; fehlender Wert wird als 0
+  interpretiert statt die Kachel wegzulassen.
+- **Fix:** Kennzahlen ohne Wert werden nicht gerendert.
+- **VERHINDERUNGS-REGEL:** Render-Test asserted, dass „0+" in keinem generierten
+  HTML vorkommt. Regel-Status: ✅ (Master-Review 2026-07-23): Validator-Regel
+  `null_zaehler` (lib/generierung/konsistenz-validator.ts, `/\b0\+/` auf
+  sichtbarem Text — matcht „0+", nicht „10+"/„250+") läuft im harten QA-Gate
+  jeder Generierung UND im Golden-Set (Validator-Check je Profil). Tests:
+  scripts/test-phase3.ts `validator-null-zaehler [J-002]` + Gegenprobe
+  `validator-zaehler-ok [J-002]`. Grün.
+
+### J-003 · Platzhalter „wird vom System generiert" im Footer
+- **Datum:** Historie (vor 2026-07-23)
+- **Fehler:** Interner Platzhalter-Text erschien auf ausgelieferter Seite.
+- **Root Cause:** Platzhalter-String aus Seed/Config gelangte ungefiltert in den
+  Renderer; kein Scan auf verbotene interne Strings.
+- **Fix:** Platzhalter entfernt.
+- **VERHINDERUNGS-REGEL:** QA-Gate mit Verbots-Liste interner Strings
+  („wird vom System generiert", „TODO", „Platzhalter", „Lorem") über das
+  gesamte HTML. Regel-Status: ✅ (Master-Review 2026-07-23): `INTERNE_STRINGS`-
+  Verbots-Liste + `lorem`-Regel in lib/generierung/konsistenz-validator.ts
+  (Regel `interner_string`, sichtbarer Text — Attribute/Kommentare zählen
+  nicht, sonst False-Positives durch alt-Texte). Tests:
+  scripts/test-phase3.ts `validator-interner-string [J-003]` +
+  `validator-todo [J-003]` + bestehendes `validator-lorem`. Läuft in jedem
+  QA-Gate und im Golden-Set. Grün.
+
+### J-004 · Sektionen bei Bildfehlern still ausgeblendet
+- **Datum:** Historie (vor 2026-07-23)
+- **Fehler:** Fehlende/kaputte Assets führten dazu, dass ganze Sektionen ohne
+  Warnung wegfielen — Demo sah „fertig" aus, war aber unvollständig.
+- **Root Cause:** Renderer behandelte fehlende MediaSlots als „Sektion weglassen"
+  statt als Fehler; keine Pflicht-Slot-Validierung am Ende.
+- **Fix:** `fehlendePflichtSlots` — Demo wird NICHT gespeichert, wenn
+  Pflicht-Slots leer sind (generate-flagship-demo.ts).
+- **VERHINDERUNGS-REGEL:** Pflicht-Slot-Validierung wirft hart; Test deckt den
+  Pfad ab. Regel-Status: ✅ (Master-Review 2026-07-23, verifiziert):
+  `npm run test:assets` §3.3 „Pflicht-Slot ⇒ harter Fail (nie Platzhalter)"
+  beweist: leere Bank + Pflicht-Slot wirft [C-APPROVED]; zusätzlich
+  Validator-Regel `pflicht_slot_leer` (konsistenz-validator.ts) mit Test
+  `validator-pflicht-slot [C-SLOTS]` (scripts/test-phase3.ts). Beide grün.
+
+### J-005 · SF-Pro-Lizenzdatei im Kunden-Handoff
+- **Datum:** Historie (vor 2026-07-23)
+- **Fehler:** Apple-SF-Pro-Font (nicht lizenzierbar für Web-Weitergabe) lag im
+  ausgelieferten Handoff-Paket.
+- **Root Cause:** Font-Dateien wurden unreflektiert mitkopiert; keine
+  Lizenz-Whitelist im Build/Export.
+- **Fix:** SF Pro entfernt, nur lizenzfreie Fonts (Google Fonts/self-hosted OFL).
+- **VERHINDERUNGS-REGEL:** CI-Scan: Export/Public-Verzeichnisse dürfen keine
+  Dateien matchen auf `(SF-?Pro|\.dfont|Apple)` u. ä.; Font-Whitelist.
+  Regel-Status: ✅ (Master-Review 2026-07-23, gebaut): `npm run test:fonts`
+  (scripts/test-font-lizenz.ts) scannt public/ + export/ + handoff/ —
+  (a) verbotene Namensmuster (sf-pro, .dfont, apple, helvetica, segoe),
+  (b) jede Font-Datei muss auf der expliziten Whitelist stehen (aktuell nur
+  2× InterTight woff2, OFL). 315 Dateien gescannt, grün.
+
+---
+
+## Neue Einträge (Master-Review 2026-07-23 ff.)
+
+### J-006 · „Bearer undefined"-Bypass + tote Crons (alle 6 Cron-Routen)
+- **Datum:** 2026-07-23 (Master-Review Kap. 4, Befund B-15, P0)
+- **Fehler:** Alle 6 Cron-Routen (`briefings`, `seo-plan`, `ads-check`,
+  `kosten-summary`, `qa-scan`, `dunning`) prüften
+  `authHeader !== \`Bearer ${process.env.CRON_SECRET}\``. Da `CRON_SECRET`
+  in keiner Vercel-Umgebung gesetzt ist, hatte das zwei Folgen:
+  (a) **Bypass:** Jeder, der den literalen Header `Bearer undefined` sendet,
+  war autorisiert — inkl. Dunning-Manipulation (Sites sperren) und
+  LLM-Kosten-Missbrauch (seo-plan mit echtem Anthropic-Production-Key).
+  (b) **Tote Crons:** Vercel sendet den Auth-Header nur bei gesetztem
+  Secret — die legitimen Cron-Aufrufe liefen ohne Header und wären nach
+  Setzen des Secrets weiter gelaufen, aber bis dahin war jede Route
+  gleichzeitig offen für den Bypass.
+- **Root Cause:** String-Vergleich gegen ein Template-Literal ohne
+  Unset-Guard: `undefined` wird zu `"Bearer undefined"` interpoliert —
+  ein erratbarer, konstanter „Schlüssel". Fail-open statt fail-closed.
+- **Fix:** `lib/cron-auth.ts` → `istCronAutorisiert(request)`:
+  fail-closed (kein Secret ⇒ immer 401), konstanter Vergleich nur bei
+  gesetztem Secret. Alle 6 Routen umgestellt. D-Ops offen: `CRON_SECRET`
+  in Vercel setzen (sonst bleiben die Crons tot — aber sicher tot).
+- **VERHINDERUNGS-REGEL:** `npm run test:cron-auth`
+  (scripts/test-cron-auth.ts): (1) Unit-Tests am Helper — ohne Secret wird
+  auch `Bearer undefined`/`Bearer ` abgelehnt; mit Secret nur der korrekte
+  Header akzeptiert. (2) Quelltext-Scan über **alle** `app/api/cron/*/route.ts`:
+  jede Route muss `istCronAutorisiert` nutzen, das alte Muster
+  `Bearer ${process.env.CRON_SECRET}` ist verboten. Vor dem Fix: 12 rote
+  Checks (Beweis), danach grün. Regel-Status: ✅

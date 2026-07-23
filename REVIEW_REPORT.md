@@ -1,0 +1,368 @@
+# REVIEW_REPORT — Master-Review (System-TÜV)
+
+Start: 2026-07-23 · Branch: `chore/master-review` · Prompt: `MASTER_REVIEW_PROMPT.md`
+
+## Ampel-Übersicht
+
+| Kapitel | Status | Ampel |
+|---|---|---|
+| 0 Selbstkontrolle (Journal + Regeln) | Alle Journal-Regeln J-001..J-006 maschinell gebaut/verifiziert und grün (Kap. 6) | 🟢 |
+| 1 Die 9 Stationen | geprüft — 11 Befunde (0×P0, 4×P1, Rest P2/Zielbild) | 🟡 |
+| 2 E2E-Generalprobe | Suite gebaut (15 Stationen), grüner Lauf blockiert durch fehlende Env-Keys (B-12) | 🟡 |
+| 3 Demo-Qualität (Budget-Läufe) | Drehbücher ✓, Determinismus ✅ bewiesen (0 €), GaLaBau-Läufe = Zielbild-Lücke (B-20), Growth-Unterseiten fehlen (B-21), Video/Assets D-Ops-blockiert (B-14) | 🟡 |
+| 4 SEO-Automatik | geprüft — B-15 P0 (Cron-Auth-Bypass) im Code gefixt + Verhinderungs-Regel; 4 weitere Befunde (B-16..B-19); D-Ops CRON_SECRET offen | 🟡 |
+| 5 Sicherheits-Review | 8/8 Punkte geprüft — Isolation mit Zweitkunden BEWIESEN (10/10), Webhooks/Uploads/Secrets OK; 2×P1 (B-24 npm-Vulns, B-25 Missbrauch/Kosten-Cap), 3×P2 | 🟡 |
+| 6 Abschluss | Journal-Regeln J-001..J-005 nachgebaut/verifiziert (alle ✅), Backlog befüllt (15 Einträge), Generalprobe lokal grün — als CI-Kriterium offen (B-13) | 🟡 |
+
+Ampel-Legende: 🟢 OK (bewiesen) · 🟡 Risiko/in Arbeit · 🔴 P0 offen · ⚪ ausstehend
+
+## Befunde
+
+Schweregrade: **P0** = bricht Verkauf/Sicherheit, sofort fixen (+ Test + Journal) ·
+**P1** = vor erstem zahlenden Kunden · **P2** = Backlog.
+
+### Kapitel 1 — Die 9 Stationen (geprüft 2026-07-23)
+
+**Methodik:** 4 Explore-Agents kartierten die Stationen; alle kritischen Claims
+danach selbst im Code verifiziert (Datei:Zeile). Beweis-Suites lokal grün gelaufen,
+Screenshots mobile+desktop in `docs/review/`.
+
+**Ampel je Station:**
+
+| # | Station | Ampel | Kern-Beleg |
+|---|---|---|---|
+| 1 | Landing | 🟡 | Hero-Split+Bento+CTA ✓, Lighthouse-CI konfiguriert; B-03 totes Video-Element |
+| 2 | Demo-Wizard | 🟡 | /entwurf = Einzelformular, KEIN 7-Schritte-Wizard (B-05, Zielbild-Lücke) |
+| 3 | Lead im Admin | 🟡 | crm_stage-Kette+Notizen ✓; kein Lead-Score (B-06), status/crm_stage doppelt (B-10) |
+| 4 | Ein-Klick-Demo | 🟡 | QA-Gates grün (68 Prüfungen), Golden-Set 10+8 grün; Kosten-Logging-Lücken (B-09) |
+| 5 | Demo senden | 🟡 | noindex 3-fach ✓, share_token ✓, ?level ✓; Flagship ohne Demo-Badge (B-01), expires_at nie gesetzt (B-07) |
+| 6 | Kauf & Zugang | 🟡 | Webhook idempotent+5 Events, Magic-Link, Verträge 24/12/3 — Code getestet (phase5 grün); Stripe-Keys/Webhook nicht in Vercel (D-Ops) |
+| 7 | Portal + Chatbot | 🟢 | PatchSchema-Ops, Rollback, gesperrte Pfade; smoke-editor-ops 13/13 grün |
+| 8 | Upsells | 🟡 | 7 Produkte, eigener Vertrag, Editor-Gate ✓; Touchpoint-Crons+Fulfillment = Stubs |
+| 9 | Betrieb | 🟡 | Dunning 0/3/7/14 bewiesen (phase5), 6 Crons, Kill-Switch; qa-scan ohne echten Browser, kein Auto-Kill bei Kosten, Backups undokumentiert (B-11) |
+
+**Befunde:**
+
+- **B-01 · P1 · Flagship-Demos ohne Demo-Badge.** `app/demo/[token]/route.ts`:
+  demoBar wird nur im Library/Premium-Pfad injiziert (Z. 168–169); der
+  Flagship-Pfad (Z. 113–144) rendert ohne Badge. Zielbild St. 5 verlangt
+  „Demo-Link (noindex, Badge)". Repro: Maler-Demo-Link öffnen — kein Badge.
+- **B-02 · P1 · sitemap.ts / robots.ts / robots.txt fehlen komplett** (verifiziert:
+  keine der drei Dateien existiert). Marketing-Site hat keine Sitemap/robots-Steuerung;
+  Kap.-4-Anspruch „saubere Sitemap" ist für die eigene Domain unerfüllt.
+- **B-03 · P1 · Landing: totes Hero-Video-Element.** `components/landing/WvdClient.tsx:236–242`
+  — leerer Poster (`aria-hidden`-div ohne Bild) + Play-Button ohne onClick.
+  Sichtbar kaputtes Element auf der Verkaufsseite.
+- **B-04 · P1 · Demo-Freigabe auf Vercel unmöglich (QA-Deadlock, ops-seitig).**
+  Ohne `BROWSER_QA_WS_ENDPOINT` scheitert Browser-QA sowohl automatisch
+  (silent catch, `lib/generierung/lead-demo.ts:301–305`) als auch manuell
+  (500, `app/api/admin/sites/[siteId]/qa/route.ts:100–104`) → nie ein
+  qa_reports-Eintrag → Freigeben-Gate blockt dauerhaft mit 409
+  (`app/api/admin/demos/[demoId]/freigeben/route.ts:54–59`). Kein Code-Bug
+  (Hard-Gate arbeitet wie designed, Fehlermeldung verweist auf WARTELISTE);
+  Fix = D-Ops: Browserless-Endpoint in Vercel setzen.
+- **B-05 · Zielbild-Lücke · Kein 7-Schritte-Wizard.** `/entwurf` ist ein
+  Einzelformular (grep „schritt/step" = 0 Treffer); business_profiles wird nur
+  über Admin-POST befüllt (`app/api/admin/leads/route.ts:149–168`). Verweis:
+  WIZARD-Prompt.
+- **B-06 · Zielbild-Lücke · Kein Lead-Score** (grep lead_score = 0 Treffer in
+  Leads-Routen). Zielbild St. 3. Verweis: MVP_FINISH.
+- **B-07 · P2 · expires_at nie gesetzt.** Render-Gate prüft Ablauf
+  (`app/demo/[token]/route.ts:65`), aber kein Insert setzt expires_at —
+  Demo-Links laufen nie ab.
+- **B-08 · P2 · view_count nicht atomar** (read-modify-write, Race bei
+  parallelen Aufrufen).
+- **B-09 · P2 · Kosten-Logging lückenhaft.** kosten_cent bleibt 0, wenn der
+  zweite LLM-Call abbricht; custom generate-assets loggt keine Kosten;
+  DEMO_KOSTEN_LIMIT_CENT (150) nur Warnung, kein Abbruch.
+- **B-10 · P2 · Doppelsystem status vs. crm_stage** auf leads — zwei
+  Statusketten ohne Synchronisationsregel.
+- **B-11 · P2 · Betriebslücken.** qa-scan-Cron nutzt In-Process-Checks statt
+  echtem Browser (max 20 Sites); kein Auto-Kill bei Kostengrenze; kein manueller
+  Dunning-Trigger im Admin; Backup-/Restore-Strategie undokumentiert
+  (wird in Kap. 5.8 vertieft).
+
+**Beweis-Suites (alle lokal grün, 2026-07-23):**
+
+| Suite | Ergebnis |
+|---|---|
+| `npm run test:qa-gate` | 68 Prüfungen, 0 Fehler (Render/Golden-Set-Reparatur/Strukturklassen) |
+| `npm run check:quality` | 38 Regeln abgedeckt, Implementierung+Test+Checklist synchron |
+| `npm run ci:golden-set` | 10 Firmen (Library) + 8 Profile (Flagship), 0 Verstöße — inkl. Konsistenz-Validator, keine fremden Städte, keine erfundenen Bewertungen (deckt J-001 teilweise) |
+| `npm run test:phase5` | alle grün (Magic-Link, Dunning 0/3/7→14, SEO-Abo/Cron/Freigabe) |
+| `npx tsx scripts/smoke-editor-ops.ts` | 13/13 (Zod-Ops, Pfad-Gates, Reorder-Regeln) |
+
+### Kapitel 2 — E2E-Generalprobe (Suite gebaut 2026-07-23)
+
+**Artefakt:** `e2e/generalprobe.spec.ts` (Commit b3824ab) — ein durchgehender
+Playwright-Lauf mit 15 Stationen, jeder Pfeil = Assertion + Screenshot
+(`test-results/generalprobe/`):
+
+1. Ad-Klick (UTM-Landing) → 2. /entwurf-Formular → Lead → 3. Admin-Lead mit
+Business-Profil (GaLaBau, Leipzig, 3 Leistungen) → 4. Demo generieren
+(Flagship mit LLM, sonst Library-Fallback) → 5. QA-Gate + Freigeben →
+6. Demo-Link mobil (iPhone 13, noindex-Assert) → 7. Testmode-Kauf via
+Stripe-Webhook-Simulation (`generateTestHeaderString`) → Kunde + Site +
+Vertrag 24/12 + Auth-User → 8. Kunden-Login → 9. Wizard-PATCHes →
+10. Chat-Edit (LLM-gated) → 11. Publish → Site live über Host-Routing →
+12. Cron qa-scan → 13. SEO-Upsell-Kauf + Unterseiten-Freigabe (LLM-gated) →
+14. Zahlung fehlschlagen → Mahnkette 0/3/7 per Zeitreise (Rückdatierung
+`zahlung_ueberfaelig_seit` + Cron) → Tag 14 Suspend → 503-Wartungsseite →
+15. invoice.paid → entsperrt → Site wieder 200. Cleanup FK-korrekt in afterAll.
+
+**Verifiziert:** `npx tsc --noEmit` grün; ohne Env-Keys skippt die Suite
+sauber (1 skipped, keine Fehler). Sicherheits-Guard: bricht hart ab, wenn
+`STRIPE_SECRET_KEY` kein `sk_test_`-Key ist.
+
+**Dokumentierte Zielbild-Abweichungen (im Suite-Kopf):** kein 7-Schritte-Wizard
+(B-05, Lead via Admin-API), Magic-Link-Mail wird nicht geklickt (Auth-User-
+Existenz = Beweis), Library-Fallback ohne LLM überspringt QA-Gate-Kette.
+
+**Befunde:**
+
+- **B-12 · P1 · Generalprobe kann nicht grün laufen — Env-Keys fehlen bzw.
+  sind leere Platzhalter.** *(Korrigiert nach Production-Pull
+  `vercel env pull --environment=production`:)* `.env.local` (Development-
+  Scope) enthält nur Supabase + Resend. In **Production** existieren
+  `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `HIGGSFIELD_API_KEY`,
+  `HIGGSFIELD_API_SECRET` zwar als Variablen, sind aber **leere Strings**
+  (`""`); `CRON_SECRET` fehlt in allen Umgebungen komplett. Einzig
+  `ANTHROPIC_API_KEY` ist real gesetzt (sk-ant-…). → Suite skippt.
+  Abschluss-Kriterium Kap. 6 („Generalprobe läuft grün als CI-Suite")
+  bleibt D-Ops-blockiert. Fix = D-Ops mit Felix: Stripe-Test-Keys +
+  Webhook-Secret + CRON_SECRET befüllen.
+- **B-13 · P1 · Kein CI-Workflow existiert.** `.github/workflows/` fehlt
+  komplett — weder `test:e2e` noch die Kap.-1-Beweis-Suiten (qa-gate,
+  golden-set, phase5) laufen automatisiert. „Bleibt als Dauer-CI-Lauf"
+  (Kap.-2-Anspruch) ist unerfüllt; Workflow-Datei anlegen, sobald Secrets
+  verfügbar sind.
+
+### Kapitel 3 — Demo-Qualität (Stand 2026-07-23)
+
+**Erledigt (3.4 Text-Teil):** `config/story-drehbuecher.ts` (Commit ace8aea) —
+5-Akt-Drehbücher (je Akt Name + genau 1 Satz) für alle 16 START_BRANCHEN
+plus GaLaBau als Premium-Scroll-Referenz („Hang-Verwandlung"). HWG-Branchen
+(Zahnarzt, Physio) bewusst als Praxis-Erlebnis-Story statt Behandlungs-
+Verwandlung. Typecheck grün.
+
+**Blockiert (3.1–3.3, 3.4-Generierung, 3.5 Kosten-Report):**
+
+- **B-14 · P1 · Asset-Keys leer — Video-Kette blockiert; Text-Läufe möglich.**
+  *(Korrigiert nach Production-Pull:)* `ANTHROPIC_API_KEY` ist in Vercel
+  Production **real gesetzt** und lokal via `.env.review-prod.local`
+  verfügbar ⇒ LLM-basierte Text-/Kompositions-Läufe (GaLaBau-Testläufe,
+  Determinismus-Check, Growth-Unterseiten) sind lokal startbar.
+  `HIGGSFIELD_API_KEY`/`HIGGSFIELD_API_SECRET` existieren als Variablen,
+  sind aber **leere Strings**; `FAL_API_KEY` fehlt
+  (lib/assets/higgsfield.ts:354–355 baut die Provider-Kette nur bei
+  gesetzten Keys). Damit bleiben Video-Kette und Asset-Generierung
+  D-Ops-blockiert. Fix = D-Ops mit Felix (gleiche Sitzung wie B-04/B-12).
+- **Nebenbefund:** `galabau` existiert nicht in `branchen_profile`
+  (17 Einträge, GaLaBau fehlt; die 16 START_BRANCHEN + `reiterhof`).
+  Für die GaLaBau-Läufe muss die Branche vorab geseedet oder der
+  Flagship-Pfad ohne Branchen-Profil genutzt werden — beim Budget-Lauf klären.
+
+**Abschluss Kap. 3 (2026-07-23, nach Code-Recherche + Beweis-Lauf):**
+
+- **Determinismus ✅ bewiesen.** `personalisiereFlagshipConfig`
+  (lib/pipeline/generate-flagship-demo.ts:292) ist rein mechanisch —
+  verbatim-Ersetzung von Firma/Ort/Telefon, **kein LLM-Call**. Beweis:
+  `scripts/review-determinismus.ts` (Doppel-Lauf „Malerbetrieb Krause GmbH,
+  Mainz" gegen approved `maler`-Profil): identische SHA-256-Hashes über
+  Config (`ca2d58ee…`) und gerendertes HTML (`faae0c2c…`). LLM (temperature
+  0.3/0.4, kein seed-Param) steckt nur im Branchen-Seeding und Premium-Pfad
+  — nicht im Verkaufs-Demo-Pfad.
+- **B-20 · P1 · GaLaBau-Musterbetriebs-Läufe sind ohne Bau-Auftrag
+  unmöglich — kein Personalisierungs-Codepfad für Kompositionen.**
+  `personalisiereFlagshipConfig` verarbeitet nur `FlagshipConfig` und
+  crasht auf `GalabauConfig` (dokumentiert in
+  scripts/generate-galabau-demo.ts:1–19); `galabau` fehlt in
+  `branchen_profile` und START_BRANCHEN; das einzige Erzeugungs-Script ist
+  GrünWerk-hardcoded (Seed + Asset-Fill, keine Firma/Ort-Ersetzung).
+  Leistungs-Karten „3–10" sind nur Kommentar (keine Validierung), es gibt
+  genau 5 Asset-Slots (svc_01–05) — ab der 6. Leistung Platzhalter.
+  ⇒ Die geforderten 3 Läufe (3/5/8 Leistungen) sind als **Zielbild-Lücke**
+  dokumentiert, nicht durchführbar. Kein P0: GaLaBau ist nicht verkäuflich
+  angebunden (nicht in START_BRANCHEN), kein bestehender Verkaufspfad bricht.
+- **B-21 · P1 · Growth-Unterseiten „{Leistung} in {Stadt}" existieren
+  nicht.** `renderUnterseite` (lib/flagship/render.ts:207–232) liefert
+  4 feste Unterseiten (leistungen/ergebnisse/ueber-uns/kontakt) — keine
+  Seite je Leistung, kein Title/H1-Muster „{Leistung} in {Stadt}", keine
+  Sitemap dazu (hängt mit B-18 zusammen). Kontaktformular-Testsubmit je
+  Leistungsseite damit gegenstandslos.
+- **Video-Stufe + Premium-Scroll-Bau:** weiterhin D-Ops-blockiert (B-14,
+  Higgsfield-Keys leer). Text-Drehbücher für alle 16 Branchen ✓ (ace8aea).
+- **Kosten-Report:** 0,00 € — alle durchführbaren Kap.-3-Teile kamen ohne
+  LLM-/Higgsfield-Call aus (Personalisierung ist mechanisch).
+
+### Kapitel 4 — SEO-Automatik (Stand 2026-07-23)
+
+**Geprüft:** alle 6 Cron-Routen (`app/api/cron/*/route.ts`), `vercel.json`
+(6 Cron-Einträge), Flagship-/Library-Renderer (JSON-LD, OG, Meta),
+SEO-Landingpage-Pipeline (`lib/seo-plan.ts`), noindex-Logik, Admin-UI.
+
+**Befunde:**
+
+- **B-15 · P0 (Code gefixt, D-Ops offen) · „Bearer undefined"-Bypass auf
+  allen 6 Cron-Routen + Crons de facto tot.** Jede Route verglich
+  `authHeader !== \`Bearer ${process.env.CRON_SECRET}\``. Da `CRON_SECRET`
+  nirgends gesetzt ist (B-12): (a) literaler Header `Bearer undefined`
+  autorisierte jeden Angreifer — u. a. Dunning-Cron (fremde Sites sperrbar)
+  und seo-plan (LLM-Kosten-Missbrauch mit dem **echten** Production-
+  Anthropic-Key); (b) legitime Vercel-Cron-Aufrufe liefen ins 401, weil
+  Vercel den Auth-Header nur bei gesetztem Secret sendet ⇒ Briefings,
+  SEO-Plan, Dunning, QA-Scan, Kosten-Summary, Ads-Check laufen in
+  Production **gar nicht**. **Fix (sofort, TDD):** `lib/cron-auth.ts`
+  (`istCronAutorisiert`, fail-closed), alle 6 Routen umgestellt;
+  Verhinderungs-Regel `npm run test:cron-auth` (Unit-Tests + Quelltext-Scan
+  aller Cron-Routen, vor Fix 12 rote Checks) — Journal **J-006**.
+  test:phase5-Assertions angepasst, beide Suiten grün, tsc grün.
+  **D-Ops offen:** `CRON_SECRET` in Vercel setzen, sonst bleiben die Crons
+  (jetzt sicher) tot.
+- **B-16 · P1 · `og:image` fehlt in Flagship- und Library-Renderer.**
+  `lib/flagship/render.ts` und `lib/library/render.ts` setzen kein
+  `og:image`/`og:title`-Set — geteilte Demo-/Kunden-Links haben keine
+  Social-Preview. (Nur der Alt-Pfad `multipage-renderer` hat OG-Tags.)
+- **B-17 · P1 · Library-Renderer ohne LocalBusiness-JSON-LD.**
+  `lib/flagship/render.ts:34–48` injiziert LocalBusiness/Restaurant-JSON-LD;
+  `lib/library/render.ts:316–327` rendert nur title+description. Betrifft
+  alle Library-Demos **und die SEO-Unterseiten des Abos** — ausgerechnet
+  das SEO-Produkt liefert Seiten ohne strukturierte Daten.
+- **B-18 · P1 · Keine sitemap.xml/robots.txt pro Kundenseite.**
+  `fertigstellen/route.ts:14`: „Sitemap-Einreichung + Domain-Connect folgen
+  in Phase G" — nicht gebaut. QA-Gate R-SITEMAP
+  (lib/qa-gate/render-checks.ts:153–165) prüft bei publish nur canonical.
+  Live-Kundenseiten sind für Google nur über Crawling ohne Sitemap
+  auffindbar.
+- **B-19 · P2 · SEO-Unterseiten durchlaufen nicht die Demo-QA-Gates.**
+  `lib/seo-plan.ts:172` nutzt nur `technischerSeoCheck` (Z. 69–89:
+  Wortzahl, H1, Title-Länge) — kein Browser-QA, kein Konsistenz-Validator,
+  keine Render-Checks wie bei Demos. Monatlich automatisch generierte
+  Kundenseiten haben damit schwächere Qualitätssicherung als die Demo.
+- **Positiv:** noindex-Logik korrekt (X-Robots-Tag + meta-Injection für
+  Demos; live-Seiten indexierbar); Keyword-Wahl `${branche} ${ort}` +
+  Modifier mit Slug-Dedupe; seo-plan idempotent pro Site+Monat
+  (UNIQUE + Vorab-Check); Freigabe-Workflow (WARTET_AUF_FREIGABE → Mail →
+  1-Klick) vorhanden. Kein manueller Cron-Trigger im Admin (deckt sich
+  mit B-11).
+
+### Kapitel 5 — Sicherheits-Review (geprüft 2026-07-23)
+
+**Methodik:** 3 parallele Explore-Audits (Isolation/AuthZ, Chat-Editor/XSS,
+Webhooks/Uploads/Secrets) — alle kritischen Claims danach selbst verifiziert
+(Datei:Zeile, Live-SQL gegen Supabase, `npm audit`). Zusätzlich zwei
+Live-Beweise gegen die echte Datenbank: Anon-Key-REST-Test und der vom
+Prompt geforderte **Zweitkunden-Test** (`scripts/review-rls-zweitkunde.ts`).
+
+**Verdikt je Prüfpunkt:**
+
+| # | Punkt | Verdikt | Kern-Beleg |
+|---|---|---|---|
+| 1 | Mandanten-Isolation (RLS) | 🟢 BEWIESEN | RLS aktiv auf allen 34 public-Tabellen (Live-SQL); Anon-Key liefert `[]` auf customers/contracts/sites/demos/leads/email_logs/nutzungs_events; Zweitkunden-Test 10/10 grün |
+| 2 | AuthZ auf API-Routen | 🟢 mit 1 Randnotiz | 35 Admin-Routen `requireAdmin()`, 19 Site-Routen `getOwnedSite()`; Ausnahme B-22 |
+| 3 | Chat-Editor / XSS | 🟢 mit 1 Randnotiz | Zod `discriminatedUnion` (6 Ops, max 20/Patch), gesperrte Pfade, `esc()`-Kette in allen Renderern; Randnotiz B-23 |
+| 4 | Stripe-Webhooks | 🟢 | fail-closed Signaturprüfung (fehlendes Secret ⇒ 500, `app/api/webhooks/stripe/route.ts:47-66`), Idempotenz via `processed_webhook_events`, Preise ausschließlich server-seitig aus `getPackage()` |
+| 5 | Uploads | 🟢 | MIME-Whitelist + 10-MB-Limit + Sharp-Re-Encode nach WebP — SVG/Polyglot-Dateien werden dadurch effektiv neutralisiert |
+| 6 | Secrets & Dependencies | 🟡 | Repo enthält nur Platzhalter (`.env.local.example`), Client-Bundle sauber (NEXT_PUBLIC nur Supabase-URL+Anon-Key); ABER `npm audit` rot → B-24 |
+| 7 | Missbrauch / Kosten | 🟡 | Chat-Limit 50/Tag + Formular 5/h/IP + Honeypot vorhanden; ABER kein Cap auf LLM-Kosten, Lücken bei Paid-Routen → B-25 |
+| 8 | Betrieb (Rollback/Monitoring/Backup) | 🟢 mit 1 Randnotiz | Rollback-Route existiert und ist getestet; `meldeJobFehler` → Slack `#errors`; Backups Supabase-managed; Randnotiz B-26 |
+
+**Zweitkunden-Beweis (Punkt 1, Live gegen Produktions-Supabase):**
+`npx tsx scripts/review-rls-zweitkunde.ts` legt per Service-Role zwei komplette
+Testkunden an (Auth-User + `customers` + `sites`), loggt sich als Kunde A mit dem
+**Anon-Key** ein und greift auf Kunde B zu. Ergebnis 10/10 PASS:
+eigene Daten sichtbar (Positiv-Kontrolle), fremde `customers`-/`sites`-Zeilen
+weder per ID noch per Vollscan sichtbar, UPDATE/DELETE auf fremde Zeilen
+treffen 0 Zeilen, Service-Kontrolle bestätigt Site B unverändert. Cleanup
+automatisch, Exit 1 bei jeder Verletzung — wiederholbar als Regressionstest.
+Nebenbefund dabei: Trigger `on_auth_user_created` legt pro Auth-User automatisch
+eine `customers`-Zeile an (RLS-korrekt auf `user_id` gescoped, FK-Cascade räumt
+auf — kein Leak, aber wichtig für Test-Asserts).
+
+**Befunde:**
+
+- **B-22 (P2) · `kunden_bilder`-Routen ohne expliziten Ownership-Filter.**
+  `app/api/customer/bilder/[bildId]` PATCH/DELETE filtert nur über `bildId`
+  und verlässt sich für die Mandanten-Trennung allein auf RLS. RLS greift
+  (bewiesen), aber Defense-in-Depth fehlt: Alle anderen Kunden-Routen filtern
+  zusätzlich explizit auf `customer_id`. Ein späteres versehentliches
+  Service-Role-Refactoring würde hier still die Isolation verlieren.
+- **B-23 (P2) · `innerHTML` mit nicht escaptem SVG-Pfad.**
+  `lib/flagship/js.ts:93` schreibt `d.i` (Icon-Pfad) per `innerHTML` ins DOM.
+  Derzeit stammen die Werte ausschließlich aus dem read-only `ICON_PATHS`-
+  Objekt — kein aktiver XSS-Vektor. Wird die Quelle je editierbar
+  (Chat-Editor-Op auf Icons), entsteht ein Vektor. Escaping oder
+  `createElementNS` wäre die dauerhafte Absicherung.
+- **B-24 (P1) · `npm audit` (prod): 3 Vuln-Gruppen, davon 2 high.**
+  (a) `next` 14.2.35 — 4 Advisories (u. a. GHSA-9g9p/-h25m/-ggv3/-3x4c:
+  DoS via Image-Optimierung, HTTP-Request-Smuggling, Cache-Poisoning),
+  Fix erst in next@16 (Breaking). (b) `ws` 8.0.0–8.20.1 high (2 Advisories),
+  Fix via `npm audit fix`. (c) `postcss` <8.5.10 moderate (im next-Bundle).
+  Vor erstem zahlenden Kunden mindestens `ws` fixen und next-Upgrade-Pfad
+  entscheiden.
+- **B-25 (P1) · Kein Kosten-Cap, Rate-Limit-Lücken auf Paid-Routen.**
+  Öffentliche Flächen sind limitiert (Chat 50/Tag, Formulare 5/h/IP,
+  Honeypot). Aber: (a) Admin-/Kunden-Routen, die LLM-Kosten auslösen, haben
+  kein Rate-Limit; (b) `app/api/onboarding/generate` prüft den Kill-Switch
+  `generierungGesperrt()` NICHT (authentifiziert via
+  `getAuthenticatedCustomer()`, Z. 17 — darum P1, nicht P0); (c) der
+  Kosten-Alarm ist nur ein Post-hoc-Slack-Ping ohne hartes Threshold-Cap —
+  ein Amok-Loop würde erst nach Kostenanfall gemeldet, nicht gestoppt.
+- **B-26 (P2) · Stilles Error-Logging auf 3 Pfaden.**
+  Chat-Editor, Upsell-Checkout und Form-Submit loggen Fehler nur per
+  `console.error` statt über `meldeJobFehler` → Slack. Fehler auf diesen
+  umsatzrelevanten Pfaden fallen im Betrieb nicht auf.
+
+**Positiv:** Isolation dreifach bewiesen (SQL-Policy-Audit + Anon-REST +
+Zweitkunden-Login); Stripe-Kette durchgehend fail-closed und idempotent;
+Upload-Pipeline neutralisiert gefährliche Formate per Re-Encode; keine
+Secrets im Repo oder Client-Bundle; Rollback-Pfad existiert und ist getestet.
+
+### Kapitel 6 — Abschluss (2026-07-23)
+
+**Journal-Regeln (Wiederholungs-Verbot scharf gestellt):** Alle Einträge
+J-001..J-006 haben jetzt eine **maschinelle** Verhinderungs-Regel, gebaut
+oder verifiziert und grün gelaufen:
+
+| Journal | Regel | Beweis |
+|---|---|---|
+| J-001 Erfundene Marke | Golden-Set Check 4b: Vorlagen-Firma/-Ort NIE im HTML | `npm run ci:golden-set` — 16/16 Asserts |
+| J-002 „0+"-Zähler | Validator-Regel `null_zaehler` (`/\b0\+/`, sichtbarer Text) | test-phase3 `validator-null-zaehler` + Gegenprobe („10+"/„250+" ok) |
+| J-003 Interne Platzhalter | `INTERNE_STRINGS`-Verbots-Liste im Validator | test-phase3 `validator-interner-string` + `validator-todo` |
+| J-004 Still ausgeblendete Sektionen | Pflicht-Slot wirft hart | `npm run test:assets` §3.3 + `validator-pflicht-slot` |
+| J-005 SF-Pro-Lizenz | Font-Scan mit Verbots-Muster + Whitelist | `npm run test:fonts` — 315 Dateien, grün |
+| J-006 Cron-Auth-Bypass | fail-closed Helper + Quelltext-Scan aller Cron-Routen | `npm run test:cron-auth` |
+
+**Generalprobe (lokal, 2026-07-23) — alle Suiten grün:**
+test:phase3 (43), test:qa-gate (68), test:maler (204), test:galabau (130),
+test:flagship (469), ci:golden-set (8 Profile), test:assets, test:fonts (315
+Dateien), test:cron-auth, test:rls (10/10 Zweitkunden-Beweis).
+
+**Abschluss-Kriterium „Generalprobe läuft grün als CI-Suite": NICHT erfüllt.**
+Alle Suiten existieren und sind lokal grün, aber es gibt keinen CI-Workflow,
+der sie erzwingt (B-13) — und der E2E-Teil (Kap. 2) bleibt durch fehlende
+Env-Keys blockiert (B-12, D-Ops). Erst wenn beides steht, ist das
+Wiederholungs-Verbot auch gegen künftige Pushes scharf. → Backlog Nr. 6 + 1.
+
+**Backlog:** `OPTIMIERUNGS_BACKLOG.md` mit 15 Einträgen befüllt (sortiert
+Umsatzwirkung ÷ Aufwand, ausschließlich aus Befunden B-01..B-26).
+
+**Offene D-Ops (Felix):** CRON_SECRET in Vercel (dringend, sonst Crons tot),
+Stripe-Test-Keys + Webhook-Secret, Higgsfield-Keys, BROWSER_QA_WS_ENDPOINT,
+CI-Workflow aktivieren.
+
+## Beweise (Screenshots/Logs)
+
+Ablage: `docs/review/` (Screenshots mobile+desktop, Log-Auszüge). Verlinkung je Befund.
+
+Kapitel 1 (2026-07-23, alle HTTP 200):
+- `landing-mobile.png` / `landing-desktop.png` — Landing komplett, CTA sichtbar
+- `entwurf-mobile.png` / `entwurf-desktop.png` — Formular erreichbar
+- `demo-maler-mobile.png` / `demo-maler-desktop.png` — Maler-Flagship-Demo, alle
+  Sektionen mit Assets (Hinweis: fullPage-Screenshot ohne Scroll zeigt
+  Scroll-Reveal-Sektionen leer — Artefakt, kein Bug; Shots entstanden nach
+  progressivem Scroll)
+
+## Kosten-Report Kap. 3
+
+_(folgt mit den Budget-Läufen)_

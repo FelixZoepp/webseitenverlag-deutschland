@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generatePreCallBriefing } from '@/lib/briefing'
 import { meldeJobFehler } from '@/lib/monitoring'
+import { istCronAutorisiert } from '@/lib/cron-auth'
 import { Resend } from 'resend'
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@resend.dev'
@@ -18,9 +19,8 @@ function getServiceClient() {
 
 // Cron: Alle 30 Min prüfen ob Onboarding-Calls in 2-2.5h anstehen
 export async function GET(request: Request) {
-  // Vercel Cron Auth prüfen
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Vercel Cron Auth prüfen (fail-closed)
+  if (!istCronAutorisiert(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

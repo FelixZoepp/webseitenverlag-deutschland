@@ -118,8 +118,8 @@ check('Dunning: Sperre exakt ab Tag 14',
     webhook.includes('zielStufe <= (contract.mahnstufe ?? 0)'))
 
   const cron = lese('app/api/cron/dunning/route.ts')
-  check('Dunning-Cron: existiert mit CRON_SECRET-Schutz',
-    cron.includes('CRON_SECRET') && cron.includes("status: 401"))
+  check('Dunning-Cron: existiert mit fail-closed Cron-Auth',
+    cron.includes('istCronAutorisiert') && cron.includes("status: 401"))
   check('Dunning-Cron: Eskalation + Sperre aus lib/dunning (Config-getrieben)',
     cron.includes('stufeFuerTage') && cron.includes('sperreFaellig') && cron.includes('tageUeberfaellig'))
   check('Dunning-Cron: Sperre setzt gesperrt + Cache-Invalidierung + Task',
@@ -147,8 +147,8 @@ check('Dunning: Sperre exakt ab Tag 14',
     webhook.includes('handleUpsellCheckout') && webhook.includes('upsell:'))
 
   const seoCron = lese('app/api/cron/seo-plan/route.ts')
-  check('SEO-Cron: monatlich, CRON_SECRET, Kill-Switch',
-    seoCron.includes('CRON_SECRET') && seoCron.includes('generierungGesperrt'))
+  check('SEO-Cron: monatlich, fail-closed Cron-Auth, Kill-Switch',
+    seoCron.includes('istCronAutorisiert') && seoCron.includes('generierungGesperrt'))
   check('SEO-Cron: idempotent pro Site+Monat, Freigabe-Status',
     seoCron.includes('WARTET_AUF_FREIGABE') && seoCron.includes('monat'))
   check('SEO-Cron: in vercel.json registriert', lese('vercel.json').includes('/api/cron/seo-plan'))
