@@ -156,3 +156,28 @@ export function renderStufeFuerTier(tier: string | null | undefined): RenderStuf
       return 'statisch'
   }
 }
+
+/**
+ * Paket-Rezept — Ableitungen aus der Render-Stufe für Demo-Pipeline und
+ * Demo-Render. EINZIGE Quelle: keine verstreuten `paket !== 'starter'`-Checks
+ * mehr in Routen (Verhinderungs-Regel in scripts/test-baustein-c.ts).
+ */
+
+/** Seiten-Modus je Tier: Onepager nur, wenn der Plan keine Unterseiten hat. */
+export function seitenModusFuerTier(tier: string | null | undefined): 'onepager' | 'multipage' {
+  return getPlan(tier).maxUnterseiten > 0 ? 'multipage' : 'onepager'
+}
+
+/** Video-Generierung in der Demo-Pipeline: alle Stufen außer der statischen. */
+export function videoErlaubtFuerTier(tier: string | null | undefined): boolean {
+  return renderStufeFuerTier(tier) !== 'statisch'
+}
+
+/**
+ * Render-Level des generischen Flagships (Legacy-Namen 'business' | 'growth'):
+ * 'business' entfernt den Video-Hero, 'growth' zeigt ihn. Demos rendern damit
+ * ihr Paket: Starter ohne Video, Business/Growth mit Video-Look.
+ */
+export function flagshipLevelFuerTier(tier: string | null | undefined): 'business' | 'growth' {
+  return renderStufeFuerTier(tier) === 'statisch' ? 'business' : 'growth'
+}

@@ -5,6 +5,7 @@ import { generiereVideo } from '@/lib/assets/pipeline'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 import { FLAGSHIP_VIDEO_PROMPTS } from '@/lib/pipeline/generate-flagship-demo'
+import { videoErlaubtFuerTier } from '@/config/plans'
 
 export const maxDuration = 300
 
@@ -44,7 +45,7 @@ export async function POST(
   const admin = createAdminClient()
   const { data: demo, error: loadErr } = await admin
     .from('demos')
-    .select('id, config, branche, asset_meta, kosten_cent')
+    .select('id, config, branche, asset_meta, kosten_cent, paket')
     .eq('id', params.demoId)
     .single()
 
@@ -55,6 +56,15 @@ export async function POST(
   const config = demo.config as FlagshipConfig
   if (config.engine !== 'flagship') {
     return NextResponse.json({ error: 'Nur Flagship-Demos unterstützt' }, { status: 400 })
+  }
+
+  // Paket-Rezept (config/plans.ts): statische Stufe (Starter) bekommt kein Video —
+  // serverseitig, nicht nur in der UI.
+  if (!videoErlaubtFuerTier((demo as { paket?: string | null }).paket)) {
+    return NextResponse.json(
+      { error: 'Video-Header ist ab Business — Demo ist im Starter-Paket.' },
+      { status: 403 }
+    )
   }
 
   let heroUrl = config.inhalte?.hero?.media?.datei

@@ -7,7 +7,7 @@
 > Implementierung (Marker) und ihren Test (Regel-ID) geprüft.
 > Regel ohne Implementierung = Build-Fehler.
 
-Stand: 38 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (Playwright)
+Stand: 39 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (Playwright)
 
 ## Inhalt & Copy
 
@@ -76,6 +76,7 @@ Stand: 38 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (P
 | `C-COPY-PERSONAL` | Copy-Slots werden in JEDER Stufe pro Kunde personalisiert — identische Texte wären Duplicate Content (SEO-Schaden für alle). | Config | Kein Autofix — Personalisierung ist Teil der Generierungs-Pipeline (Firmenname/Stadt im Copy-Prompt). | `config/plans.ts` | `scripts/test-baustein-c.ts` |
 | `C-STARTER-FROZEN` | Starter nutzt pro Branche EINE fixe Komposition (library_pages.frozen) — Struktur/Reihenfolge/Preset unveränderlich. | Config | Kein Autofix — Struktur-Ops sind für Starter serverseitig gesperrt (C-PLAN-GATE). | `supabase/migrations/031_frozen_composition.sql` | `scripts/test-baustein-c.ts` |
 | `C-VIDEO-APPROVED` | Nur freigegebene Videos (quality_status=approved) sind einer Site zuweisbar; Zuweisung nur im Growth-Paket, immer mit Poster-Fallback. | Config | Kein Autofix — Zuweisung wird mit 409/403 abgewiesen. | `app/api/admin/sites/[siteId]/video/route.ts` | `scripts/test-baustein-c.ts` |
+| `C-PAKET-REZEPT` | Paket-Ableitungen (Render-Level, Video-Erlaubnis, Seiten-Modus) kommen NUR aus config/plans.ts — keine Inline-Paket-Checks in Demo-Routen; Demo rendert die Stufe ihres Pakets. | Config | Kein Autofix — Inline-Check durch den passenden Helper (seitenModusFuerTier/videoErlaubtFuerTier/flagshipLevelFuerTier) ersetzen. | `config/plans.ts` | `scripts/test-baustein-c.ts` |
 
 ## Ablauf (Baustein A)
 

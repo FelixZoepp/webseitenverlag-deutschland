@@ -406,6 +406,16 @@ export const QA_REGELN: QaRegel[] = [
     testRef: 'scripts/test-baustein-c.ts',
     kategorie: 'Produktstufen',
   },
+  {
+    id: 'C-PAKET-REZEPT',
+    beschreibung: 'Paket-Ableitungen (Render-Level, Video-Erlaubnis, Seiten-Modus) kommen NUR aus config/plans.ts — keine Inline-Paket-Checks in Demo-Routen; Demo rendert die Stufe ihres Pakets.',
+    layer: 'config',
+    autofix: 'Kein Autofix — Inline-Check durch den passenden Helper (seitenModusFuerTier/videoErlaubtFuerTier/flagshipLevelFuerTier) ersetzen.',
+    implementiertIn: 'config/plans.ts',
+    marker: 'Paket-Rezept',
+    testRef: 'scripts/test-baustein-c.ts',
+    kategorie: 'Produktstufen',
+  },
 ]
 
 export function regelnNachLayer(layer: RegelLayer): QaRegel[] {
