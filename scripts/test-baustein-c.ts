@@ -7,10 +7,18 @@
  *  - C-COPY-PERSONAL: Copy-Slots werden in JEDEM Tier personalisiert (kein Duplicate Content)
  *  - C-STARTER-FROZEN: Frozen Composition (library_pages.frozen) existiert als Migration
  *  - C-VIDEO-APPROVED: Nur freigegebene Videos sind zuweisbar (Growth-Gate serverseitig)
+ *  - C-PAKET-REZEPT: Paket → Stufe/Video/Seiten-Modus NUR über config/plans.ts (keine Inline-Checks)
  */
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
-import { PLANS, getPlan, hatEditorFeature } from '../config/plans'
+import {
+  PLANS,
+  getPlan,
+  hatEditorFeature,
+  seitenModusFuerTier,
+  videoErlaubtFuerTier,
+  flagshipLevelFuerTier,
+} from '../config/plans'
 import { PatchSchema, applyPatch, getOpsPrompt } from '../lib/editor-ops'
 import { VIDEO_GUIDELINES, buildVideoRefinerPrompt, getBranchenVideoStil } from '../config/video-guidelines'
 import { enthaeltStadt } from '../lib/generierung/copy-slots'
@@ -168,6 +176,50 @@ check('Video: Negativ-Regeln vorhanden', Array.isArray(VIDEO_GUIDELINES.negativ)
   check('C-VIDEO-APPROVED: Poster-Fallback bei Zuweisung gesetzt',
     route.includes('poster') && route.includes('C-VIDEO-FALLBACK'))
   check('C-VIDEO-APPROVED: Stub ohne Datei nicht zuweisbar', route.includes('keine abspielbare Datei'))
+}
+
+// ------------------------------------------------------------
+// C-PAKET-REZEPT: Paket-Ableitungen (Stufe/Video/Seiten-Modus) NUR aus config/plans.ts
+// ------------------------------------------------------------
+check('C-PAKET-REZEPT: Seiten-Modus — Starter Onepager, Business/Growth Multipage',
+  seitenModusFuerTier('starter') === 'onepager' &&
+  seitenModusFuerTier('business') === 'multipage' &&
+  seitenModusFuerTier('growth') === 'multipage')
+check('C-PAKET-REZEPT: Video — Starter nein, Business/Growth ja',
+  !videoErlaubtFuerTier('starter') &&
+  videoErlaubtFuerTier('business') &&
+  videoErlaubtFuerTier('growth'))
+check('C-PAKET-REZEPT: Render-Level — Starter business (ohne Video), Business/Growth growth',
+  flagshipLevelFuerTier('starter') === 'business' &&
+  flagshipLevelFuerTier('business') === 'growth' &&
+  flagshipLevelFuerTier('growth') === 'growth')
+check('C-PAKET-REZEPT: ohne Paket → Starter-Defaults (Abwärtskompatibilität)',
+  seitenModusFuerTier(null) === 'onepager' &&
+  !videoErlaubtFuerTier(null) &&
+  flagshipLevelFuerTier(null) === 'business')
+{
+  const demoRender = readFileSync(join(root, 'app/demo/[token]/route.ts'), 'utf8')
+  check('C-PAKET-REZEPT: Demo-Render koppelt Level ans Paket (flagshipLevelFuerTier)',
+    demoRender.includes('flagshipLevelFuerTier('))
+  const demoCreate = readFileSync(join(root, 'app/api/admin/demos/route.ts'), 'utf8')
+  check('C-PAKET-REZEPT: Demo-Erstellung nutzt seitenModusFuerTier + videoErlaubtFuerTier',
+    demoCreate.includes('seitenModusFuerTier(') && demoCreate.includes('videoErlaubtFuerTier('))
+  const videoRoute = readFileSync(join(root, 'app/api/admin/demos/[demoId]/video/route.ts'), 'utf8')
+  check('C-PAKET-REZEPT: Video-Route gated serverseitig über videoErlaubtFuerTier',
+    videoRoute.includes('videoErlaubtFuerTier('))
+  const paymentLink = readFileSync(join(root, 'app/api/admin/demos/[demoId]/payment-link/route.ts'), 'utf8')
+  check('C-PAKET-REZEPT: Payment-Link-Paketwechsel zieht Seiten-Modus mit (seitenModusFuerTier)',
+    paymentLink.includes('seitenModusFuerTier('))
+  // Verhinderungs-Regel: keine verstreuten Inline-Paket-Checks mehr in den Demo-Routen
+  for (const [name, quelle] of [
+    ['Demo-Render', demoRender],
+    ['Demo-Erstellung', demoCreate],
+    ['Video-Route', videoRoute],
+    ['Payment-Link', paymentLink],
+  ] as const) {
+    check(`C-PAKET-REZEPT: ${name} ohne Inline-Check paket !== 'starter'`,
+      !quelle.includes("!== 'starter'") && !quelle.includes("=== 'starter'"))
+  }
 }
 
 console.log(fehler === 0 ? '\nAlle Baustein-C-Tests grün.' : `\n${fehler} Test(s) rot.`)

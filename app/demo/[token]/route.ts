@@ -8,6 +8,7 @@ import { renderFlagshipPage } from '@/lib/flagship/render'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 import { inlineEditorScript } from '@/lib/demo-editor'
 import { finalisiereDemoHtml } from '@/lib/demo-badge'
+import { flagshipLevelFuerTier } from '@/config/plans'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -41,18 +42,25 @@ export async function GET(
   if (!token || token.length > 100) return notFoundPage('Dieser Demo-Link ist ungültig.')
   const url = new URL(request.url)
   const editMode = url.searchParams.has('edit')
-  // Baustein C §C.3: Demos rendern Business-Level; ?level=growth zeigt den Video-Look.
-  const level: 'business' | 'growth' = url.searchParams.get('level') === 'growth' ? 'growth' : 'business'
 
   const { data: demo } = await supabase
     .from('demos')
-    .select('id, prospect_name, template_id, config, status, view_count, expires_at, payment_link_url')
+    .select('id, prospect_name, template_id, config, status, view_count, expires_at, payment_link_url, paket')
     .eq('share_token', token)
     .single()
 
   if (!demo || !demo.config) {
     return notFoundPage('Dieser Demo-Link ist ungültig oder wurde entfernt.')
   }
+
+  // Baustein C §C.3: Demos rendern die Stufe ihres Pakets (config/plans.ts —
+  // Starter ohne Video-Hero, Business/Growth mit). ?level=business|growth
+  // bleibt als Vorschau-Override für den Vergleich der Stufen.
+  const levelParam = url.searchParams.get('level')
+  const level: 'business' | 'growth' =
+    levelParam === 'growth' || levelParam === 'business'
+      ? levelParam
+      : flagshipLevelFuerTier((demo as { paket?: string | null }).paket)
 
   if (demo.expires_at && new Date(demo.expires_at) < new Date()) {
     return notFoundPage('Diese Demo ist abgelaufen. Melden Sie sich bei uns für eine aktuelle Vorschau.')
