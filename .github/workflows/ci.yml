@@ -1,6 +1,8 @@
-# CI (Mission §12, Phase H): Lint, Typecheck, Golden-Set, Lighthouse-Budgets §2.1.
-# Hinweis: Das Repo hat aktuell KEIN Git-Remote — dieser Workflow greift erst
-# nach dem ersten Push zu GitHub (siehe WARTELISTE.md).
+# CI (B-13): Generalprobe als Pflicht-Gate — jede Verhinderungs-Regel aus dem
+# FEHLERJOURNAL (J-001..J-006) und jede Test-Suite läuft bei jedem Push/PR.
+# Vollständigkeit wird maschinell erzwungen: scripts/test-ci-workflow.ts schlägt
+# fehl, wenn eine test:*-Suite aus package.json hier fehlt (Ausnahmen siehe dort).
+# E2E (Kap. 2) bleibt separat, bis Env-Keys in Vercel/GitHub stehen (B-12).
 name: ci
 
 on:
@@ -28,8 +30,51 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
+      - name: Qualitäts-Abdeckung (Regeln ↔ Implementierung ↔ Test)
+        run: npm run check:quality
+
       - name: Golden-Set (offline, deterministisch)
         run: npm run ci:golden-set
+
+      - name: Generalprobe — Render- und Pipeline-Suiten
+        run: |
+          npm run test:phase3
+          npm run test:qa-gate
+          npm run test:phase4
+          npm run test:phase5
+          npm run test:phase6
+          npm run test:flagship
+          npm run test:maler
+          npm run test:galabau
+          npm run test:baustein-c
+
+      - name: Journal-Regeln (J-001..J-006)
+        run: |
+          npm run test:assets
+          npm run test:fonts
+          npm run test:cron-auth
+
+      - name: Vertrags-, CRM- und Hosting-Suiten
+        run: |
+          npm run test:kuendigung
+          npm run test:hosting
+          npm run test:crm
+          npm run test:scrub
+
+      - name: Conversion & SEO (Badge, Sitemap/Robots, JSON-LD)
+        run: |
+          npm run test:demo-badge
+          npm run test:seo-plattform
+          npm run test:jsonld
+
+      - name: Kosten-Schranke (B-25, jede LLM-Route braucht das Gate)
+        run: npm run test:kosten-cap
+
+      - name: CI-Vollständigkeit (B-13, diese Datei prüft sich selbst)
+        run: npm run test:ci-workflow
+
+      - name: Audit-Gate (High/Critical in Prod-Dependencies = rot, B-24)
+        run: npm run check:audit
 
       - name: Lighthouse-Budgets (Perf ≥90, SEO ≥95, A11y ≥90, JS ≤30 KB)
         run: npm run ci:lighthouse

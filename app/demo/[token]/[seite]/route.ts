@@ -4,6 +4,7 @@ import { renderAnfrageSeite } from '@/lib/flagship/anfrage'
 import { renderUnterseite } from '@/lib/flagship/render'
 import type { FlagshipConfig, UnterseitenSlug } from '@/lib/flagship/types'
 import { UNTERSEITEN } from '@/lib/flagship/types'
+import { finalisiereDemoHtml } from '@/lib/demo-badge'
 
 // Funnel-Unterseite der Flagship-Demos (/demo/{token}/anfrage bzw. /reservierung).
 // Multipage: Inhalts-Unterseiten (/demo/{token}/leistungen, /ergebnisse, /ueber-uns, /kontakt).
@@ -31,7 +32,7 @@ export async function GET(
 
   const { data: demo } = await supabase
     .from('demos')
-    .select('id, config, expires_at')
+    .select('id, config, expires_at, prospect_name, payment_link_url')
     .eq('share_token', token)
     .single()
 
@@ -45,16 +46,23 @@ export async function GET(
 
   const basisPfad = `/demo/${token}`
 
+  // B-01/B-16: Badge + noindex + OG auch auf allen Unterseiten
+  const badgeOptionen = {
+    prospectName: (demo as { prospect_name?: string }).prospect_name ?? 'Ihre Firma',
+    paymentLinkUrl: (demo as { payment_link_url?: string | null }).payment_link_url ?? null,
+    origin: new URL(_request.url).origin,
+  }
+
   // Multipage-Unterseiten (leistungen, ergebnisse, ueber-uns, kontakt)
   if (istUnterseite) {
     if (config.seiten_modus !== 'multipage') {
       return new NextResponse('Nicht gefunden', { status: 404 })
     }
-    const html = renderUnterseite(config, seite as UnterseitenSlug, {
+    const html = finalisiereDemoHtml(renderUnterseite(config, seite as UnterseitenSlug, {
       demo: true,
       basisPfad,
       submitZiel: null,
-    })
+    }), badgeOptionen)
     return new NextResponse(html, {
       status: 200,
       headers: {
@@ -71,11 +79,11 @@ export async function GET(
     return NextResponse.redirect(new URL(`${basisPfad}/${erwartet}`, _request.url))
   }
 
-  const html = renderAnfrageSeite(config, {
+  const html = finalisiereDemoHtml(renderAnfrageSeite(config, {
     demo: true,
     basisPfad,
     submitZiel: null,
-  })
+  }), badgeOptionen)
 
   return new NextResponse(html, {
     status: 200,

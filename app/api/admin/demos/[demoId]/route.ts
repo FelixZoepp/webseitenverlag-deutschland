@@ -12,6 +12,7 @@ import { generiereFlagshipDemo } from '@/lib/pipeline/generate-flagship-demo'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 import { generiereAsset, generiereVideo, makePair } from '@/lib/assets/pipeline'
 import { loadLibraryPage } from '@/lib/library/load'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 
 export const maxDuration = 300
 
@@ -84,6 +85,12 @@ export async function PATCH(
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ demo: updated })
+  }
+
+  // B-25: Alles ab hier kann LLM-/Asset-Kosten auslösen — Kill-Switch + Tages-Cap
+  const schranke = await pruefeLlmSchranke('admin-demo-regenerate')
+  if (!schranke.ok) {
+    return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
   }
 
   // Neu generieren: Flagship-Engine

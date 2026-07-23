@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth-helpers'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 import { generiereFlagshipDemo } from '@/lib/pipeline/generate-flagship-demo'
 import { collectProspectData } from '@/lib/pipeline/prospect-data'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -20,6 +21,12 @@ export async function POST(
 ) {
   const auth = await requireAdmin()
   if (!auth.ok) return auth.response
+
+  // B-25: Asset-Generierung (Hero + Paare) kostet Geld — Kill-Switch + Tages-Kosten-Cap
+  const schranke = await pruefeLlmSchranke('admin-demo-assets')
+  if (!schranke.ok) {
+    return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
+  }
 
   const admin = createAdminClient()
   const { data: demo, error: loadErr } = await admin

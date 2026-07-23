@@ -35,7 +35,8 @@ const DIST = join(__dirname, '..', '.lighthouse', 'dist')
 
 /** Fremd-CDN-Muster für JS/CSS/Fonts (wie ci-golden-set; Stock-Bilder erlaubt) */
 const CDN_MUSTER = [
-  /<script\b/i,
+  // JSON-LD (B-17) ist inline strukturierte Daten — kein ausführbares Script
+  /<script\b(?![^>]*type=["']application\/ld\+json["'])/i,
   /<link[^>]+rel=["']stylesheet["']/i,
   /@import\s/i,
   /fonts\.googleapis\.com/i,

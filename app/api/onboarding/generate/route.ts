@@ -1,5 +1,6 @@
 import { getAuthenticatedCustomer } from '@/lib/api-helpers'
 import { generateSiteFromTranscript } from '@/lib/generate-site'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { PackageTier } from '@/lib/packages'
@@ -18,6 +19,16 @@ export async function POST(request: Request) {
     if (!result.ok) return result.response
 
     const { customer, supabase } = result.data
+
+    // B-25: Kill-Switch (fehlte hier, Befund b) + Tages-Cap + 5 Generierungen/h je Kunde
+    const schranke = await pruefeLlmSchranke('onboarding-generate', {
+      schluessel: customer.id,
+      maxProFenster: 5,
+      fensterMs: 60 * 60 * 1000,
+    })
+    if (!schranke.ok) {
+      return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
+    }
 
     const body = await request.json()
     const parsed = GenerateSchema.safeParse(body)

@@ -1,5 +1,6 @@
 import { getOwnedSite } from '@/lib/api-helpers'
 import { chatWithClaude, type CustomerContext } from '@/lib/claude'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 import { getPackage, type PackageTier } from '@/lib/packages'
 import { PatchSchema, applyPatch, formatiereBildListe, type AufgeloestesBild } from '@/lib/editor-ops'
 import { getEditorAssets, type EditorAsset } from '@/lib/assets/repository'
@@ -51,6 +52,12 @@ export async function POST(
     }
 
     const { message, currentPage } = parsed.data
+
+    // B-25: Kill-Switch + Tages-Kosten-Cap (zusätzlich zum 50/Tag-Limit unten)
+    const schranke = await pruefeLlmSchranke('site-chat')
+    if (!schranke.ok) {
+      return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
+    }
 
     // Rate-Limit: 50 Kunden-Nachrichten/Tag über alle Sites des Kunden
     const { data: kundenSites } = await supabase

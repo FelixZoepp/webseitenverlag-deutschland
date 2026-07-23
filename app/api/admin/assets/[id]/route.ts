@@ -1,6 +1,6 @@
 import { requireAdmin } from '@/lib/auth-helpers'
 import { NextResponse } from 'next/server'
-import { generierungGesperrt } from '@/lib/monitoring'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 import { generiereAsset, makePair, type SzeneTyp } from '@/lib/assets/pipeline'
 import type { AssetAspect } from '@/lib/assets/higgsfield'
 
@@ -63,8 +63,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
     // Regenerate: neuer Provider-Call mit gespeichertem Prompt, neuem Seed
     if (body.action === 'regenerate') {
-      if (generierungGesperrt()) {
-        return NextResponse.json({ error: 'GENERATION_KILL_SWITCH aktiv — Generierung gestoppt' }, { status: 409 })
+      // B-25: Regenerate kostet Geld — Kill-Switch + Tages-Kosten-Cap
+      const schranke = await pruefeLlmSchranke('admin-asset-regenerate')
+      if (!schranke.ok) {
+        return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
       }
       if (!asset.gen_prompt) {
         return NextResponse.json({ error: 'Kein gespeicherter Prompt — Asset ist nicht regenerierbar' }, { status: 400 })

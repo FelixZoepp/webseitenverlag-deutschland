@@ -28,12 +28,14 @@ const FONT_WHITELIST = new Set([
 
 const FONT_ENDUNGEN = /\.(woff2?|ttf|otf|eot|dfont)$/i
 
-function* alleDateien(dir: string): Generator<string> {
+function alleDateien(dir: string): string[] {
+  const ergebnis: string[] = []
   for (const eintrag of readdirSync(dir)) {
     const pfad = join(dir, eintrag)
-    if (statSync(pfad).isDirectory()) yield* alleDateien(pfad)
-    else yield pfad
+    if (statSync(pfad).isDirectory()) ergebnis.push(...alleDateien(pfad))
+    else ergebnis.push(pfad)
   }
+  return ergebnis
 }
 
 let fehler = 0
