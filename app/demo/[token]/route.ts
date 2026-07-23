@@ -7,6 +7,7 @@ import type { LibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
 import { renderFlagshipPage } from '@/lib/flagship/render'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 import { inlineEditorScript } from '@/lib/demo-editor'
+import { finalisiereDemoHtml } from '@/lib/demo-badge'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -32,15 +33,6 @@ function notFoundPage(message: string): NextResponse {
   return new NextResponse(html, { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } })
 }
 
-function demoBar(prospectName: string): string {
-  return `
-<div style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#111;color:#fff;font-family:system-ui,sans-serif;font-size:13px;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 -2px 12px rgba(0,0,0,0.3)">
-  <span style="background:#22c55e;width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0"></span>
-  <span>Demo-Vorschau für <strong>${escapeHtml(prospectName)}</strong> &middot; erstellt vom Webseiten-Verlag Deutschland</span>
-</div>
-<div style="height:44px"></div>`
-}
-
 export async function GET(
   request: Request,
   { params }: { params: { token: string } }
@@ -54,7 +46,7 @@ export async function GET(
 
   const { data: demo } = await supabase
     .from('demos')
-    .select('id, prospect_name, template_id, config, status, view_count, expires_at')
+    .select('id, prospect_name, template_id, config, status, view_count, expires_at, payment_link_url')
     .eq('share_token', token)
     .single()
 
@@ -95,11 +87,19 @@ export async function GET(
     return pageHtml.replace('</body>', editorCode + '\n</body>')
   }
 
+  // B-01/B-16: JEDER Engine-Pfad läuft durch finalisiereDemoHtml
+  // (Badge + Freischalten-CTA + noindex + OG-Preview) — keine Ausnahmen.
+  const badgeOptionen = {
+    prospectName: demo.prospect_name,
+    paymentLinkUrl: (demo as { payment_link_url?: string | null }).payment_link_url ?? null,
+    origin: url.origin,
+  }
+
   let html: string
 
   // Custom-HTML-Demos (z. B. Animations-Flagships wie Padel)
   if (engine === 'custom' && typeof (demo.config as { html?: string }).html === 'string') {
-    html = injectEditor((demo.config as { html: string }).html)
+    html = finalisiereDemoHtml(injectEditor((demo.config as { html: string }).html), badgeOptionen)
     await supabase
       .from('demos')
       .update({ view_count: (demo.view_count ?? 0) + 1, last_viewed_at: new Date().toISOString() })
@@ -127,6 +127,8 @@ export async function GET(
       console.error(`Demo-Render fehlgeschlagen (flagship, demo ${demo.id}):`, err)
       return notFoundPage('Die Demo konnte nicht geladen werden.')
     }
+
+    html = finalisiereDemoHtml(html, badgeOptionen)
 
     await supabase
       .from('demos')
@@ -163,13 +165,8 @@ export async function GET(
     }
   }
 
-  // Demo-Leiste einblenden + Suchmaschinen ausschließen
-  const withBar = html.includes('</body>')
-    ? html.replace('</body>', `${demoBar(demo.prospect_name)}</body>`)
-    : html + demoBar(demo.prospect_name)
-  const finalHtml = withBar.includes('<head>')
-    ? withBar.replace('<head>', '<head><meta name="robots" content="noindex, nofollow">')
-    : withBar
+  // Demo-Leiste + noindex + OG-Preview (Library/Premium-Pfad)
+  const finalHtml = finalisiereDemoHtml(html, badgeOptionen)
 
   // View-Tracking (fire-and-forget wäre riskant in Serverless — kurz awaiten)
   await supabase
