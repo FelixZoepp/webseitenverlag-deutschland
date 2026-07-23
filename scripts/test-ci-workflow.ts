@@ -51,8 +51,7 @@ check('CI: Typecheck (tsc --noEmit)', ci.includes('npx tsc --noEmit'))
 check('CI: Qualitäts-Abdeckung (check:quality)', ci.includes('npm run check:quality'))
 check('CI: Golden-Set (ci:golden-set)', ci.includes('npm run ci:golden-set'))
 check('CI: Lighthouse-Budgets (ci:lighthouse)', ci.includes('npm run ci:lighthouse'))
-check('CI: npm audit auf Prod-Dependencies (High = rot)',
-  ci.includes('npm audit') && ci.includes('--audit-level=high'))
+check('CI: Audit-Gate (check:audit, High/Critical = rot)', ci.includes('npm run check:audit'))
 check('CI: Trigger push', /on:\s*[\s\S]*?push:/.test(ci))
 check('CI: Trigger pull_request', ci.includes('pull_request'))
 

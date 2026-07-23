@@ -70,8 +70,8 @@ jobs:
       - name: CI-Vollständigkeit (B-13, diese Datei prüft sich selbst)
         run: npm run test:ci-workflow
 
-      - name: npm audit (High-Findings in Prod-Dependencies = rot, B-24)
-        run: npm audit --omit=dev --audit-level=high
+      - name: Audit-Gate (High/Critical in Prod-Dependencies = rot, B-24)
+        run: npm run check:audit
 
       - name: Lighthouse-Budgets (Perf ≥90, SEO ≥95, A11y ≥90, JS ≤30 KB)
         run: npm run ci:lighthouse

@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "npx tsx scripts/check-quality-coverage.ts && next build",
     "check:quality": "npx tsx scripts/check-quality-coverage.ts",
+    "check:audit": "npx tsx scripts/check-audit.ts",
     "start": "next start",
     "lint": "next lint",
     "asset:paar": "npx tsx scripts/asset-paar.ts",
