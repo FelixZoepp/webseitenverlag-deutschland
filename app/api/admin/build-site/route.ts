@@ -2,6 +2,7 @@ import { requireAdmin } from '@/lib/auth-helpers'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { generateSiteFromTranscript } from '@/lib/generate-site'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 
 const BuildSchema = z.object({
   siteId: z.string().uuid(),
@@ -13,6 +14,12 @@ export async function POST(request: Request) {
   try {
     const result = await requireAdmin()
     if (!result.ok) return result.response
+
+    // B-25: Kill-Switch + Tages-Kosten-Cap vor jedem LLM-Aufruf
+    const schranke = await pruefeLlmSchranke('admin-build-site')
+    if (!schranke.ok) {
+      return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
+    }
 
     const { supabase } = result.data
     const body = await request.json()

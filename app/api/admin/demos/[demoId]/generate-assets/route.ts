@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth-helpers'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 import { generiereAsset, generiereVideo } from '@/lib/assets/pipeline'
 
 export const maxDuration = 300
@@ -14,6 +15,13 @@ export async function POST(
 ) {
   const auth = await requireAdmin()
   if (!auth.ok) return auth.response
+
+  // B-25: Bild- + Video-Generierung kostet Geld — Kill-Switch + Tages-Kosten-Cap
+  const schranke = await pruefeLlmSchranke('admin-demo-generate-assets')
+  if (!schranke.ok) {
+    return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
+  }
+
   const { supabase } = auth.data
 
   const { data: demo, error: loadErr } = await supabase

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
 import { requireAdmin } from '@/lib/auth-helpers'
-import { generierungGesperrt } from '@/lib/monitoring'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 import { isPremiumTemplate } from '@/lib/templates'
 import { scrapeProspectWebsite } from '@/lib/scrape-prospect'
 import { generateDemoConfig, validateImageUrls } from '@/lib/generate-demo'
@@ -31,11 +31,10 @@ export async function POST(request: Request) {
   const auth = await requireAdmin()
   if (!auth.ok) return auth.response
 
-  if (generierungGesperrt()) {
-    return NextResponse.json(
-      { error: 'Generierung gestoppt (GENERATION_KILL_SWITCH aktiv) — Env-Var entfernen, um wieder zu generieren.' },
-      { status: 503 }
-    )
+  // B-25: Kill-Switch + Tages-Kosten-Cap vor jedem LLM-Aufruf
+  const schranke = await pruefeLlmSchranke('admin-demo-erstellen')
+  if (!schranke.ok) {
+    return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
   }
 
   const body = await request.json().catch(() => null)

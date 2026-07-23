@@ -67,6 +67,9 @@ jobs:
           npm run test:seo-plattform
           npm run test:jsonld
 
+      - name: Kosten-Schranke (B-25, jede LLM-Route braucht das Gate)
+        run: npm run test:kosten-cap
+
       - name: CI-Vollständigkeit (B-13, diese Datei prüft sich selbst)
         run: npm run test:ci-workflow
 

@@ -5,6 +5,7 @@ import { getImageChecklist } from '@/lib/image-checklist'
 import { pruefeAspekt } from '@/lib/assets/aspekt'
 import sharp from 'sharp'
 import Anthropic from '@anthropic-ai/sdk'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
@@ -59,6 +60,16 @@ export async function POST(request: Request) {
       .single()
 
     if (!customer) return NextResponse.json({ error: 'Kunde nicht gefunden' }, { status: 404 })
+
+    // B-25: KI-Zuordnung kostet Tokens — Kill-Switch + Tages-Cap + 30 Uploads/h je Kunde
+    const schranke = await pruefeLlmSchranke('customer-bilder', {
+      schluessel: customer.id,
+      maxProFenster: 30,
+      fensterMs: 60 * 60 * 1000,
+    })
+    if (!schranke.ok) {
+      return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
+    }
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null

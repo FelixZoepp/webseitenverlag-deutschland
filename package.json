@@ -28,6 +28,7 @@
     "test:seo-plattform": "npx tsx scripts/test-seo-plattform.ts",
     "test:jsonld": "npx tsx scripts/test-jsonld.ts",
     "test:ci-workflow": "npx tsx scripts/test-ci-workflow.ts",
+    "test:kosten-cap": "npx tsx scripts/test-kosten-cap.ts",
     "test:phase5": "npx tsx scripts/test-phase5.ts",
     "test:phase6": "npx tsx scripts/test-phase6.ts",
     "test:galabau": "npx tsx scripts/test-galabau.ts",

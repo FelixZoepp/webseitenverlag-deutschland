@@ -18,6 +18,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { generiereVideo } from '@/lib/assets/pipeline'
 import { buildVideoRefinerPrompt, VIDEO_GUIDELINES } from '@/config/video-guidelines'
 import { hatEditorFeature } from '@/config/plans'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 
 export const maxDuration = 300
@@ -62,6 +63,14 @@ export async function POST(request: Request, { params }: { params: { siteId: str
     return NextResponse.json({ error: 'Ungültige Anfrage', details: parsed.error.issues }, { status: 400 })
   }
   const body = parsed.data
+
+  // B-25: refine/generate/regenerate lösen LLM-/Video-Kosten aus — Kill-Switch + Tages-Cap
+  if (body.aktion === 'refine' || body.aktion === 'generate' || body.aktion === 'regenerate') {
+    const schranke = await pruefeLlmSchranke('admin-video')
+    if (!schranke.ok) {
+      return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
+    }
+  }
 
   const admin = createAdminClient()
   const { data: site, error: siteErr } = await admin

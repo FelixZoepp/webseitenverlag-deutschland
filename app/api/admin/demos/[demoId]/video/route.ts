@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth-helpers'
+import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 import { generiereVideo } from '@/lib/assets/pipeline'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { FlagshipConfig } from '@/lib/flagship/types'
@@ -33,6 +34,12 @@ export async function POST(
 ) {
   const auth = await requireAdmin()
   if (!auth.ok) return auth.response
+
+  // B-25: Video-Generierung kostet Geld — Kill-Switch + Tages-Kosten-Cap
+  const schranke = await pruefeLlmSchranke('admin-demo-video')
+  if (!schranke.ok) {
+    return NextResponse.json({ error: schranke.grund }, { status: schranke.status })
+  }
 
   const admin = createAdminClient()
   const { data: demo, error: loadErr } = await admin
