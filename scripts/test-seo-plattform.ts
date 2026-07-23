@@ -10,6 +10,7 @@ import { readdirSync, statSync } from 'fs'
 import { join } from 'path'
 import sitemap from '../app/sitemap'
 import robots from '../app/robots'
+import { veroeffentlichteArtikel } from '../lib/blog/artikel'
 
 let fehler = 0
 function check(name: string, bedingung: boolean, detail?: string) {
@@ -29,15 +30,18 @@ check('Sitemap enthält KEINE Demo-/Admin-/Dashboard-Pfade',
   urls.every((u) => !/\/(demo|admin|dashboard|api|kundenseite)\b/.test(u)))
 check('Alle Sitemap-URLs absolut (https)', urls.every((u) => u.startsWith('https://')))
 
-// Blog-Ordner auf Platte ⇔ Sitemap (kein Post darf vergessen werden)
+// Blog-Ordner auf Platte ⇔ Sitemap — nur veröffentlichte Artikel müssen drin stehen
+// (Artikel mit Datum in der Zukunft sind per Datums-Gate noch nicht sichtbar)
 const blogDir = join(__dirname, '..', 'app', '(marketing)', 'blog')
 const slugsAufPlatte = readdirSync(blogDir).filter(
   (e) => statSync(join(blogDir, e)).isDirectory()
 )
+const veroeffentlichteSlugs = new Set(veroeffentlichteArtikel().map((a) => a.slug))
 for (const slug of slugsAufPlatte) {
+  if (!veroeffentlichteSlugs.has(slug)) continue // noch nicht veröffentlicht — OK
   check(`Blog-Post "${slug}" steht in der Sitemap`,
     urls.some((u) => u.endsWith(`/blog/${slug}`)),
-    'Neuen Post in app/sitemap.ts BLOG_SLUGS eintragen')
+    'Registry-Eintrag in lib/blog/artikel.ts prüfen')
 }
 
 const r = robots()
