@@ -416,6 +416,16 @@ export const QA_REGELN: QaRegel[] = [
     testRef: 'scripts/test-baustein-c.ts',
     kategorie: 'Produktstufen',
   },
+  {
+    id: 'R-MOBILE-CLIP',
+    beschreibung: 'Kein horizontales Scrollen auf Mobile: jede Renderer-Basis (Flagship, GalaBau/Maler, Scrub, Bibliothek) trägt overflow-x:hidden;overflow-x:clip auf html UND body — iOS Safari ignoriert body allein; clip erhält position:sticky.',
+    layer: 'render',
+    autofix: 'Kein Autofix — overflow-x:hidden;overflow-x:clip in der html- und body-Regel des Renderers ergänzen.',
+    implementiertIn: 'lib/flagship/css.ts',
+    marker: 'overflow-x:clip',
+    testRef: 'scripts/test-flagship.ts',
+    kategorie: 'Technik',
+  },
 ]
 
 export function regelnNachLayer(layer: RegelLayer): QaRegel[] {

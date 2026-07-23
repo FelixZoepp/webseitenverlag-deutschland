@@ -11,6 +11,8 @@
  *
  * Aufruf: npm run test:flagship
  */
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import { FLAGSHIP_SEEDS } from '../lib/flagship/seeds'
 import { renderFlagshipPage, renderUnterseite } from '../lib/flagship/render'
 import { renderAnfrageSeite } from '../lib/flagship/anfrage'
@@ -264,6 +266,36 @@ console.log('  onepager: ok (alle Sektionen vorhanden)')
   loopConfig.inhalte.hero.video = { src: '/media/test.mp4', poster: '/media/test.jpg', modus: 'loop' }
   const loopHtml = renderFlagshipPage(loopConfig, { demo: true, basisPfad: '/demo/test' })
   assert(loopHtml.includes('data-modus="loop"'), 'scroll-extra', 'Hero rendert nicht data-modus="loop"')
+}
+
+// ------------------------------------------------------------
+// R-MOBILE-CLIP: Mobile darf nie horizontal scrollen — jede Renderer-Basis
+// trägt overflow-x:hidden;overflow-x:clip auf html UND body (iOS Safari
+// ignoriert body allein; clip zerstört position:sticky nicht).
+// ------------------------------------------------------------
+{
+  const RENDERER_CSS_QUELLEN = [
+    'lib/flagship/css.ts',
+    'lib/flagship/galabau/css.ts', // deckt auch maler ab (galabauCss-Basis)
+    'lib/flagship/scrub/css.ts',
+    'lib/library/render.ts',
+  ]
+  for (const rel of RENDERER_CSS_QUELLEN) {
+    const src = readFileSync(join(__dirname, '..', rel), 'utf-8')
+    // Ganze Zeile prüfen — Template-Ausdrücke (${…}) enthalten schließende Klammern
+    const htmlRegel = src.match(/^html\{.*$/m)?.[0] ?? ''
+    const bodyRegel = src.match(/^body\{.*$/m)?.[0] ?? ''
+    assert(
+      htmlRegel.includes('overflow-x:hidden') && htmlRegel.includes('overflow-x:clip'),
+      'R-MOBILE-CLIP',
+      `${rel}: html{} ohne overflow-x:hidden;overflow-x:clip`
+    )
+    assert(
+      bodyRegel.includes('overflow-x:hidden') && bodyRegel.includes('overflow-x:clip'),
+      'R-MOBILE-CLIP',
+      `${rel}: body{} ohne overflow-x:hidden;overflow-x:clip`
+    )
+  }
 }
 
 console.log(`\n${geprueft} Prüfungen, ${fehler} Fehler`)

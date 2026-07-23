@@ -66,8 +66,11 @@ export function flagshipCss(design: FlagshipDesign, opts?: { premiumAnimationen?
   --sans:${sans};--serif:${serif};
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:var(--sans);background:var(--basis);color:var(--text);line-height:${hell ? '1.6' : '1.65'};-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* Mobile-Fix: Deko-Glows (hero::before/after, sig::after) ragen über den Viewport —
+   overflow-x muss auf html UND body liegen (iOS Safari ignoriert body allein).
+   clip statt hidden: erzeugt keinen Scroll-Container, position:sticky (Scrub) bleibt intakt. */
+html{scroll-behavior:smooth;overflow-x:hidden;overflow-x:clip}
+body{font-family:var(--sans);background:var(--basis);color:var(--text);line-height:${hell ? '1.6' : '1.65'};-webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-x:clip}
 ::selection{background:var(--ak1);color:${hell ? 'var(--text)' : 'var(--basis)'}}
 img{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}

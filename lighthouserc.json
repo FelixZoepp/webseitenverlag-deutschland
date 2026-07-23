@@ -3,7 +3,7 @@
     "collect": {
       "staticDistDir": ".lighthouse/dist",
       "maxAutodiscoverUrls": 0,
-      "numberOfRuns": 1
+      "numberOfRuns": 3
     },
     "assert": {
       "assertions": {
