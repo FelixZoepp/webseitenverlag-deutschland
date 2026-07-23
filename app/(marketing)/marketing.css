@@ -1437,3 +1437,13 @@ footer {
   .blog-card { flex-direction: column !important; }
   .blog-card-img { width: 100% !important; height: 180px !important; }
 }
+
+/* Demo-Teaser: responsive Stack */
+@media (max-width: 700px) {
+  .demo-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 500px) {
+  .demo-card { flex-direction: column !important; }
+  .demo-card-img { width: 100% !important; height: 180px !important; }
+}
+.demo-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md) !important; }
