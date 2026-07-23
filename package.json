@@ -37,7 +37,8 @@
     "test:crm": "npx tsx scripts/test-crm.ts",
     "seed:assets": "npx tsx scripts/seed-assets.ts",
     "seed:branchen": "npx tsx scripts/seed-branchen.ts",
-    "test:blog": "npx tsx scripts/test-blog.ts"
+    "test:blog": "npx tsx scripts/test-blog.ts",
+    "test:go-live": "npx tsx scripts/test-go-live.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",

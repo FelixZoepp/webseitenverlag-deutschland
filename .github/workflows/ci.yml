@@ -67,6 +67,7 @@ jobs:
           npm run test:seo-plattform
           npm run test:jsonld
           npm run test:blog
+          npm run test:go-live
 
       - name: Kosten-Schranke (B-25, jede LLM-Route braucht das Gate)
         run: npm run test:kosten-cap

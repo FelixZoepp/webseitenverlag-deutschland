@@ -427,6 +427,16 @@ export const QA_REGELN: QaRegel[] = [
     kategorie: 'SEO & Recht',
   },
   {
+    id: 'R-GO-LIVE',
+    beschreibung: 'Freischaltung setzt noindex=false + status=published + Subdomain/Domain. Subdomain ist DNS-konform (≤63 Zeichen, a-z/0-9/-).',
+    layer: 'render',
+    autofix: 'Kein Autofix — Freischalt-Logik in der API-Route prüfen.',
+    implementiertIn: 'app/api/admin/sites/[siteId]/freischalten/route.ts',
+    marker: 'noindex: false',
+    testRef: 'scripts/test-go-live.ts',
+    kategorie: 'Technik',
+  },
+  {
     id: 'R-MOBILE-CLIP',
     beschreibung: 'Kein horizontales Scrollen auf Mobile: jede Renderer-Basis (Flagship, GalaBau/Maler, Scrub, Bibliothek) trägt overflow-x:hidden;overflow-x:clip auf html UND body — iOS Safari ignoriert body allein; clip erhält position:sticky.',
     layer: 'render',

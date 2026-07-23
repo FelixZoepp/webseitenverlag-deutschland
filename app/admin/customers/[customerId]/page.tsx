@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Trash2, Mail, Loader2, Check, Package, FileText, Clock, ChevronRight, Download, Building2, CreditCard, Image, Sparkles, Link2, Copy } from 'lucide-react'
+import { ArrowLeft, Trash2, Mail, Loader2, Check, Package, FileText, Clock, ChevronRight, Download, Building2, CreditCard, Image, Sparkles, Link2, Copy, Globe, X } from 'lucide-react'
 import { VERTRAGS_STATUS_LABELS, VERTRAGS_STATUS_COLORS, type VertragsStatus, type KundenDokument, type VertragsTimeline } from '@/types'
 import { UPSELL_PRODUCTS } from '@/config/upsells'
 
@@ -38,6 +38,7 @@ export default function CustomerDetailPage() {
   const [timeline, setTimeline] = useState<VertragsTimeline[]>([])
   const [bilder, setBilder] = useState<{ id: string; slot_id: string | null; dateiname: string; public_url: string; ki_zuordnung: string | null; ki_confidence: number | null; manuell_zugeordnet: boolean }[]>([])
   const [activeTab, setActiveTab] = useState<'overview' | 'dokumente' | 'upsells' | 'timeline' | 'bilder' | 'briefing'>('overview')
+  const [freischaltenSite, setFreischaltenSite] = useState<Record<string, unknown> | null>(null)
 
   const loadUpsells = useCallback(() => {
     setUpsellsLoading(true)
@@ -232,6 +233,14 @@ export default function CustomerDetailPage() {
                         site.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                       }`}>{site.status === 'published' ? 'Live' : 'Entwurf'}</span>
                       <Link href={`/dashboard/${site.id}`} className="text-xs text-blue-600 hover:underline">Bearbeiten</Link>
+                      {site.status !== 'published' && (
+                        <button
+                          onClick={() => setFreischaltenSite(site)}
+                          className="flex items-center gap-1 text-xs px-2.5 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium"
+                        >
+                          <Globe className="w-3 h-3" /> Freischalten
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -429,6 +438,16 @@ export default function CustomerDetailPage() {
         </div>
       )}
 
+      {freischaltenSite && (
+        <FreischaltenModal
+          site={freischaltenSite}
+          onClose={() => setFreischaltenSite(null)}
+          onSuccess={() => {
+            setFreischaltenSite(null)
+            window.location.reload()
+          }}
+        />
+      )}
     </main>
   )
 }
@@ -679,6 +698,217 @@ function BriefingTab({ customerId, customer }: { customerId: string; customer: R
           </div>
         ) : (
           <p className="text-sm text-gray-400">Noch kein Briefing generiert. Klicke oben auf &quot;Briefing generieren&quot;.</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ============================================================
+// FreischaltenModal
+// ============================================================
+
+interface DnsAnleitung {
+  hostname: string
+  anleitung: string[]
+  status: string
+  fehler?: string
+}
+
+interface FreischaltenErgebnis {
+  ok: boolean
+  subdomain?: string
+  subdomainUrl?: string
+  domain?: string
+  dnsAnleitung?: DnsAnleitung
+}
+
+function FreischaltenModal({
+  site,
+  onClose,
+  onSuccess,
+}: {
+  site: Record<string, unknown>
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [domainTyp, setDomainTyp] = useState<'subdomain' | 'eigene'>('subdomain')
+  const [eigeneDomain, setEigeneDomain] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [fehler, setFehler] = useState<string | null>(null)
+  const [ergebnis, setErgebnis] = useState<FreischaltenErgebnis | null>(null)
+
+  const firmenname = (site.name as string) || 'ihre-firma'
+  const subdomainVorschau = `${firmenname.toLowerCase().replace(/[^a-z0-9]/g, '-')}.webseitenverlag-deutschland.de`
+
+  async function handleFreischalten() {
+    setLoading(true)
+    setFehler(null)
+    try {
+      const body: { domain?: string } = {}
+      if (domainTyp === 'eigene' && eigeneDomain.trim()) {
+        body.domain = eigeneDomain.trim()
+      }
+      const res = await fetch(`/api/admin/sites/${site.id}/freischalten`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json().catch(() => null)
+      if (res.ok && data?.ok) {
+        setErgebnis(data)
+      } else {
+        setFehler(data?.error || 'Freischalten fehlgeschlagen')
+      }
+    } catch {
+      setFehler('Netzwerkfehler')
+    }
+    setLoading(false)
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Globe className="w-5 h-5 text-green-600" /> Website freischalten
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {!ergebnis ? (
+          <>
+            <p className="text-sm text-gray-600 mb-5">
+              Die Website wird öffentlich sichtbar und bei Google indexiert.
+            </p>
+
+            {/* Domain-Auswahl */}
+            <div className="space-y-3 mb-6">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="domainTyp"
+                  value="subdomain"
+                  checked={domainTyp === 'subdomain'}
+                  onChange={() => setDomainTyp('subdomain')}
+                  className="mt-0.5"
+                />
+                <div>
+                  <span className="text-sm font-medium text-gray-900">Subdomain (automatisch)</span>
+                  <p className="text-xs text-gray-500 mt-0.5">{subdomainVorschau}</p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="domainTyp"
+                  value="eigene"
+                  checked={domainTyp === 'eigene'}
+                  onChange={() => setDomainTyp('eigene')}
+                  className="mt-0.5"
+                />
+                <div className="flex-1">
+                  <span className="text-sm font-medium text-gray-900">Eigene Domain</span>
+                  {domainTyp === 'eigene' && (
+                    <input
+                      type="text"
+                      value={eigeneDomain}
+                      onChange={(e) => setEigeneDomain(e.target.value)}
+                      placeholder="www.beispiel.de"
+                      className="mt-2 w-full text-sm border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                      autoFocus
+                    />
+                  )}
+                </div>
+              </label>
+            </div>
+
+            {fehler && (
+              <div className="mb-4 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+                {fehler}
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleFreischalten}
+                disabled={loading || (domainTyp === 'eigene' && !eigeneDomain.trim())}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Schalte frei...</> : <><Globe className="w-4 h-4" /> Freischalten</>}
+              </button>
+            </div>
+          </>
+        ) : (
+          /* Ergebnis-Ansicht */
+          <div>
+            <div className="flex items-center gap-2 mb-4 text-green-700">
+              <Check className="w-5 h-5" />
+              <span className="font-semibold">Website freigeschaltet!</span>
+            </div>
+
+            {ergebnis.subdomainUrl && (
+              <div className="mb-4 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+                <p className="text-xs text-green-700 mb-1 font-medium">Live-URL:</p>
+                <a
+                  href={ergebnis.subdomainUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-green-800 font-mono break-all hover:underline"
+                >
+                  {ergebnis.subdomainUrl}
+                </a>
+              </div>
+            )}
+
+            {ergebnis.dnsAnleitung && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-4 mb-4">
+                <p className="text-sm font-semibold text-gray-900 mb-3">
+                  DNS-Einrichtung für {ergebnis.dnsAnleitung.hostname}:
+                </p>
+                <ol className="space-y-1.5">
+                  {ergebnis.dnsAnleitung.anleitung.map((schritt, i) => (
+                    <li key={i} className="text-sm text-gray-700 flex gap-2">
+                      <span className="text-gray-400 flex-shrink-0">{i + 1}.</span>
+                      <span className="font-mono text-xs bg-white border border-gray-200 rounded px-2 py-1 break-all">{schritt}</span>
+                    </li>
+                  ))}
+                </ol>
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <p className="text-xs text-gray-500">
+                    Status: {ergebnis.dnsAnleitung.status === 'pending' ? 'Warte auf DNS-Propagierung...' : ergebnis.dnsAnleitung.status}
+                  </p>
+                  {ergebnis.dnsAnleitung.fehler && (
+                    <p className="text-xs text-amber-600 mt-1">{ergebnis.dnsAnleitung.fehler}</p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">Die Verbindung wird automatisch erkannt.</p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                onClick={onSuccess}
+                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700"
+              >
+                Fertig
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>
