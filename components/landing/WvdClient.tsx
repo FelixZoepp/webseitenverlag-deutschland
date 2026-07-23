@@ -12,25 +12,25 @@ const BEISPIEL_DEMOS = [
   {
     branche: "GaLaBau",
     url: DEMO_URL,
-    bild: "/beispiele/galabau.webp",
+    bild: "/beispiele/galabau.png",
     wunsch: "Wollte endlich Anfragen über Google statt nur Empfehlungen.",
   },
   {
     branche: "Solar / PV",
     url: "https://sonnenstrom-journey.higgsfield.app",
-    bild: "/beispiele/solar.webp",
+    bild: "/beispiele/solar.png",
     wunsch: "Hatte keine Website — Kunden kamen nur per Mundpropaganda.",
   },
   {
     branche: "Dachdecker",
     url: "https://dachmeister.higgsfield.app",
-    bild: "/beispiele/dachdecker.webp",
+    bild: "/beispiele/dachdecker.png",
     wunsch: "Wollte mich von den großen Portalen unabhängig machen.",
   },
   {
     branche: "Gartengestaltung",
     url: "https://garden-scroll.higgsfield.app",
-    bild: "/beispiele/garten.webp",
+    bild: "/beispiele/garten.png",
     wunsch: "Meine alte Website hat nie jemanden zum Anrufen gebracht.",
   },
 ];
