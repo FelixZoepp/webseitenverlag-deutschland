@@ -10,6 +10,7 @@ import { generateLibraryDemoConfig } from '@/lib/pipeline/generate-library-conte
 import { personalisiereFlagshipConfig, type DesignOverrides } from '@/lib/pipeline/generate-flagship-demo'
 import { libraryPageKey, loadLibraryPage } from '@/lib/library/load'
 import { SEED_BRANCHEN, STILE, type Stil } from '@/lib/library/types'
+import { seitenModusFuerTier, videoErlaubtFuerTier } from '@/config/plans'
 
 // F5: Flagship-Demos generieren Assets frisch (Hero + Paar, je ~30–90s)
 export const maxDuration = 300
@@ -93,7 +94,8 @@ export async function POST(request: Request) {
     }
 
     const gewaehltesPaket = typeof body?.paket === 'string' && ['starter', 'business', 'growth'].includes(body.paket) ? body.paket : 'business'
-    config.seiten_modus = gewaehltesPaket === 'starter' ? 'onepager' : 'multipage'
+    // Paket-Rezept (config/plans.ts): Seiten-Modus + Video folgen der Stufe — keine Inline-Checks.
+    config.seiten_modus = seitenModusFuerTier(gewaehltesPaket)
 
     const shareToken = randomBytes(24).toString('base64url')
     const { data: demo, error } = await auth.data.supabase
@@ -118,7 +120,7 @@ export async function POST(request: Request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     // Phase 2 kommt über separaten POST /api/admin/demos/[id]/assets (Frontend triggert)
-    const videoErlaubt = gewaehltesPaket !== 'starter'
+    const videoErlaubt = videoErlaubtFuerTier(gewaehltesPaket)
     return NextResponse.json({
       demo,
       warning: null,
