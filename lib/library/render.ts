@@ -73,8 +73,8 @@ function cssTokens(stil: string, akzent: string): string {
 
 const BASIS_CSS = `
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.6;font-size:17px}
+html{scroll-behavior:smooth;overflow-x:hidden;overflow-x:clip}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.6;font-size:17px;overflow-x:hidden;overflow-x:clip}
 h1,h2,h3{font-family:var(--font-head);line-height:1.2;letter-spacing:-0.01em}
 img{max-width:100%;display:block}
 a{color:inherit}

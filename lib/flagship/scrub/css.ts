@@ -32,8 +32,8 @@ export function scrubCss(design: ScrubDesign): string {
 
 :root{--ss-bg:${design.basis};--ss-text:${design.text};--ss-muted:${design.text_soft};--ss-akzent:${design.akzent1};--ss-cyan:${design.akzent2}}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--ss-bg);color:var(--ss-text);font-family:'Inter Tight',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;letter-spacing:-0.011em;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;overflow-x:hidden;overflow-x:clip}
+body{margin:0;background:var(--ss-bg);color:var(--ss-text);font-family:'Inter Tight',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;letter-spacing:-0.011em;-webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-x:clip}
 section[id]{scroll-margin-top:72px}
 img{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}

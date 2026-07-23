@@ -7,7 +7,7 @@
 > Implementierung (Marker) und ihren Test (Regel-ID) geprüft.
 > Regel ohne Implementierung = Build-Fehler.
 
-Stand: 39 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (Playwright)
+Stand: 40 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (Playwright)
 
 ## Inhalt & Copy
 
@@ -46,6 +46,7 @@ Stand: 39 Regeln · Layer: Config (Generierung) → Render (HTML) → Browser (P
 | `B-LINKS` | Keine toten href="#"-Links im DOM. | Browser | Link aus Sektions-Config reparieren oder Element ausblenden; sonst failed. | `lib/qa-gate/browser-checks.ts` | `scripts/test-qa-gate.ts` |
 | `B-FORM` | Formular-Testsubmit erreicht den Endpoint (bzw. Funnel-CTA korrekt verlinkt). | Browser | Strukturell → failed + manual_task. | `lib/qa-gate/browser-checks.ts` | `scripts/test-qa-gate.ts` |
 | `B-MOTION` | prefers-reduced-motion wird respektiert (keine Endlos-Animationen unter reduce). | Browser | Strukturell → Template-Bug → failed + manual_task. | `lib/qa-gate/browser-checks.ts` | `scripts/test-qa-gate.ts` |
+| `R-MOBILE-CLIP` | Kein horizontales Scrollen auf Mobile: jede Renderer-Basis (Flagship, GalaBau/Maler, Scrub, Bibliothek) trägt overflow-x:hidden;overflow-x:clip auf html UND body — iOS Safari ignoriert body allein; clip erhält position:sticky. | Render | Kein Autofix — overflow-x:hidden;overflow-x:clip in der html- und body-Regel des Renderers ergänzen. | `lib/flagship/css.ts` | `scripts/test-flagship.ts` |
 
 ## SEO & Recht
 
