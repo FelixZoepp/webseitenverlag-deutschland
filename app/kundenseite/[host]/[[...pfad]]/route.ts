@@ -15,6 +15,10 @@
 import { NextResponse } from 'next/server'
 import { resolveSiteIdCached, renderSiteCached } from '@/lib/hosting/site-cache'
 import { sperrSeite, mitNoindex } from '@/lib/auslieferung'
+import { createAdminClient } from '@/lib/supabase/admin'
+import type { FlagshipConfig } from '@/lib/flagship/types'
+import { UNTERSEITEN } from '@/lib/flagship/types'
+import { isMultiPageConfig } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +29,81 @@ function htmlAntwort(html: string, status: number, noindex: boolean): NextRespon
   }
   if (noindex) headers['X-Robots-Tag'] = 'noindex, nofollow'
   return new NextResponse(noindex ? mitNoindex(html) : html, { status, headers })
+}
+
+/** Sitemap-XML für eine Live-Site generieren */
+async function sitemapAntwort(siteId: string): Promise<NextResponse | null> {
+  const supabase = createAdminClient()
+
+  // Site laden: nur published + nicht gesperrt + nicht noindex
+  const { data: site } = await supabase
+    .from('sites')
+    .select('id, subdomain, config, status, gesperrt, noindex')
+    .eq('id', siteId)
+    .maybeSingle()
+
+  if (!site || site.status !== 'published' || site.gesperrt || site.noindex) return null
+
+  // Kanonische Basis-URL ermitteln: Custom Domain (AKTIV) hat Vorrang
+  const { data: domain } = await supabase
+    .from('domains')
+    .select('hostname')
+    .eq('site_id', siteId)
+    .eq('status', 'AKTIV')
+    .maybeSingle()
+
+  const marketingHost =
+    (process.env.NEXT_PUBLIC_MARKETING_HOST || 'webseitenverlag-deutschland.de')
+      .split(':')[0]
+      .toLowerCase()
+
+  const basisUrl = domain?.hostname
+    ? `https://${domain.hostname}`
+    : `https://${site.subdomain}.${marketingHost}`
+
+  // Unterseiten ermitteln
+  const config = (site.config || {}) as Record<string, unknown>
+  const slugs: string[] = []
+
+  if ((config as { engine?: string }).engine === 'flagship') {
+    const fsConfig = config as unknown as FlagshipConfig
+    if (fsConfig.seiten_modus === 'multipage') {
+      for (const { slug } of UNTERSEITEN) slugs.push(slug)
+    }
+    // Immer Funnel-Seite einschließen
+    const funnelSlug = fsConfig.funnel?.modus === 'reservierung' ? 'reservierung' : 'anfrage'
+    slugs.push(funnelSlug)
+  } else {
+    const typedConfig = config as import('@/types').SiteConfig
+    if (isMultiPageConfig(typedConfig)) {
+      for (const page of Object.values(typedConfig.pages)) {
+        if (page.slug) slugs.push(page.slug)
+      }
+    }
+  }
+
+  const heute = new Date().toISOString().slice(0, 10)
+
+  const urls = [
+    `  <url>\n    <loc>${basisUrl}/</loc>\n    <lastmod>${heute}</lastmod>\n    <priority>1.0</priority>\n  </url>`,
+    ...slugs.map(
+      (s) =>
+        `  <url>\n    <loc>${basisUrl}/${s}</loc>\n    <lastmod>${heute}</lastmod>\n    <priority>0.8</priority>\n  </url>`
+    ),
+  ]
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join('\n')}
+</urlset>`
+
+  return new NextResponse(xml, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
+    },
+  })
 }
 
 function nichtGefunden(): NextResponse {
@@ -49,6 +128,12 @@ export async function GET(
   try {
     const siteId = await resolveSiteIdCached(host)
     if (!siteId) return nichtGefunden()
+
+    // Sitemap für live Sites (noindex=false, published, nicht gesperrt)
+    if (pfad === 'sitemap.xml') {
+      const sitemap = await sitemapAntwort(siteId)
+      return sitemap ?? nichtGefunden()
+    }
 
     const auslieferung = await renderSiteCached(siteId, pfad)
 
