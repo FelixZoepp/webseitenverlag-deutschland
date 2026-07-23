@@ -350,7 +350,7 @@ export default function BlogArticle() {
               </li>
               <li>
                 <strong>Alles inklusive.</strong> Hosting, Sicherheit, Updates, Support –
-                für 99 € netto/Monat, monatlich kündbar.
+                für 99 € netto/Monat, faire Vertragsbedingungen.
               </li>
             </ol>
 
@@ -377,7 +377,7 @@ export default function BlogArticle() {
                 }}
               >
                 Kurzes Gespräch, ein paar Fotos – und in 3 Tagen bist du online. Ab 99 € netto/Monat,
-                monatlich kündbar, kein Technikwissen nötig.
+                transparente Konditionen, kein Technikwissen nötig.
               </p>
               <Link
                 href="/entwurf"

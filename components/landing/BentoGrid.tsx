@@ -40,7 +40,7 @@ export default function BentoGrid() {
             <div className="relative z-10 mb-6">
               <h3 className="mb-3 text-2xl font-semibold tracking-tight text-white">Keine Startgebühr</h3>
               <p className="text-[15px] leading-relaxed text-white/70">
-                Kein Einmal-Investment von tausenden Euro. Sie zahlen einfach monatlich &ndash; fair, transparent, kündbar.
+                Kein Einmal-Investment von tausenden Euro. Sie zahlen einfach monatlich &ndash; fair, transparent, alles inklusive.
               </p>
             </div>
             <div className="flex flex-1 items-center justify-center">

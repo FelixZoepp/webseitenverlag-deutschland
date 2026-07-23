@@ -19,7 +19,7 @@ const faqData = [
   { q: "Was bedeutet 'Website mieten'?", a: "Beim Mieten zahlst du einen monatlichen Festbetrag (z. B. 99 € netto/Monat) und erhältst dafür eine professionelle Website inklusive Design, Hosting, Pflege, Updates und Support. Du zahlst keine Einmalgebühr. Bei Kündigung wird die Seite deaktiviert, deine Inhalte kannst du exportieren." },
   { q: "Ab wann lohnt sich Mieten mehr als Kaufen?", a: "Finanziell lohnt sich Mieten besonders in den ersten 3 bis 5 Jahren. Bei einer Agentur-Website für 5.000 Euro plus 100 Euro monatliche Wartung zahlst du im ersten Jahr 6.200 Euro. Im Abo-Modell zahlst du 1.188 Euro – eine Ersparnis von über 5.000 Euro. Der Break-even liegt typischerweise erst nach 4 bis 6 Jahren." },
   { q: "Gehört mir die Website im Abo-Modell?", a: "Nein, die Website gehört dir nicht – vergleichbar mit einem Leasing-Auto. Deine Inhalte (Texte, Bilder) gehören dir und können exportiert werden. Der Vorteil: Du musst dich um nichts kümmern – Technik, Updates und Sicherheit sind im Preis enthalten." },
-  { q: "Kann ich eine gemietete Website jederzeit kündigen?", a: "Ja, seriöse Anbieter ermöglichen eine monatliche Kündigung. Es gibt keine langfristige Vertragsbindung. Das minimiert dein finanzielles Risiko – wenn es nicht passt, steigst du einfach aus." },
+  { q: "Wie sind die Kündigungsbedingungen beim Abo-Modell?", a: "Die Mindestlaufzeit beträgt 24 Monate mit einer Kündigungsfrist von 3 Monaten zum Vertragsende. Das klingt lang, aber SEO-Ergebnisse brauchen 3–6 Monate – nach einem Jahr sehen unsere Kunden den ROI. Im Vergleich zur Agentur (5.000+ Euro im Voraus) ist das finanzielle Risiko deutlich geringer." },
   { q: "Ist eine gemietete Website genauso gut wie eine gekaufte?", a: "Ja. Die Qualität hängt vom Anbieter ab, nicht vom Zahlungsmodell. Abo-Anbieter haben sogar einen Anreiz, dauerhaft gute Qualität zu liefern – weil du sonst einfach kündigst. Bei einer gekauften Website gibt es diesen Anreiz nach der Bezahlung nicht mehr." },
 ];
 
@@ -104,7 +104,7 @@ export default function BlogArticle() {
               <strong>Website kaufen:</strong> Du zahlst einmalig 3.000 bis 15.000 Euro an eine Agentur oder einen Freelancer. Die Website gehört dir. Du bist danach selbst für Hosting, Wartung, Updates und Sicherheit verantwortlich – oder zahlst extra dafür.
             </div>
             <div style={defBox}>
-              <strong>Website mieten (Abo-Modell):</strong> Du zahlst einen monatlichen Festbetrag (ab 99 € netto/Monat). Im Preis enthalten sind Design, Entwicklung, Hosting, Pflege, Updates und Support. Keine Einmalzahlung, monatlich kündbar.
+              <strong>Website mieten (Abo-Modell):</strong> Du zahlst einen monatlichen Festbetrag (ab 99 € netto/Monat, alle Preise netto zzgl. MwSt.). Im Preis enthalten sind Design, Entwicklung, Hosting, Pflege, Updates und Support. Keine Einmalzahlung. Mindestlaufzeit 24 Monate, Verlängerung um 12 Monate, Kündigungsfrist 3 Monate zum Vertragsende.
             </div>
             <p>
               Der Unterschied liegt nicht in der Qualität, sondern im Geschäftsmodell. Denk an den Unterschied zwischen einem Eigenheim und einer Mietwohnung – oder zwischen Auto kaufen und leasen.
@@ -156,7 +156,7 @@ export default function BlogArticle() {
                     ["Updates & Pflege", "Extra oder selbst", "Inklusive"],
                     ["Support", "Je nach Vertrag", "Persönlicher Ansprechpartner"],
                     ["Fertigstellung", "4–12 Wochen", "Wenige Tage"],
-                    ["Risiko", "Hoch (Vorabinvestment)", "Minimal (monatl. kündbar)"],
+                    ["Risiko", "Hoch (Vorabinvestment)", "Kalkulierbar (24 Mon. Laufzeit)"],
                     ["Flexibilität bei Kündigung", "Website bleibt, aber veraltet", "Seite wird deaktiviert"],
                   ].map((row, i) => (
                     <tr key={i} style={{ borderBottom: "1px solid var(--border)" }}>
@@ -190,7 +190,7 @@ export default function BlogArticle() {
                 Lieber mieten statt kaufen?
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
-                Professionelle Website ab 99 € netto/Monat. Ohne Vorabkosten, ohne Risiko, monatlich kündbar.
+                Professionelle Website ab 99 € netto/Monat. Ohne Vorabkosten, faire Vertragsbedingungen, transparente Konditionen.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "14px 32px", fontSize: 15 }}>
                 <span>Kostenloses Erstgespräch buchen →</span>
@@ -213,7 +213,7 @@ export default function BlogArticle() {
               <li>Du kein hohes Einmal-Investment riskieren willst</li>
               <li>Du keine Lust hast, dich um Technik, Updates und Sicherheit zu kümmern</li>
               <li>Du schnell online sein willst – in Tagen statt Monaten</li>
-              <li>Du flexibel bleiben willst und nicht an einen Vertrag gebunden sein möchtest</li>
+              <li>Du klare, transparente Konditionen bevorzugst statt einer hohen Einmalzahlung</li>
               <li>Du einen festen Ansprechpartner für Änderungen und Fragen brauchst</li>
             </ul>
 
@@ -245,7 +245,7 @@ export default function BlogArticle() {
             <h2 style={h2Style}>Fazit: Mieten ist 2026 das smartere Modell</h2>
             <ol style={{ ...ulStyle, paddingLeft: 24 }}>
               <li style={{ marginBottom: 12 }}>
-                <strong>Mieten ist finanziell risikoärmer.</strong> Keine Vorabkosten, monatlich kündbar, alles inklusive.
+                <strong>Mieten ist finanziell risikoärmer.</strong> Keine Vorabkosten, faire Vertragsbedingungen (24 Monate Mindestlaufzeit, 3 Monate Kündigungsfrist), alles inklusive.
               </li>
               <li style={{ marginBottom: 12 }}>
                 <strong>Die Qualität ist vergleichbar.</strong> Der Unterschied liegt im Geschäftsmodell, nicht im Ergebnis.

@@ -401,7 +401,7 @@ export default function BlogArticle() {
                 }}
               >
                 Wir zeigen dir in 15 Minuten, wie deine professionelle Website aussehen könnte.
-                Ab 99 € netto/Monat, monatlich kündbar, kein Technikwissen nötig.
+                Ab 99 € netto/Monat, transparente Konditionen, kein Technikwissen nötig.
               </p>
               <Link
                 href="/entwurf"

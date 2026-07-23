@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 const faqData = [
   { q: "Was kostet es, eine Webseite erstellen zu lassen?", a: "Eine professionelle Webseite kostet bei einer Agentur zwischen 3.000 und 15.000 Euro einmalig, bei einem Freelancer 1.000 bis 5.000 Euro. Im Abo-Modell zahlst du ab 99 € netto pro Monat ohne Einmalkosten – inklusive Design, Hosting, Pflege und Support." },
-  { q: "Lohnt sich ein Webseiten-Abo?", a: "Ein Webseiten-Abo lohnt sich besonders für Selbstständige und kleine Unternehmen, die kein hohes Einmal-Investment riskieren wollen. Du erhältst eine professionelle Webseite ohne Vorabkosten und kannst monatlich kündigen. Bereits ein neuer Kundenauftrag refinanziert oft das gesamte Jahresabo." },
+  { q: "Lohnt sich ein Webseiten-Abo?", a: "Ein Webseiten-Abo lohnt sich besonders für Selbstständige und kleine Unternehmen, die kein hohes Einmal-Investment riskieren wollen. Du erhältst eine professionelle Webseite ohne Vorabkosten. Die Mindestlaufzeit beträgt 24 Monate mit 3 Monaten Kündigungsfrist – SEO-Ergebnisse brauchen 3–6 Monate, nach einem Jahr sehen unsere Kunden den ROI. Bereits ein neuer Kundenauftrag refinanziert oft das gesamte Jahresabo." },
   { q: "Was ist im Abo-Preis von 99 € netto/Monat enthalten?", a: "Im Abo sind enthalten: individuelles Webdesign, Entwicklung, Hosting auf deutschen Servern, SSL-Zertifikat, Domain, SEO-Grundoptimierung, DSGVO-konforme Rechtstexte, regelmäßige Updates, technische Wartung und persönlicher Support." },
   { q: "Gehört mir die Webseite, wenn ich das Abo kündige?", a: "Im Abo-Modell mietest du die Webseite. Bei Kündigung wird die Seite deaktiviert. Deine Inhalte (Texte, Bilder) gehören dir und können exportiert werden. Das ist vergleichbar mit einem Mietvertrag für ein Büro – du nutzt es, solange du zahlst." },
   { q: "Ist eine 99 € netto-Webseite genauso gut wie eine für 5.000€?", a: "Ja, die Qualität ist vergleichbar. Der Unterschied liegt im Geschäftsmodell, nicht in der Qualität. Statt einer hohen Einmalzahlung verteilt das Abo-Modell die Kosten auf monatliche Raten und inkludiert gleichzeitig laufende Leistungen wie Pflege und Updates, die bei Agenturen extra kosten." },
@@ -139,7 +139,7 @@ export default function BlogArticle() {
 
             <h3 style={h3Style}>3. Webseiten-Abo (Mieten statt kaufen)</h3>
             <div style={defBox}>
-              <strong>Was ist ein Webseiten-Abo?</strong> Ein Webseiten-Abo ist ein Modell, bei dem du eine professionell gestaltete Webseite für einen festen monatlichen Betrag mietest. Im Preis enthalten sind Design, Entwicklung, Hosting, Pflege, Updates und Support. Du zahlst keine Einmalgebühr und kannst monatlich kündigen.
+              <strong>Was ist ein Webseiten-Abo?</strong> Ein Webseiten-Abo ist ein Modell, bei dem du eine professionell gestaltete Webseite für einen festen monatlichen Betrag mietest. Im Preis enthalten sind Design, Entwicklung, Hosting, Pflege, Updates und Support. Du zahlst keine Einmalgebühr. Die Mindestlaufzeit beträgt 24 Monate mit einer Kündigungsfrist von 3 Monaten zum Vertragsende.
             </div>
             <p>
               Das Abo-Modell ist relativ neu und löst genau das Problem, das viele Selbstständige haben: Du bekommst eine Agentur-Qualität-Webseite, aber ohne das finanzielle Risiko einer hohen Vorabinvestition.
@@ -174,7 +174,7 @@ export default function BlogArticle() {
                     ["Support", "Je nach Vertrag", "E-Mail/Chat", "Persönlicher Ansprechpartner"],
                     ["Flexibilität", "Änderungen kosten extra", "Selbst anpassen", "Änderungen inklusive"],
                     ["Gesamtkosten 3 Jahre", "5.800–21.000€+", "360–1.080€", "3.564€"],
-                    ["Risiko", "Hoch (Vorabinvestment)", "Niedrig", "Minimal (monatl. kündbar)"],
+                    ["Risiko", "Hoch (Vorabinvestment)", "Niedrig", "Kalkulierbar (24 Mon. Laufzeit)"],
                   ].map((row, i) => (
                     <tr key={i} style={{ borderBottom: "1px solid var(--border)" }}>
                       <td style={{ ...tdStyle, fontWeight: 600 }}>{row[0]}</td>

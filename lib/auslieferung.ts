@@ -16,8 +16,10 @@ import { isPremiumTemplate, renderPremiumTemplate } from '@/lib/templates'
 import { renderLibraryPage } from '@/lib/library/render'
 import { loadLibraryPage } from '@/lib/library/load'
 import type { LibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
-import { renderFlagshipPage } from '@/lib/flagship/render'
+import { renderFlagshipPage, renderUnterseite } from '@/lib/flagship/render'
 import { renderAnfrageSeite } from '@/lib/flagship/anfrage'
+import { UNTERSEITEN } from '@/lib/flagship/types'
+import type { UnterseitenSlug } from '@/lib/flagship/types'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 
 export interface Rechtstexte {
@@ -217,6 +219,13 @@ async function renderEngineSeite(
       return renderAnfrageSeite(fsConfig, {
         submitZiel: `/api/public/forms/${site.id}/submit`,
       })
+    }
+    // Multipage-Unterseiten (Business/Growth)
+    if (fsConfig.seiten_modus === 'multipage') {
+      const unterseite = UNTERSEITEN.find((u) => u.slug === slug)
+      if (unterseite) {
+        return renderUnterseite(fsConfig, slug as UnterseitenSlug, { noindex: false })
+      }
     }
     return null
   }

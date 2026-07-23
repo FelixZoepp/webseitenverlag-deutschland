@@ -31,8 +31,8 @@ const faqData = [
     a: "Ja, das ist eines der stärksten Argumente. Domain, Website-Inhalte und SEO-Rankings gehen bei Unternehmensübergabe einfach mit über. Der Nachfolger startet nicht bei null, sondern mit einer eingeführten Online-Präsenz. Das spart dem Käufer Zeit und Geld – und erhöht damit deinen Verkaufspreis.",
   },
   {
-    q: "Gibt es kurze Vertragslaufzeiten für ältere Unternehmer?",
-    a: "Bei uns läuft alles monatlich. Keine Mindestlaufzeit, keine Kündigungsfristen. Du kannst jederzeit aufhören – auch wenn du morgen entscheidest, das Geschäft zu übergeben. Du gehst kein Risiko ein.",
+    q: "Welche Vertragsbedingungen gelten?",
+    a: "Die Mindestlaufzeit beträgt 24 Monate mit einer Kündigungsfrist von 3 Monaten zum Vertragsende. Das klingt lang, aber SEO-Ergebnisse brauchen 3–6 Monate – nach einem Jahr sehen unsere Kunden den ROI. Wenn du das Geschäft vorzeitig übergibst, kann der Vertrag auf den Nachfolger übergehen – das ist sogar ein Vorteil beim Firmenverkauf.",
   },
 ];
 
@@ -263,8 +263,8 @@ export default function BlogArticle() {
                 Für die letzten Jahre – und für einen guten Abschluss
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
-                Sieh dir kostenfrei an, wie deine Website aussehen könnte. Monatlich kündbar,
-                kein Risiko.
+                Sieh dir kostenfrei an, wie deine Website aussehen könnte. Faire Konditionen,
+                kein versteckter Aufschlag.
               </p>
               <Link
                 href="/entwurf"
@@ -275,17 +275,18 @@ export default function BlogArticle() {
               </Link>
             </div>
 
-            {/* H2: Keine Bindung */}
-            <h2 style={h2Style}>Keine langen Verträge – das passt zur Situation</h2>
+            {/* H2: Faire Bedingungen */}
+            <h2 style={h2Style}>Faire Vertragsbedingungen – klar und transparent</h2>
             <p>
-              &ldquo;Ich will mich nicht auf Jahre binden&rdquo; – das ist ein völlig
-              verständlicher Einwand. Und genau deshalb ist das Abo-Modell ideal.
+              &ldquo;Ich will wissen, worauf ich mich einlasse&rdquo; – das ist ein völlig
+              verständlicher Anspruch. Und genau deshalb legen wir unsere Konditionen offen.
             </p>
             <p>
-              Ab 99 € netto/Monat, monatlich kündbar. Kein Jahresvertrag, keine Mindestlaufzeit.
-              Du kannst morgen kündigen, wenn du das Geschäft übergibst – und bis dahin
-              profitierst du von mehr Anfragen, besseren Kunden und einem höheren Unternehmenswert.
-              Das ist kein Risiko. Das ist eine monatliche Option, die du ziehen kannst.
+              Ab 99 € netto/Monat, Mindestlaufzeit 24 Monate, 3 Monate Kündigungsfrist zum
+              Vertragsende. Alle Preise verstehen sich netto zzgl. MwSt. Das sind klare,
+              faire Bedingungen – keine versteckten Aufschläge, kein Kleingedrucktes. Und
+              wenn du das Geschäft übergibst, kann der Vertrag auf den Nachfolger übergehen –
+              was deinen Verkaufspreis sogar erhöht.
             </p>
 
             {/* FAQ */}
@@ -323,8 +324,7 @@ export default function BlogArticle() {
                 zum Nachfolger – er startet mit Rückenwind.
               </li>
               <li>
-                <strong>Kein Risiko, keine Bindung.</strong> Monatlich kündbar, 99 € netto/Monat.
-                Kündige, wenn du aufhörst – vorher profitierst du.
+                <strong>Faire, transparente Konditionen.</strong> 24 Monate Mindestlaufzeit, 3 Monate Kündigungsfrist, 99 € netto/Monat. Klare Bedingungen – und bei Unternehmensübergabe geht der Vertrag nahtlos auf den Nachfolger über.
               </li>
             </ol>
 
@@ -350,8 +350,8 @@ export default function BlogArticle() {
                   margin: "0 auto 20px",
                 }}
               >
-                Wir zeigen dir kostenlos, wie deine Website aussehen könnte. Monatlich kündbar,
-                ab 99 € netto/Monat, kein Technikwissen nötig.
+                Wir zeigen dir kostenlos, wie deine Website aussehen könnte. Ab 99 € netto/Monat,
+                faire Vertragsbedingungen, kein Technikwissen nötig.
               </p>
               <Link
                 href="/entwurf"

@@ -278,7 +278,7 @@ export default function WvdClient() {
             </div>
             <div className="trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-              Monatlich kündbar
+              Faire Vertragsbedingungen
             </div>
           </div>
         </div>
@@ -372,7 +372,7 @@ export default function WvdClient() {
             <p>
               Deshalb haben wir das Modell umgedreht: <strong>Du zahlst 99 € netto im Monat. Wir liefern alles.</strong>
               Design, Technik, Hosting, Google-Optimierung, Updates, Support.
-              Kein Einmal-Invest. Kein Risiko. Du kannst jederzeit kündigen.
+              Kein Einmal-Invest. Faire Konditionen. Transparente Preise.
             </p>
             <p>
               <strong>Eine einzige Kundenanfrage, die über deine neue Webseite kommt,
@@ -955,7 +955,7 @@ export default function WvdClient() {
             { q: "99 € netto/Monat – was ist da alles drin?", a: "Alles. Design, Entwicklung, Hosting, Domain, SSL, Google-Optimierung (SEO), DSGVO-konforme Rechtstexte, Updates, Wartung und persönlicher Support. Es gibt keine versteckten Kosten." },
             { q: "Wie schnell ist meine Webseite online?", a: "In der Regel innerhalb weniger Tage nach unserem Erstgespräch. Bei umfangreicheren Projekten kann es etwas länger dauern – darüber sprechen wir im Gespräch." },
             { q: "Muss ich mich um irgendwas Technisches kümmern?", a: "Nein. Wir kümmern uns um alles – von der Domain-Registrierung über die Technik bis zu Updates. Du musst nichts installieren, konfigurieren oder updaten." },
-            { q: "Was, wenn ich nach 2 Monaten kündigen will?", a: "Kein Problem. Du kannst monatlich kündigen, keine Mindestlaufzeit. Wir sind überzeugt, dass du bleibst, weil du zufrieden bist – nicht weil du musst." },
+            { q: "Wie sind die Vertragsbedingungen?", a: "Die Mindestlaufzeit beträgt 24 Monate mit 3 Monaten Kündigungsfrist. Danach verlängert sich der Vertrag um jeweils 12 Monate. Alle Preise sind netto zzgl. MwSt. Wir setzen auf langfristige Zusammenarbeit, weil SEO-Ergebnisse Zeit brauchen – und unsere Kunden nach 6 Monaten die Ergebnisse sehen." },
             { q: "Ist die Webseite wirklich professionell – oder sieht man, dass sie \"günstig\" ist?", a: "Unsere Webseiten sind individuell gestaltet und auf dem gleichen technischen Niveau wie Seiten, die Agenturen für 5.000€+ bauen. Der Unterschied ist unser Geschäftsmodell, nicht die Qualität." },
             { q: "Wie komme ich bei Google nach oben?", a: "Jede Seite wird mit technischem SEO, schnellen Ladezeiten, strukturierten Daten und den richtigen Meta-Informationen gebaut. Das ist die Grundlage. Sichtbarkeit bei Google baut sich über die ersten Wochen und Monate auf – je nach Wettbewerb in deiner Region." },
           ].map((faq, i) => (

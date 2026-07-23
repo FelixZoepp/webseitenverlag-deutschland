@@ -266,7 +266,7 @@ export async function chatWithClaude(
   const configContext = `\n\nAktuelle Website-Konfiguration:\n${JSON.stringify(currentConfig, null, 2)}`
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1024,
     temperature: 0.5,
     system: systemPrompt + configContext,

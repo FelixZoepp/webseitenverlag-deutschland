@@ -158,7 +158,7 @@ export default function BlogArticle() {
                 Deine professionelle Website ab 99 € netto/Monat
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
-                Ohne Einmalkosten, fertig in wenigen Tagen, monatlich kündbar. Lass uns sprechen.
+                Ohne Einmalkosten, fertig in wenigen Tagen, faire Vertragsbedingungen. Lass uns sprechen.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "14px 32px", fontSize: 15 }}>
                 <span>Kostenloses Erstgespräch buchen →</span>

@@ -5,6 +5,7 @@ import { generiereFlagshipDemo } from '@/lib/pipeline/generate-flagship-demo'
 import { collectProspectData } from '@/lib/pipeline/prospect-data'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { FlagshipConfig } from '@/lib/flagship/types'
+import { videoErlaubtFuerTier } from '@/config/plans'
 
 // Asset-Generierung braucht bis zu 180s (Hero + Signature-Paar parallel)
 export const maxDuration = 300
@@ -31,7 +32,7 @@ export async function POST(
   const admin = createAdminClient()
   const { data: demo, error: loadErr } = await admin
     .from('demos')
-    .select('id, config, branche, prospect_name, prospect_website, notes, scraped_data')
+    .select('id, config, branche, prospect_name, prospect_website, notes, scraped_data, paket')
     .eq('id', params.demoId)
     .single()
 
@@ -88,7 +89,7 @@ export async function POST(
       demo: updated,
       warning,
       kosten_cent: ergebnis.kostenCent,
-      videoJob: ergebnis.videoJob ? true : false,
+      videoJob: ergebnis.videoJob && videoErlaubtFuerTier(demo.paket) ? true : false,
     })
   } catch (err) {
     return NextResponse.json(

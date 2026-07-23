@@ -28,7 +28,7 @@ const faqData = [
   },
   {
     q: "Warum ist ein Abo-Modell sicherer als ein Einmalauftrag?",
-    a: "Beim Abo-Modell zahlst du monatlich und kannst jederzeit kündigen. Der Anbieter hat also jeden Monat einen Anreiz, dir guten Service zu liefern – sonst kündigt du. Bei einem Einmalauftrag hat die Agentur das Geld, sobald du gezahlt hast. Der Anreiz ist dann weg. Das Abo-Modell zwingt zur Qualität.",
+    a: "Beim Abo-Modell zahlst du einen festen monatlichen Betrag mit klaren, transparenten Konditionen – Mindestlaufzeit 24 Monate, 3 Monate Kündigungsfrist. Der Anbieter hat einen dauerhaften Anreiz, guten Service zu liefern – weil du nach der Mindestlaufzeit kündigen kannst. Bei einem Einmalauftrag hat die Agentur das Geld, sobald du gezahlt hast. Der Anreiz ist dann weg. Das Abo-Modell zwingt zur Qualität.",
   },
   {
     q: "Gehört mir die Website, wenn ich ein Abo abschließe?",
@@ -228,12 +228,13 @@ export default function BlogArticle() {
               du stellen – und die Antworten sollten klar und schriftlich sein.
             </p>
 
-            <h3 style={h3Style}>Monatlich kündbar</h3>
+            <h3 style={h3Style}>Transparente Vertragsbedingungen</h3>
             <p>
-              Das ist vielleicht das wichtigste Signal. Ein Anbieter, der monatlich kündbare
-              Verträge anbietet, muss jeden Monat seinen Job machen. Er kann sich nicht hinter
-              einem 2-Jahres-Vertrag verstecken. Monatliche Kündbarkeit ist Qualitätspflicht –
-              per Geschäftsmodell.
+              Das ist vielleicht das wichtigste Signal. Ein seriöser Anbieter legt seine
+              Konditionen offen: Wie lang ist die Mindestlaufzeit? Welche Kündigungsfrist gilt?
+              Was kostet eine Verlängerung? Klare Antworten auf diese Fragen – ohne Ausweichen,
+              ohne Kleingedrucktes – sind ein Zeichen für einen fairen Partner. Wer seine
+              Konditionen versteckt oder erst auf Nachfrage nennt, hat etwas zu verbergen.
             </p>
 
             <h3 style={h3Style}>Referenzen und Portfolio</h3>
@@ -249,7 +250,8 @@ export default function BlogArticle() {
               noch, aber Updates waren unmöglich. Das Schlimmste: Die Domain und das Hosting
               liefen auf den Accounts der Agentur. Er hatte keine Website – er hatte eine Miete
               gezahlt, ohne Mietvertrag. Heute zahlt er 99 € netto/Monat, hat alle Zugänge selbst
-              in der Hand und kann monatlich kündigen.
+              in der Hand und weiß genau, welche Konditionen gelten: Mindestlaufzeit 24 Monate,
+              3 Monate Kündigungsfrist, alle Preise netto. Keine Überraschungen.
             </div>
 
             {/* H2: Abo als Schutz */}
@@ -261,9 +263,10 @@ export default function BlogArticle() {
             </p>
             <ul style={ulStyle}>
               <li>
-                <strong>Anreiz zur Qualität bleibt bestehen:</strong> Wir liefern guten Service,
-                weil du sonst nächsten Monat kündigst. Diesen Anreiz hat eine Agentur nach
-                dem Einmalauftrag nicht mehr.
+                <strong>Anreiz zur Qualität bleibt bestehen:</strong> Wir liefern dauerhaft
+                guten Service, weil unsere Konditionen das erfordern und weil du nach der
+                Mindestlaufzeit von 24 Monaten kündigen kannst. Diesen Anreiz hat eine Agentur
+                nach dem Einmalauftrag nicht mehr.
               </li>
               <li>
                 <strong>Kein finanzielles Klumpenrisiko:</strong> 99 € netto/Monat sind ein
@@ -291,7 +294,7 @@ export default function BlogArticle() {
                   fontVariationSettings: '"opsz" 24, "SOFT" 50',
                 }}
               >
-                Kein Risiko, kein Vorschuss, monatlich kündbar
+                Kein Vorschuss, feste Preise, transparente Konditionen
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
                 Sieh dir an, wie deine Website aussehen könnte – bevor du irgendetwas zahlst.
@@ -357,8 +360,9 @@ export default function BlogArticle() {
                 bei Kündigung? Die Antworten sagen mehr als jedes Hochglanz-Angebot.
               </li>
               <li style={{ marginBottom: 12 }}>
-                <strong>Das Abo-Modell schützt strukturell.</strong> Monatliche Kündbarkeit
-                zwingt jeden Anbieter zu kontinuierlicher Qualität – kein Geld, keine Website.
+                <strong>Das Abo-Modell schützt strukturell.</strong> Transparente Konditionen,
+                feste Preise ohne versteckte Aufschläge und dauerhafte Betreuung sind das
+                Qualitätssignal – nicht Versprechen, sondern überprüfbare Fakten.
               </li>
               <li>
                 <strong>Starte ohne Risiko.</strong> Lass dir einen kostenlosen Entwurf zeigen,
@@ -389,7 +393,7 @@ export default function BlogArticle() {
                 }}
               >
                 Wir zeigen dir deinen Website-Entwurf kostenlos und unverbindlich. Kein Druck,
-                kein Vorschuss, monatlich kündbar ab 99 € netto/Monat.
+                kein Vorschuss, faire Vertragsbedingungen ab 99 € netto/Monat.
               </p>
               <Link
                 href="/entwurf"

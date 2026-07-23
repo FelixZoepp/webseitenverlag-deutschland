@@ -5,13 +5,13 @@ const plans = [
     desc: "Perfekt für Einzelunternehmer und kleine Betriebe.",
     features: [
       "One-Page Webseite",
+      "Fullscreen-Hintergrundbild",
       "Responsive Design",
       "SEO-Grundoptimierung",
       "Kontaktformular",
-      "SSL-Zertifikat",
+      "SSL-Zertifikat & Hosting",
       "DSGVO-konform",
-      "1 E-Mail-Adresse",
-      "Hosting inklusive",
+      "Eigene Domain möglich",
     ],
     highlight: false,
   },
@@ -21,14 +21,14 @@ const plans = [
     desc: "Für Unternehmen, die mehr Sichtbarkeit wollen.",
     features: [
       "Bis zu 5 Unterseiten",
+      "Video-Header möglich",
       "Individuelles Design",
       "Erweiterte SEO",
-      "Google My Business",
-      "Blog-Funktion",
-      "5 E-Mail-Adressen",
-      "Analytics-Dashboard",
-      "Prioritäts-Support",
-      "Monatliche Reports",
+      "Bewertungs-Widget",
+      "Sektionen bearbeiten",
+      "Alle Farbthemen",
+      "Kontaktformular",
+      "Eigene Domain möglich",
     ],
     highlight: true,
   },
@@ -37,16 +37,14 @@ const plans = [
     price: "249",
     desc: "Für maximale Online-Präsenz und Wachstum.",
     features: [
-      "Unbegrenzte Seiten",
-      "Premium-Design",
+      "Bis zu 10 Unterseiten",
+      "Video-Header + Scroll-Effekt",
+      "Premium-Animationen",
       "Vollständige SEO-Strategie",
-      "Content-Erstellung",
-      "Online-Shop möglich",
-      "10 E-Mail-Adressen",
-      "A/B-Testing",
-      "Dedizierter Account-Manager",
-      "Wöchentliche Reports",
-      "Social-Media-Integration",
+      "Ads-Landingpages",
+      "Terminbuchung",
+      "Alle Business-Features",
+      "Prioritäts-Support",
     ],
     highlight: false,
   },
@@ -62,7 +60,7 @@ export default function Pricing() {
             Transparent. <span className="text-[var(--blue)]">Ehrlich.</span> Fair.
           </h2>
           <p className="mx-auto max-w-[580px] text-lg text-[var(--ink-soft)]">
-            Keine versteckten Kosten, keine Startgebühr. Monatlich kündbar.
+            Keine versteckten Kosten, keine Startgebühr. Alle Preise netto.
           </p>
         </div>
 
@@ -117,7 +115,7 @@ export default function Pricing() {
               </ul>
 
               <a
-                href="#contact"
+                href="/entwurf"
                 className={`flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 font-semibold transition-all hover:-translate-y-0.5 ${
                   plan.highlight
                     ? "bg-[var(--blue)] text-white shadow-lg shadow-blue-500/25 hover:bg-[var(--blue-hover)]"
@@ -131,7 +129,7 @@ export default function Pricing() {
         </div>
 
         <p className="mt-8 text-center text-sm text-[var(--ink-soft)]">
-          Alle Preise zzgl. MwSt. &middot; Keine Mindestlaufzeit &middot; Monatlich kündbar
+          Alle Preise netto zzgl. MwSt. &middot; Mindestlaufzeit 24 Monate &middot; 3 Monate Kündigungsfrist
         </p>
       </div>
     </section>

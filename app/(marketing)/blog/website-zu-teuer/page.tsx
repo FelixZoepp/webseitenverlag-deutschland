@@ -25,8 +25,8 @@ const faqData = [
     a: "Bei seriösen Anbietern nicht. Hosting, SSL-Zertifikat, Pflege und technischer Support sind im Abo enthalten. Frag vor Vertragsabschluss konkret nach: Was kostet ein Textupdate? Was, wenn ich neue Fotos hochladen will? Das zeigt schnell, ob der Anbieter transparent ist.",
   },
   {
-    q: "Kann ich jederzeit kündigen?",
-    a: "Bei uns ja. Das Abo läuft monatlich, ohne Mindestlaufzeit. Das ist übrigens der entscheidende Unterschied zur Agentur: Du gehst kein finanzielles Risiko ein. Wenn die Website nicht liefert, was sie soll, hörst du auf – fertig.",
+    q: "Wie sind die Vertragsbedingungen?",
+    a: "Die Mindestlaufzeit beträgt 24 Monate mit 3 Monaten Kündigungsfrist zum Vertragsende. Das klingt lang, aber SEO-Ergebnisse brauchen 3–6 Monate – nach einem Jahr sehen unsere Kunden den ROI. Im Vergleich zur Agentur gehst du trotzdem kein hohes finanzielles Risiko ein: Statt 5.000 Euro im Voraus zahlst du 99 € netto monatlich, und alle Preise verstehen sich netto zzgl. MwSt.",
   },
   {
     q: "Warum ist die Agentur so teuer?",
@@ -244,9 +244,7 @@ export default function BlogArticle() {
 
             <h3 style={h3Style}>Was passiert, wenn keine Kunden kommen?</h3>
             <p>
-              Dann kündigst du. Monatlich, ohne Mindestlaufzeit. Das ist das Sicherheitsnetz des
-              Abo-Modells. Du riskierst maximal einen Monatsbeitrag – nicht tausende Euro wie bei
-              einer Agentur, die nichts liefert.
+              Dann sprechen wir darüber. Die Mindestlaufzeit beträgt 24 Monate mit 3 Monaten Kündigungsfrist – das ist bewusst so, weil SEO Zeit braucht. Aber du riskierst in dieser Zeit maximal 99 € netto/Monat – nicht tausende Euro wie bei einer Agentur, die nichts liefert und das Geld bereits hat.
             </p>
 
             {/* CTA Mid-Article */}

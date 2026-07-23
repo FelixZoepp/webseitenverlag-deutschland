@@ -12,8 +12,8 @@ const faqs = [
     a: "Alles: Design, Entwicklung, Hosting, Domain, SSL-Zertifikat, SEO-Optimierung, DSGVO-konforme Rechtstexte, Updates, Wartung und persönlicher Support.",
   },
   {
-    q: "Gibt es eine Mindestlaufzeit?",
-    a: "Nein. Sie können monatlich kündigen. Wir sind überzeugt, dass Sie bleiben, weil Sie zufrieden sind – nicht weil Sie müssen.",
+    q: "Wie sind die Vertragsbedingungen?",
+    a: "Die Mindestlaufzeit beträgt 24 Monate mit 3 Monaten Kündigungsfrist. Danach verlängert sich der Vertrag um jeweils 12 Monate. Alle Preise sind netto zzgl. MwSt. Wir setzen auf langfristige Zusammenarbeit, weil SEO-Ergebnisse Zeit brauchen – und nach einem Jahr sehen unsere Kunden den ROI.",
   },
   {
     q: "Kann ich meine Webseite selbst bearbeiten?",
