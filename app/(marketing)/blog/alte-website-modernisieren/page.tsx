@@ -22,7 +22,7 @@ const faqData = [
   },
   {
     q: "Was kostet eine Modernisierung?",
-    a: "Das hängt stark ab, wie weit du gehen willst. Ein einfacher Relaunch (neues Design, gleiche Inhalte) kostet bei einer Agentur 1.500 bis 4.000 Euro. Ein kompletter Neustart mit neuem CMS, SEO-Optimierung und frischen Inhalten liegt bei 3.000 bis 8.000 Euro. Im Abo-Modell startest du direkt mit einer modernen Seite ab 99 Euro/Monat.",
+    a: "Das hängt stark ab, wie weit du gehen willst. Ein einfacher Relaunch (neues Design, gleiche Inhalte) kostet bei einer Agentur 1.500 bis 4.000 Euro. Ein kompletter Neustart mit neuem CMS, SEO-Optimierung und frischen Inhalten liegt bei 3.000 bis 8.000 Euro. Im Abo-Modell startest du direkt mit einer modernen Seite ab 99 € netto/Monat.",
   },
   {
     q: "Verliere ich mein Google-Ranking beim Neustart?",
@@ -332,7 +332,7 @@ export default function BlogArticle() {
                 richtigen Weiterleitungen verlierst du nichts – und gewinnst oft sogar.
               </li>
               <li>
-                <strong>Ab 99 Euro/Monat startest du sofort modern.</strong> Ohne
+                <strong>Ab 99 € netto/Monat startest du sofort modern.</strong> Ohne
                 Einmalkosten, ohne Risiko, mit professionellem Ergebnis.
               </li>
             </ol>

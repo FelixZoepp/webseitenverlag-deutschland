@@ -248,7 +248,7 @@ export default function BlogArticle() {
               erreichbar – Telefon abgestellt, E-Mails blieben unbeantwortet. Die Website lief
               noch, aber Updates waren unmöglich. Das Schlimmste: Die Domain und das Hosting
               liefen auf den Accounts der Agentur. Er hatte keine Website – er hatte eine Miete
-              gezahlt, ohne Mietvertrag. Heute zahlt er 99 €/Monat, hat alle Zugänge selbst
+              gezahlt, ohne Mietvertrag. Heute zahlt er 99 € netto/Monat, hat alle Zugänge selbst
               in der Hand und kann monatlich kündigen.
             </div>
 
@@ -266,7 +266,7 @@ export default function BlogArticle() {
                 dem Einmalauftrag nicht mehr.
               </li>
               <li>
-                <strong>Kein finanzielles Klumpenrisiko:</strong> 99 Euro/Monat sind ein
+                <strong>Kein finanzielles Klumpenrisiko:</strong> 99 € netto/Monat sind ein
                 überschaubares Risiko. 4.500 Euro auf einmal – nicht.
               </li>
               <li>
@@ -389,7 +389,7 @@ export default function BlogArticle() {
                 }}
               >
                 Wir zeigen dir deinen Website-Entwurf kostenlos und unverbindlich. Kein Druck,
-                kein Vorschuss, monatlich kündbar ab 99 €/Monat.
+                kein Vorschuss, monatlich kündbar ab 99 € netto/Monat.
               </p>
               <Link
                 href="/entwurf"

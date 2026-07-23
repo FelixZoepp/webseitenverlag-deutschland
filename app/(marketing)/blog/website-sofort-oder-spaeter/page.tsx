@@ -199,7 +199,7 @@ export default function BlogArticle() {
               dass du jemals einen einzigen dieser Menschen getroffen hast.
             </p>
             <p>
-              Gegenüber diesen Zahlen wirken 99 Euro/Monat für eine Website wie das, was sie sind:
+              Gegenüber diesen Zahlen wirken 99 € netto/Monat für eine Website wie das, was sie sind:
               keine Ausgabe, sondern ein Investment mit klarem Rückfluss.
             </p>
 

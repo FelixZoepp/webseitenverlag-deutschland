@@ -5,9 +5,9 @@ import './marketing.css'
 // kein Font-Download nötig, bestes LCP
 
 export const metadata: Metadata = {
-  title: 'Webseiten-Verlag Deutschland — Professionelle Webseiten ab 99 €/Monat',
+  title: 'Webseiten-Verlag Deutschland — Professionelle Webseiten ab 99 € netto/Monat',
   description:
-    'Professionelle Webseiten in 24 Stunden online. Keine Startgebühr, ab 99 €/Monat all-inclusive: Hosting, SEO, KI-Editor & Support.',
+    'Professionelle Webseiten in 24 Stunden online. Keine Startgebühr, ab 99 € netto/Monat all-inclusive: Hosting, SEO, KI-Editor & Support.',
   keywords: [
     'Webseite erstellen lassen',
     'Webdesign günstig',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     'Webseiten-Verlag',
   ],
   openGraph: {
-    title: 'Webseiten-Verlag Deutschland — Professionelle Webseiten ab 99 €/Monat',
+    title: 'Webseiten-Verlag Deutschland — Professionelle Webseiten ab 99 € netto/Monat',
     description: 'In 24 h online. Keine Startgebühr. Ab 99 €/Monat all-inclusive.',
     type: 'website',
     locale: 'de_DE',

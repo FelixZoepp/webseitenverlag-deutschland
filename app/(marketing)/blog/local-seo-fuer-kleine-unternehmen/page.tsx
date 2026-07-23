@@ -152,7 +152,7 @@ export default function BlogArticle() {
                 Website mit Local-SEO-Optimierung?
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
-                Unsere Websites sind von Anfang an für lokale Google-Suchen optimiert. Ab 99 Euro/Monat, ohne Einmalkosten.
+                Unsere Websites sind von Anfang an für lokale Google-Suchen optimiert. Ab 99 € netto/Monat, ohne Einmalkosten.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "14px 32px", fontSize: 15 }}>
                 <span>Kostenloses Erstgespräch buchen →</span>
@@ -260,7 +260,7 @@ export default function BlogArticle() {
                 <strong>Sammle aktiv Google-Bewertungen.</strong> Sie sind der stärkste Vertrauensfaktor und verbessern dein Ranking.
               </li>
               <li>
-                <strong>Habe eine schnelle, mobilfreundliche Website mit lokalen Keywords.</strong> Im Abo-Modell bekommst du das ab 99 Euro/Monat – inklusive SEO-Optimierung.
+                <strong>Habe eine schnelle, mobilfreundliche Website mit lokalen Keywords.</strong> Im Abo-Modell bekommst du das ab 99 € netto/Monat – inklusive SEO-Optimierung.
               </li>
             </ol>
 

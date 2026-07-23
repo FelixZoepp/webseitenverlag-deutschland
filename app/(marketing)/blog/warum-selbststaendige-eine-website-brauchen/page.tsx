@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 const faqData = [
   { q: "Reicht nicht eine Instagram-Seite statt einer Website?", a: "Nein. Social Media ist eine Ergänzung, kein Ersatz. Du bist auf einer fremden Plattform abhängig von deren Algorithmus, Regeln und Reichweite. Deine Website gehört dir, ist bei Google auffindbar und vermittelt professionelle Glaubwürdigkeit – das kann kein Social-Media-Profil ersetzen." },
   { q: "Brauche ich als Einzelunternehmer wirklich eine Website?", a: "Ja. Kunden googeln dich, bevor sie dich kontaktieren. Ohne Website finden sie entweder nichts oder – noch schlimmer – nur deine Konkurrenz. Eine eigene Website ist deine digitale Visitenkarte und oft der erste Eindruck, den ein potenzieller Kunde von dir bekommt." },
-  { q: "Was kostet eine Website für Selbstständige?", a: "Im Abo-Modell ab 99 Euro pro Monat ohne Einmalkosten. Bei einer Agentur zwischen 3.000 und 8.000 Euro einmalig plus laufende Wartungskosten. Für die meisten Selbstständigen ist das Abo-Modell die risikoärmste Variante." },
+  { q: "Was kostet eine Website für Selbstständige?", a: "Im Abo-Modell ab 99 € netto pro Monat ohne Einmalkosten. Bei einer Agentur zwischen 3.000 und 8.000 Euro einmalig plus laufende Wartungskosten. Für die meisten Selbstständigen ist das Abo-Modell die risikoärmste Variante." },
   { q: "Wie viele Seiten braucht eine Website für Selbstständige?", a: "In der Regel reichen 3 bis 7 Seiten: Startseite, Leistungen (oder Angebot), Über mich, Kontakt und optional Referenzen oder ein Blog. Wichtiger als die Seitenanzahl ist, dass die Inhalte klar und auf deine Zielgruppe zugeschnitten sind." },
   { q: "Wie schnell kann meine Website online sein?", a: "Im Abo-Modell ist deine Website in der Regel innerhalb weniger Tage fertig und online. Bei einer klassischen Agentur dauert ein Webprojekt oft 4 bis 12 Wochen. Je schneller du online bist, desto schneller kommen die ersten Anfragen." },
 ];
@@ -155,7 +155,7 @@ export default function BlogArticle() {
             {/* CTA Mid-Article */}
             <div style={ctaBox}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, marginBottom: 8, fontVariationSettings: '"opsz" 24, "SOFT" 50' }}>
-                Deine professionelle Website ab 99 Euro/Monat
+                Deine professionelle Website ab 99 € netto/Monat
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
                 Ohne Einmalkosten, fertig in wenigen Tagen, monatlich kündbar. Lass uns sprechen.
@@ -219,7 +219,7 @@ export default function BlogArticle() {
 
             <h3 style={h3Style}>&ldquo;Ich habe kein Budget für eine Website&rdquo;</h3>
             <p>
-              Im Abo-Modell kostet eine professionelle Website 99 Euro pro Monat – ohne Einmalkosten. Das ist weniger als ein Geschäftsessen. Und ein einziger neuer Kunde über die Website refinanziert das gesamte Jahresabo.
+              Im Abo-Modell kostet eine professionelle Website 99 € netto pro Monat – ohne Einmalkosten. Das ist weniger als ein Geschäftsessen. Und ein einziger neuer Kunde über die Website refinanziert das gesamte Jahresabo.
             </p>
 
             <h3 style={h3Style}>&ldquo;Ich habe keine Zeit, mich darum zu kümmern&rdquo;</h3>
@@ -253,7 +253,7 @@ export default function BlogArticle() {
                 <strong>Kunden erwarten eine Website.</strong> Ohne verlierst du Glaubwürdigkeit und potenzielle Aufträge.
               </li>
               <li>
-                <strong>Es war noch nie so einfach und günstig</strong> wie 2026, eine professionelle Website zu bekommen. Ab 99 Euro/Monat, fertig in wenigen Tagen, ohne technisches Vorwissen.
+                <strong>Es war noch nie so einfach und günstig</strong> wie 2026, eine professionelle Website zu bekommen. Ab 99 € netto/Monat, fertig in wenigen Tagen, ohne technisches Vorwissen.
               </li>
             </ol>
 

@@ -233,7 +233,7 @@ export default function BlogArticle() {
                   fontVariationSettings: '"opsz" 24, "SOFT" 50',
                 }}
               >
-                Nicht mehr Kunden – bessere Kunden. Ab 99 €/Monat.
+                Nicht mehr Kunden – bessere Kunden. Ab 99 € netto/Monat.
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
                 Zeig uns dein Gewerk. Wir zeigen dir, wie eine Website deine Auftragsqualität

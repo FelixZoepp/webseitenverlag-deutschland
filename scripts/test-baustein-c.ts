@@ -1,5 +1,5 @@
 /**
- * Baustein-C-Test (Produktstufen 99/149/249 €): npx tsx scripts/test-baustein-c.ts
+ * Baustein-C-Test (Produktstufen 99/169/249 €): npx tsx scripts/test-baustein-c.ts
  *
  * Deckt die QA-Regeln der Kategorie „Produktstufen" ab:
  *  - C-PLAN-GATE: Editor-Ops werden serverseitig gegen den Plan geprüft (nie nur UI)
@@ -35,9 +35,9 @@ const root = join(__dirname, '..')
 // Plan-Matrix (§C.4): Preise als Hinweis aus Config, Rechte-Matrix
 // ------------------------------------------------------------
 check('Plans: drei Tiers vorhanden', !!PLANS.starter && !!PLANS.business && !!PLANS.growth)
-check('Plans: Preis-Hinweise 99/149/249 € netto',
+check('Plans: Preis-Hinweise 99/169/249 € netto',
   PLANS.starter.preis_hinweis === '99 € netto' &&
-  PLANS.business.preis_hinweis === '149 € netto' &&
+  PLANS.business.preis_hinweis === '169 € netto' &&
   PLANS.growth.preis_hinweis === '249 € netto')
 check('Matrix: Starter hat update_text/swap_image/set_theme_preset',
   hatEditorFeature('starter', 'update_text') &&
@@ -48,11 +48,12 @@ check('Matrix: Starter hat KEIN add_section/reorder/video/scroll_story',
   !hatEditorFeature('starter', 'reorder') &&
   !hatEditorFeature('starter', 'video_header') &&
   !hatEditorFeature('starter', 'scroll_story'))
-check('Matrix: Business hat add_section+reorder+signature, kein Video',
+check('Matrix: Business hat add_section+reorder+signature+video_header, kein scroll_story',
   hatEditorFeature('business', 'add_section_from_library') &&
   hatEditorFeature('business', 'reorder') &&
   hatEditorFeature('business', 'signature_section') &&
-  !hatEditorFeature('business', 'video_header'))
+  hatEditorFeature('business', 'video_header') &&
+  !hatEditorFeature('business', 'scroll_story'))
 check('Matrix: Growth hat alles inkl. video_header+scroll_story',
   hatEditorFeature('growth', 'video_header') && hatEditorFeature('growth', 'scroll_story'))
 

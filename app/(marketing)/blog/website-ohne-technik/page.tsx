@@ -311,7 +311,7 @@ export default function BlogArticle() {
               </li>
             </ul>
             <p>
-              Das alles läuft für 99 Euro/Monat. Komplett. Keine Extras, keine Überraschungen.
+              Das alles läuft für 99 € netto/Monat. Komplett. Keine Extras, keine Überraschungen.
             </p>
 
             {/* FAQ */}
@@ -350,7 +350,7 @@ export default function BlogArticle() {
               </li>
               <li>
                 <strong>Alles inklusive.</strong> Hosting, Sicherheit, Updates, Support –
-                für 99 €/Monat, monatlich kündbar.
+                für 99 € netto/Monat, monatlich kündbar.
               </li>
             </ol>
 
@@ -376,7 +376,7 @@ export default function BlogArticle() {
                   margin: "0 auto 20px",
                 }}
               >
-                Kurzes Gespräch, ein paar Fotos – und in 3 Tagen bist du online. Ab 99 €/Monat,
+                Kurzes Gespräch, ein paar Fotos – und in 3 Tagen bist du online. Ab 99 € netto/Monat,
                 monatlich kündbar, kein Technikwissen nötig.
               </p>
               <Link

@@ -22,7 +22,7 @@ const faqData = [
   },
   {
     q: "Was kostet ein Profi wirklich mehr?",
-    a: "Im Abo-Modell gar nicht so viel mehr, wie viele denken. Der Neffe baut die Seite vielleicht umsonst oder für ein symbolisches Entgelt – aber dann zahlst du anderweitig: mit deiner Zeit, mit Energie für die Koordination, und irgendwann mit der Agenturrechnung für den Notfall-Neustart. Ein professionelles Abo ab 99 Euro/Monat ist oft günstiger als der Gesamtpreis der Bastellösung.",
+    a: "Im Abo-Modell gar nicht so viel mehr, wie viele denken. Der Neffe baut die Seite vielleicht umsonst oder für ein symbolisches Entgelt – aber dann zahlst du anderweitig: mit deiner Zeit, mit Energie für die Koordination, und irgendwann mit der Agenturrechnung für den Notfall-Neustart. Ein professionelles Abo ab 99 € netto/Monat ist oft günstiger als der Gesamtpreis der Bastellösung.",
   },
   {
     q: "Was wenn ich schon eine vom Bekannten habe?",
@@ -255,7 +255,7 @@ export default function BlogArticle() {
                 Professionell muss nicht teuer sein
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
-                Ab 99 Euro/Monat bekommst du eine Website, die tut, was sie soll – mit Support,
+                Ab 99 € netto/Monat bekommst du eine Website, die tut, was sie soll – mit Support,
                 der antwortet, und einem Vertrag, der schützt.
               </p>
               <Link
@@ -325,7 +325,7 @@ export default function BlogArticle() {
                 SEO, Ladezeit, Mobiloptimierung und Rechtssicherheit sind keine Extras.
               </li>
               <li>
-                <strong>Die Alternative ist erschwinglich.</strong> Ab 99 Euro/Monat bekommst
+                <strong>Die Alternative ist erschwinglich.</strong> Ab 99 € netto/Monat bekommst
                 du professionellen Support, einen Ansprechpartner und eine Website, die Ergebnisse
                 liefert – ohne Familiendrama.
               </li>
