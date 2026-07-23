@@ -6,7 +6,7 @@ import { h2Style, h3Style, ulStyle, defBox, ctaBox, thStyle, tdStyle } from "@/l
 
 export const metadata: Metadata = {
   title: "Webseite erstellen lassen Kosten 2026 – Ehrlicher Vergleich",
-  description: "Was kostet eine professionelle Webseite wirklich? Ehrlicher Vergleich: Agentur (5.000€+) vs. Abo-Modell (99€/Monat). Mit Rechner und Entscheidungshilfe.",
+  description: "Was kostet eine professionelle Webseite wirklich? Ehrlicher Vergleich: Agentur (5.000€+) vs. Abo-Modell (99 € netto/Monat). Mit Rechner und Entscheidungshilfe.",
   openGraph: {
     title: "Webseite erstellen lassen: Was kostet das wirklich?",
     description: "Ehrlicher Kostenvergleich 2026: Agentur vs. Baukasten vs. Abo-Modell. Mit konkreten Zahlen.",
@@ -16,11 +16,11 @@ export const metadata: Metadata = {
 };
 
 const faqData = [
-  { q: "Was kostet es, eine Webseite erstellen zu lassen?", a: "Eine professionelle Webseite kostet bei einer Agentur zwischen 3.000 und 15.000 Euro einmalig, bei einem Freelancer 1.000 bis 5.000 Euro. Im Abo-Modell zahlst du ab 99 Euro pro Monat ohne Einmalkosten – inklusive Design, Hosting, Pflege und Support." },
+  { q: "Was kostet es, eine Webseite erstellen zu lassen?", a: "Eine professionelle Webseite kostet bei einer Agentur zwischen 3.000 und 15.000 Euro einmalig, bei einem Freelancer 1.000 bis 5.000 Euro. Im Abo-Modell zahlst du ab 99 € netto pro Monat ohne Einmalkosten – inklusive Design, Hosting, Pflege und Support." },
   { q: "Lohnt sich ein Webseiten-Abo?", a: "Ein Webseiten-Abo lohnt sich besonders für Selbstständige und kleine Unternehmen, die kein hohes Einmal-Investment riskieren wollen. Du erhältst eine professionelle Webseite ohne Vorabkosten und kannst monatlich kündigen. Bereits ein neuer Kundenauftrag refinanziert oft das gesamte Jahresabo." },
-  { q: "Was ist im Abo-Preis von 99€/Monat enthalten?", a: "Im Abo sind enthalten: individuelles Webdesign, Entwicklung, Hosting auf deutschen Servern, SSL-Zertifikat, Domain, SEO-Grundoptimierung, DSGVO-konforme Rechtstexte, regelmäßige Updates, technische Wartung und persönlicher Support." },
+  { q: "Was ist im Abo-Preis von 99 € netto/Monat enthalten?", a: "Im Abo sind enthalten: individuelles Webdesign, Entwicklung, Hosting auf deutschen Servern, SSL-Zertifikat, Domain, SEO-Grundoptimierung, DSGVO-konforme Rechtstexte, regelmäßige Updates, technische Wartung und persönlicher Support." },
   { q: "Gehört mir die Webseite, wenn ich das Abo kündige?", a: "Im Abo-Modell mietest du die Webseite. Bei Kündigung wird die Seite deaktiviert. Deine Inhalte (Texte, Bilder) gehören dir und können exportiert werden. Das ist vergleichbar mit einem Mietvertrag für ein Büro – du nutzt es, solange du zahlst." },
-  { q: "Ist eine 99€-Webseite genauso gut wie eine für 5.000€?", a: "Ja, die Qualität ist vergleichbar. Der Unterschied liegt im Geschäftsmodell, nicht in der Qualität. Statt einer hohen Einmalzahlung verteilt das Abo-Modell die Kosten auf monatliche Raten und inkludiert gleichzeitig laufende Leistungen wie Pflege und Updates, die bei Agenturen extra kosten." },
+  { q: "Ist eine 99 € netto-Webseite genauso gut wie eine für 5.000€?", a: "Ja, die Qualität ist vergleichbar. Der Unterschied liegt im Geschäftsmodell, nicht in der Qualität. Statt einer hohen Einmalzahlung verteilt das Abo-Modell die Kosten auf monatliche Raten und inkludiert gleichzeitig laufende Leistungen wie Pflege und Updates, die bei Agenturen extra kosten." },
   { q: "Wie schnell ist meine Webseite im Abo-Modell fertig?", a: "Im Abo-Modell ist deine Webseite in der Regel innerhalb weniger Tage fertig und online. Bei klassischen Agenturen dauert ein Webprojekt oft 4 bis 12 Wochen." },
 ];
 
@@ -105,7 +105,7 @@ export default function BlogArticle() {
             {/* H2: Was kostet eine Webseite 2026? */}
             <h2 style={h2Style}>Was kostet eine professionelle Webseite 2026?</h2>
             <div style={defBox}>
-              <strong>Kurz-Antwort:</strong> Eine professionelle Business-Webseite kostet 2026 zwischen 0€ (Baukasten-Einstieg) und 20.000€+ (Agentur mit Individualentwicklung). Die meisten kleinen Unternehmen zahlen zwischen 2.500€ und 8.000€ einmalig – oder ab 99€/Monat im Abo-Modell.
+              <strong>Kurz-Antwort:</strong> Eine professionelle Business-Webseite kostet 2026 zwischen 0€ (Baukasten-Einstieg) und 20.000€+ (Agentur mit Individualentwicklung). Die meisten kleinen Unternehmen zahlen zwischen 2.500€ und 8.000€ einmalig – oder ab 99 € netto/Monat im Abo-Modell.
             </div>
             <p>
               Die Preisspanne ist riesig, weil &ldquo;Webseite&rdquo; alles bedeuten kann: von der einfachen Visitenkarte bis zum komplexen Online-Shop.
@@ -145,7 +145,7 @@ export default function BlogArticle() {
               Das Abo-Modell ist relativ neu und löst genau das Problem, das viele Selbstständige haben: Du bekommst eine Agentur-Qualität-Webseite, aber ohne das finanzielle Risiko einer hohen Vorabinvestition.
             </p>
             <ul style={ulStyle}>
-              <li><strong>Kosten:</strong> Ab 99€/Monat, alles inklusive</li>
+              <li><strong>Kosten:</strong> Ab 99 € netto/Monat, alles inklusive</li>
               <li><strong>Keine Einmalzahlung,</strong> keine versteckten Kosten</li>
               <li><strong>Fertig in wenigen Tagen</strong> statt Wochen oder Monaten</li>
               <li><strong>Pflege, Updates und Support</strong> sind im Preis enthalten</li>
@@ -166,7 +166,7 @@ export default function BlogArticle() {
                 <tbody>
                   {[
                     ["Vorabkosten", "3.000–15.000€", "0€", "0€"],
-                    ["Monatliche Kosten", "50–200€ (Hosting + Wartung)", "10–30€", "Ab 99€ (alles inkl.)"],
+                    ["Monatliche Kosten", "50–200€ (Hosting + Wartung)", "10–30€", "Ab 99 € netto (alles inkl.)"],
                     ["Design-Qualität", "Individuell, hoch", "Template-basiert", "Individuell, hoch"],
                     ["SEO-Optimierung", "Meist Aufpreis", "Eingeschränkt", "Inklusive"],
                     ["Fertigstellung", "4–12 Wochen", "Sofort (Selbstbau)", "Wenige Tage"],
@@ -187,10 +187,10 @@ export default function BlogArticle() {
               </table>
             </div>
 
-            {/* H2: Warum 99€ nicht billig bedeutet */}
-            <h2 style={h2Style}>Warum 99€/Monat nicht bedeutet, dass die Qualität schlechter ist</h2>
+            {/* H2: Warum 99 € netto nicht billig bedeutet */}
+            <h2 style={h2Style}>Warum 99 € netto/Monat nicht bedeutet, dass die Qualität schlechter ist</h2>
             <p>
-              Das ist die häufigste Frage – und die berechtigtste. Wenn Agenturen 5.000€ verlangen, warum geht es bei uns für 99€/Monat?
+              Das ist die häufigste Frage – und die berechtigtste. Wenn Agenturen 5.000€ verlangen, warum geht es bei uns für 99 € netto/Monat?
             </p>
             <p>
               Die Antwort ist simpel: <strong>Es ist ein anderes Geschäftsmodell, nicht eine schlechtere Leistung.</strong>
@@ -264,7 +264,7 @@ export default function BlogArticle() {
               Über seine neue Webseite bekommt er 3 Anfragen pro Monat, wovon er eine in einen Auftrag umwandelt.
             </p>
             <p>
-              Das bedeutet: <strong>2.500€ Mehrumsatz pro Monat – bei 99€ Investition.</strong> Ein ROI von 25x. Und das ist konservativ gerechnet.
+              Das bedeutet: <strong>2.500€ Mehrumsatz pro Monat – bei 99 € netto Investition.</strong> Ein ROI von 25x. Und das ist konservativ gerechnet.
             </p>
             <p>
               <Link href="/#rechner" style={{ color: "var(--blue)", fontWeight: 600 }}>
@@ -287,10 +287,10 @@ export default function BlogArticle() {
             <h2 style={h2Style}>Fazit: Was du jetzt wissen musst</h2>
             <ol style={{ ...ulStyle, paddingLeft: 24 }}>
               <li style={{ marginBottom: 12 }}>
-                <strong>Eine professionelle Webseite muss 2026 nicht mehr tausende Euro kosten.</strong> Das Abo-Modell macht Agentur-Qualität für 99€/Monat zugänglich – ohne Risiko, ohne Vorabkosten.
+                <strong>Eine professionelle Webseite muss 2026 nicht mehr tausende Euro kosten.</strong> Das Abo-Modell macht Agentur-Qualität für 99 € netto/Monat zugänglich – ohne Risiko, ohne Vorabkosten.
               </li>
               <li style={{ marginBottom: 12 }}>
-                <strong>Die Qualität hängt nicht vom Preismodell ab,</strong> sondern vom Anbieter. 99€/Monat ist kein &ldquo;Billig-Angebot&rdquo; – es ist ein anderes Geschäftsmodell.
+                <strong>Die Qualität hängt nicht vom Preismodell ab,</strong> sondern vom Anbieter. 99 € netto/Monat ist kein &ldquo;Billig-Angebot&rdquo; – es ist ein anderes Geschäftsmodell.
               </li>
               <li>
                 <strong>Eine Webseite ist keine Ausgabe, sondern eine Investition.</strong> Bereits ein einziger neuer Kundenauftrag über deine Webseite refinanziert oft das gesamte Jahresabo.

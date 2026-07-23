@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const faqData = [
   {
     q: "Lohnt sich eine Website noch, wenn ich in ein paar Jahren aufhöre?",
-    a: "Ja – oft sogar besonders dann. Eine professionelle Website erhöht deinen Firmenwert beim Verkauf, bringt in den letzten Jahren bessere und zahlungskräftigere Kunden, und gibt dir mehr Kontrolle darüber, welche Aufträge du annimmst. Die Investition von 99 Euro/Monat rentiert sich in der Regel schon nach wenigen Wochen.",
+    a: "Ja – oft sogar besonders dann. Eine professionelle Website erhöht deinen Firmenwert beim Verkauf, bringt in den letzten Jahren bessere und zahlungskräftigere Kunden, und gibt dir mehr Kontrolle darüber, welche Aufträge du annimmst. Die Investition von 99 € netto/Monat rentiert sich in der Regel schon nach wenigen Wochen.",
   },
   {
     q: "Hilft eine Website wirklich beim Firmenverkauf?",
@@ -220,7 +220,7 @@ export default function BlogArticle() {
             <div style={defBox}>
               <strong>Praxis-Beispiel:</strong> Ein Klempner aus dem Raum Dortmund,
               57 Jahre alt, wollte in fünf Jahren das Geschäft übergeben. Er ließ eine
-              professionelle Website erstellen – 99 Euro/Monat. Zwei Jahre später, beim
+              professionelle Website erstellen – 99 € netto/Monat. Zwei Jahre später, beim
               Gespräch mit einem möglichen Käufer, kam der Website-Traffic als konkreter
               Punkt auf den Tisch: 40–60 Anfragen pro Monat, davon 15–20 Abschlüsse.
               Das Ergebnis: Der Käufer zahlte 15.000 Euro mehr als ursprünglich verhandelt,
@@ -282,7 +282,7 @@ export default function BlogArticle() {
               verständlicher Einwand. Und genau deshalb ist das Abo-Modell ideal.
             </p>
             <p>
-              Ab 99 Euro/Monat, monatlich kündbar. Kein Jahresvertrag, keine Mindestlaufzeit.
+              Ab 99 € netto/Monat, monatlich kündbar. Kein Jahresvertrag, keine Mindestlaufzeit.
               Du kannst morgen kündigen, wenn du das Geschäft übergibst – und bis dahin
               profitierst du von mehr Anfragen, besseren Kunden und einem höheren Unternehmenswert.
               Das ist kein Risiko. Das ist eine monatliche Option, die du ziehen kannst.
@@ -323,7 +323,7 @@ export default function BlogArticle() {
                 zum Nachfolger – er startet mit Rückenwind.
               </li>
               <li>
-                <strong>Kein Risiko, keine Bindung.</strong> Monatlich kündbar, 99 €/Monat.
+                <strong>Kein Risiko, keine Bindung.</strong> Monatlich kündbar, 99 € netto/Monat.
                 Kündige, wenn du aufhörst – vorher profitierst du.
               </li>
             </ol>
@@ -351,7 +351,7 @@ export default function BlogArticle() {
                 }}
               >
                 Wir zeigen dir kostenlos, wie deine Website aussehen könnte. Monatlich kündbar,
-                ab 99 €/Monat, kein Technikwissen nötig.
+                ab 99 € netto/Monat, kein Technikwissen nötig.
               </p>
               <Link
                 href="/entwurf"

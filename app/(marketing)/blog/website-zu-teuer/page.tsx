@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 const faqData = [
   {
     q: "Was kostet eine Website wirklich?",
-    a: "Das kommt auf den Weg an. Eine Agentur berechnet für eine professionelle Website zwischen 3.000 und 8.000 Euro einmalig – plus 50 bis 150 Euro/Monat für Wartung und Hosting. Im Abo-Modell bekommst du die gleiche Qualität ab 99 Euro/Monat ohne Einmalkosten.",
+    a: "Das kommt auf den Weg an. Eine Agentur berechnet für eine professionelle Website zwischen 3.000 und 8.000 Euro einmalig – plus 50 bis 150 Euro/Monat für Wartung und Hosting. Im Abo-Modell bekommst du die gleiche Qualität ab 99 € netto/Monat ohne Einmalkosten.",
   },
   {
     q: "Gibt es versteckte Kosten beim Abo?",
@@ -194,7 +194,7 @@ export default function BlogArticle() {
                 Wartung. Hohes Risiko, lange Vorlaufzeit, kein Ergebnis garantiert.
               </li>
               <li>
-                <strong>Abo-Modell:</strong> Ab 99 Euro/Monat, alles inklusive – Design, Hosting,
+                <strong>Abo-Modell:</strong> Ab 99 € netto/Monat, alles inklusive – Design, Hosting,
                 Pflege, Support. Kein Risiko, kein Technikwissen nötig.
               </li>
             </ul>
@@ -207,11 +207,11 @@ export default function BlogArticle() {
             {/* H2: ROI */}
             <h2 style={h2Style}>Die ehrliche ROI-Rechnung</h2>
             <p>
-              99 Euro im Monat klingen nach einer festen Ausgabe. Aber stell dir die Frage anders:
+              99 € netto im Monat klingen nach einer festen Ausgabe. Aber stell dir die Frage anders:
               Wie viel Umsatz muss die Website bringen, damit sie sich rechnet?
             </p>
 
-            <h3 style={h3Style}>Beispiel: Elektriker, 99 Euro/Monat</h3>
+            <h3 style={h3Style}>Beispiel: Elektriker, 99 € netto/Monat</h3>
             <p>
               Ein typischer Auftrag für einen Elektriker – Unterverteilung tauschen, Steckdosen
               installieren, Beleuchtung nachrüsten – liegt zwischen 600 und 1.400 Euro.
@@ -224,7 +224,7 @@ export default function BlogArticle() {
 
             <div style={defBox}>
               <strong>Praxis-Beispiel:</strong> Ein Elektriker aus dem Raum Stuttgart zahlt
-              99 Euro/Monat für seine Website. Im ersten Monat nach Launch kamen 3 Anfragen über
+              99 € netto/Monat für seine Website. Im ersten Monat nach Launch kamen 3 Anfragen über
               das Kontaktformular – alle wurden zu Aufträgen. Gesamtumsatz: 4.200 Euro.
               Der ROI im ersten Monat: über 4.100 %.
             </div>
@@ -260,7 +260,7 @@ export default function BlogArticle() {
                   fontVariationSettings: '"opsz" 24, "SOFT" 50',
                 }}
               >
-                Kostet 99 €/Monat – bringt ab dem ersten Kunden mehr zurück
+                Kostet 99 € netto/Monat – bringt ab dem ersten Kunden mehr zurück
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
                 Zeig uns dein Gewerk, wir zeigen dir, wie deine Website aussehen könnte. Kostenlos
@@ -295,7 +295,7 @@ export default function BlogArticle() {
                 schaut dort nach
               </li>
               <li>
-                <strong>Website im Abo:</strong> 99 Euro/Monat, 24/7 sichtbar, wächst mit
+                <strong>Website im Abo:</strong> 99 € netto/Monat, 24/7 sichtbar, wächst mit
                 der Zeit, bringt auch nach Jahren noch Anfragen
               </li>
             </ul>
@@ -328,7 +328,7 @@ export default function BlogArticle() {
             <h2 style={h2Style}>Fazit: Nicht zu teuer – falscher Vergleich</h2>
             <ol style={{ ...ulStyle, paddingLeft: 24 }}>
               <li style={{ marginBottom: 12 }}>
-                <strong>99 Euro/Monat sind kein Kostenpunkt, sondern ein Investment.</strong>{" "}
+                <strong>99 € netto/Monat sind kein Kostenpunkt, sondern ein Investment.</strong>{" "}
                 Ein einziger Neukunde reicht, um das Abo für viele Monate zu finanzieren.
               </li>
               <li style={{ marginBottom: 12 }}>

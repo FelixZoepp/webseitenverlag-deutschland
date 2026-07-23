@@ -17,7 +17,7 @@ const plans = [
   },
   {
     name: "Business",
-    price: "149",
+    price: "169",
     desc: "Für Unternehmen, die mehr Sichtbarkeit wollen.",
     features: [
       "Bis zu 5 Unterseiten",
@@ -92,7 +92,7 @@ export default function Pricing() {
               <div className="mb-8 flex items-baseline gap-1">
                 <span className="text-5xl font-bold tracking-tighter">{plan.price}</span>
                 <span className={`text-lg ${plan.highlight ? "text-white/60" : "text-[var(--ink-soft)]"}`}>
-                  &euro;/Monat
+                  &euro; netto/Monat
                 </span>
               </div>
 

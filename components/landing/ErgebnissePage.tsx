@@ -16,7 +16,7 @@ const CASES = [
   {
     name: "Elektro Schuster",
     branche: "Elektroinstallation, Düsseldorf",
-    quote: "Als Einzelunternehmer hatte ich nie Zeit, mich um eine Webseite zu kümmern. Die 99€ im Monat waren mein Testlauf. Nach dem ersten Monat kamen 5 neue Anfragen pro Woche. Das hat sich 50-fach bezahlt gemacht.",
+    quote: "Als Einzelunternehmer hatte ich nie Zeit, mich um eine Webseite zu kümmern. Die 99 € netto im Monat waren mein Testlauf. Nach dem ersten Monat kamen 5 neue Anfragen pro Woche. Das hat sich 50-fach bezahlt gemacht.",
     results: [
       { label: "Neue Anfragen/Woche", before: "0", after: "5+" },
       { label: "Umsatzsteigerung", before: "—", after: "+40%" },
@@ -26,7 +26,7 @@ const CASES = [
   {
     name: "Praxis Dr. Weber",
     branche: "Physiotherapie, Hamburg",
-    quote: "Ich hatte Angst vor den Kosten einer professionellen Webseite. 99€ im Monat war für mich der perfekte Einstieg. Nach 4 Wochen war mein Kalender voller als je zuvor. Jetzt haben wir eine Warteliste.",
+    quote: "Ich hatte Angst vor den Kosten einer professionellen Webseite. 99 € netto im Monat war für mich der perfekte Einstieg. Nach 4 Wochen war mein Kalender voller als je zuvor. Jetzt haben wir eine Warteliste.",
     results: [
       { label: "Terminbuchungen/Woche", before: "3–4", after: "12–15" },
       { label: "Auslastung", before: "65%", after: "100% + Warteliste" },
@@ -56,7 +56,7 @@ const CASES = [
   {
     name: "Coaching Sabine Lang",
     branche: "Business Coaching, Frankfurt",
-    quote: "Ich hatte 3 Angebote von Agenturen – alle über 4.000€. Als Einzelunternehmerin war das einfach zu viel Risiko. Mit 99€/Monat konnte ich es ausprobieren. Heute kommen 60% meiner Klienten über meine Webseite.",
+    quote: "Ich hatte 3 Angebote von Agenturen – alle über 4.000€. Als Einzelunternehmerin war das einfach zu viel Risiko. Mit 99 € netto/Monat konnte ich es ausprobieren. Heute kommen 60% meiner Klienten über meine Webseite.",
     results: [
       { label: "Klienten über Website", before: "0%", after: "60%" },
       { label: "Sichtbarkeit", before: "Nur Social Media", after: "Google + Social" },

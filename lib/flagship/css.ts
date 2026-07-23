@@ -145,6 +145,8 @@ nav.scrolled~header .scroll-hint,nav.scrolled~.hero .scroll-hint{opacity:0}
 /* Video-Hero (Growth-Level) */
 .vhero{position:relative;min-height:100vh;display:flex;align-items:center;padding:150px 0 100px;overflow:hidden}
 .vhero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.vhero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;animation:kenburns 20s ease-in-out infinite alternate}
+@keyframes kenburns{0%{transform:scale(1)}100%{transform:scale(1.06)}}
 .vshade{position:absolute;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(90deg,var(--basis) 0%,rgba(${rgb(t.basis)},.95) 30%,rgba(${rgb(t.basis)},.7) 50%,rgba(${rgb(t.basis)},.15) 70%,rgba(${rgb(t.basis)},0) 85%)}
 .vshade::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(${rgb(t.basis)},.6),transparent 25%,transparent 75%,rgba(${rgb(t.basis)},.4))}
@@ -157,6 +159,7 @@ nav.scrolled~header .scroll-hint,nav.scrolled~.hero .scroll-hint{opacity:0}
 }
 @media(prefers-reduced-motion:reduce){
   .vhero video{display:none}
+  .vhero-img{animation:none}
 }
 .vplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;background:var(--ak1);border:none;cursor:pointer;display:grid;place-items:center;z-index:3;box-shadow:0 0 0 0 rgba(${rgb(t.akzent1)},.5);animation:vglow 2.5s ease-in-out infinite;transition:opacity .5s,transform .3s var(--spring,ease)}
 .vplay:hover{transform:translate(-50%,-50%) scale(1.1)}

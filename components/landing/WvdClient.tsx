@@ -241,7 +241,7 @@ export default function WvdClient() {
           </h1>
           <p className="hero-lead">
             Professionelle Webseite erstellen lassen – ohne tausende Euro vorab.
-            <strong> Ab 99 €/Monat, komplett fertig in wenigen Tagen.</strong>{" "}
+            <strong> Ab 99 € netto/Monat, komplett fertig in wenigen Tagen.</strong>{" "}
             Design, Hosting, SEO und Support inklusive. Damit du online gefunden wirst und neue Kunden gewinnst.
           </p>
           <div className="cta-row">
@@ -370,7 +370,7 @@ export default function WvdClient() {
               sie dazu zwingt, tausende Euro zu riskieren, bevor ein einziger Kunde anfragt.</strong>
             </p>
             <p>
-              Deshalb haben wir das Modell umgedreht: <strong>Du zahlst 99€ im Monat. Wir liefern alles.</strong>
+              Deshalb haben wir das Modell umgedreht: <strong>Du zahlst 99 € netto im Monat. Wir liefern alles.</strong>
               Design, Technik, Hosting, Google-Optimierung, Updates, Support.
               Kein Einmal-Invest. Kein Risiko. Du kannst jederzeit kündigen.
             </p>
@@ -524,7 +524,7 @@ export default function WvdClient() {
                   <span>Support <em>✓</em></span>
                 </div>
                 <div className="fb-price-row">
-                  <span className="fb-price">99 €/Monat</span>
+                  <span className="fb-price">99 € netto/Monat</span>
                   <span className="fb-dsgvo">DSGVO</span>
                 </div>
               </div>
@@ -722,7 +722,7 @@ export default function WvdClient() {
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
                     <span style={{ color: "var(--text-secondary)", fontSize: 14 }}>Deine Investition:</span>
-                    <span style={{ fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 24, color: "var(--text-primary)" }}>99€<span style={{ fontSize: 14, fontWeight: 400 }}>/Monat</span></span>
+                    <span style={{ fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 24, color: "var(--text-primary)" }}>99 € netto<span style={{ fontSize: 14, fontWeight: 400 }}>/Monat</span></span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
                     <span style={{ color: "var(--text-secondary)", fontSize: 14 }}>Potentieller Mehrumsatz:</span>
@@ -766,7 +766,7 @@ export default function WvdClient() {
               {/* CTA */}
               <div style={{ textAlign: "center" }}>
                 <p style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.01em", color: "var(--text-primary)", marginBottom: 24 }}>
-                  {roi.gewinn.toLocaleString("de-DE")}€ mehr Gewinn pro Monat – für 99€ Einsatz.
+                  {roi.gewinn.toLocaleString("de-DE")} € mehr Gewinn pro Monat – für 99 € netto Einsatz.
                 </p>
                 <a href="/entwurf" className="btn btn-primary" style={{ fontSize: 17, padding: "20px 44px" }}>
                   <span>Diese Zahlen für mich realistisch machen →</span>
@@ -929,7 +929,7 @@ export default function WvdClient() {
                   "Deine Webseite ist live und wird bei Google gefunden",
                   "Die ersten Anfragen kommen – ohne dass du etwas tust",
                   "Du wirkst professionell und baust Vertrauen auf, bevor der Kunde anruft",
-                  "99€/Monat, die sich mit dem ersten Auftrag vielfach bezahlt machen",
+                  "99 € netto/Monat, die sich mit dem ersten Auftrag vielfach bezahlt machen",
                 ].map((item, i) => (
                   <li key={i} style={{ display: "flex", gap: 10, fontSize: 15, lineHeight: 1.5, color: "var(--text-secondary)" }}>
                     <span style={{ color: "var(--green-500)", flexShrink: 0 }}>✓</span> {item}
@@ -952,7 +952,7 @@ export default function WvdClient() {
             <h2 className="display">Häufig <span className="accent">gefragt</span>.</h2>
           </div>
           {[
-            { q: "99€/Monat – was ist da alles drin?", a: "Alles. Design, Entwicklung, Hosting, Domain, SSL, Google-Optimierung (SEO), DSGVO-konforme Rechtstexte, Updates, Wartung und persönlicher Support. Es gibt keine versteckten Kosten." },
+            { q: "99 € netto/Monat – was ist da alles drin?", a: "Alles. Design, Entwicklung, Hosting, Domain, SSL, Google-Optimierung (SEO), DSGVO-konforme Rechtstexte, Updates, Wartung und persönlicher Support. Es gibt keine versteckten Kosten." },
             { q: "Wie schnell ist meine Webseite online?", a: "In der Regel innerhalb weniger Tage nach unserem Erstgespräch. Bei umfangreicheren Projekten kann es etwas länger dauern – darüber sprechen wir im Gespräch." },
             { q: "Muss ich mich um irgendwas Technisches kümmern?", a: "Nein. Wir kümmern uns um alles – von der Domain-Registrierung über die Technik bis zu Updates. Du musst nichts installieren, konfigurieren oder updaten." },
             { q: "Was, wenn ich nach 2 Monaten kündigen will?", a: "Kein Problem. Du kannst monatlich kündigen, keine Mindestlaufzeit. Wir sind überzeugt, dass du bleibst, weil du zufrieden bist – nicht weil du musst." },
@@ -1008,7 +1008,7 @@ export default function WvdClient() {
               <a href="#" className="logo">
                 <Image src="/logo.svg" alt="Webseiten-Verlag Deutschland" width={32} height={32} />Webseiten-Verlag <span>Deutschland</span>
               </a>
-              <p>Professionelle Webseiten ab 99&thinsp;€/Monat. Keine Startgebühr. In wenigen Tagen online.</p>
+              <p>Professionelle Webseiten ab 99&thinsp;€ netto/Monat. Keine Startgebühr. In wenigen Tagen online.</p>
             </div>
             <div className="footer-col">
               <h4>Seiten</h4>

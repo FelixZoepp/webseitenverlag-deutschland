@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 const faqData = [
-  { q: "Was bedeutet 'Website mieten'?", a: "Beim Mieten zahlst du einen monatlichen Festbetrag (z. B. 99 Euro/Monat) und erhältst dafür eine professionelle Website inklusive Design, Hosting, Pflege, Updates und Support. Du zahlst keine Einmalgebühr. Bei Kündigung wird die Seite deaktiviert, deine Inhalte kannst du exportieren." },
+  { q: "Was bedeutet 'Website mieten'?", a: "Beim Mieten zahlst du einen monatlichen Festbetrag (z. B. 99 € netto/Monat) und erhältst dafür eine professionelle Website inklusive Design, Hosting, Pflege, Updates und Support. Du zahlst keine Einmalgebühr. Bei Kündigung wird die Seite deaktiviert, deine Inhalte kannst du exportieren." },
   { q: "Ab wann lohnt sich Mieten mehr als Kaufen?", a: "Finanziell lohnt sich Mieten besonders in den ersten 3 bis 5 Jahren. Bei einer Agentur-Website für 5.000 Euro plus 100 Euro monatliche Wartung zahlst du im ersten Jahr 6.200 Euro. Im Abo-Modell zahlst du 1.188 Euro – eine Ersparnis von über 5.000 Euro. Der Break-even liegt typischerweise erst nach 4 bis 6 Jahren." },
   { q: "Gehört mir die Website im Abo-Modell?", a: "Nein, die Website gehört dir nicht – vergleichbar mit einem Leasing-Auto. Deine Inhalte (Texte, Bilder) gehören dir und können exportiert werden. Der Vorteil: Du musst dich um nichts kümmern – Technik, Updates und Sicherheit sind im Preis enthalten." },
   { q: "Kann ich eine gemietete Website jederzeit kündigen?", a: "Ja, seriöse Anbieter ermöglichen eine monatliche Kündigung. Es gibt keine langfristige Vertragsbindung. Das minimiert dein finanzielles Risiko – wenn es nicht passt, steigst du einfach aus." },
@@ -104,7 +104,7 @@ export default function BlogArticle() {
               <strong>Website kaufen:</strong> Du zahlst einmalig 3.000 bis 15.000 Euro an eine Agentur oder einen Freelancer. Die Website gehört dir. Du bist danach selbst für Hosting, Wartung, Updates und Sicherheit verantwortlich – oder zahlst extra dafür.
             </div>
             <div style={defBox}>
-              <strong>Website mieten (Abo-Modell):</strong> Du zahlst einen monatlichen Festbetrag (ab 99 Euro/Monat). Im Preis enthalten sind Design, Entwicklung, Hosting, Pflege, Updates und Support. Keine Einmalzahlung, monatlich kündbar.
+              <strong>Website mieten (Abo-Modell):</strong> Du zahlst einen monatlichen Festbetrag (ab 99 € netto/Monat). Im Preis enthalten sind Design, Entwicklung, Hosting, Pflege, Updates und Support. Keine Einmalzahlung, monatlich kündbar.
             </div>
             <p>
               Der Unterschied liegt nicht in der Qualität, sondern im Geschäftsmodell. Denk an den Unterschied zwischen einem Eigenheim und einer Mietwohnung – oder zwischen Auto kaufen und leasen.
@@ -128,7 +128,7 @@ export default function BlogArticle() {
             <h3 style={h3Style}>Variante B: Website mieten (Abo-Modell)</h3>
             <ul style={ulStyle}>
               <li><strong>Einmalkosten:</strong> 0 Euro</li>
-              <li><strong>Monatlicher Beitrag:</strong> 99 Euro/Monat = 1.188 Euro/Jahr</li>
+              <li><strong>Monatlicher Beitrag:</strong> 99 € netto/Monat = 1.188 Euro/Jahr</li>
               <li><strong>Hosting, Wartung, Support:</strong> Im Preis enthalten</li>
               <li><strong>Gesamtkosten Jahr 1:</strong> 1.188 Euro</li>
               <li><strong>Gesamtkosten 3 Jahre:</strong> 3.564 Euro</li>
@@ -148,7 +148,7 @@ export default function BlogArticle() {
                 <tbody>
                   {[
                     ["Vorabkosten", "3.000–15.000 Euro", "0 Euro"],
-                    ["Monatliche Kosten", "50–200 Euro (Hosting + Wartung)", "Ab 99 Euro (alles inkl.)"],
+                    ["Monatliche Kosten", "50–200 Euro (Hosting + Wartung)", "Ab 99 € netto (alles inkl.)"],
                     ["Kosten Jahr 1", "5.000–16.000 Euro", "1.188 Euro"],
                     ["Kosten 3 Jahre", "8.000–22.000 Euro", "3.564 Euro"],
                     ["Eigentum", "Ja, die Website gehört dir", "Nein, du mietest sie"],
@@ -175,7 +175,7 @@ export default function BlogArticle() {
               Die ehrliche Antwort: Rein finanziell lohnt sich Kaufen erst nach vielen Jahren – und nur unter bestimmten Voraussetzungen.
             </p>
             <p>
-              Rechnen wir es durch: Eine Agentur-Website kostet 5.000 Euro einmalig plus 100 Euro/Monat Wartung. Das Abo kostet 99 Euro/Monat. Der finanzielle Break-even – also der Punkt, ab dem Kaufen günstiger wird – liegt bei etwa <strong>5 Jahren</strong>.
+              Rechnen wir es durch: Eine Agentur-Website kostet 5.000 Euro einmalig plus 100 Euro/Monat Wartung. Das Abo kostet 99 € netto/Monat. Der finanzielle Break-even – also der Punkt, ab dem Kaufen günstiger wird – liegt bei etwa <strong>5 Jahren</strong>.
             </p>
             <p>
               Aber: Nach 3 bis 4 Jahren ist eine Website technisch und optisch veraltet und braucht ein Redesign. Dann startet der Zyklus von vorn. In der Praxis erreichst du den Break-even beim Kaufen also selten.
@@ -190,7 +190,7 @@ export default function BlogArticle() {
                 Lieber mieten statt kaufen?
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
-                Professionelle Website ab 99 Euro/Monat. Ohne Vorabkosten, ohne Risiko, monatlich kündbar.
+                Professionelle Website ab 99 € netto/Monat. Ohne Vorabkosten, ohne Risiko, monatlich kündbar.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "14px 32px", fontSize: 15 }}>
                 <span>Kostenloses Erstgespräch buchen →</span>

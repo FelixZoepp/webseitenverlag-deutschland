@@ -86,14 +86,17 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
 </header>`
   }
 
-  // Standard: statischer Bild-Hero
+  // Standard: Fullscreen-Bild-Hero (statisches Hintergrundbild wie Video-Hero)
+  const poster = hero.media.datei || ''
   return `<!-- sektion:hero -->
-<header class="hero" id="top">
-  <div class="wrap">
-    <div class="rv in">
+<header class="vhero" id="top">
+  ${poster ? `<img class="vhero-img" src="${escAttr(poster)}" alt="${escAttr(hero.media.alt || hero.media.label)}" loading="eager">` : ''}
+  <div class="vshade"></div>
+  <div class="wrap vinner">
+    <div class="rv in" style="max-width:640px">
       <span class="eyebrow">${esc(hero.eyebrow)}</span>
       <h1>${headline}</h1>
-      <p class="lead">${esc(hero.lead)}</p>
+      <p class="lead" style="margin:24px 0 36px">${esc(hero.lead)}</p>
       <div class="cta-row">
         <a class="${ctaKlasse}" href="${escAttr(funnelUrl)}">${esc(hero.cta_label)} <span class="arr">→</span></a>${sekundaer}
       </div>
@@ -101,12 +104,8 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
         ${chips}
       </div>
     </div>
-    <div class="hero-media rv in" style="--i:1">
-      ${mediaSlot(hero.media, 'frame')}
-      <div class="stat-card sc1"><b>${esc(hero.stat1.wert)}</b><small>${esc(hero.stat1.label)}</small></div>
-      <div class="stat-card sc2"><b>${esc(hero.stat2.wert)}</b><small>${esc(hero.stat2.label)}</small></div>
-    </div>
   </div>
+  <div class="stat-card vcard"><b>${esc(hero.stat2.wert)}</b><small>${esc(hero.stat2.label)}</small></div>
   <div class="scroll-hint">Entdecken <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg></div>
 </header>`
 }

@@ -245,7 +245,7 @@ export default function BlogArticle() {
                   fontVariationSettings: '"opsz" 24, "SOFT" 50',
                 }}
               >
-                Dein eigenes Fundament – ab 99 €/Monat
+                Dein eigenes Fundament – ab 99 € netto/Monat
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
                 Eine Website, die dir gehört und rund um die Uhr Anfragen sammelt. Zeig uns dein
@@ -324,7 +324,7 @@ export default function BlogArticle() {
               </li>
               <li>
                 <strong>Beides zusammen ist unschlagbar.</strong> Social Media bringt Sichtbarkeit,
-                deine Website bringt Anfragen – und ab 99 Euro/Monat kostet das Fundament weniger,
+                deine Website bringt Anfragen – und ab 99 € netto/Monat kostet das Fundament weniger,
                 als du denkst.
               </li>
             </ol>

@@ -24,7 +24,7 @@ const faqData = [
   },
   {
     q: "Was kostet eine professionelle Website im Vergleich zum Baukasten?",
-    a: "Ein Baukasten kostet 15–30 Euro/Monat, dazu kommen oft Extras für eigene Domain, E-Mail oder mehr Speicher. Eine professionelle Website im Abo gibt es ab 99 Euro/Monat – inklusive Design, Hosting, Pflege und Support. Der Unterschied: Beim Baukasten investierst du zusätzlich viele Stunden deiner eigenen Zeit. Bei der Profi-Website nicht.",
+    a: "Ein Baukasten kostet 15–30 Euro/Monat, dazu kommen oft Extras für eigene Domain, E-Mail oder mehr Speicher. Eine professionelle Website im Abo gibt es ab 99 € netto/Monat – inklusive Design, Hosting, Pflege und Support. Der Unterschied: Beim Baukasten investierst du zusätzlich viele Stunden deiner eigenen Zeit. Bei der Profi-Website nicht.",
   },
   {
     q: "Kann ich von Wix oder Jimdo zu einer professionellen Website wechseln?",
@@ -208,7 +208,7 @@ export default function BlogArticle() {
                     ["Core Web Vitals", "Oft mangelhaft", "Optimiert"],
                     ["Support", "Helpdesk / Community", "Persönlicher Ansprechpartner"],
                     ["Pflege", "Selbst erledigen", "Im Preis enthalten"],
-                    ["Monatliche Kosten", "15–30 € + Extras", "Ab 99 € all-inclusive"],
+                    ["Monatliche Kosten", "15–30 € + Extras", "Ab 99 € netto all-inclusive"],
                     ["Zeitaufwand für dich", "Hoch (Stunden/Monat)", "Minimal"],
                     ["Geeignet für", "Hobby, Landingpage", "Gewerbe, Kundengewinnung"],
                   ].map(([k, b, p], i) => (
@@ -332,7 +332,7 @@ export default function BlogArticle() {
               </li>
             </ul>
             <p>
-              Wenn du das alles addierst, ist der Preisunterschied zu 99 Euro/Monat für eine
+              Wenn du das alles addierst, ist der Preisunterschied zu 99 € netto/Monat für eine
               professionelle Website oft kleiner als gedacht – und der Qualitätsunterschied riesig.
             </p>
 
@@ -401,7 +401,7 @@ export default function BlogArticle() {
                 }}
               >
                 Wir zeigen dir in 15 Minuten, wie deine professionelle Website aussehen könnte.
-                Ab 99 €/Monat, monatlich kündbar, kein Technikwissen nötig.
+                Ab 99 € netto/Monat, monatlich kündbar, kein Technikwissen nötig.
               </p>
               <Link
                 href="/entwurf"

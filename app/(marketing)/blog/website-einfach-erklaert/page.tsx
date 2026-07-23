@@ -259,7 +259,7 @@ export default function BlogArticle() {
                 Wir kümmern uns um alles – du konzentrierst dich aufs Handwerk
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
-                Kein Technikwissen nötig. Ab 99 €/Monat, alles inklusive. Zeig uns, was du machst.
+                Kein Technikwissen nötig. Ab 99 € netto/Monat, alles inklusive. Zeig uns, was du machst.
               </p>
               <Link
                 href="/entwurf"
@@ -327,7 +327,7 @@ export default function BlogArticle() {
                 Technik-Stress, ohne Software zu lernen.
               </li>
               <li>
-                <strong>Ab 99 Euro/Monat ist alles inklusive.</strong> Kein Vorschuss, keine
+                <strong>Ab 99 € netto/Monat ist alles inklusive.</strong> Kein Vorschuss, keine
                 Einmalzahlung, keine versteckten Kosten.
               </li>
             </ol>

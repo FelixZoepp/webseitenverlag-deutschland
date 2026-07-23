@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 const faqData = [
   { q: "Brauche ich als Handwerker wirklich eine eigene Website?", a: "Ja. Über 80 % der Kunden suchen heute online nach Handwerkern in ihrer Region. Ohne Website bist du für diese Kunden unsichtbar – selbst wenn du über Empfehlungen gut ausgelastet bist. Eine Website sichert dir langfristig einen stabilen Auftragseingang." },
-  { q: "Was kostet eine Website für Handwerker?", a: "Eine professionelle Handwerker-Website kostet bei einer Agentur zwischen 3.000 und 8.000 Euro einmalig. Im Abo-Modell bekommst du eine gleichwertige Seite ab 99 Euro pro Monat – ohne Einmalkosten, inklusive Hosting, Pflege und Support." },
+  { q: "Was kostet eine Website für Handwerker?", a: "Eine professionelle Handwerker-Website kostet bei einer Agentur zwischen 3.000 und 8.000 Euro einmalig. Im Abo-Modell bekommst du eine gleichwertige Seite ab 99 € netto pro Monat – ohne Einmalkosten, inklusive Hosting, Pflege und Support." },
   { q: "Was muss auf einer Handwerker-Website stehen?", a: "Die wichtigsten Elemente sind: deine Leistungen mit konkreten Beschreibungen, dein Einsatzgebiet, Referenzfotos von abgeschlossenen Projekten, Kundenbewertungen, eine klare Kontaktmöglichkeit (Telefon + Formular) und ein Google-Maps-Ausschnitt mit deinem Standort." },
   { q: "Wie werde ich als Handwerker bei Google gefunden?", a: "Drei Schritte: Erstens ein Google Unternehmensprofil anlegen und pflegen. Zweitens eine Website mit lokalen Keywords wie 'Elektriker München' oder 'Dachdecker Köln'. Drittens regelmäßig Google-Bewertungen von zufriedenen Kunden sammeln." },
   { q: "Wie schnell bekomme ich über eine Website neue Aufträge?", a: "Die ersten Anfragen kommen oft innerhalb von 2 bis 4 Wochen nach dem Launch, wenn die Seite suchmaschinenoptimiert ist. Nach 3 bis 6 Monaten steigt die Sichtbarkeit bei Google deutlich und die Anfragen werden regelmäßiger." },
@@ -202,7 +202,7 @@ export default function BlogArticle() {
                 Website für deinen Handwerksbetrieb?
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
-                Professionelle Handwerker-Website ab 99 Euro/Monat. Ohne Einmalkosten, fertig in wenigen Tagen.
+                Professionelle Handwerker-Website ab 99 € netto/Monat. Ohne Einmalkosten, fertig in wenigen Tagen.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "14px 32px", fontSize: 15 }}>
                 <span>Kostenloses Erstgespräch buchen →</span>
@@ -217,7 +217,7 @@ export default function BlogArticle() {
             <ul style={ulStyle}>
               <li><strong>Selbst bauen (Baukasten):</strong> 10–30 Euro/Monat, aber viel eigene Zeit und oft unprofessionelles Ergebnis</li>
               <li><strong>Agentur beauftragen:</strong> 3.000–8.000 Euro einmalig, plus 50–150 Euro/Monat für Wartung</li>
-              <li><strong>Abo-Modell:</strong> Ab 99 Euro/Monat, alles inklusive – Design, Hosting, Pflege, Support. Keine Vorabkosten</li>
+              <li><strong>Abo-Modell:</strong> Ab 99 € netto/Monat, alles inklusive – Design, Hosting, Pflege, Support. Keine Vorabkosten</li>
             </ul>
             <p>
               Für die meisten Handwerksbetriebe ist das Abo-Modell der sinnvollste Weg: Du bekommst Agentur-Qualität, ohne tausende Euro zu riskieren. Und wenn es nicht passt, kündigst du einfach.
@@ -244,7 +244,7 @@ export default function BlogArticle() {
                 <strong>Deine Kunden suchen online.</strong> Wer bei Google nicht sichtbar ist, verliert jeden Tag potenzielle Aufträge an die Konkurrenz.
               </li>
               <li>
-                <strong>Es muss nicht teuer sein.</strong> Mit dem Abo-Modell bekommst du eine professionelle Handwerker-Website ab 99 Euro/Monat – ohne Risiko, ohne technisches Vorwissen.
+                <strong>Es muss nicht teuer sein.</strong> Mit dem Abo-Modell bekommst du eine professionelle Handwerker-Website ab 99 € netto/Monat – ohne Risiko, ohne technisches Vorwissen.
               </li>
             </ol>
 

@@ -70,7 +70,7 @@ const FAQ_DATA = [
   { q: "Sind das echte Kunden?", a: "Ja. Alle gezeigten Personen sind echte Geschäftsführer, die unser Webseiten-Abo nutzen. Die Originalbewertungen findest du zusätzlich auch auf Trustpilot." },
   { q: "Wie lange dauert es bis zu den ersten Anfragen?", a: "Viele Kunden berichten von Anfragen schon in den ersten 1–7 Tagen nach Launch. Wie schnell es bei dir geht, hängt von Branche, Region und Wettbewerb ab – das klären wir im Erstgespräch." },
   { q: "Funktioniert das nur für Handwerk?", a: "Nein. Unsere Kunden kommen aus Handwerk, Beratung, Dienstleistung, Sachverständigenwesen und Solartechnik. Das Modell funktioniert überall, wo lokale oder Fach-Sucher nach einem Anbieter googeln." },
-  { q: "Was kostet das genau?", a: "99 € im Monat. Darin enthalten: Webdesign, Hosting, Pflege, Updates, technischer Support. Kein Einmalpreis, keine versteckten Kosten." },
+  { q: "Was kostet das genau?", a: "99 € netto im Monat. Darin enthalten: Webdesign, Hosting, Pflege, Updates, technischer Support. Kein Einmalpreis, keine versteckten Kosten." },
   { q: "Gehört mir die Webseite?", a: "Du nutzt die Webseite im Abo-Modell. Im Erstgespräch erklären wir dir transparent, wie das funktioniert und welche Optionen du hast." },
   { q: "Was ist, wenn ich keine Anfragen bekomme?", a: "Wir gestalten Webseiten so, dass sie sucherorientiert und konversionsstark sind – das ist Teil unseres Modells. Im Erstgespräch zeigen wir dir ehrlich, ob dein Markt das hergibt, bevor wir starten." },
 ];
@@ -78,7 +78,7 @@ const FAQ_DATA = [
 const SCHEMA = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Webseiten-Erstellung im Abo (99€/Monat)",
+  name: "Webseiten-Erstellung im Abo (99 € netto/Monat)",
   provider: { "@type": "Organization", name: "Webseiten-Verlag Deutschland" },
   aggregateRating: { "@type": "AggregateRating", ratingValue: "5.0", reviewCount: "17" },
   review: [
@@ -159,7 +159,7 @@ export default function KundenmeinungenPage() {
               { value: "120.000 €+", label: "Umsatz in 6 Monaten" },
               { value: "250.000 €+", label: "Auftragsvolumen im 1. Jahr" },
               { value: "10 Minuten", label: "bis zur ersten Anfrage" },
-              { value: "99 €", label: "pro Monat. Mehr nicht." },
+              { value: "99 € netto", label: "pro Monat. Mehr nicht." },
             ].map((s, i) => (
               <div key={i} style={{ padding: "36px 24px", borderRight: "1px solid var(--border)", borderBottom: "1px solid var(--border)", textAlign: "center" }}>
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "clamp(24px, 3vw, 36px)", color: "var(--blue)", lineHeight: 1, marginBottom: 8, letterSpacing: "-0.04em", fontVariationSettings: '"opsz" 144, "SOFT" 100' }}>

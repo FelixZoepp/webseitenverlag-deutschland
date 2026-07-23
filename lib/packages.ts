@@ -47,7 +47,7 @@ export const PACKAGES: PackageDefinition[] = [
     id: 'business',
     name: 'Business',
     emoji: '🥈',
-    price: 149,
+    price: 169,
     label: 'Empfehlung',
     maxPages: 5,
     features: [

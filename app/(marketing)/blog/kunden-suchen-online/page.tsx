@@ -250,7 +250,7 @@ export default function BlogArticle() {
                   fontVariationSettings: '"opsz" 24, "SOFT" 50',
                 }}
               >
-                Werde sichtbar – ab 99 €/Monat
+                Werde sichtbar – ab 99 € netto/Monat
               </h3>
               <p style={{ color: "var(--ink-soft)", fontSize: 15, marginBottom: 16 }}>
                 Lass uns nachschauen, wie oft in deiner Region nach deiner Branche gesucht wird.

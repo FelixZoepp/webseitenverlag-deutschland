@@ -57,7 +57,7 @@ export default function PotenzialRechnerPage() {
   }), [suchvolumen, klickratePct, conversionPct, abschlussratePct, auftragswertEuro])
 
   const jahresUmsatz = ergebnis.umsatzProJahrCent / 100
-  const empfohlenespaket = jahresUmsatz > 80000 ? 'Growth (249 €/Mt)' : jahresUmsatz > 30000 ? 'Business (149 €/Mt)' : 'Starter (99 €/Mt)'
+  const empfohlenespaket = jahresUmsatz > 80000 ? 'Growth (249 €/Mt)' : jahresUmsatz > 30000 ? 'Business (169 €/Mt)' : 'Starter (99 €/Mt)'
 
   // Lade Defaults wenn Branche + Stadt gesetzt
   function ladeDefaults(bSlug: string, sSlug: string) {

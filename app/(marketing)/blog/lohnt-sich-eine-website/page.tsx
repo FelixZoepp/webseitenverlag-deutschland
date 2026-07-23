@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 const faqData = [
   {
     q: "Ab wann rechnet sich eine Website?",
-    a: "Im Abo-Modell ab 99 Euro/Monat rechnet sich eine Website oft schon mit einem einzigen neuen Kunden pro Monat. Bei einem durchschnittlichen Auftragswert von 500 Euro ist der ROI sofort positiv. Für die meisten lokalen Dienstleister gilt: Wer in einer Stadt mit mehr als 20.000 Einwohnern arbeitet, kann realistische Anfragen über seine Website erwarten.",
+    a: "Im Abo-Modell ab 99 € netto/Monat rechnet sich eine Website oft schon mit einem einzigen neuen Kunden pro Monat. Bei einem durchschnittlichen Auftragswert von 500 Euro ist der ROI sofort positiv. Für die meisten lokalen Dienstleister gilt: Wer in einer Stadt mit mehr als 20.000 Einwohnern arbeitet, kann realistische Anfragen über seine Website erwarten.",
   },
   {
     q: "Wie viele Kunden bringt eine Website?",
@@ -214,7 +214,7 @@ export default function BlogArticle() {
               Durchschnittlicher Auftragswert: 2.400 Euro
               <br />
               <br />
-              <strong>Ergebnis: 2.400 Euro Mehrumsatz pro Monat bei 99 Euro Kosten.</strong>
+              <strong>Ergebnis: 2.400 Euro Mehrumsatz pro Monat bei 99 € netto Kosten.</strong>
             </div>
 
             {/* H2: Vergleich mit Offline */}
@@ -234,7 +234,7 @@ export default function BlogArticle() {
             <h3 style={h3Style}>Option 2: Flyer, Printanzeigen, Branchenbuch</h3>
             <p>
               Diese Kanäle kosten zwischen 200 und 800 Euro pro Kampagne – mit einmaliger
-              Wirkung und keiner Messbarkeit. Eine Website kostet 99 Euro/Monat und arbeitet
+              Wirkung und keiner Messbarkeit. Eine Website kostet 99 € netto/Monat und arbeitet
               rund um die Uhr, wird mit der Zeit stärker und lässt sich mit Google Analytics
               komplett auswerten.
             </p>
@@ -333,7 +333,7 @@ export default function BlogArticle() {
                 steuerbaren Kundenstrom.
               </li>
               <li style={{ marginBottom: 12 }}>
-                <strong>Das Risiko ist begrenzt.</strong> Im Abo-Modell bei 99 Euro/Monat
+                <strong>Das Risiko ist begrenzt.</strong> Im Abo-Modell bei 99 € netto/Monat
                 weißt du nach dem ersten Monat, ob Anfragen kommen – und kannst dann
                 entscheiden.
               </li>

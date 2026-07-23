@@ -35,7 +35,7 @@ export type EditorFeature =
   | 'add_section_from_library' // Sektions-Galerie (ab Business)
   | 'reorder'                  // Sektionen umsortieren (ab Business, Kern fix)
   | 'signature_section'        // branchenspezifische Signature-Section (ab Business)
-  | 'video_header'             // Video-Hero (nur Growth)
+  | 'video_header'             // Video-Hero Loop (ab Business)
   | 'scroll_story'             // Scroll-Story / Scrub-Video (nur Growth)
 
 export interface PlanDefinition {
@@ -60,8 +60,9 @@ const BUSINESS_EDITOR: EditorFeature[] = [
   'add_section_from_library',
   'reorder',
   'signature_section',
+  'video_header',
 ]
-const GROWTH_EDITOR: EditorFeature[] = [...BUSINESS_EDITOR, 'video_header', 'scroll_story']
+const GROWTH_EDITOR: EditorFeature[] = [...BUSINESS_EDITOR, 'scroll_story']
 
 export const PLANS: Record<PackageTier, PlanDefinition> = {
   starter: {
@@ -76,7 +77,7 @@ export const PLANS: Record<PackageTier, PlanDefinition> = {
   business: {
     tier: 'business',
     name: 'Business',
-    preis_hinweis: '149 € netto',
+    preis_hinweis: '169 € netto',
     maxUnterseiten: 5,
     features: ['eigene_domain', 'unterseiten', 'bewertungs_widget', 'seo_basis'],
     editorFeatures: BUSINESS_EDITOR,
