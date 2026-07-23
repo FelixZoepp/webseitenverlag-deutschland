@@ -318,6 +318,26 @@ export function renderLibraryPage(config: LibraryDemoConfig, assets: StockAsset[
     (inhalte.hero as Inhalt | undefined)?.subheadline ?? `${config.meta.firma} — ${config.branche}`
   )
 
+  // B-17: LocalBusiness-JSON-LD — das SEO-Produkt muss strukturierte Daten liefern.
+  const jsonLdDaten: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: config.meta.firma,
+    description: beschreibung,
+  }
+  if (config.meta.ort || config.meta.adresse) {
+    jsonLdDaten.address = {
+      '@type': 'PostalAddress',
+      ...(config.meta.adresse ? { streetAddress: config.meta.adresse } : {}),
+      ...(config.meta.ort ? { addressLocality: config.meta.ort } : {}),
+      addressCountry: 'DE',
+    }
+  }
+  if (config.meta.telefon) jsonLdDaten.telephone = config.meta.telefon
+  if (config.meta.email) jsonLdDaten.email = config.meta.email
+  // '<' escapen, damit '</script>' in Inhalten nicht aus dem JSON-LD-Block ausbricht
+  const jsonLd = JSON.stringify(jsonLdDaten).replace(/</g, '\\u003c')
+
   return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -325,6 +345,11 @@ export function renderLibraryPage(config: LibraryDemoConfig, assets: StockAsset[
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(titel)}</title>
 <meta name="description" content="${eAttr(beschreibung)}">
+<meta property="og:title" content="${eAttr(titel)}">
+<meta property="og:description" content="${eAttr(beschreibung)}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="de_DE">
+<script type="application/ld+json">${jsonLd}</script>
 <style>:root{${cssTokens(config.stil, akzent)}}${BASIS_CSS}</style>
 </head>
 <body>

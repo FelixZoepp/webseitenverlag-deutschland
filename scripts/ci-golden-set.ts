@@ -124,9 +124,11 @@ function check(name: string, ok: boolean, detail?: string) {
   if (!ok) fehler++
 }
 
-/** Fremd-CDN-Muster für JS/CSS/Fonts (Bilder von Stock-Assets sind erlaubt) */
+/** Fremd-CDN-Muster für JS/CSS/Fonts (Bilder von Stock-Assets sind erlaubt).
+ * Ausführbare <script>-Blöcke sind verboten; <script type="application/ld+json">
+ * ist reines Daten-Markup (LocalBusiness-JSON-LD, B-17) und explizit erlaubt. */
 const CDN_MUSTER = [
-  /<script\b/i,
+  /<script\b(?![^>]*type=["']application\/ld\+json["'])/i,
   /<link[^>]+rel=["']stylesheet["']/i,
   /@import\s/i,
   /fonts\.googleapis\.com/i,
