@@ -464,7 +464,7 @@ function FooterSimple() {
       <div className="container">
         <div className="footer-bottom" style={{ borderTop: "none", paddingTop: 0 }}>
           <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
-          <span><a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></span>
+          <span><a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a> · <a href="/agb">AGB</a></span>
         </div>
       </div>
     </footer>

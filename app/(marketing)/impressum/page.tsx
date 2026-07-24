@@ -48,6 +48,12 @@ export default function ImpressumPage() {
               E-Mail: info@webseitenverlag-deutschland.de
             </p>
 
+            <h2 style={h2}>Handelsregister</h2>
+            <p>
+              Registergericht: Amtsgericht Charlottenburg (Berlin)<br />
+              Registernummer: HRB 281476 B
+            </p>
+
             <h2 style={h2}>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
             <p>
               Felix-Leon Zoepp<br />
@@ -109,7 +115,7 @@ export default function ImpressumPage() {
         <div className="container">
           <div className="footer-bottom">
             <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
-            <span><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link></span>
+            <span><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link> · <Link href="/agb">AGB</Link></span>
           </div>
         </div>
       </footer>

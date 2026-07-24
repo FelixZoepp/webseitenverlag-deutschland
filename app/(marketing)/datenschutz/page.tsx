@@ -53,6 +53,8 @@ export default function DatenschutzPage() {
             <p>
               Content-Leads Solutions UG (haftungsbeschränkt)<br />
               Geschäftsführer: Felix-Leon Zoepp<br />
+              Rhinstraße 137A, 10315 Berlin<br />
+              Registergericht: Amtsgericht Charlottenburg (Berlin), HRB 281476 B<br />
               E-Mail: info@webseitenverlag-deutschland.de
             </p>
 
@@ -96,6 +98,8 @@ export default function DatenschutzPage() {
               Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:<br /><br />
               Content-Leads Solutions UG (haftungsbeschränkt)<br />
               Geschäftsführer: Felix-Leon Zoepp<br />
+              Rhinstraße 137A, 10315 Berlin<br />
+              Registergericht: Amtsgericht Charlottenburg (Berlin), HRB 281476 B<br />
               E-Mail: info@webseitenverlag-deutschland.de
             </p>
 
@@ -195,7 +199,7 @@ export default function DatenschutzPage() {
         <div className="container">
           <div className="footer-bottom">
             <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
-            <span><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link></span>
+            <span><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link> · <Link href="/agb">AGB</Link></span>
           </div>
         </div>
       </footer>

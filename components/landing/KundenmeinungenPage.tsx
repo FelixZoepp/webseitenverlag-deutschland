@@ -360,7 +360,7 @@ export default function KundenmeinungenPage() {
         <div className="container">
           <div className="footer-bottom">
             <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
-            <span><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link></span>
+            <span><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link> · <Link href="/agb">AGB</Link></span>
           </div>
         </div>
       </footer>

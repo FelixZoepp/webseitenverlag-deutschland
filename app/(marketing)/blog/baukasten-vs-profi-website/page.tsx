@@ -422,7 +422,7 @@ export default function BlogArticle() {
             <span>© 2026 Webseiten-Verlag Deutschland. Alle Rechte vorbehalten.</span>
             <span>
               <Link href="/impressum">Impressum</Link> ·{" "}
-              <Link href="/datenschutz">Datenschutz</Link>
+              <Link href="/datenschutz">Datenschutz</Link> · <Link href="/agb">AGB</Link>
             </span>
           </div>
         </div>
