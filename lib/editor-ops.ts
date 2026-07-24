@@ -99,8 +99,8 @@ export const PatchSchema = z.array(OpSchema).min(1).max(20)
 const GESPERRTE_PFADE: { muster: RegExp; grund: string }[] = [
   { muster: /(^|\.)phone$/, grund: 'Die Telefonnummer ändern Sie sicher über den Fakten-Check im Fertigstellungs-Bereich.' },
   { muster: /(^|\.)logoUrl$/, grund: 'Das Logo wird über den Bilder-Upload geändert, nicht per Chat.' },
-  { muster: /(^|\.)(imprintUrl|privacyUrl)$/, grund: 'Impressum und Datenschutz sind geschützt (rechtliche Pflichtangaben).' },
-  { muster: /(^|\.)rechtstexte(\.|$)/, grund: 'Rechtstexte werden aus Ihren Pflichtangaben generiert und sind nicht frei editierbar.' },
+  { muster: /(^|\.)(imprintUrl|privacyUrl)$/, grund: 'Rechtstexte können nur über den Rechtstexte-Bereich bearbeitet werden.' },
+  { muster: /(^|\.)rechtstexte(\.|$)/, grund: 'Rechtstexte können nur über den Rechtstexte-Bereich bearbeitet werden.' },
   { muster: /Color$/, grund: 'Farben werden nur über Design-Vorlagen geändert (set_theme_preset).' },
   { muster: /(^|\.)colors(\.|$)/, grund: 'Farben werden nur über Design-Vorlagen geändert (set_theme_preset).' },
   { muster: /(^|\.)font/i, grund: 'Schriften werden nur über Design-Vorlagen geändert.' },

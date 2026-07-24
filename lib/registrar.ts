@@ -1,43 +1,9 @@
 /**
- * Domain-Registrierung + DNS-Checks (Phase G, §11).
+ * Domain DNS-Checks (Phase G, §11).
  *
- * Neuregistrierung im Kundennamen läuft über eine Reseller-API — solange kein
- * Zugang existiert (WARTELISTE.md), simuliert der Mock-Registrar die Bestellung
- * inkl. automatischem Nameserver-Setup. Umschalten per Env:
- *   REGISTRAR_PROVIDER  'mock' (Default) | später echter Reseller
  *   DOMAIN_DNS_ZIEL     erwarteter CNAME/A-Wert für vorhandene Domains
  *                       (Fallback: NEXT_PUBLIC_MARKETING_HOST)
  */
-
-export interface RegistrarErgebnis {
-  success: boolean
-  orderId?: string
-  nameserver?: string[]
-  error?: string
-}
-
-const MOCK_NAMESERVER = ['ns1.webseitenverlag-dns.de', 'ns2.webseitenverlag-dns.de']
-
-export function registrarProvider(): string {
-  return process.env.REGISTRAR_PROVIDER || 'mock'
-}
-
-/** Domain im Kundennamen bestellen — Mock bis Reseller-API-Zugang da ist. */
-export async function registriereDomain(hostname: string): Promise<RegistrarErgebnis> {
-  const provider = registrarProvider()
-
-  if (provider === 'mock') {
-    // Simulierte Bestellung: sofort erfolgreich, Nameserver "automatisch" gesetzt
-    return {
-      success: true,
-      orderId: `mock-${Date.now().toString(36)}-${hostname.replace(/[^a-z0-9]/g, '').slice(0, 8)}`,
-      nameserver: MOCK_NAMESERVER,
-    }
-  }
-
-  // Echter Reseller: noch kein API-Zugang (siehe WARTELISTE.md)
-  return { success: false, error: `Registrar-Provider "${provider}" ist nicht implementiert` }
-}
 
 /** Erwartetes DNS-Ziel für vorhandene Domains (CNAME auf unsere Infrastruktur). */
 export function dnsZiel(): string | null {
@@ -52,8 +18,7 @@ export function dnsZiel(): string | null {
 export async function pruefeDnsEintrag(
   hostname: string,
   ziel: string
-)
-: Promise<{ ok: boolean; gefunden: string[] }> {
+): Promise<{ ok: boolean; gefunden: string[] }> {
   const gefunden: string[] = []
   for (const type of ['CNAME', 'A']) {
     try {

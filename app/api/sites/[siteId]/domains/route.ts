@@ -1,16 +1,12 @@
 /**
- * Custom Domains je Site (Phase G, §11).
+ * Custom Domains je Site (Phase G, §11, robust).
  *   GET  → Liste der Domains (RLS: Kunde sieht eigene)
- *   POST → Domain anlegen:
- *     typ 'neuregistrierung' → Bestellung über Registrar (Mock bis Reseller-API,
- *       WARTELISTE.md) inkl. automatischem Nameserver-Setup → sofort AKTIV
- *     typ 'vorhanden'        → attachCustomDomain (Vercel Domains API, MVP-Finish §1):
- *       Domain am Vercel-Projekt anmelden + Zeile mit Status WARTET_AUF_DNS/AKTIV;
- *       ohne VERCEL_TOKEN als Stub (WARTELISTE). Recheck über /domains/[domainId]/check
+ *   POST → Domain anlegen: attachCustomDomain (Vercel Domains API, robust):
+ *     Domain + www-Partner am Vercel-Projekt anmelden + Zeilen upserten;
+ *     ohne VERCEL_TOKEN als Stub (WARTELISTE). Recheck über /domains/[domainId]/check
  */
 import { getOwnedSite } from '@/lib/api-helpers'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { registriereDomain, registrarProvider, dnsZiel } from '@/lib/registrar'
 import { attachCustomDomain } from '@/lib/hosting/vercel-domains'
 import { NextResponse } from 'next/server'
 
@@ -28,9 +24,10 @@ export async function GET(
     .from('domains')
     .select('*')
     .eq('site_id', params.siteId)
+    .order('ist_hauptdomain', { ascending: false })
     .order('created_at', { ascending: false })
 
-  return NextResponse.json({ domains: domains || [], dns_ziel: dnsZiel() })
+  return NextResponse.json({ domains: domains || [] })
 }
 
 export async function POST(
@@ -43,7 +40,6 @@ export async function POST(
 
     const body = await request.json().catch(() => ({}))
     const hostname = String(body.hostname || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '')
-    const typ = body.typ === 'neuregistrierung' ? 'neuregistrierung' : 'vorhanden'
 
     if (!hostname || hostname.length > 255 || !HOSTNAME_REGEX.test(hostname)) {
       return NextResponse.json({ error: 'Bitte eine gültige Domain angeben (z. B. maler-schmidt.de).' }, { status: 400 })
@@ -51,11 +47,17 @@ export async function POST(
 
     const admin = createAdminClient()
 
+    // Prüfen ob Haupt- oder Partner-Hostname bereits vergeben
+    const { partnerHostname } = await import('@/lib/hosting/vercel-domains')
+    const partner = partnerHostname(hostname)
+
     const { data: vorhanden } = await admin
       .from('domains')
-      .select('id, site_id')
-      .eq('hostname', hostname)
+      .select('id, site_id, hostname')
+      .in('hostname', [hostname, partner])
+      .limit(1)
       .maybeSingle()
+
     if (vorhanden) {
       return NextResponse.json(
         { error: vorhanden.site_id === params.siteId ? 'Diese Domain ist bereits verknüpft.' : 'Diese Domain ist bereits vergeben.' },
@@ -63,47 +65,7 @@ export async function POST(
       )
     }
 
-    if (typ === 'neuregistrierung') {
-      const bestellung = await registriereDomain(hostname)
-      if (!bestellung.success) {
-        const { data: domain, error } = await admin
-          .from('domains')
-          .insert({
-            site_id: params.siteId,
-            hostname,
-            typ,
-            status: 'FEHLER',
-            registrar: registrarProvider(),
-            fehler: bestellung.error || 'Bestellung fehlgeschlagen',
-          })
-          .select()
-          .single()
-        if (error) throw new Error(error.message)
-        return NextResponse.json({ domain }, { status: 201 })
-      }
-
-      const { data: domain, error } = await admin
-        .from('domains')
-        .insert({
-          site_id: params.siteId,
-          hostname,
-          typ,
-          status: 'AKTIV', // Registrar setzt Nameserver automatisch → zeigt auf uns
-          registrar: registrarProvider(),
-          registrar_order_id: bestellung.orderId,
-          nameserver: bestellung.nameserver,
-          aktiv_seit: new Date().toISOString(),
-          letzter_check_am: new Date().toISOString(),
-        })
-        .select()
-        .single()
-      if (error) throw new Error(error.message)
-      return NextResponse.json({ domain }, { status: 201 })
-    }
-
-    // Vorhandene Domain: bei Vercel anmelden + Zeile upserten (MVP-Finish §1).
-    // Ohne VERCEL_TOKEN läuft attachCustomDomain als Stub — Zeile entsteht
-    // trotzdem, damit die DNS-Anleitung rausgehen kann (WARTELISTE).
+    // Domain + Partner bei Vercel anmelden + Zeilen upserten (Change 2.3)
     const ergebnis = await attachCustomDomain(admin, params.siteId, hostname)
     if (!ergebnis.ok) {
       return NextResponse.json(
@@ -111,13 +73,17 @@ export async function POST(
         { status: 502 }
       )
     }
-    const { data: domain, error } = await admin
+
+    // Alle angelegten Domains zurückgeben
+    const { data: domains, error } = await admin
       .from('domains')
       .select('*')
-      .eq('hostname', hostname)
-      .single()
+      .eq('site_id', params.siteId)
+      .in('hostname', [hostname, partner])
+      .order('ist_hauptdomain', { ascending: false })
     if (error) throw new Error(error.message)
-    return NextResponse.json({ domain }, { status: 201 })
+
+    return NextResponse.json({ domains }, { status: 201 })
   } catch (e) {
     console.error('[domains] Fehler:', e)
     return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 })

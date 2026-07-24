@@ -1,11 +1,12 @@
 /**
  * Einzelne Domain (Phase G, §11):
- *   POST   → DNS-Recheck („wartet auf DNS" → AKTIV, sobald der Eintrag stimmt)
- *   DELETE → Domain von der Site entfernen
+ *   POST   → DNS-Recheck (nutzt jetzt pruefeDomainStatus für konsistente Prüfung)
+ *   DELETE → Domain von der Site entfernen (inkl. Partner-Domain)
+ *   PATCH  → Hauptdomain-Flag umschalten
  */
 import { getOwnedSite } from '@/lib/api-helpers'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { pruefeDnsEintrag, dnsZiel } from '@/lib/registrar'
+import { pruefeDomainStatus } from '@/lib/hosting/domain-check'
 import { revalidateHostMap } from '@/lib/hosting/site-cache'
 import { NextResponse } from 'next/server'
 
@@ -30,34 +31,72 @@ export async function POST(
       return NextResponse.json({ domain })
     }
 
-    const ziel = (domain.dns_ziel as string) || dnsZiel()
-    if (!ziel) {
-      return NextResponse.json(
-        { error: 'Kein DNS-Ziel konfiguriert (DOMAIN_DNS_ZIEL / NEXT_PUBLIC_MARKETING_HOST).' },
-        { status: 400 }
-      )
-    }
+    // Neue einheitliche Prüfung über pruefeDomainStatus
+    const ergebnis = await pruefeDomainStatus(admin, params.domainId)
 
-    const check = await pruefeDnsEintrag(domain.hostname as string, ziel)
-    const now = new Date().toISOString()
-    const update = check.ok
-      ? { status: 'AKTIV', aktiv_seit: now, letzter_check_am: now, fehler: null, updated_at: now }
-      : { letzter_check_am: now, updated_at: now }
-
+    // Aktualisierte Domain zurückgeben
     const { data: aktualisiert, error } = await admin
       .from('domains')
-      .update(update)
+      .select('*')
       .eq('id', params.domainId)
-      .select()
       .single()
     if (error) throw new Error(error.message)
 
-    // Neu AKTIV → Host-Map-Cache invalidieren, damit die Domain sofort auflöst
-    if (check.ok) revalidateHostMap()
-
-    return NextResponse.json({ domain: aktualisiert, dns_ok: check.ok, gefunden: check.gefunden })
+    return NextResponse.json({
+      domain: aktualisiert,
+      dns_ok: ergebnis.verified,
+      status: ergebnis.status,
+    })
   } catch (e) {
     console.error('[domains/check] Fehler:', e)
+    return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 })
+  }
+}
+
+/** PATCH: Hauptdomain umschalten */
+export async function PATCH(
+  request: Request,
+  { params }: { params: { siteId: string; domainId: string } }
+) {
+  try {
+    const result = await getOwnedSite(params.siteId)
+    if (!result.ok) return result.response
+
+    const body = await request.json().catch(() => ({}))
+    const istHauptdomain = body.ist_hauptdomain === true
+
+    const admin = createAdminClient()
+
+    // Prüfen ob Domain zur Site gehört
+    const { data: domain } = await admin
+      .from('domains')
+      .select('id, partner_domain_id')
+      .eq('id', params.domainId)
+      .eq('site_id', params.siteId)
+      .maybeSingle()
+    if (!domain) return NextResponse.json({ error: 'Domain nicht gefunden' }, { status: 404 })
+
+    const now = new Date().toISOString()
+
+    if (istHauptdomain) {
+      // Diese Domain zur Hauptdomain machen, Partner-Domain auf false setzen
+      await admin.from('domains').update({ ist_hauptdomain: true, updated_at: now }).eq('id', params.domainId)
+      if (domain.partner_domain_id) {
+        await admin.from('domains').update({ ist_hauptdomain: false, updated_at: now }).eq('id', domain.partner_domain_id)
+      }
+    } else {
+      await admin.from('domains').update({ ist_hauptdomain: false, updated_at: now }).eq('id', params.domainId)
+    }
+
+    const { data: aktualisiert } = await admin
+      .from('domains')
+      .select('*')
+      .eq('id', params.domainId)
+      .single()
+
+    return NextResponse.json({ domain: aktualisiert })
+  } catch (e) {
+    console.error('[domains/patch] Fehler:', e)
     return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 })
   }
 }
@@ -71,6 +110,19 @@ export async function DELETE(
     if (!result.ok) return result.response
 
     const admin = createAdminClient()
+
+    // Partner-Domain auch löschen
+    const { data: domain } = await admin
+      .from('domains')
+      .select('id, partner_domain_id')
+      .eq('id', params.domainId)
+      .eq('site_id', params.siteId)
+      .maybeSingle()
+
+    if (domain?.partner_domain_id) {
+      await admin.from('domains').delete().eq('id', domain.partner_domain_id)
+    }
+
     const { error } = await admin
       .from('domains')
       .delete()
