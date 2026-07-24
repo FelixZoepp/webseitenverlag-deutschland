@@ -238,7 +238,7 @@ export default function DomainPage() {
     await laden()
   }
 
-  const hauptdomainUmschalten = async (domainId: string, _partnerDomainId: string | null) => {
+  const hauptdomainUmschalten = async (domainId: string) => {
     await fetch(`/api/sites/${siteId}/domains/${domainId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -250,10 +250,6 @@ export default function DomainPage() {
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', padding: '80px' }}><Loader2 className="w-5 h-5 animate-spin" style={{ color: '#9CA3AF' }} /></div>
   }
-
-  // Domains gruppieren: Hauptdomains mit Partnern
-  const hauptdomains = domains.filter((d) => d.ist_hauptdomain)
-  const partnerdomains = domains.filter((d) => !d.ist_hauptdomain)
 
   return (
     <div style={{ padding: '24px 32px', maxWidth: '800px' }}>
@@ -332,7 +328,6 @@ export default function DomainPage() {
         ) : (
           domains.map((d) => {
             const s = STATUS_LABEL[d.status]
-            const partner = domains.find((p) => p.id === d.partner_domain_id)
             const statusText = d.status === 'FEHLER'
               ? d.fehler || 'Unbekannter Fehler'
               : STATUS_BESCHREIBUNG[d.status] || ''
@@ -423,7 +418,7 @@ export default function DomainPage() {
                 {!d.ist_hauptdomain && d.partner_domain_id && (
                   <div style={{ marginTop: '8px', paddingLeft: '28px' }}>
                     <button
-                      onClick={() => hauptdomainUmschalten(d.id, d.partner_domain_id)}
+                      onClick={() => hauptdomainUmschalten(d.id)}
                       style={{ fontSize: '11px', color: '#1D4ED8', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
                     >
                       Als Hauptdomain festlegen

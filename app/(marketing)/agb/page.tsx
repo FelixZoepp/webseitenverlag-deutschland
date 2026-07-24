@@ -39,7 +39,7 @@ export default function AgbPage() {
 
             <h2 style={h2}>§1 Geltungsbereich und Vertragspartner</h2>
             <p>
-              (1) Diese Allgemeinen Geschäftsbedingungen gelten für sämtliche Verträge zwischen der Content-Leads Solutions UG (haftungsbeschränkt), Rhinstraße 137A, 10315 Berlin, eingetragen im Handelsregister des Amtsgerichts Charlottenburg (Berlin) unter HRB 281476 B, vertreten durch den Geschäftsführer Felix-Leon Zoepp (nachfolgend „Anbieter"), und ihren Kunden (nachfolgend „Kunde") über die Erstellung, Bereitstellung, den Betrieb und die Pflege von Webseiten unter der Marke „Webseiten-Verlag Deutschland".
+              (1) Diese Allgemeinen Geschäftsbedingungen gelten für sämtliche Verträge zwischen der Content-Leads Solutions UG (haftungsbeschränkt), Rhinstraße 137A, 10315 Berlin, eingetragen im Handelsregister des Amtsgerichts Charlottenburg (Berlin) unter HRB 281476 B, vertreten durch den Geschäftsführer Felix-Leon Zoepp (nachfolgend &bdquo;Anbieter&ldquo;), und ihren Kunden (nachfolgend &bdquo;Kunde&ldquo;) über die Erstellung, Bereitstellung, den Betrieb und die Pflege von Webseiten unter der Marke &bdquo;Webseiten-Verlag Deutschland&ldquo;.
             </p>
             <p>
               (2) Der Anbieter schließt Verträge ausschließlich mit Unternehmern im Sinne des § 14 BGB, juristischen Personen des öffentlichen Rechts und öffentlich-rechtlichen Sondervermögen. Verträge mit Verbrauchern im Sinne des § 13 BGB werden nicht geschlossen.
