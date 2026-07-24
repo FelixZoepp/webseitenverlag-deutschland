@@ -7,7 +7,7 @@ import { Globe, Loader2, RefreshCw, Trash2, CheckCircle2, Clock, AlertTriangle }
 interface Domain {
   id: string
   hostname: string
-  typ: 'neuregistrierung' | 'vorhanden'
+  typ: 'vorhanden'
   status: 'BESTELLT' | 'WARTET_AUF_DNS' | 'AKTIV' | 'FEHLER'
   nameserver: string[] | null
   dns_ziel: string | null
@@ -30,7 +30,6 @@ export default function DomainPage() {
   const [dnsZiel, setDnsZiel] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [hostname, setHostname] = useState('')
-  const [typ, setTyp] = useState<'vorhanden' | 'neuregistrierung'>('vorhanden')
   const [busy, setBusy] = useState(false)
   const [checking, setChecking] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
@@ -58,7 +57,7 @@ export default function DomainPage() {
       const r = await fetch(`/api/sites/${siteId}/domains`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hostname, typ }),
+        body: JSON.stringify({ hostname, typ: 'vorhanden' }),
       })
       const data = await r.json()
       if (!r.ok) {
@@ -98,7 +97,7 @@ export default function DomainPage() {
     <div style={{ padding: '24px 32px', maxWidth: '800px' }}>
       <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Domain</h1>
       <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '24px' }}>
-        Eigene Domain verbinden oder eine neue Domain registrieren lassen
+        Eigene Domain mit Ihrer Website verbinden
       </p>
 
       {/* Neue Domain */}
@@ -112,14 +111,6 @@ export default function DomainPage() {
             required
             style={{ flex: '1 1 240px', padding: '10px 12px', borderRadius: '8px', border: '1px solid #D1D5DB', fontSize: '14px' }}
           />
-          <select
-            value={typ}
-            onChange={(e) => setTyp(e.target.value as 'vorhanden' | 'neuregistrierung')}
-            style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #D1D5DB', fontSize: '14px', background: '#fff' }}
-          >
-            <option value="vorhanden">Domain gehört mir bereits</option>
-            <option value="neuregistrierung">Neu registrieren lassen</option>
-          </select>
           <button
             type="submit"
             disabled={busy}
@@ -129,16 +120,19 @@ export default function DomainPage() {
             Hinzufügen
           </button>
         </div>
-        {typ === 'vorhanden' && dnsZiel && (
+        {dnsZiel && (
           <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '10px' }}>
-            Nach dem Hinzufügen: Bei Ihrem Domain-Anbieter einen <strong>CNAME-Eintrag</strong> auf <code style={{ background: '#F3F4F6', padding: '1px 6px', borderRadius: '4px' }}>{dnsZiel}</code> setzen — danach „Erneut prüfen“ klicken.
+            Nach dem Hinzufügen: Bei Ihrem Domain-Anbieter einen <strong>CNAME-Eintrag</strong> auf <code style={{ background: '#F3F4F6', padding: '1px 6px', borderRadius: '4px' }}>{dnsZiel}</code> setzen — danach „Erneut prüfen" klicken.
           </p>
         )}
-        {typ === 'neuregistrierung' && (
-          <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '10px' }}>
-            Wir registrieren die Domain in Ihrem Namen und richten alles automatisch ein — keine weiteren Schritte nötig.
-          </p>
-        )}
+        <div style={{ marginTop: 12, padding: "14px 18px", borderRadius: 12, background: "rgba(37,99,235,0.05)", border: "1px solid rgba(37,99,235,0.12)", fontSize: 14, lineHeight: 1.6, color: "var(--ink-soft)" }}>
+          <strong>Noch keine Domain?</strong> Registrieren Sie eine bei einem Anbieter Ihrer Wahl, z.{"\u00a0"}B.{" "}
+          <a href="https://www.ionos.de" target="_blank" rel="noopener" style={{ color: "var(--blue)" }}>IONOS</a>,{" "}
+          <a href="https://www.strato.de" target="_blank" rel="noopener" style={{ color: "var(--blue)" }}>Strato</a>,{" "}
+          <a href="https://www.united-domains.de" target="_blank" rel="noopener" style={{ color: "var(--blue)" }}>united-domains</a> oder{" "}
+          <a href="https://www.namecheap.com" target="_blank" rel="noopener" style={{ color: "var(--blue)" }}>Namecheap</a>.
+          {" "}Danach verbinden Sie sie hier.
+        </div>
         {fehler && (
           <p style={{ fontSize: '13px', color: '#DC2626', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <AlertTriangle style={{ width: '14px', height: '14px' }} /> {fehler}
@@ -167,7 +161,7 @@ export default function DomainPage() {
                     <div>
                       <p style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>{d.hostname}</p>
                       <p style={{ fontSize: '11px', color: '#9CA3AF' }}>
-                        {d.typ === 'neuregistrierung' ? 'Neuregistrierung' : 'Eigene Domain'}
+                        Eigene Domain
                         {d.letzter_check_am && ` · zuletzt geprüft ${new Date(d.letzter_check_am).toLocaleString('de-DE')}`}
                       </p>
                     </div>
