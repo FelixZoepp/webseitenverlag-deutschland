@@ -7,19 +7,16 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-// Rate limiting: max 5 per IP per hour
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now()
-  const entry = rateLimitMap.get(ip)
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + 3600000 })
-    return true
-  }
-  if (entry.count >= 5) return false
-  entry.count++
-  return true
+// Rate-Limit: max 5 Einsendungen pro IP pro Stunde — DB-basiert (serverless-kompatibel)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function checkRateLimit(supabaseClient: any, ip: string): Promise<boolean> {
+  const eineStundeHer = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+  const { count } = await supabaseClient
+    .from('form_submissions')
+    .select('id', { count: 'exact', head: true })
+    .eq('ip_address', ip)
+    .gte('created_at', eineStundeHer)
+  return count === null || count < 5
 }
 
 const corsHeaders = {
@@ -91,7 +88,7 @@ export async function POST(
     const isSpam = !!(body.website || body.url)
 
     // Rate limit check
-    const withinLimit = checkRateLimit(ip)
+    const withinLimit = await checkRateLimit(supabase, ip)
 
     // Remove honeypot fields from stored data
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

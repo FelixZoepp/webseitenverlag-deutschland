@@ -5,19 +5,10 @@ import { Resend } from 'resend'
 
 export const dynamic = 'force-dynamic'
 
-// Sehr einfaches In-Memory-Rate-Limit (pro Instanz): max 5 Anfragen / 10 Min / IP
-const RATE_LIMIT = 5
-const RATE_WINDOW_MS = 10 * 60 * 1000
-const hits = new Map<string, number[]>()
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now()
-  const recent = (hits.get(ip) || []).filter((t) => now - t < RATE_WINDOW_MS)
-  if (recent.length >= RATE_LIMIT) return true
-  recent.push(now)
-  hits.set(ip, recent)
-  return false
-}
+// TODO: Rate-Limiting fehlt hier. Das bisherige In-Memory-Map-Limit wurde entfernt,
+// weil es auf Vercel Serverless nicht instanz-übergreifend funktioniert.
+// Lösung: IP-Spalte in `leads` ergänzen und DB-basiertes Count-Query verwenden
+// (analog zu form_submissions/submit/route.ts), oder Upstash Redis einbinden.
 
 function str(v: unknown, max = 500): string | null {
   if (typeof v !== 'string') return null
@@ -26,11 +17,6 @@ function str(v: unknown, max = 500): string | null {
 }
 
 export async function POST(request: Request) {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
-  if (rateLimited(ip)) {
-    return NextResponse.json({ error: 'Zu viele Anfragen. Bitte später erneut versuchen.' }, { status: 429 })
-  }
-
   const body = await request.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Ungültige Anfrage' }, { status: 400 })
 

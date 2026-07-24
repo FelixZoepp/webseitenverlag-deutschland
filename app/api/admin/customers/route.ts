@@ -93,8 +93,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       customer,
-      tempPassword,
       invitationSent,
+      message: invitationSent
+        ? 'Kunde angelegt. Einladungs-E-Mail wurde versendet.'
+        : 'Einladungs-E-Mail konnte nicht versendet werden — Passwort manuell setzen.',
     }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 })
