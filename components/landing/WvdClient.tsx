@@ -205,7 +205,7 @@ export default function WvdClient() {
             <a href="/kundenmeinungen">Kundenmeinungen</a>
             <a href="/blog">Blog</a>
           </div>
-          <a href="/entwurf" className="nav-cta">Kostenloses Erstgespräch</a>
+          <a href="/entwurf" className="nav-cta">Kostenlose Demo</a>
           <button
             className="nav-burger"
             onClick={() => setMobileMenu(!mobileMenu)}
@@ -246,7 +246,7 @@ export default function WvdClient() {
           </p>
           <div className="cta-row">
             <a href="/entwurf" className="btn btn-primary">
-              <span>Kostenloses Erstgespräch buchen →</span>
+              <span>Kostenlose Demo ansehen →</span>
             </a>
             <a href="#ergebnisse" className="btn btn-ghost">
               <span>Beispiele ansehen</span>
@@ -423,7 +423,7 @@ export default function WvdClient() {
             <div className="fb-card fb-web">
               <div className="fb-head">
                 <h3>In Tagen live</h3>
-                <p className="bento-text">Vom Erstgespräch zur fertigen Webseite — professionell aufgebaut und sofort erreichbar.</p>
+                <p className="bento-text">Von der Demo zur fertigen Webseite — professionell aufgebaut und sofort erreichbar.</p>
               </div>
               <div className="fb-visual">
                 <div className="fb-browser">
@@ -551,7 +551,7 @@ export default function WvdClient() {
               {[
                 {
                   icon: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.19 13.8 19.79 19.79 0 0 1 1.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />,
-                  title: "Kostenloses Erstgespräch",
+                  title: "Kostenlose Demo",
                   desc: "In einem 15-Minuten-Gespräch lernen wir dich und dein Business kennen. Kostenlos und unverbindlich.",
                 },
                 {
@@ -578,7 +578,7 @@ export default function WvdClient() {
 
             <div style={{ textAlign: "center" }}>
               <a href="/entwurf" className="urgency-cta">
-                <span>Kostenloses Erstgespräch buchen</span>
+                <span>Kostenlose Demo ansehen</span>
                 <span className="arrow-circle">
                   <svg viewBox="0 0 24 24" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                 </span>
@@ -953,7 +953,7 @@ export default function WvdClient() {
           </div>
           {[
             { q: "99 € netto/Monat – was ist da alles drin?", a: "Alles. Design, Entwicklung, Hosting, Domain, SSL, Google-Optimierung (SEO), DSGVO-konforme Rechtstexte, Updates, Wartung und persönlicher Support. Es gibt keine versteckten Kosten." },
-            { q: "Wie schnell ist meine Webseite online?", a: "In der Regel innerhalb weniger Tage nach unserem Erstgespräch. Bei umfangreicheren Projekten kann es etwas länger dauern – darüber sprechen wir im Gespräch." },
+            { q: "Wie schnell ist meine Webseite online?", a: "In der Regel innerhalb weniger Tage nach Ihrer Demo-Anfrage. Bei umfangreicheren Projekten kann es etwas länger dauern – darüber sprechen wir im Gespräch." },
             { q: "Muss ich mich um irgendwas Technisches kümmern?", a: "Nein. Wir kümmern uns um alles – von der Domain-Registrierung über die Technik bis zu Updates. Du musst nichts installieren, konfigurieren oder updaten." },
             { q: "Wie sind die Vertragsbedingungen?", a: "Die Mindestlaufzeit beträgt 24 Monate mit 3 Monaten Kündigungsfrist. Danach verlängert sich der Vertrag um jeweils 12 Monate. Alle Preise sind netto zzgl. MwSt. Wir setzen auf langfristige Zusammenarbeit, weil SEO-Ergebnisse Zeit brauchen – und unsere Kunden nach 6 Monaten die Ergebnisse sehen." },
             { q: "Ist die Webseite wirklich professionell – oder sieht man, dass sie \"günstig\" ist?", a: "Unsere Webseiten sind individuell gestaltet und auf dem gleichen technischen Niveau wie Seiten, die Agenturen für 5.000€+ bauen. Der Unterschied ist unser Geschäftsmodell, nicht die Qualität." },
@@ -986,7 +986,7 @@ export default function WvdClient() {
                 was eine Webseite für dein Business bringen kann – und ob wir der richtige Partner dafür sind.
               </p>
               <a href="/entwurf" className="btn btn-primary" style={{ fontSize: 18, padding: "22px 48px" }}>
-                <span>Kostenloses Erstgespräch buchen →</span>
+                <span>Kostenlose Demo ansehen →</span>
               </a>
               <div style={{ display: "flex", justifyContent: "center", gap: 32, marginTop: 28, fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--text-tertiary)" }}>
                 <span>✓ 100% kostenlos</span>
@@ -1022,7 +1022,7 @@ export default function WvdClient() {
             <div className="footer-col">
               <h4>Kontakt</h4>
               <ul>
-                <li><a href="/entwurf">Erstgespräch buchen</a></li>
+                <li><a href="/entwurf">Demo ansehen</a></li>
                 <li><a href="#faq">FAQ</a></li>
               </ul>
             </div>

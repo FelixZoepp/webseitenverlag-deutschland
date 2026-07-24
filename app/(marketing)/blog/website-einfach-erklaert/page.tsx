@@ -94,7 +94,7 @@ export default function BlogArticle() {
             <Link href="/blog">Blog</Link>
           </div>
           <Link href="/entwurf" className="nav-cta">
-            Kostenloses Erstgespräch
+            Kostenlose Demo
           </Link>
         </div>
       </nav>
@@ -279,7 +279,7 @@ export default function BlogArticle() {
             </p>
             <ul style={ulStyle}>
               <li>
-                <strong>Tag 1:</strong> Erstgespräch (15–30 Minuten)
+                <strong>Tag 1:</strong> Kostenlose Demo (15–30 Minuten)
               </li>
               <li>
                 <strong>Tag 2–3:</strong> Wir erstellen deinen ersten Entwurf

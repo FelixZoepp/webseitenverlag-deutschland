@@ -79,7 +79,7 @@ export default function ErgebnissePage() {
             <a href="/#rechner">ROI-Rechner</a>
             <a href="/#faq">FAQ</a>
           </div>
-          <a href="/entwurf" className="nav-cta">Kostenloses Erstgespräch</a>
+          <a href="/entwurf" className="nav-cta">Kostenlose Demo</a>
         </div>
       </nav>
 
@@ -193,7 +193,7 @@ export default function ErgebnissePage() {
               15 Minuten. Kostenlos. Unverbindlich. Wir zeigen dir, was für dein Business möglich ist.
             </p>
             <a href="/entwurf" className="btn btn-primary" style={{ fontSize: 18, padding: "22px 48px" }}>
-              <span>Kostenloses Erstgespräch buchen →</span>
+              <span>Kostenlose Demo ansehen →</span>
             </a>
           </div>
         </div>

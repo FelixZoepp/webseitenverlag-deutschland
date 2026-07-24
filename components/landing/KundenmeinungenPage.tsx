@@ -68,11 +68,11 @@ const TEXT_TESTIMONIALS = [
 
 const FAQ_DATA = [
   { q: "Sind das echte Kunden?", a: "Ja. Alle gezeigten Personen sind echte Geschäftsführer, die unser Webseiten-Abo nutzen. Die Originalbewertungen findest du zusätzlich auch auf Trustpilot." },
-  { q: "Wie lange dauert es bis zu den ersten Anfragen?", a: "Viele Kunden berichten von Anfragen schon in den ersten 1–7 Tagen nach Launch. Wie schnell es bei dir geht, hängt von Branche, Region und Wettbewerb ab – das klären wir im Erstgespräch." },
+  { q: "Wie lange dauert es bis zu den ersten Anfragen?", a: "Viele Kunden berichten von Anfragen schon in den ersten 1–7 Tagen nach Launch. Wie schnell es bei dir geht, hängt von Branche, Region und Wettbewerb ab – das klären wir vorab." },
   { q: "Funktioniert das nur für Handwerk?", a: "Nein. Unsere Kunden kommen aus Handwerk, Beratung, Dienstleistung, Sachverständigenwesen und Solartechnik. Das Modell funktioniert überall, wo lokale oder Fach-Sucher nach einem Anbieter googeln." },
   { q: "Was kostet das genau?", a: "99 € netto im Monat. Darin enthalten: Webdesign, Hosting, Pflege, Updates, technischer Support. Kein Einmalpreis, keine versteckten Kosten." },
-  { q: "Gehört mir die Webseite?", a: "Du nutzt die Webseite im Abo-Modell. Im Erstgespräch erklären wir dir transparent, wie das funktioniert und welche Optionen du hast." },
-  { q: "Was ist, wenn ich keine Anfragen bekomme?", a: "Wir gestalten Webseiten so, dass sie sucherorientiert und konversionsstark sind – das ist Teil unseres Modells. Im Erstgespräch zeigen wir dir ehrlich, ob dein Markt das hergibt, bevor wir starten." },
+  { q: "Gehört mir die Webseite?", a: "Du nutzt die Webseite im Abo-Modell. Vorab erklären wir dir transparent, wie das funktioniert und welche Optionen du hast." },
+  { q: "Was ist, wenn ich keine Anfragen bekomme?", a: "Wir gestalten Webseiten so, dass sie sucherorientiert und konversionsstark sind – das ist Teil unseres Modells. Vorab zeigen wir dir ehrlich, ob dein Markt das hergibt, bevor wir starten." },
 ];
 
 const SCHEMA = {
@@ -130,7 +130,7 @@ export default function KundenmeinungenPage() {
             <Link href="/kundenmeinungen">Kundenmeinungen</Link>
             <Link href="/blog">Blog</Link>
           </div>
-          <Link href="/entwurf" className="nav-cta">Kostenloses Erstgespräch</Link>
+          <Link href="/entwurf" className="nav-cta">Kostenlose Demo</Link>
         </div>
       </nav>
 
@@ -146,7 +146,7 @@ export default function KundenmeinungenPage() {
             Das sagen Handwerker, Berater und Selbstständige, die statt 5.000&thinsp;€ einmalig einfach 99&thinsp;€ im Monat investiert haben – und schon in den ersten Tagen Anfragen bekamen.
           </p>
           <Link href="/entwurf" className="btn btn-primary" style={{ fontSize: 17, padding: "20px 44px" }}>
-            <span>Kostenloses Erstgespräch sichern →</span>
+            <span>Kostenlose Demo sichern →</span>
           </Link>
         </div>
       </section>
@@ -258,7 +258,7 @@ export default function KundenmeinungenPage() {
             Diese Zahlen für dein Unternehmen realistisch machen?
           </h3>
           <p style={{ color: "var(--ink-soft)", fontSize: 17, lineHeight: 1.6, marginBottom: 28 }}>
-            15 Minuten Erstgespräch. Kein Verkaufsdruck. Klare Antwort, ob das Modell für dich passt.
+            Kostenlose Demo. Kein Verkaufsdruck. Klare Antwort, ob das Modell für dich passt.
           </p>
           <Link href="/entwurf" className="btn btn-primary" style={{ fontSize: 16, padding: "18px 40px" }}>
             <span>Termin sichern →</span>
@@ -327,7 +327,7 @@ export default function KundenmeinungenPage() {
               ))}
             </div>
             <Link href="/entwurf" className="btn btn-primary" style={{ fontSize: 18, padding: "22px 48px" }}>
-              <span>Jetzt kostenloses Erstgespräch buchen →</span>
+              <span>Jetzt kostenlose Demo ansehen →</span>
             </Link>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-tertiary)", marginTop: 16 }}>
               15 Minuten · Unverbindlich · Kein Verkaufsdruck

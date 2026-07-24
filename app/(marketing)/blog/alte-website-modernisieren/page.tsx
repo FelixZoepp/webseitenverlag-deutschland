@@ -92,7 +92,7 @@ export default function BlogArticle() {
             <Link href="/blog">Blog</Link>
           </div>
           <Link href="/entwurf" className="nav-cta">
-            Kostenloses Erstgespräch
+            Kostenlose Demo
           </Link>
         </div>
       </nav>
@@ -268,7 +268,7 @@ export default function BlogArticle() {
                 className="btn btn-primary"
                 style={{ padding: "14px 32px", fontSize: 15 }}
               >
-                <span>Kostenloses Erstgespräch buchen →</span>
+                <span>Kostenlose Demo ansehen →</span>
               </Link>
             </div>
 
@@ -367,7 +367,7 @@ export default function BlogArticle() {
                 className="btn btn-primary"
                 style={{ padding: "18px 40px", fontSize: 16 }}
               >
-                <span>Kostenloses Erstgespräch buchen →</span>
+                <span>Kostenlose Demo ansehen →</span>
               </Link>
             </div>
           </div>

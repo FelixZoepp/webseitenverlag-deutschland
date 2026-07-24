@@ -61,7 +61,7 @@ export default function BlogArticle() {
             <Link href="/ergebnisse">Ergebnisse</Link>
             <Link href="/blog">Blog</Link>
           </div>
-          <Link href="/entwurf" className="nav-cta">Kostenloses Erstgespräch</Link>
+          <Link href="/entwurf" className="nav-cta">Kostenlose Demo</Link>
         </div>
       </nav>
 
@@ -211,7 +211,7 @@ export default function BlogArticle() {
                 In 15 Minuten klären wir, ob das Abo-Modell für dich passt – ohne Verkaufsdruck.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "14px 32px", fontSize: 15 }}>
-                <span>Kostenloses Erstgespräch buchen →</span>
+                <span>Kostenlose Demo ansehen →</span>
               </Link>
             </div>
 
@@ -306,7 +306,7 @@ export default function BlogArticle() {
                 In 15 Minuten klären wir, ob das Abo-Modell für dein Business passt – ohne Verkaufsdruck, ohne Verpflichtung.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "18px 40px", fontSize: 16 }}>
-                <span>Kostenloses Erstgespräch buchen →</span>
+                <span>Kostenlose Demo ansehen →</span>
               </Link>
             </div>
           </div>

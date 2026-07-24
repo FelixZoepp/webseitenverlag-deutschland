@@ -92,7 +92,7 @@ export default function BlogArticle() {
             <Link href="/blog">Blog</Link>
           </div>
           <Link href="/entwurf" className="nav-cta">
-            Kostenloses Erstgespräch
+            Kostenlose Demo
           </Link>
         </div>
       </nav>

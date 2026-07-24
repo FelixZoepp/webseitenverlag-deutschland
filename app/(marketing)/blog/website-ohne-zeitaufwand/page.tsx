@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 const faqData = [
   {
     q: "Wie viel Zeit muss ich investieren?",
-    a: "Für das Erstgespräch ca. 30 Minuten. Für die Freigabe des Entwurfs nochmal 15 bis 30 Minuten. Das war's. Danach läuft die Website, und du musst nichts tun – außer die Anfragen entgegennehmen.",
+    a: "Für die Demo-Anfrage und Erstabstimmung ca. 30 Minuten. Für die Freigabe des Entwurfs nochmal 15 bis 30 Minuten. Das war's. Danach läuft die Website, und du musst nichts tun – außer die Anfragen entgegennehmen.",
   },
   {
     q: "Wer pflegt die Website?",
@@ -26,11 +26,11 @@ const faqData = [
   },
   {
     q: "Was muss ich an Inhalten liefern?",
-    a: "Weniger als du denkst. Im Erstgespräch sammeln wir alle Infos, die wir brauchen: Leistungen, Einsatzgebiet, ein paar Eckdaten zu deinem Betrieb. Fotos, wenn du welche hast – wenn nicht, haben wir professionelle Stockfotos als Platzhalter. Texte schreiben wir auf Basis deiner Angaben.",
+    a: "Weniger als du denkst. Vorab sammeln wir alle Infos, die wir brauchen: Leistungen, Einsatzgebiet, ein paar Eckdaten zu deinem Betrieb. Fotos, wenn du welche hast – wenn nicht, haben wir professionelle Stockfotos als Platzhalter. Texte schreiben wir auf Basis deiner Angaben.",
   },
   {
     q: "Wie schnell ist die Website fertig?",
-    a: "Typischerweise 5 bis 7 Werktage nach dem Erstgespräch. Du siehst einen Entwurf, gibst Feedback, wir setzen es um. In der Regel ist die Website nach maximal zwei Feedback-Runden live.",
+    a: "Typischerweise 5 bis 7 Werktage nach Ihrer Demo-Anfrage. Du siehst einen Entwurf, gibst Feedback, wir setzen es um. In der Regel ist die Website nach maximal zwei Feedback-Runden live.",
   },
 ];
 
@@ -92,7 +92,7 @@ export default function BlogArticle() {
             <Link href="/blog">Blog</Link>
           </div>
           <Link href="/entwurf" className="nav-cta">
-            Kostenloses Erstgespräch
+            Kostenlose Demo
           </Link>
         </div>
       </nav>
@@ -196,7 +196,7 @@ export default function BlogArticle() {
                 Arbeit
               </li>
               <li>
-                <strong>Abo-Modell mit Full-Service:</strong> 30 Minuten Erstgespräch,
+                <strong>Abo-Modell mit Full-Service:</strong> 30 Minuten Demo-Gespräch,
                 15 Minuten Entwurf-Feedback. Das war es.
               </li>
             </ul>
@@ -209,7 +209,7 @@ export default function BlogArticle() {
             {/* Praxis-Beispiel */}
             <div style={defBox}>
               <strong>Praxis-Beispiel:</strong> Ein Physiotherapeut aus Köln wollte seit
-              zwei Jahren eine Website – kam nie dazu. Im Erstgespräch hat er 30 Minuten
+              zwei Jahren eine Website – kam nie dazu. Im Gespräch hat er 30 Minuten
               erzählt, was er macht und wen er behandelt. 5 Tage später war die Website live.
               Eigenaufwand gesamt: 45 Minuten. Erste Anfrage über die Website: 11 Tage
               nach Launch.
@@ -227,7 +227,7 @@ export default function BlogArticle() {
 
             <h3 style={h3Style}>Texte und Inhalte</h3>
             <p>
-              Auf Basis deiner Angaben aus dem Erstgespräch schreiben wir alle Texte für
+              Auf Basis deiner Angaben schreiben wir alle Texte für
               deine Website. Leistungsbeschreibungen, Über-uns-Seite, Kontaktseite. Du liest
               drüber, sagst ob es passt – und wir sind fertig.
             </p>
@@ -268,7 +268,7 @@ export default function BlogArticle() {
                 className="btn btn-primary"
                 style={{ padding: "14px 32px", fontSize: 15 }}
               >
-                <span>Jetzt Erstgespräch buchen →</span>
+                <span>Jetzt kostenlose Demo ansehen →</span>
               </Link>
             </div>
 
@@ -312,7 +312,7 @@ export default function BlogArticle() {
             <h2 style={h2Style}>Fazit: Keine Zeit ist keine Ausrede mehr</h2>
             <ol style={{ ...ulStyle, paddingLeft: 24 }}>
               <li style={{ marginBottom: 12 }}>
-                <strong>30 Minuten reichen.</strong> Das Erstgespräch ist alles, was du
+                <strong>30 Minuten reichen.</strong> Die Demo-Anfrage ist alles, was du
                 wirklich selbst tun musst. Den Rest übernehmen wir.
               </li>
               <li style={{ marginBottom: 12 }}>
@@ -359,7 +359,7 @@ export default function BlogArticle() {
                 className="btn btn-primary"
                 style={{ padding: "18px 40px", fontSize: 16 }}
               >
-                <span>Jetzt Erstgespräch buchen →</span>
+                <span>Jetzt kostenlose Demo ansehen →</span>
               </Link>
             </div>
           </div>

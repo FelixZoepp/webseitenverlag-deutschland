@@ -60,7 +60,7 @@ export default function BlogArticle() {
             <Link href="/ergebnisse">Ergebnisse</Link>
             <Link href="/blog">Blog</Link>
           </div>
-          <Link href="/entwurf" className="nav-cta">Kostenloses Erstgespräch</Link>
+          <Link href="/entwurf" className="nav-cta">Kostenlose Demo</Link>
         </div>
       </nav>
 
@@ -155,7 +155,7 @@ export default function BlogArticle() {
                 Unsere Websites sind von Anfang an für lokale Google-Suchen optimiert. Ab 99 € netto/Monat, ohne Einmalkosten.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "14px 32px", fontSize: 15 }}>
-                <span>Kostenloses Erstgespräch buchen →</span>
+                <span>Kostenlose Demo ansehen →</span>
               </Link>
             </div>
 
@@ -273,7 +273,7 @@ export default function BlogArticle() {
                 Unsere Websites sind von Tag eins für lokale Sichtbarkeit optimiert. Lass uns in 15 Minuten besprechen, wie das für dein Business aussieht.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "18px 40px", fontSize: 16 }}>
-                <span>Kostenloses Erstgespräch buchen →</span>
+                <span>Kostenlose Demo ansehen →</span>
               </Link>
             </div>
           </div>

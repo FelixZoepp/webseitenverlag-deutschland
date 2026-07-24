@@ -26,7 +26,7 @@ export default function BlogPage() {
             <Link href="/ergebnisse">Ergebnisse</Link>
             <Link href="/blog">Blog</Link>
           </div>
-          <Link href="/entwurf" className="nav-cta">Kostenloses Erstgespräch</Link>
+          <Link href="/entwurf" className="nav-cta">Kostenlose Demo</Link>
         </div>
       </nav>
 

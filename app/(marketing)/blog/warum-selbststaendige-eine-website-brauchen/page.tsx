@@ -60,7 +60,7 @@ export default function BlogArticle() {
             <Link href="/ergebnisse">Ergebnisse</Link>
             <Link href="/blog">Blog</Link>
           </div>
-          <Link href="/entwurf" className="nav-cta">Kostenloses Erstgespräch</Link>
+          <Link href="/entwurf" className="nav-cta">Kostenlose Demo</Link>
         </div>
       </nav>
 
@@ -161,7 +161,7 @@ export default function BlogArticle() {
                 Ohne Einmalkosten, fertig in wenigen Tagen, faire Vertragsbedingungen. Lass uns sprechen.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "14px 32px", fontSize: 15 }}>
-                <span>Kostenloses Erstgespräch buchen →</span>
+                <span>Kostenlose Demo ansehen →</span>
               </Link>
             </div>
 
@@ -224,7 +224,7 @@ export default function BlogArticle() {
 
             <h3 style={h3Style}>&ldquo;Ich habe keine Zeit, mich darum zu kümmern&rdquo;</h3>
             <p>
-              Genau deshalb gibt es das Abo-Modell. Wir kümmern uns um Design, Technik, Hosting, Updates und Support. Dein Zeitaufwand: ein Erstgespräch und gelegentliche Rückmeldungen zu Inhalten. Das war&apos;s.
+              Genau deshalb gibt es das Abo-Modell. Wir kümmern uns um Design, Technik, Hosting, Updates und Support. Dein Zeitaufwand: eine kurze Demo-Anfrage und gelegentliche Rückmeldungen zu Inhalten. Das war&apos;s.
             </p>
 
             <h3 style={h3Style}>&ldquo;Meine Kunden kommen über Empfehlungen&rdquo;</h3>
@@ -266,7 +266,7 @@ export default function BlogArticle() {
                 In 15 Minuten besprechen wir deine Website – ohne Verkaufsdruck, ohne Verpflichtung.
               </p>
               <Link href="/entwurf" className="btn btn-primary" style={{ padding: "18px 40px", fontSize: 16 }}>
-                <span>Kostenloses Erstgespräch buchen →</span>
+                <span>Kostenlose Demo ansehen →</span>
               </Link>
             </div>
           </div>
