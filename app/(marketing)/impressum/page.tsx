@@ -40,28 +40,19 @@ export default function ImpressumPage() {
             <h2 style={h2}>Angaben gemäß § 5 TMG</h2>
             <p>
               <strong>Content-Leads Solutions UG (haftungsbeschränkt)</strong><br />
-              Geschäftsführer: Felix-Leon Zoepp
+              Geschäftsführer: Felix-Leon Zoepp<br />
+              Rhinstraße 137A<br />
+              10315 Berlin
             </p>
             <p>
               E-Mail: info@webseitenverlag-deutschland.de
             </p>
 
-            <h2 style={h2}>Handelsregister</h2>
-            <p>
-              Registergericht: Amtsgericht [wird ergänzt]<br />
-              Registernummer: HRB [wird ergänzt]
-            </p>
-
-            <h2 style={h2}>Umsatzsteuer-ID</h2>
-            <p>
-              Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG:<br />
-              [wird ergänzt]
-            </p>
-
             <h2 style={h2}>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
             <p>
               Felix-Leon Zoepp<br />
-              Content-Leads Solutions UG (haftungsbeschränkt)
+              Rhinstraße 137A<br />
+              10315 Berlin
             </p>
 
             <h2 style={h2}>Streitschlichtung</h2>
