@@ -9,6 +9,8 @@
 import { getOwnedSite } from '@/lib/api-helpers'
 import { revalidateSite, revalidateHostMap } from '@/lib/hosting/site-cache'
 import { starteAsyncPublishQa } from '@/lib/qa-gate/publish-qa'
+import { fehlendeImpressumFelder } from '@/lib/rechtstexte/types'
+import type { ImpressumDaten } from '@/lib/rechtstexte/types'
 import { NextResponse } from 'next/server'
 import { SiteConfig } from '@/types'
 
@@ -42,6 +44,19 @@ export async function POST(
     const config = (site.draft_config || site.config) as SiteConfig | null
     if (!config) {
       return NextResponse.json({ error: 'Keine Konfiguration zum Veröffentlichen vorhanden.' }, { status: 400 })
+    }
+
+    // Impressum-Pflichtfelder prüfen — Publish blockieren wenn unvollständig
+    const pflichtangaben = (site.pflichtangaben || {}) as Record<string, unknown>
+    const impressumDaten = (pflichtangaben.impressum || null) as ImpressumDaten | null
+    const fehlend = fehlendeImpressumFelder(impressumDaten)
+    if (fehlend.length > 0) {
+      return NextResponse.json(
+        {
+          error: `Impressum unvollständig — bitte füllen Sie folgende Felder unter „Rechtstexte" aus: ${fehlend.join(', ')}`,
+        },
+        { status: 400 }
+      )
     }
 
     const now = new Date().toISOString()
