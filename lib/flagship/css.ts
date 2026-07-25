@@ -148,12 +148,12 @@ nav.scrolled~header .scroll-hint,nav.scrolled~.hero .scroll-hint{opacity:0}
 .vhero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;animation:kenburns 20s ease-in-out infinite alternate}
 @keyframes kenburns{0%{transform:scale(1)}100%{transform:scale(1.06)}}
 .vshade{position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.75) 35%,rgba(0,0,0,.5) 55%,rgba(0,0,0,.15) 75%,transparent 100%)}
-.vshade::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.4),transparent 25%,transparent 75%,rgba(0,0,0,.3))}
+  background:linear-gradient(90deg,rgba(${rgb(t.basis)},1) 0%,rgba(${rgb(t.basis)},.92) 30%,rgba(${rgb(t.basis)},.65) 50%,rgba(${rgb(t.basis)},.2) 70%,transparent 85%)}
+.vshade::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(${rgb(t.basis)},.5),transparent 25%,transparent 75%,rgba(${rgb(t.basis)},.35))}
 .vinner{position:relative;z-index:2;width:100%;text-align:left}
 .vcard{position:absolute;right:44px;bottom:48px;z-index:2}
 @media(max-width:860px){
-  .vshade{background:linear-gradient(180deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.7) 40%,rgba(0,0,0,.4) 65%,rgba(0,0,0,.15) 100%)}
+  .vshade{background:linear-gradient(180deg,rgba(${rgb(t.basis)},1) 0%,rgba(${rgb(t.basis)},.9) 30%,rgba(${rgb(t.basis)},.5) 60%,rgba(${rgb(t.basis)},.2) 100%)}
   .vcard{display:none}
   .vhero{min-height:92vh;padding-top:130px}
 }
@@ -407,10 +407,10 @@ ${opts?.premiumAnimationen ? `
 .rv{transition-duration:1s}
 .card,.quote,.nw-card,.proz-station{transition-duration:.5s}
 .card:hover,.quote:hover,.nw-card:hover,.proz-station:hover{transform:translateY(-8px)}
-.vhero{color:#fff}
-.vhero .eyebrow{color:rgba(255,255,255,.8)}
-.vhero .lead{color:rgba(255,255,255,.85)}
-.vhero .chips .chip{color:#fff;border-color:rgba(255,255,255,.25)}
+.vhero{color:var(--text)}
+.vhero .eyebrow{color:${hell ? 'var(--soft)' : 'rgba(255,255,255,.8)'}}
+.vhero .lead{color:${hell ? 'var(--soft)' : 'rgba(255,255,255,.85)'}}
+.vhero .chips .chip{color:var(--text);border-color:${hell ? 'var(--line)' : 'rgba(255,255,255,.25)'}}
 .hero h1,.hero .lead,.vhero h1,.vhero .lead{text-shadow:0 2px 24px rgba(0,0,0,.3)}
 section{transition:background .6s}
 .frame{overflow:hidden}
