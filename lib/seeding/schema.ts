@@ -212,7 +212,7 @@ export const VorlagenCopySchema = z.object({
       vorher: MediaBeschreibungSchema,
       nachher: MediaBeschreibungSchema,
       caption: z.string().min(5).max(120),
-    })).min(1).max(3).optional(),
+    })).min(1).max(2).optional(),
     bilder: z.array(z.object({
       media: MediaBeschreibungSchema,
       caption: z.string().min(5).max(120),

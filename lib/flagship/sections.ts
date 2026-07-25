@@ -338,7 +338,7 @@ export function renderErgebnisse(e: ErgebnisseInhalt): string {
   let inhalt: string
   if (e.variante === 'ba_slider') {
     inhalt = `<div class="ba-grid">
-      ${(e.paare || [])
+      ${(e.paare || []).slice(0, 2)
         .map((p, i) => `<figure class="ba rv" style="--i:${i}" data-ba>
         ${mediaSlot(p.vorher, 'lay before')}
         ${mediaSlot(p.nachher, 'lay after')}
