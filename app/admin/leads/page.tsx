@@ -205,7 +205,7 @@ export default function LeadsPage() {
           <div style={{ padding: '32px', textAlign: 'center', color: 'var(--za-fg-3)', fontSize: '12px' }}>Lade Leads…</div>
         ) : leads.length === 0 ? (
           <div style={{ padding: '32px', textAlign: 'center', color: 'var(--za-fg-3)', fontSize: '12px' }}>
-            Noch keine Leads — lege den ersten über „Neuer Lead" an.
+            Noch keine Leads — lege den ersten über &bdquo;Neuer Lead&ldquo; an.
           </div>
         ) : (
           <table className="glass-table">
