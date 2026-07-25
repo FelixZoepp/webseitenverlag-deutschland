@@ -203,8 +203,9 @@ check('C-PAKET-REZEPT: ohne Paket → Starter-Defaults (Abwärtskompatibilität)
   check('C-PAKET-REZEPT: Demo-Render koppelt Level ans Paket (flagshipLevelFuerTier)',
     demoRender.includes('flagshipLevelFuerTier('))
   const demoCreate = readFileSync(join(root, 'app/api/admin/demos/route.ts'), 'utf8')
-  check('C-PAKET-REZEPT: Demo-Erstellung nutzt seitenModusFuerTier + videoErlaubtFuerTier',
-    demoCreate.includes('seitenModusFuerTier(') && demoCreate.includes('videoErlaubtFuerTier('))
+  const demoAssets = readFileSync(join(root, 'app/api/admin/demos/[demoId]/assets/route.ts'), 'utf8')
+  check('C-PAKET-REZEPT: Demo-Erstellung nutzt seitenModusFuerTier, Assets-Route gated Video über videoErlaubtFuerTier',
+    demoCreate.includes('seitenModusFuerTier(') && demoAssets.includes('videoErlaubtFuerTier('))
   const videoRoute = readFileSync(join(root, 'app/api/admin/demos/[demoId]/video/route.ts'), 'utf8')
   check('C-PAKET-REZEPT: Video-Route gated serverseitig über videoErlaubtFuerTier',
     videoRoute.includes('videoErlaubtFuerTier('))
