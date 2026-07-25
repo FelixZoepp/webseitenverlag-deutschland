@@ -127,13 +127,17 @@ export function renderFlagshipPage(config: FlagshipConfig | GalabauConfig | Male
 
   let body: string
   if (multipage) {
-    // Multipage-Startseite: reduziertes Sektions-Set
+    // Multipage-Startseite: Kern-Sektionen (Unterseiten haben Details)
     body = [
       renderNav(navInhalt, hell, funnelUrl),
       renderHero(inhalte.hero, hell, funnelUrl, config),
       renderFakten(inhalte.fakten),
+      renderEmpathie(inhalte.empathie),
       renderSignature(inhalte.signature),
+      renderLeistungen(inhalte.leistungen),
       renderZahlen(inhalte.zahlen),
+      renderStimmen(inhalte.stimmen),
+      renderFaq(inhalte.faq),
       renderConversion(inhalte.conversion, hell, funnelUrl, funnelLabel),
       renderFooter(inhalte.footer, navInhalt, hell, meta.firma),
       opts.demo ? renderRibbon() : '',
