@@ -19,7 +19,7 @@ import { istScrubKomposition, type ScrubConfig } from './scrub/types'
 import { renderScrubStory } from './scrub/render'
 import { esc, escAttr, ICON_PATHS } from './html'
 import { flagshipCss } from './css'
-import { flagshipJs } from './js'
+import { flagshipJs, scrubMultiJs } from './js'
 import {
   renderAblauf, renderConversion, renderEmpathie, renderErgebnisse, renderFakten,
   renderFaq, renderFooter, renderHero, renderLeistungen, renderLokal, renderMarken,
@@ -65,6 +65,9 @@ function htmlShell(
     iconPfade: ICON_PATHS,
   })
 
+  const hatScrubMulti = config.scroll_animationen && config.scrub_szenen?.length
+  const scrubMultiScript = hatScrubMulti ? `\n${scrubMultiJs()}` : ''
+
   return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -87,7 +90,7 @@ ${flagshipCss(design, { premiumAnimationen: config.premium_animationen })}
 ${body}
 
 <script>
-${js}
+${js}${scrubMultiScript}
 </script>
 </body>
 </html>`
@@ -127,7 +130,7 @@ export function renderFlagshipPage(config: FlagshipConfig | GalabauConfig | Male
     // Multipage-Startseite: reduziertes Sektions-Set
     body = [
       renderNav(navInhalt, hell, funnelUrl),
-      renderHero(inhalte.hero, hell, funnelUrl),
+      renderHero(inhalte.hero, hell, funnelUrl, config),
       renderFakten(inhalte.fakten),
       renderSignature(inhalte.signature),
       renderZahlen(inhalte.zahlen),
@@ -139,7 +142,7 @@ export function renderFlagshipPage(config: FlagshipConfig | GalabauConfig | Male
     // Onepager: alle Sektionen
     body = [
       renderNav(navInhalt, hell, funnelUrl),
-      renderHero(inhalte.hero, hell, funnelUrl),
+      renderHero(inhalte.hero, hell, funnelUrl, config),
       renderFakten(inhalte.fakten),
       inhalte.marken ? renderMarken(inhalte.marken) : '',
       inhalte.nachweise ? renderNachweise(inhalte.nachweise) : '',
