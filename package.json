@@ -38,7 +38,8 @@
     "seed:assets": "npx tsx scripts/seed-assets.ts",
     "seed:branchen": "npx tsx scripts/seed-branchen.ts",
     "test:blog": "npx tsx scripts/test-blog.ts",
-    "test:go-live": "npx tsx scripts/test-go-live.ts"
+    "test:go-live": "npx tsx scripts/test-go-live.ts",
+    "seed:scrub": "npx tsx scripts/seed-scrub-videos.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
