@@ -61,17 +61,16 @@ export function renderAnfrageSeite(config: FlagshipConfig, opts: FlagshipRenderO
       <p class="fehler">Bitte eine Leistung auswählen.</p>
       <div class="fnav"><button class="btn${hell ? ' sun' : ''}" type="button" data-weiter>Weiter <span class="arr">→</span></button></div>`, true))
 
-    // Schritt 2: branchenspezifische Qualifizierung (aus branchen_profile.quali_fragen)
+    // Schritt 2+: branchenspezifische Qualifizierung — eine Frage pro Schritt
     if (funnel.quali_fragen?.length) {
-      const felder = funnel.quali_fragen
-        .map((f) => `<label>${esc(f.frage)}${f.pflicht ? '*' : ''}</label>\n      ${qualiFeld(f)}`)
-        .join('\n      ')
-      schritte.push(schrittHtml(`
-      <h2>Ein paar Details</h2>
+      for (const f of funnel.quali_fragen) {
+        schritte.push(schrittHtml(`
+      <h2>${esc(f.frage)}</h2>
       <p class="sub">Damit wir Ihre Anfrage sofort richtig einschätzen können.</p>
-      ${felder}
-      <p class="fehler">Bitte die Pflichtfelder beantworten.</p>
+      ${qualiFeld(f)}
+      <p class="fehler">${f.pflicht ? 'Bitte beantworten Sie diese Frage.' : ''}</p>
       <div class="fnav"><button class="btn ghost zurueck" type="button" data-zurueck>←</button><button class="btn${hell ? ' sun' : ''}" type="button" data-weiter>Weiter <span class="arr">→</span></button></div>`, false))
+      }
     }
   }
 
