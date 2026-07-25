@@ -153,6 +153,15 @@ export function wendeDesignOverridesAn(config: FlagshipConfig, overrides: Design
     if (istMalerKomposition(config)) config.signature_story = 'on'
   }
 }
+
+/** Scrub-Assets aus dem Branchen-Profil in die Demo-Config kopieren (wenn vorhanden + scroll_animationen aktiv) */
+export function kopiereScruDaten(config: FlagshipConfig, profil: Record<string, unknown> | null): void {
+  if (!config.scroll_animationen || !profil) return
+  const scrubSzenen = (profil as { scrub_szenen?: unknown[] }).scrub_szenen
+  const scrubAssets = (profil as { scrub_assets?: unknown }).scrub_assets
+  if (scrubSzenen?.length) config.scrub_szenen = scrubSzenen as FlagshipConfig['scrub_szenen']
+  if (scrubAssets) config.scrub_assets = scrubAssets as FlagshipConfig['scrub_assets']
+}
 /** DoD-Grenze (BF §6): Kosten pro Demo in Cent */
 const DEMO_KOSTEN_LIMIT_CENT = 150
 
@@ -365,6 +374,7 @@ export async function personalisiereFlagshipConfig(
 
   const config = structuredClone(vorlage)
   if (overrides) wendeDesignOverridesAn(config, overrides)
+  kopiereScruDaten(config, row.profil as Record<string, unknown> | null)
   const paare = bauErsetzungsPaare(config.meta.firma, prospect.firma, config.meta.ort, prospect.ort, config.inhalte, config.meta.telefon, prospect.telefon)
   config.inhalte = ersetzeUeberall(config.inhalte, paare)
   config.funnel = ersetzeUeberall(config.funnel, paare)
@@ -443,6 +453,7 @@ export async function generiereFlagshipDemo(
   // 1) Klonen + Design-Overrides + deterministische Personalisierung (kein Claude-Call)
   const config = structuredClone(vorlage)
   if (overrides) wendeDesignOverridesAn(config, overrides)
+  kopiereScruDaten(config, row.profil as Record<string, unknown> | null)
   const paare = bauErsetzungsPaare(config.meta.firma, prospect.firma, config.meta.ort, prospect.ort, config.inhalte, config.meta.telefon, prospect.telefon)
   config.inhalte = ersetzeUeberall(config.inhalte, paare)
   config.funnel = ersetzeUeberall(config.funnel, paare)
