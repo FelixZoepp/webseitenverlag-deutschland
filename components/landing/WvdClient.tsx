@@ -202,7 +202,6 @@ export default function WvdClient() {
             <a href="#problem">Warum jetzt</a>
             <a href="#rechner">ROI-Rechner</a>
             <a href="#ablauf">Ablauf</a>
-            <a href="/kundenmeinungen">Kundenmeinungen</a>
             <a href="/blog">Blog</a>
           </div>
           <a href="/entwurf" className="nav-cta">Kostenlose Demo</a>
@@ -222,7 +221,6 @@ export default function WvdClient() {
             <a href="#problem" onClick={() => setMobileMenu(false)}>Warum jetzt</a>
             <a href="#rechner" onClick={() => setMobileMenu(false)}>ROI-Rechner</a>
             <a href="#ablauf" onClick={() => setMobileMenu(false)}>Ablauf</a>
-            <a href="/kundenmeinungen" onClick={() => setMobileMenu(false)}>Kundenmeinungen</a>
             <a href="/blog" onClick={() => setMobileMenu(false)}>Blog</a>
           </div>
         )}
@@ -856,9 +854,6 @@ export default function WvdClient() {
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" as const }}>
             <a href={DEMO_URL} target="_blank" rel="noopener" className="btn btn-ghost" style={{ fontSize: 16, padding: "18px 40px" }}>
               <span>Live-Demo ansehen</span>
-            </a>
-            <a href="/kundenmeinungen" className="btn btn-primary" style={{ fontSize: 16, padding: "18px 40px" }}>
-              <span>Alle Kundenergebnisse ansehen →</span>
             </a>
           </div>
         </div>

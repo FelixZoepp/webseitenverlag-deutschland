@@ -23,7 +23,7 @@ const urls = eintraege.map((e) => e.url)
 
 check('Sitemap hat Startseite mit Priority 1',
   eintraege.some((e) => e.url.endsWith('/') && e.priority === 1))
-for (const pfad of ['/anfrage', '/ergebnisse', '/kundenmeinungen', '/blog']) {
+for (const pfad of ['/anfrage', '/ergebnisse', '/blog']) {
   check(`Sitemap enthält ${pfad}`, urls.some((u) => u.endsWith(pfad)))
 }
 check('Sitemap enthält KEINE Demo-/Admin-/Dashboard-Pfade',

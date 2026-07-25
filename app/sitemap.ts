@@ -13,7 +13,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${APP_URL}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${APP_URL}/anfrage`, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${APP_URL}/ergebnisse`, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${APP_URL}/kundenmeinungen`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${APP_URL}/blog`, changeFrequency: 'weekly', priority: 0.7 },
   ]
   const blog: MetadataRoute.Sitemap = veroeffentlichteArtikel().map((a) => ({
