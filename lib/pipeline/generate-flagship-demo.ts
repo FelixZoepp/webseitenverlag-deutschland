@@ -241,6 +241,19 @@ export function bauErsetzungsPaare(
     const kurz = firmaOhneRechtsform(alteFirma)
     if (kurz && kurz !== alteFirma && kurz !== neueFirma) {
       paare.push([kurz, neueFirma])
+      // Einzelne markante Wörter ersetzen (z.B. "Hessler" aus "Dachwerk Hessler")
+      // Nur Wörter mit ≥4 Buchstaben die keine generischen Begriffe sind
+      const generisch = new Set(['gmbh', 'gbr', 'ohg', 'und', 'der', 'die', 'das', 'für', 'von', 'bei', 'aus', 'zum', 'zur', 'den', 'dem'])
+      const worte = kurz.split(/[\s&-]+/).filter(w => w.length >= 4 && !generisch.has(w.toLowerCase()))
+      // Neuen Firmennamen ebenfalls splitten für 1:1-Zuordnung
+      const neueWorte = neueFirma.split(/[\s&-]+/).filter(w => w.length >= 4 && !generisch.has(w.toLowerCase()))
+      for (const wort of worte) {
+        if (wort !== kurz && wort !== alteFirma && wort !== neueFirma) {
+          // Ersetze durch das letzte markante Wort der neuen Firma (meistens der Nachname)
+          const ersatz = neueWorte.length > 0 ? neueWorte[neueWorte.length - 1] : neueFirma
+          paare.push([wort, ersatz])
+        }
+      }
     }
   }
   if (neuerOrt && alterOrt && alterOrt !== neuerOrt) {
@@ -249,10 +262,12 @@ export function bauErsetzungsPaare(
   if (neuTelefon && altTelefon && altTelefon !== neuTelefon) {
     paare.push([altTelefon, neuTelefon])
   }
-  // Regionalbezeichnungen ersetzen
+  // Regionalbezeichnungen ersetzen (inkl. "das Ruhrgebiet" → "Berlin und Umgebung")
   const json = JSON.stringify(alteInhalte)
   for (const region of REGIONAL_BEGRIFFE) {
     if (json.includes(region) && neuerOrt) {
+      // "das Ruhrgebiet" → "Berlin und Umgebung" (nicht "das Berlin und Umgebung")
+      paare.push([`das ${region}`, `${neuerOrt} und Umgebung`])
       paare.push([region, `${neuerOrt} und Umgebung`])
     }
   }
