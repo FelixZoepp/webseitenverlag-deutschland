@@ -48,6 +48,7 @@ export const ASSET_STILE: Record<string, AssetStil> = {
       vorher: 'the same room before renovation: stained old wall paint, cracks, faded colors, dusty floor',
       team: 'painter in white work clothes seen from behind, painting a wall with a roller',
       detail: 'close-up of professional painting tools, brushes and color swatches on a workbench',
+      leistung: 'professional painting tools and materials arranged on a drop cloth, ready for work',
     },
     style_tags: ['hell', 'clean', 'handwerk'],
   },
@@ -62,6 +63,7 @@ export const ASSET_STILE: Record<string, AssetStil> = {
       vorher: 'the same table empty and bare, chairs up, room in plain daylight',
       team: 'chef plating a dish in a professional kitchen, seen from behind',
       detail: 'close-up of fresh regional ingredients on a wooden cutting board',
+      leistung: 'kitchen station with professional cooking utensils, ingredients prepared for service',
     },
     style_tags: ['warm', 'genuss', 'abendlicht'],
   },
@@ -81,6 +83,7 @@ export function fallbackStil(branche: string): AssetStil {
       vorher: `the same scene before the work: worn, unfinished, in need of service`,
       team: `${b} professional at work, seen from behind or side, no visible face`,
       detail: `close-up of professional ${b} tools and materials`,
+      leistung: `professional ${b} workspace showing service in action, tools and materials visible`,
     },
     style_tags: ['hell', 'clean'],
   }
@@ -113,6 +116,7 @@ export function altTextVorlage(brancheName: string, szene: SzeneTyp): string {
     vorher: `Zustand vor Beginn der ${brancheName}-Arbeiten`,
     team: `Mitarbeiter eines ${brancheName}-Betriebs bei der Arbeit`,
     detail: `Werkzeuge und Materialien eines ${brancheName}-Betriebs`,
+    leistung: `Leistung eines ${brancheName}-Betriebs in Aktion`,
   }
   return vorlagen[szene]
 }

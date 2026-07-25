@@ -40,7 +40,7 @@ const BUCKET = 'asset-bank'
 /** srcset-Stufen (Breite in px) — größte Stufe = storage_path/Hauptdatei */
 const SRCSET_BREITEN = [480, 960, 1600]
 
-export type SzeneTyp = 'hero' | 'vorher' | 'nachher' | 'detail' | 'team' | 'galerie'
+export type SzeneTyp = 'hero' | 'vorher' | 'nachher' | 'detail' | 'team' | 'galerie' | 'leistung'
 
 export interface AssetGenerierung {
   prompt: string

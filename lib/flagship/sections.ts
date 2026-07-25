@@ -279,7 +279,7 @@ export function renderLeistungen(l: LeistungenInhalt): string {
         <h3>${esc(k.titel)}</h3>
         <p>${esc(k.text)}</p>${link}
       </div>
-      <div class="svc-bild media" data-label="Leistung: ${escAttr(k.titel)}" style="transform:rotate(${rot}deg)"></div>
+      <div class="svc-bild media" data-label="Leistung: ${escAttr(k.titel)}" style="transform:rotate(${rot}deg)">${(k as Record<string, unknown>).media && ((k as Record<string, unknown>).media as { datei?: string }).datei ? `<img src="${escAttr(((k as Record<string, unknown>).media as { datei: string }).datei)}" alt="${escAttr(k.titel)}" width="800" height="600" onload="this.parentElement.classList.add('loaded')" onerror="this.remove()">` : ''}</div>
     </div>
   </article>`
     })

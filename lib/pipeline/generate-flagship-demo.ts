@@ -205,6 +205,47 @@ export interface FlagshipDemoErgebnis {
  * Varianten bleibt die fremde Stadt im Text stehen (Konsistenz-Validator §4.3).
  * Reihenfolge: längste Variante zuerst, damit split/join sauber greift.
  */
+/** Firma-Kurzform ohne Rechtsform (z.B. "Dachwerk Hessler GmbH" → "Dachwerk Hessler") */
+function firmaOhneRechtsform(firma: string): string {
+  return firma.replace(/\s*(GmbH|UG|AG|e\.K\.|OHG|KG|GbR|UG \(haftungsbeschränkt\)|mbH|Co\.\s*KG)\s*$/i, '').trim()
+}
+
+const REGIONAL_BEGRIFFE = ['Ruhrgebiet', 'Rhein-Main', 'Rheinland', 'Münsterland', 'Sauerland', 'Schwarzwald', 'Allgäu', 'Erzgebirge', 'Oberbayern', 'Niederrhein', 'Bergisches Land', 'Ostwestfalen', 'Nordhessen', 'Südhessen', 'Oberfranken', 'Mittelfranken', 'Unterfranken', 'Oberpfalz', 'Niederbayern']
+
+/** Alle Ersetzungs-Paare für Firma + Ort + Region aufbauen */
+export function bauErsetzungsPaare(
+  alteFirma: string | undefined,
+  neueFirma: string,
+  alterOrt: string | undefined,
+  neuerOrt: string | null | undefined,
+  alteInhalte: unknown,
+  altTelefon?: string | null,
+  neuTelefon?: string | null,
+): [string, string][] {
+  const paare: [string, string][] = []
+  if (alteFirma && alteFirma !== neueFirma) {
+    paare.push([alteFirma, neueFirma])
+    const kurz = firmaOhneRechtsform(alteFirma)
+    if (kurz && kurz !== alteFirma && kurz !== neueFirma) {
+      paare.push([kurz, neueFirma])
+    }
+  }
+  if (neuerOrt && alterOrt && alterOrt !== neuerOrt) {
+    paare.push(...ortErsetzungsPaare(alterOrt, neuerOrt))
+  }
+  if (neuTelefon && altTelefon && altTelefon !== neuTelefon) {
+    paare.push([altTelefon, neuTelefon])
+  }
+  // Regionalbezeichnungen ersetzen
+  const json = JSON.stringify(alteInhalte)
+  for (const region of REGIONAL_BEGRIFFE) {
+    if (json.includes(region) && neuerOrt) {
+      paare.push([region, `${neuerOrt} und Umgebung`])
+    }
+  }
+  return paare
+}
+
 export function ortErsetzungsPaare(vorlagenOrt: string, neuerOrt: string): [string, string][] {
   if (!vorlagenOrt || !neuerOrt || vorlagenOrt === neuerOrt) return []
   const paare: [string, string][] = [[vorlagenOrt, neuerOrt]]
@@ -320,16 +361,7 @@ export async function personalisiereFlagshipConfig(
 
   const config = structuredClone(vorlage)
   if (overrides) wendeDesignOverridesAn(config, overrides)
-  const paare: [string, string][] = []
-  if (config.meta.firma && config.meta.firma !== prospect.firma) {
-    paare.push([config.meta.firma, prospect.firma])
-  }
-  if (prospect.ort && config.meta.ort && config.meta.ort !== prospect.ort) {
-    paare.push(...ortErsetzungsPaare(config.meta.ort, prospect.ort))
-  }
-  if (prospect.telefon && config.meta.telefon && config.meta.telefon !== prospect.telefon) {
-    paare.push([config.meta.telefon, prospect.telefon])
-  }
+  const paare = bauErsetzungsPaare(config.meta.firma, prospect.firma, config.meta.ort, prospect.ort, config.inhalte, config.meta.telefon, prospect.telefon)
   config.inhalte = ersetzeUeberall(config.inhalte, paare)
   config.funnel = ersetzeUeberall(config.funnel, paare)
 
@@ -407,16 +439,7 @@ export async function generiereFlagshipDemo(
   // 1) Klonen + Design-Overrides + deterministische Personalisierung (kein Claude-Call)
   const config = structuredClone(vorlage)
   if (overrides) wendeDesignOverridesAn(config, overrides)
-  const paare: [string, string][] = []
-  if (config.meta.firma && config.meta.firma !== prospect.firma) {
-    paare.push([config.meta.firma, prospect.firma])
-  }
-  if (prospect.ort && config.meta.ort && config.meta.ort !== prospect.ort) {
-    paare.push(...ortErsetzungsPaare(config.meta.ort, prospect.ort))
-  }
-  if (prospect.telefon && config.meta.telefon && config.meta.telefon !== prospect.telefon) {
-    paare.push([config.meta.telefon, prospect.telefon])
-  }
+  const paare = bauErsetzungsPaare(config.meta.firma, prospect.firma, config.meta.ort, prospect.ort, config.inhalte, config.meta.telefon, prospect.telefon)
   config.inhalte = ersetzeUeberall(config.inhalte, paare)
   config.funnel = ersetzeUeberall(config.funnel, paare)
 
@@ -575,6 +598,40 @@ export async function generiereFlagshipDemo(
     if (durchlauf < MAX_ASSET_DURCHLAEUFE) {
       console.warn(`[flagship-demo] Durchlauf ${durchlauf}: Assets unvollständig, starte Retry…`)
     }
+  }
+
+  // Leistungsbilder generieren (parallel, non-blocking — Platzhalter bleiben wenn es fehlschlägt)
+  const leistungsAufgaben: Promise<void>[] = []
+  for (let i = 0; i < config.inhalte.leistungen.karten.length; i++) {
+    const karte = config.inhalte.leistungen.karten[i]
+    // Leistungskarten haben keine datei — nur im neuen Stack-Layout relevant
+    const leistPrompt = styleProfil?.style_prompts
+      ? baueAssetPrompt(styleProfil, `${karte.titel}: professional workspace showing this service in action, tools and materials visible`)
+      : [
+          `Professional ${row.name || brancheKey} workspace: ${karte.titel}.`,
+          `Close-up of tools, materials and work in progress. Authentic craftsmanship.`,
+          `Bright natural light, shallow depth of field, 4:3 format.`,
+          `Photorealistic editorial photography. No people, no text, no logos.`,
+        ].join(' ')
+    leistungsAufgaben.push(
+      generiereAsset({
+        prompt: leistPrompt,
+        aspect: '4:3',
+        branche: brancheKey,
+        szeneTyp: 'leistung',
+        quelleOverride: 'demo_generiert',
+        kontext: `${kontext}:leistung-${i}`,
+      }).then((asset) => {
+        kostenCent += asset.kostenCent
+        // MediaSlot-Felder auf der Karte setzen — sections.ts liest sie aus dem data-label
+        ;(karte as Record<string, unknown>).media = { datei: asset.publicUrl, label: karte.titel, alt: karte.titel }
+      }).catch((e: Error) => {
+        warnungen.push(`Leistungsbild ${i} fehlgeschlagen: ${e.message}`)
+      })
+    )
+  }
+  if (leistungsAufgaben.length > 0) {
+    await Promise.all(leistungsAufgaben)
   }
 
   // Fallback-Kette: Bank, dann CSS-Platzhalter (MediaSlot ohne datei)
