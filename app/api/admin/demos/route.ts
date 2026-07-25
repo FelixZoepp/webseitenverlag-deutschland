@@ -10,7 +10,7 @@ import { generateLibraryDemoConfig } from '@/lib/pipeline/generate-library-conte
 import { personalisiereFlagshipConfig, type DesignOverrides } from '@/lib/pipeline/generate-flagship-demo'
 import { libraryPageKey, loadLibraryPage } from '@/lib/library/load'
 import { SEED_BRANCHEN, STILE, type Stil } from '@/lib/library/types'
-import { seitenModusFuerTier, videoErlaubtFuerTier } from '@/config/plans'
+import { seitenModusFuerTier } from '@/config/plans'
 
 // F5: Flagship-Demos generieren Assets frisch (Hero + Paar, je ~30–90s)
 export const maxDuration = 300
