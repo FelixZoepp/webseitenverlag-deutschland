@@ -165,7 +165,7 @@ const UNTERSEITEN_MARKER: Record<UnterseitenSlug, string[]> = {
 
 /** Sektionen, die auf der Multipage-Startseite NICHT erscheinen dürfen */
 const MULTIPAGE_HOME_AUSGESCHLOSSEN = [
-  'empathie', 'leistungen', 'ergebnisse', 'stimmen', 'lokal', 'faq', 'nachweise',
+  'ergebnisse', 'lokal', 'nachweise', 'ablauf', 'referenzen',
 ]
 
 for (const [key, seed] of Object.entries(FLAGSHIP_SEEDS)) {
