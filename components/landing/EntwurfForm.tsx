@@ -85,6 +85,10 @@ export default function EntwurfForm() {
       });
       if (!res.ok) throw new Error("Fehler beim Senden");
       setSubmitted(true);
+      // Facebook Pixel: Lead Event
+      if (typeof window !== 'undefined' && (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq) {
+        (window as unknown as { fbq: (...args: unknown[]) => void }).fbq('track', 'Lead');
+      }
     } catch {
       setError("Es gab ein Problem beim Senden. Bitte versuchen Sie es erneut.");
     } finally {
