@@ -125,7 +125,7 @@ export default function AgbPage() {
               (3) Der Anbieter protokolliert Veröffentlichungsvorgänge mit Zeitpunkt und auslösendem Zugang und stellt eine Funktion zur Wiederherstellung eines vorherigen Standes bereit.
             </p>
             <p>
-              (4) Rechtlich relevante Pflichtangaben, insbesondere Impressum, Datenschutzerklärung und Cookie-Hinweise, sind der Bearbeitung durch das System entzogen. Änderungen hieran sind beim Anbieter in Textform zu beauftragen.
+              (4) Rechtlich relevante Pflichtangaben, insbesondere Impressum, Datenschutzerklärung und Cookie-Hinweise, sind der Bearbeitung durch das KI-gest&uuml;tzte System entzogen. Der Kunde pflegt die zugrunde liegenden Angaben &uuml;ber ein hierf&uuml;r vorgesehenes strukturiertes Eingabeformular selbst; aus diesen Angaben erzeugt der Anbieter die entsprechenden Texte anhand fester Vorlagen. &sect;12 Absatz 2 und 3 gelten.
             </p>
             <p>
               (5) Nicht im monatlichen Entgelt enthalten sind Zusatzmodule und Zusatzleistungen, insbesondere weitere Unterseiten, zusätzliche Funktionen sowie Leistungen, die außerhalb des Bearbeitungssystems zu erbringen sind. Diese werden nach der jeweils gültigen Preisliste des Anbieters vergütet. Der Anbieter teilt dem Kunden den Preis vor Ausführung mit; die Beauftragung erfolgt in Textform.
@@ -168,7 +168,7 @@ export default function AgbPage() {
               (2) Der Vertrag verlängert sich nach Ablauf der Mindestlaufzeit automatisch um jeweils weitere 12 Monate, sofern er nicht spätestens drei Monate vor Ablauf der jeweiligen Laufzeit in Textform gekündigt wird.
             </p>
             <p>
-              (3) Die Kündigung bedarf der Textform. Sie kann per E-Mail an kuendigung@webseitenverlag-deutschland.de oder über die Kündigungsfunktion im Kundenkonto erklärt werden.
+              (3) Die K&uuml;ndigung bedarf der Textform. F&uuml;r die Erkl&auml;rung der K&uuml;ndigung stellt der Anbieter im Kundenkonto eine K&uuml;ndigungsfunktion bereit; die K&uuml;ndigung in sonstiger Textform bleibt hiervon unber&uuml;hrt. Der Anbieter best&auml;tigt Eingang und Wirksamkeitszeitpunkt in Textform.
             </p>
             <p>
               (4) Das ordentliche Kündigungsrecht des Kunden innerhalb der laufenden Vertragslaufzeit ist ausgeschlossen. Das Recht beider Parteien zur außerordentlichen Kündigung aus wichtigem Grund bleibt unberührt.
@@ -285,7 +285,7 @@ export default function AgbPage() {
             </p>
 
             <p style={{ marginTop: 48, color: "var(--ink-soft)", fontSize: 14 }}>
-              Stand: Juli 2026
+              Fassung 1.2 &ndash; Stand: Juli 2026
             </p>
           </div>
         </div>
