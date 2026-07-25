@@ -37,8 +37,6 @@ export function renderNav(nav: NavInhalt, hell: boolean, funnelUrl: string): str
 
 export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): string {
   const headline = hero.headline_zeilen.map((z) => hl(z)).join('<br>')
-  // Chips im Hero entfernt (doppelt mit Fakten-Sektion darunter)
-  const chips = ''
   const ctaKlasse = hell ? 'btn sun' : 'btn'
   const sekundaer = hero.cta_sekundaer
     ? `\n        <a class="btn ghost" href="${escAttr(hero.cta_sekundaer.href)}">${esc(hero.cta_sekundaer.label)}</a>`
