@@ -268,31 +268,36 @@ export function renderSignature(sig: SignatureInhalt): string {
 }
 
 export function renderLeistungen(l: LeistungenInhalt): string {
+  const rotationen = [-2, 1.5, -1, 2, -1.5, 1, -2, 1.5, -1]
   const karten = l.karten
     .map((k, i) => {
-      const kopf = l.stil === 'nummern'
-        ? `<span class="no">${esc(k.no || '')}</span>`
-        : `<div class="ic">${icon(k.icon || 'sparkle')}</div>`
+      const nr = String(i + 1).padStart(2, '0')
+      const rot = rotationen[i % rotationen.length]
       const link = k.link_label ? `\n        <span class="fp">${esc(k.link_label)}</span>` : ''
-      return `<div class="card rv" style="--i:${i}">
-        ${kopf}
+      return `<article class="svc rv" style="top:${90 + i * 16}px">
+    <div class="nr" aria-hidden="true">${nr}</div>
+    <div class="svc-grid">
+      <div>
         <h3>${esc(k.titel)}</h3>
         <p>${esc(k.text)}</p>${link}
-      </div>`
+      </div>
+      <div class="svc-bild media" data-label="Leistung: ${escAttr(k.titel)}" style="transform:rotate(${rot}deg)"></div>
+    </div>
+  </article>`
     })
-    .join('\n      ')
+    .join('\n  ')
   const hinweis = l.hinweis
     ? `\n    <p class="rv leist-hinweis">${esc(l.hinweis.text)} <a href="${escAttr(l.hinweis.link_anker)}">${esc(l.hinweis.link_label)}</a></p>`
     : ''
   return `<!-- sektion:leistungen -->
-<section class="leist tex" id="leistungen">
+<section class="leist" id="leistungen">
   <div class="wrap">
     <div class="rv" style="max-width:660px">
       <span class="eyebrow">${esc(l.eyebrow)}</span>
       <h2>${hl(l.headline)}</h2>
     </div>
-    <div class="grid3">
-      ${karten}
+    <div class="stack">
+  ${karten}
     </div>${hinweis}
   </div>
 </section>`
