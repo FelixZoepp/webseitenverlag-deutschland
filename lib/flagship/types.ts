@@ -275,6 +275,29 @@ export interface FlagshipMeta {
 }
 
 /** Config in demos.config bzw. sites.config, engine === 'flagship' */
+/** Einzelszene der Multi-Video-Scroll-Scrub-Experience */
+export interface ScrubMultiSzene {
+  id: string
+  label: string         // 'Schritt 01 — Das Fundament'
+  titel: string         // 'Wo alles beginnt.'
+  text: string          // 2-3 sentences
+  tags: string[]        // 3 keywords
+  align: 'left' | 'right'
+  scroll: number        // 1.3-1.8 (scroll weight)
+  linger: number        // 0.1-0.3 (linger at ends)
+  videoPrompt: string   // Higgsfield prompt (English)
+}
+
+/** Asset-URLs für die Multi-Video-Scroll-Scrub-Experience */
+export interface ScrubMultiAssets {
+  entryStill: string
+  clips: Array<{
+    desktop: string     // GOP 8, 1080p URL
+    mobile: string      // GOP 4, 720p URL
+    poster: string      // JPEG URL
+  }>
+}
+
 export interface FlagshipConfig {
   engine: 'flagship'
   branche_key: string
@@ -290,6 +313,10 @@ export interface FlagshipConfig {
   scroll_animationen?: boolean
   /** Multipage: Sektionen auf eigene Unterseiten verteilen (Business/Growth) */
   seiten_modus?: 'onepager' | 'multipage'
+  /** Multi-Video-Scroll-Scrub: Szenen-Definitionen (Texte, Gewichtung, Alignment) */
+  scrub_szenen?: ScrubMultiSzene[]
+  /** Multi-Video-Scroll-Scrub: Asset-URLs (Clips, Poster, Entry-Still) */
+  scrub_assets?: ScrubMultiAssets
 }
 
 /** Verfügbare Unterseiten im Multipage-Modus */

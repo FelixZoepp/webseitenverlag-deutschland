@@ -5,7 +5,7 @@
 
 import type {
   AblaufInhalt, ConversionInhalt, EmpathieInhalt, ErgebnisseInhalt, FaktenInhalt,
-  FaqInhalt, FlagshipInhalte, FooterInhalt, HeroInhalt, LeistungenInhalt,
+  FaqInhalt, FlagshipConfig, FlagshipInhalte, FooterInhalt, HeroInhalt, LeistungenInhalt,
   LokalInhalt, MarkenInhalt, NachweiseInhalt, NavInhalt, ProzessInhalt,
   ReferenzenInhalt, SignatureInhalt, StimmenInhalt, ZahlenInhalt,
 } from './types'
@@ -35,7 +35,51 @@ export function renderNav(nav: NavInhalt, hell: boolean, funnelUrl: string): str
 </nav>`
 }
 
-export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): string {
+/** Multi-Video Scroll-Scrub (Premium): 2-Spalten-Layout, sticky Video links, Chapters rechts */
+function renderScrubMulti(config: FlagshipConfig): string {
+  const szenen = config.scrub_szenen!
+  const assets = config.scrub_assets!
+
+  const layers = assets.clips.map((clip, i) => `
+    <div class="scrub-layer" data-idx="${i}">
+      <img class="scrub-poster" src="${escAttr(clip.poster)}" alt="" loading="${i === 0 ? 'eager' : 'lazy'}">
+    </div>`).join('')
+
+  const chapters = szenen.map((s, i) => `
+    <div class="scrub-chapter${i === 0 ? ' aktiv' : ''}" data-idx="${i}" style="text-align:${s.align}">
+      <span class="scrub-label">${esc(s.label)}</span>
+      <h3>${esc(s.titel)}</h3>
+      <p>${esc(s.text)}</p>
+      <div class="scrub-tags">${s.tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>
+    </div>`).join('')
+
+  // Scene config as JSON for the JS controller
+  const sceneData = JSON.stringify(szenen.map((s, i) => ({
+    idx: i,
+    scroll: s.scroll,
+    linger: s.linger,
+    desktop: assets.clips[i]?.desktop || '',
+    mobile: assets.clips[i]?.mobile || '',
+  })))
+
+  return `<!-- sektion:hero -->
+<div class="scrub-multi" data-scrub-scenes='${sceneData.replace(/'/g, "&#39;")}'>
+  <div class="scrub-stage">
+    ${layers}
+    <div class="scrub-shade"></div>
+  </div>
+  <div class="scrub-story">
+    ${chapters}
+  </div>
+</div>`
+}
+
+export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string, config?: FlagshipConfig): string {
+  // Scroll-Scrub Multi-Szenen (Premium, wenn scroll_animationen aktiv + scrub_szenen vorhanden)
+  if (config?.scroll_animationen && config.scrub_szenen?.length && config.scrub_assets?.clips?.length) {
+    return renderScrubMulti(config)
+  }
+
   const headline = hero.headline_zeilen.map((z) => hl(z)).join('<br>')
   const ctaKlasse = hell ? 'btn sun' : 'btn'
   const sekundaer = hero.cta_sekundaer

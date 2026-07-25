@@ -171,6 +171,31 @@ nav.scrolled~header .scroll-hint,nav.scrolled~.hero .scroll-hint{opacity:0}
 .vhero.scrub .vshade{position:sticky;top:0;height:100vh}
 .vhero.scrub .vinner{position:sticky;top:0;height:100vh;display:flex;align-items:center}
 
+/* Scroll-Scrub Multi-Szenen */
+.scrub-multi{display:grid;grid-template-columns:1fr 1fr;position:relative}
+.scrub-stage{position:sticky;top:0;height:100dvh;height:100vh;overflow:hidden;grid-row:1/-1}
+.scrub-layer{position:absolute;inset:0;opacity:0;will-change:opacity}
+.scrub-layer video,.scrub-layer img{width:100%;height:100%;object-fit:cover}
+.scrub-layer .scrub-poster{position:absolute;inset:0;transition:opacity .3s}
+.scrub-layer[data-loaded] .scrub-poster{opacity:0}
+.scrub-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(${rgb(t.basis)},.7) 0%,rgba(${rgb(t.basis)},.3) 40%,transparent 70%);pointer-events:none;z-index:1}
+.scrub-story{grid-column:2;position:relative;z-index:2}
+.scrub-chapter{min-height:100dvh;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:20vh 48px 20vh 40px;opacity:.3;transition:opacity .4s}
+.scrub-chapter.aktiv{opacity:1}
+.scrub-chapter .scrub-label{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ak1);margin-bottom:16px}
+.scrub-chapter h3{font-size:clamp(28px,3.5vw,44px);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-bottom:16px}
+.scrub-chapter p{font-size:15px;line-height:1.65;color:var(--soft);max-width:420px;margin-bottom:20px}
+.scrub-tags{display:flex;gap:8px;flex-wrap:wrap}
+.scrub-tags span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--soft)}
+@media(max-width:860px){
+  .scrub-multi{grid-template-columns:1fr}
+  .scrub-stage{height:50dvh;height:50vh;position:relative;grid-row:auto}
+  .scrub-story{grid-column:1}
+  .scrub-chapter{min-height:auto;padding:40px 24px}
+  .scrub-shade{background:linear-gradient(180deg,transparent 50%,rgba(${rgb(t.basis)},.8) 100%)}
+}
+@media(hover:none)and(pointer:coarse){.scrub-chapter{min-height:60dvh}}
+
 .media{position:relative;background:${platzhalter}}
 .media::before{content:"";position:absolute;inset:0;opacity:.5;background:repeating-linear-gradient(115deg,transparent 0 26px,rgba(${hell ? '255,255,255' : rgb(t.text)},.05) 26px 27px)}
 .media::after{content:attr(data-label) "\\A Asset folgt · Higgsfield";white-space:pre;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:rgba(${hell ? '255,255,255,.92' : rgb(t.text) + ',.85'});font-weight:700;font-size:${hell ? '.95rem' : '.92rem'};letter-spacing:.06em;line-height:2;padding:24px}

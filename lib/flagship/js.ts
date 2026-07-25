@@ -145,6 +145,155 @@ export function flagshipJs(opts: { ablauf?: AblaufInhalt; hatBaSlider: boolean; 
   return `(function(){\n  ${teile.join('\n')}\n})();`
 }
 
+/**
+ * Multi-Video Scroll-Scrub Controller.
+ * Manages N video layers in a two-column layout: sticky video stage (left),
+ * scrolling text chapters (right). requestAnimationFrame loop for smooth
+ * video.currentTime seeking, smoothstep cross-fade, lazy blob-loading.
+ */
+export function scrubMultiJs(): string {
+  return `(function(){
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var wrap=document.querySelector('.scrub-multi');
+  if(!wrap||reduced)return;
+
+  var scenesAttr=wrap.getAttribute('data-scrub-scenes');
+  if(!scenesAttr)return;
+  var scenes=JSON.parse(scenesAttr);
+  var layers=[].slice.call(wrap.querySelectorAll('.scrub-layer'));
+  var chapters=[].slice.call(wrap.querySelectorAll('.scrub-chapter'));
+  var isMobile=matchMedia("(hover:none)and(pointer:coarse)").matches;
+
+  /* ---- helpers ---- */
+  function smoothstep(edge0,edge1,x){
+    var t=Math.max(0,Math.min(1,(x-edge0)/(edge1-edge0)));
+    return t*t*(3-2*t);
+  }
+  function lingerEase(x,amount){
+    x=Math.max(0,Math.min(1,x));
+    amount=Math.max(0,Math.min(0.6,amount));
+    var c=x-0.5;
+    return (1-amount)*x+amount*(4*c*c*c+0.5);
+  }
+
+  /* ---- segment layout ---- */
+  var totalWeight=0;
+  for(var i=0;i<scenes.length;i++) totalWeight+=scenes[i].scroll;
+  var segments=[];
+  var cursor=0;
+  for(var i=0;i<scenes.length;i++){
+    var w=scenes[i].scroll/totalWeight;
+    segments.push({start:cursor,end:cursor+w,linger:scenes[i].linger,idx:i,
+      desktop:scenes[i].desktop,mobile:scenes[i].mobile});
+    cursor+=w;
+  }
+
+  /* ---- lazy loading ---- */
+  var loaded={};
+  var loading={};
+  function loadClip(idx){
+    if(loaded[idx]||loading[idx])return;
+    if(idx<0||idx>=segments.length)return;
+    loading[idx]=true;
+    var s=segments[idx];
+    var url=isMobile?s.mobile:s.desktop;
+    if(!url){loading[idx]=false;return;}
+    fetch(url).then(function(r){return r.blob()}).then(function(blob){
+      var objUrl=URL.createObjectURL(blob);
+      var video=document.createElement('video');
+      video.muted=true;
+      video.playsInline=true;
+      video.preload='auto';
+      video.style.cssText='width:100%;height:100%;object-fit:cover';
+      video.src=objUrl;
+      var layer=layers[idx];
+      if(layer){
+        layer.insertBefore(video,layer.firstChild);
+        video.addEventListener('loadedmetadata',function(){
+          layer.setAttribute('data-loaded','');
+        });
+      }
+      loaded[idx]=video;
+      loading[idx]=false;
+    }).catch(function(){loading[idx]=false});
+  }
+
+  /* ---- video seeking ---- */
+  var currentTimes={};
+  function updateVideos(activeIdx,progress){
+    for(var i=0;i<segments.length;i++){
+      var vid=loaded[i];
+      if(!vid||!vid.duration)continue;
+      if(i===activeIdx){
+        var seg=segments[i];
+        var target=lingerEase(progress,seg.linger)*vid.duration;
+        var cur=currentTimes[i]||0;
+        cur+=(target-cur)*0.2;
+        currentTimes[i]=cur;
+        try{vid.currentTime=cur}catch(e){}
+      }
+    }
+  }
+
+  /* ---- rAF loop ---- */
+  var lastActive=-1;
+  function readScroll(){
+    var rect=wrap.getBoundingClientRect();
+    var wrapH=rect.height;
+    var scrollRange=wrapH-innerHeight;
+    if(scrollRange<=0){requestAnimationFrame(readScroll);return;}
+    var raw=Math.max(0,Math.min(1,-rect.top/scrollRange));
+
+    var activeIdx=0;
+    var activeProgress=0;
+    for(var i=0;i<segments.length;i++){
+      var seg=segments[i];
+      var segLen=seg.end-seg.start;
+      if(segLen<=0)continue;
+      var p=(raw-seg.start)/segLen;
+      p=Math.max(0,Math.min(1,p));
+      if(raw>=seg.start&&raw<=seg.end){activeIdx=i;activeProgress=p;}
+      else if(raw>seg.end){activeIdx=i;activeProgress=1;}
+
+      /* cross-fade opacity */
+      var fadeIn=smoothstep(seg.start-0.02,seg.start+0.04,raw);
+      var fadeOut=1-smoothstep(seg.end-0.04,seg.end+0.02,raw);
+      var opacity=Math.min(fadeIn,fadeOut);
+      if(i===0)opacity=fadeOut;
+      if(i===segments.length-1)opacity=fadeIn;
+      if(segments.length===1)opacity=1;
+      layers[i].style.opacity=Math.max(0,Math.min(1,opacity));
+    }
+
+    /* chapter styling */
+    for(var i=0;i<chapters.length;i++){
+      if(i===activeIdx)chapters[i].classList.add('aktiv');
+      else chapters[i].classList.remove('aktiv');
+    }
+
+    /* lazy load ±1.5 viewport */
+    var vpThreshold=1.5*innerHeight;
+    for(var i=0;i<segments.length;i++){
+      var chap=chapters[i];
+      if(chap){
+        var cr=chap.getBoundingClientRect();
+        if(cr.top<innerHeight+vpThreshold&&cr.bottom>-vpThreshold){
+          loadClip(i);
+        }
+      }
+    }
+
+    updateVideos(activeIdx,activeProgress);
+    lastActive=activeIdx;
+    requestAnimationFrame(readScroll);
+  }
+
+  /* kick off: load first clip eagerly, start loop */
+  loadClip(0);
+  requestAnimationFrame(readScroll);
+})();`
+}
+
 /** Wizard-JS der Funnel-Seite: Schritt-Navigation, Validierung, Submit */
 export function funnelJs(opts: { submitZiel: string | null; formType: 'anfrage' | 'reservierung' }): string {
   const ziel = opts.submitZiel ? JSON.stringify(opts.submitZiel) : 'null'
