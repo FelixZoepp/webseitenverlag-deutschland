@@ -91,6 +91,10 @@ export const FLAGSHIP_VIDEO_PROMPTS: Record<string, { loop: string; scrub: strin
     loop: 'A padel ball rolls slowly across a pristine blue court surface — subtle LED light reflections shimmer on the glass walls, dust particles float in the bright court lighting. The ball gently bounces once. Static camera at ground level, no person, no text, no logos.',
     scrub: 'An empty padel court prepares for play — court lines illuminate, net tensions itself, glass walls gleam as lights power on sequentially, a racket and balls appear courtside. Static camera, no person, no text, no logos.',
   },
+  jugendraum: {
+    loop: 'Close-up of colorful craft supplies on a wooden table — paintbrushes, scissors, yarn, and paper slowly arrange themselves into a creative workspace. Warm afternoon light streams through large windows. Static camera, no person, no text, no logos.',
+    scrub: 'An empty community room transforms into a vibrant youth space — beanbags inflate and place themselves, a foosball table assembles, fairy lights string across the ceiling and illuminate, board games stack on shelves, art supplies fill jars, a projector screen unfurls. The room goes from bare concrete to a warm inviting hangout. Warm colorful lighting, static camera, no person, no text, no logos.',
+  },
 }
 
 /** Design-Overrides für die Demo-Generierung (UI → API → Pipeline) */

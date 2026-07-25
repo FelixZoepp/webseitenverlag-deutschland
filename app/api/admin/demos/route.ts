@@ -119,14 +119,62 @@ export async function POST(request: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    // Phase 2 kommt über separaten POST /api/admin/demos/[id]/assets (Frontend triggert)
+    // Phase 2+3: Assets + Video direkt generieren (alles in einem Schritt)
     const videoErlaubt = videoErlaubtFuerTier(gewaehltesPaket)
+    let assetWarning: string | null = null
+    try {
+      const { generiereFlagshipDemo } = await import('@/lib/pipeline/generate-flagship-demo')
+      const { FLAGSHIP_VIDEO_PROMPTS } = await import('@/lib/pipeline/generate-flagship-demo')
+      const { generiereVideo } = await import('@/lib/assets/pipeline')
+
+      const ergebnis = await generiereFlagshipDemo(prospect, branche)
+
+      // Video automatisch generieren wenn erlaubt und Hero-Bild vorhanden
+      if (videoErlaubt && ergebnis.config.inhalte?.hero?.media?.datei && ergebnis.videoJob) {
+        try {
+          const scrubPrompt = ergebnis.config.scroll_animationen === true
+            ? FLAGSHIP_VIDEO_PROMPTS[branche]?.scrub
+            : undefined
+          const videoPrompt = ergebnis.videoJob.videoPrompt
+            || scrubPrompt
+            || `Cinematic 4K, static camera. Close-up scene related to ${branche}. Subtle ambient motion. Seamless 5-second loop. No face, no text, no logos.`
+
+          const video = await generiereVideo({
+            imageUrl: ergebnis.config.inhalte.hero.media.datei,
+            prompt: videoPrompt,
+            durationSeconds: 6,
+            kontext: ergebnis.videoJob.kontext || `video:demo:${branche}:${demo.id}`,
+          })
+          if (video.videoUrl) {
+            ergebnis.config.inhalte.hero.video = {
+              src: video.videoUrl,
+              poster: ergebnis.config.inhalte.hero.media.datei,
+              modus: (ergebnis.config.scroll_animationen && scrubPrompt) ? 'scrub' : 'loop',
+            }
+            ergebnis.kostenCent += video.kostenCent
+          }
+        } catch (e) {
+          ergebnis.warnungen.push(`Video: ${e instanceof Error ? e.message : 'Fehler'}`)
+        }
+      }
+
+      // Config mit Assets + Video updaten
+      await auth.data.supabase.from('demos').update({
+        config: ergebnis.config,
+        kosten_cent: ergebnis.kostenCent,
+        asset_meta: ergebnis.assetMeta,
+        updated_at: new Date().toISOString(),
+      }).eq('id', demo.id)
+
+      assetWarning = ergebnis.warnungen.length > 0 ? ergebnis.warnungen.join(' · ') : null
+    } catch (e) {
+      assetWarning = `Asset-Generierung fehlgeschlagen: ${e instanceof Error ? e.message : 'Fehler'} — Demo wurde trotzdem gespeichert.`
+    }
+
     return NextResponse.json({
       demo,
-      warning: null,
+      warning: assetWarning,
       kosten_cent: 0,
-      needsAssets: true,
-      videoJob: videoErlaubt,
     })
   }
 
