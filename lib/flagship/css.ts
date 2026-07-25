@@ -260,6 +260,7 @@ ${wisch
 @media(max-width:860px){.ba-grid{grid-template-columns:1fr}}
 .ba{position:relative;border-radius:var(--r);overflow:hidden;aspect-ratio:4/3;cursor:ew-resize;box-shadow:var(--shadow);touch-action:none;user-select:none}
 .ba .lay{position:absolute;inset:0}
+.ba .media{background:${hell ? 'var(--flaeche)' : '#1a1a1a'}}
 .ba img{width:100%;height:100%;object-fit:cover;pointer-events:none}
 .ba .after{clip-path:inset(0 0 0 50%)}
 .ba .handle{position:absolute;top:0;bottom:0;left:50%;width:3px;background:#fff;box-shadow:0 0 20px rgba(0,0,0,.4)}
