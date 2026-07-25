@@ -192,7 +192,7 @@ export const VorlagenCopySchema = z.object({
       text: z.string().min(20).max(300),
       icon: IconKeySchema.optional(),
       no: z.string().max(10).optional(),
-    })).min(4).max(8),
+    })).min(4).max(9),
     hinweis: z.object({
       text: z.string().min(10).max(200),
       link_label: z.string().min(3).max(60),
