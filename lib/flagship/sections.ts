@@ -37,11 +37,8 @@ export function renderNav(nav: NavInhalt, hell: boolean, funnelUrl: string): str
 
 export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): string {
   const headline = hero.headline_zeilen.map((z) => hl(z)).join('<br>')
-  const chips = hero.chips
-    .map((c) => hero.chip_stil === 'check'
-      ? `<span>${icon('check', 2.4)} ${esc(c)}</span>`
-      : `<span><i></i> ${esc(c)}</span>`)
-    .join('\n        ')
+  // Chips im Hero entfernt (doppelt mit Fakten-Sektion darunter)
+  const chips = ''
   const ctaKlasse = hell ? 'btn sun' : 'btn'
   const sekundaer = hero.cta_sekundaer
     ? `\n        <a class="btn ghost" href="${escAttr(hero.cta_sekundaer.href)}">${esc(hero.cta_sekundaer.label)}</a>`
@@ -75,9 +72,6 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
       <div class="cta-row">
         <a class="${ctaKlasse}" href="${escAttr(funnelUrl)}">${esc(hero.cta_label)} <span class="arr">→</span></a>${sekundaer}
       </div>
-      <div class="chips">
-        ${chips}
-      </div>
     </div>
   </div>
   <button class="vplay" aria-label="Video abspielen"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
@@ -102,9 +96,6 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
       <div class="cta-row">
         <a class="${ctaKlasse}" href="${escAttr(funnelUrl)}">${esc(hero.cta_label)} <span class="arr">→</span></a>${sekundaer}
       </div>
-      <div class="chips">
-        ${chips}
-      </div>
     </div>
   </div>
   <div class="stat-card vcard"><b>${esc(hero.stat2.wert)}</b><small>${esc(hero.stat2.label)}</small></div>
@@ -113,7 +104,7 @@ export function renderHero(hero: HeroInhalt, hell: boolean, funnelUrl: string): 
 }
 
 export function renderFakten(fakten: FaktenInhalt): string {
-  const punkte = fakten.punkte
+  const punkte = fakten.punkte.slice(0, 3)
     .map((p) => `<span>${p.icon ? icon(p.icon, 2) + ' ' : ''}${em(p.text)}</span>`)
     .join('\n    ')
   return `<!-- sektion:fakten -->
