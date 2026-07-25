@@ -61,8 +61,8 @@ export interface AssetProvider {
   generateVideo?(o: GenerateVideoOptions): Promise<GeneratedVideo>
 }
 
-/** Poll-Timeout laut BF §2.1: 120 s je Job. */
-const POLL_TIMEOUT_MS = 120_000
+/** Poll-Timeout: 5 Min für Video-Generierung (Seedance 2.0 braucht oft 2-3 Min). */
+const POLL_TIMEOUT_MS = 300_000
 const POLL_INTERVAL_MS = 3_000
 
 const ASPECT_DIMENSIONS: Record<AssetAspect, { breite: number; hoehe: number }> = {
