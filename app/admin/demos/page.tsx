@@ -350,6 +350,24 @@ export default function DemosPage() {
     finally { setEditBusy(null) }
   }
 
+  async function handleFlagshipAssets(demoId: string) {
+    setBusyId(demoId)
+    setError(null)
+    setWarning(null)
+    try {
+      const res = await fetch(`/api/admin/demos/${demoId}/assets`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Asset-Generierung fehlgeschlagen'); return }
+      if (data.warning) setWarning(data.warning)
+      else setWarning('Assets generiert! Seite neu laden um sie zu sehen.')
+      loadDemos()
+    } catch (err) {
+      setError(`Asset-Generierung fehlgeschlagen: ${err instanceof Error ? err.message : 'Netzwerkfehler'}`)
+    } finally {
+      setBusyId(null)
+    }
+  }
+
   async function handleGenerateCustomAssets(demoId: string) {
     setBusyId(demoId)
     setError(null)
@@ -638,10 +656,16 @@ export default function DemosPage() {
                       </button>
                     )}
                     {demo.engine === 'flagship' && (
+                      <>
+                      <button onClick={() => handleFlagshipAssets(demo.id)} disabled={busy} title="Bilder generieren (Higgsfield)"
+                        style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', background: 'rgba(255,255,255,0.65)', border: '1px solid var(--za-border)', borderRadius: '7px', fontSize: '10px', fontWeight: 600, cursor: busy ? 'wait' : 'pointer', color: 'var(--za-fg-2)', fontFamily: 'inherit', letterSpacing: '0.08em', textTransform: 'uppercase' as const }}>
+                        <Image style={{ width: '12px', height: '12px' }} /> {busy ? 'Generiert…' : 'Assets'}
+                      </button>
                       <button onClick={() => openEditPanel(demo.id)} disabled={busy} title="Demo bearbeiten"
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', background: editDemoId === demo.id ? 'var(--za-gold-grad)' : 'rgba(255,255,255,0.65)', border: editDemoId === demo.id ? 'none' : '1px solid var(--za-border)', borderRadius: '7px', cursor: 'pointer', color: editDemoId === demo.id ? '#fff' : 'var(--za-fg-3)' }}>
                         <Pencil style={{ width: '13px', height: '13px' }} />
                       </button>
+                      </>
                     )}
                     <button onClick={() => handleRegenerate(demo)} disabled={busy} title="Komplett neu generieren"
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', background: 'rgba(255,255,255,0.65)', border: '1px solid var(--za-border)', borderRadius: '7px', cursor: busy ? 'wait' : 'pointer', color: 'var(--za-fg-3)' }}>
