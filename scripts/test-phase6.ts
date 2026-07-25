@@ -62,7 +62,7 @@ const lese = (pfad: string) => readFileSync(join(root, pfad), 'utf8')
   check('Pipeline: ortErsetzungsPaare ersetzt auch Leerzeichen-/Basis-Variante des Vorlagen-Orts',
     pipeline.includes('export function ortErsetzungsPaare') &&
     pipeline.includes("replace(/-/g, ' ')") &&
-    pipeline.includes('ortErsetzungsPaare(config.meta.ort, prospect.ort)'))
+    pipeline.includes('bauErsetzungsPaare'))
 
   const pkg = lese('package.json')
   check('Alias: npm run ci:golden-set registriert', pkg.includes('"ci:golden-set"'))
