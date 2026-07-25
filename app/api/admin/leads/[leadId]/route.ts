@@ -1,5 +1,5 @@
 /**
- * Admin-CRM: Einzel-Lead aktualisieren (Pipeline-Stage verschieben).
+ * Admin-CRM: Einzel-Lead aktualisieren (Pipeline-Stage verschieben) oder löschen.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -39,4 +39,22 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return NextResponse.json({ success: true })
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ leadId: string }> }
+) {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+
+  const { leadId } = await params
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('leads')
+    .delete()
+    .eq('id', leadId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  return NextResponse.json({ ok: true })
 }

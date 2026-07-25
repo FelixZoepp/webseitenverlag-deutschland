@@ -110,7 +110,9 @@ export async function POST(request: Request) {
   if (apiKey) {
     try {
       const resend = new Resend(apiKey)
-      const fromEmail = process.env.FROM_EMAIL || 'noreply@resend.dev'
+      // FROM_EMAIL muss auf eine verifizierte Domain zeigen (z.B. noreply@webseitenverlag-deutschland.de).
+      // Der resend.dev-Fallback wird von vielen Spam-Filtern blockiert.
+      const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev'
       const fromName = process.env.FROM_NAME || 'Webseiten-Verlag Deutschland'
       const rows = Object.entries({
         Name: lead.name, Firma: lead.firma, 'E-Mail': lead.email, Telefon: lead.telefon,
@@ -123,12 +125,15 @@ export async function POST(request: Request) {
       await resend.emails.send({
         from: `${fromName} <${fromEmail}>`,
         to: notifyTo,
-        replyTo: lead.email,
+        replyTo: lead.email ?? undefined,
         subject: 'Neuer Lead Webseitenverlag Deutschland',
         html: `<h2 style="font-family:sans-serif;color:#2563eb">Neuer Lead Webseitenverlag Deutschland</h2><p style="font-family:sans-serif;font-size:14px;color:#374151">Eingegangen über <a href="https://www.webseitenverlag-deutschland.de/anfrage">webseitenverlag-deutschland.de/anfrage</a></p><table style="font-family:sans-serif;font-size:15px;border-collapse:collapse;width:100%;max-width:600px">${rows}</table><p style="font-family:sans-serif;font-size:13px;color:#94a3b8;margin-top:24px">Lead-ID: ${inserted.id} · im Admin unter Leads sichtbar</p>`,
       })
     } catch (err) {
-      console.error('Lead notification email failed:', err)
+      console.error(
+        `[LEAD-NOTIFICATION-FAILED] lead_id=${inserted.id} to=${notifyTo.join(',')} error=${(err as Error).message}`,
+        err
+      )
     }
   }
 

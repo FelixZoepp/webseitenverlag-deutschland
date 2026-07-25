@@ -3,11 +3,13 @@
 /**
  * Phase 3 (MVP_FINISH_PROMPT §4): Lead-Liste mit Ein-Klick-Generierung,
  * Job-Status (lesbare Fehler) und Mensch-Gate ("Demo geprüft" → demo_bereit).
+ * + Klick auf Zeile → Detailpanel mit allen Angaben
+ * + Löschen-Button pro Zeile
  */
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Zap, Loader2, ExternalLink, RefreshCw } from 'lucide-react'
+import { Plus, Zap, Loader2, ExternalLink, RefreshCw, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 
 interface JobInfo {
   id: string
@@ -31,9 +33,19 @@ interface QaInfo {
 interface LeadRow {
   id: string
   name: string | null
+  email: string | null
   firma: string | null
   telefon: string | null
   branche: string | null
+  nachricht: string | null
+  quelle: string | null
+  utm_source: string | null
+  utm_medium: string | null
+  utm_campaign: string | null
+  utm_term: string | null
+  utm_content: string | null
+  referrer: string | null
+  landing_path: string | null
   status: string
   demo_id: string | null
   created_at: string
@@ -59,11 +71,22 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
+function DetailRow({ label, value }: { label: string; value: string | null | undefined }) {
+  if (!value) return null
+  return (
+    <div style={{ display: 'flex', gap: '12px', padding: '6px 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+      <span style={{ minWidth: '130px', fontSize: '11px', fontWeight: 600, color: 'var(--za-fg-3)', flexShrink: 0 }}>{label}</span>
+      <span style={{ fontSize: '12px', color: 'var(--za-fg)', wordBreak: 'break-word' }}>{value}</span>
+    </div>
+  )
+}
+
 export default function LeadsPage() {
   const [leads, setLeads] = useState<LeadRow[]>([])
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const laden = useCallback(async () => {
     const res = await fetch('/api/admin/leads')
@@ -130,6 +153,30 @@ export default function LeadsPage() {
     }
   }
 
+  async function loeschen(lead: LeadRow) {
+    if (!confirm(`Lead "${lead.firma || lead.name}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`)) return
+    setBusyId(lead.id)
+    setError(null)
+    try {
+      const res = await fetch(`/api/admin/leads/${lead.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        setError(data?.error || 'Löschen fehlgeschlagen.')
+      } else {
+        setLeads((prev) => prev.filter((l) => l.id !== lead.id))
+        if (expandedId === lead.id) setExpandedId(null)
+      }
+    } catch {
+      setError('Netzwerkfehler beim Löschen.')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  function toggleDetail(id: string) {
+    setExpandedId((prev) => (prev === id ? null : id))
+  }
+
   return (
     <div className="fade-up">
       <div className="topbar">
@@ -158,7 +205,7 @@ export default function LeadsPage() {
           <div style={{ padding: '32px', textAlign: 'center', color: 'var(--za-fg-3)', fontSize: '12px' }}>Lade Leads…</div>
         ) : leads.length === 0 ? (
           <div style={{ padding: '32px', textAlign: 'center', color: 'var(--za-fg-3)', fontSize: '12px' }}>
-            Noch keine Leads — lege den ersten über „Neuer Lead“ an.
+            Noch keine Leads — lege den ersten über „Neuer Lead" an.
           </div>
         ) : (
           <table className="glass-table">
@@ -172,6 +219,7 @@ export default function LeadsPage() {
                 <th>Aktionen</th>
                 <th>Browser-QA</th>
                 <th>Mensch-Gate</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -179,110 +227,163 @@ export default function LeadsPage() {
                 const job = lead.letzter_job
                 const stil = job ? JOB_STYLES[job.status] : null
                 const busy = busyId === lead.id
+                const isExpanded = expandedId === lead.id
+                const colSpan = 9
                 return (
-                  <tr key={lead.id}>
-                    <td>
-                      <div style={{ fontWeight: 600, color: 'var(--za-fg)' }}>{lead.firma || lead.name}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--za-fg-3)' }}>{lead.telefon || '—'}</div>
-                    </td>
-                    <td>
-                      {lead.business_profile
-                        ? `${lead.business_profile.branche_key} · ${lead.business_profile.stadt}`
-                        : lead.branche || '—'}
-                    </td>
-                    <td>
-                      {stil ? (
-                        <>
-                          <span style={{ display: 'inline-flex', padding: '3px 10px', borderRadius: '999px', fontWeight: 600, fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', background: stil.bg, color: stil.fg }}>
-                            {stil.label}
-                          </span>
-                          {job?.status === 'failed' && job.fehler_grund && (
-                            <div style={{ fontSize: '11px', color: '#B3261E', marginTop: '6px', maxWidth: '320px', whiteSpace: 'pre-wrap' }}>
-                              {job.fehler_grund}
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <span style={{ fontSize: '11px', color: 'var(--za-fg-3)' }}>Noch nicht generiert</span>
-                      )}
-                    </td>
-                    <td>{job ? `${(job.kosten_cent / 100).toFixed(2)} €` : '—'}</td>
-                    <td>{formatDate(lead.created_at)}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <button
-                          onClick={() => generieren(lead)}
-                          disabled={busy || !lead.business_profile || job?.status === 'laufend'}
-                          title={lead.business_profile ? 'Demo generieren' : 'Kein Geschäftsprofil'}
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(224,53,75,0.3)', background: 'rgba(224,53,75,0.08)', color: '#E0354B', fontSize: '11px', fontWeight: 600, cursor: busy ? 'wait' : 'pointer' }}
-                        >
-                          {busy ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
-                          {job ? 'Neu generieren' : 'Generieren'}
-                        </button>
-                        {job?.demo_id && (
-                          <Link href="/admin/demos" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--za-fg-2)', textDecoration: 'none' }}>
-                            <ExternalLink size={12} /> Demo
-                          </Link>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      {job?.site_id ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          {lead.qa_report ? (
-                            <span style={{ display: 'inline-flex', width: 'fit-content', padding: '3px 10px', borderRadius: '999px', fontWeight: 600, fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', background: QA_STYLES[lead.qa_report.status].bg, color: QA_STYLES[lead.qa_report.status].fg }}>
-                              {QA_STYLES[lead.qa_report.status].label}
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: '11px', color: 'var(--za-fg-3)' }}>Kein QA-Report</span>
-                          )}
-                          {lead.qa_report?.status === 'failed' && lead.qa_report.fehler_grund && (
-                            <div style={{ fontSize: '11px', color: '#B3261E', maxWidth: '280px', whiteSpace: 'pre-wrap' }}>
-                              {lead.qa_report.fehler_grund}
-                            </div>
-                          )}
-                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            {lead.qa_report?.screenshots.mobile && (
-                              <a href={lead.qa_report.screenshots.mobile} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: 'var(--za-fg-2)' }}>
-                                Mobile
-                              </a>
-                            )}
-                            {lead.qa_report?.screenshots.desktop && (
-                              <a href={lead.qa_report.screenshots.desktop} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: 'var(--za-fg-2)' }}>
-                                Desktop
-                              </a>
-                            )}
-                            <button
-                              onClick={() => qaPruefen(lead)}
-                              disabled={busy || job.status === 'laufend'}
-                              title="Browser-QA-Lauf starten (Chromium, mobile + desktop)"
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--za-line, rgba(0,0,0,0.12))', background: 'transparent', color: 'var(--za-fg-2)', fontSize: '11px', fontWeight: 600, cursor: busy ? 'wait' : 'pointer' }}
-                            >
-                              {busy ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
-                              QA prüfen
-                            </button>
+                  <>
+                    <tr
+                      key={lead.id}
+                      onClick={() => toggleDetail(lead.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {isExpanded ? <ChevronUp size={13} style={{ color: 'var(--za-fg-3)', flexShrink: 0 }} /> : <ChevronDown size={13} style={{ color: 'var(--za-fg-3)', flexShrink: 0 }} />}
+                          <div>
+                            <div style={{ fontWeight: 600, color: 'var(--za-fg)' }}>{lead.firma || lead.name}</div>
+                            <div style={{ fontSize: '11px', color: 'var(--za-fg-3)' }}>{lead.telefon || '—'}</div>
                           </div>
                         </div>
-                      ) : (
-                        <span style={{ fontSize: '11px', color: 'var(--za-fg-4)' }}>—</span>
-                      )}
-                    </td>
-                    <td>
-                      {job && (job.status === 'demo_erstellt' || job.status === 'demo_bereit') && lead.demo_id ? (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--za-fg-2)', cursor: 'pointer' }}>
-                          <input
-                            type="checkbox"
-                            checked={job.status === 'demo_bereit'}
-                            disabled={busy}
-                            onChange={(e) => menschGate(lead, e.target.checked)}
-                          />
-                          Demo geprüft
-                        </label>
-                      ) : (
-                        <span style={{ fontSize: '11px', color: 'var(--za-fg-4)' }}>—</span>
-                      )}
-                    </td>
-                  </tr>
+                      </td>
+                      <td>
+                        {lead.business_profile
+                          ? `${lead.business_profile.branche_key} · ${lead.business_profile.stadt}`
+                          : lead.branche || '—'}
+                      </td>
+                      <td>
+                        {stil ? (
+                          <>
+                            <span style={{ display: 'inline-flex', padding: '3px 10px', borderRadius: '999px', fontWeight: 600, fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', background: stil.bg, color: stil.fg }}>
+                              {stil.label}
+                            </span>
+                            {job?.status === 'failed' && job.fehler_grund && (
+                              <div style={{ fontSize: '11px', color: '#B3261E', marginTop: '6px', maxWidth: '320px', whiteSpace: 'pre-wrap' }}>
+                                {job.fehler_grund}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <span style={{ fontSize: '11px', color: 'var(--za-fg-3)' }}>Noch nicht generiert</span>
+                        )}
+                      </td>
+                      <td>{job ? `${(job.kosten_cent / 100).toFixed(2)} €` : '—'}</td>
+                      <td>{formatDate(lead.created_at)}</td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <button
+                            onClick={() => generieren(lead)}
+                            disabled={busy || !lead.business_profile || job?.status === 'laufend'}
+                            title={lead.business_profile ? 'Demo generieren' : 'Kein Geschäftsprofil'}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(224,53,75,0.3)', background: 'rgba(224,53,75,0.08)', color: '#E0354B', fontSize: '11px', fontWeight: 600, cursor: busy ? 'wait' : 'pointer' }}
+                          >
+                            {busy ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
+                            {job ? 'Neu generieren' : 'Generieren'}
+                          </button>
+                          {job?.demo_id && (
+                            <Link href="/admin/demos" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--za-fg-2)', textDecoration: 'none' }}>
+                              <ExternalLink size={12} /> Demo
+                            </Link>
+                          )}
+                        </div>
+                      </td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        {job?.site_id ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {lead.qa_report ? (
+                              <span style={{ display: 'inline-flex', width: 'fit-content', padding: '3px 10px', borderRadius: '999px', fontWeight: 600, fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', background: QA_STYLES[lead.qa_report.status].bg, color: QA_STYLES[lead.qa_report.status].fg }}>
+                                {QA_STYLES[lead.qa_report.status].label}
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: '11px', color: 'var(--za-fg-3)' }}>Kein QA-Report</span>
+                            )}
+                            {lead.qa_report?.status === 'failed' && lead.qa_report.fehler_grund && (
+                              <div style={{ fontSize: '11px', color: '#B3261E', maxWidth: '280px', whiteSpace: 'pre-wrap' }}>
+                                {lead.qa_report.fehler_grund}
+                              </div>
+                            )}
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              {lead.qa_report?.screenshots.mobile && (
+                                <a href={lead.qa_report.screenshots.mobile} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: 'var(--za-fg-2)' }}>
+                                  Mobile
+                                </a>
+                              )}
+                              {lead.qa_report?.screenshots.desktop && (
+                                <a href={lead.qa_report.screenshots.desktop} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: 'var(--za-fg-2)' }}>
+                                  Desktop
+                                </a>
+                              )}
+                              <button
+                                onClick={() => qaPruefen(lead)}
+                                disabled={busy || job.status === 'laufend'}
+                                title="Browser-QA-Lauf starten (Chromium, mobile + desktop)"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--za-line, rgba(0,0,0,0.12))', background: 'transparent', color: 'var(--za-fg-2)', fontSize: '11px', fontWeight: 600, cursor: busy ? 'wait' : 'pointer' }}
+                              >
+                                {busy ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
+                                QA prüfen
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: '11px', color: 'var(--za-fg-4)' }}>—</span>
+                        )}
+                      </td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        {job && (job.status === 'demo_erstellt' || job.status === 'demo_bereit') && lead.demo_id ? (
+                          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--za-fg-2)', cursor: 'pointer' }}>
+                            <input
+                              type="checkbox"
+                              checked={job.status === 'demo_bereit'}
+                              disabled={busy}
+                              onChange={(e) => menschGate(lead, e.target.checked)}
+                            />
+                            Demo geprüft
+                          </label>
+                        ) : (
+                          <span style={{ fontSize: '11px', color: 'var(--za-fg-4)' }}>—</span>
+                        )}
+                      </td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => loeschen(lead)}
+                          disabled={busy}
+                          title="Lead löschen"
+                          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '6px', borderRadius: '6px', border: '1px solid rgba(179,38,30,0.25)', background: 'rgba(179,38,30,0.07)', color: '#B3261E', cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.5 : 1 }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                    {isExpanded && (
+                      <tr key={`${lead.id}-detail`}>
+                        <td colSpan={colSpan} style={{ padding: '0', background: 'rgba(0,0,0,0.02)' }}>
+                          <div style={{ padding: '16px 24px 20px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--za-fg-3)', marginBottom: '12px' }}>Lead-Details</div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 40px', maxWidth: '800px' }}>
+                              <div>
+                                <DetailRow label="Name" value={lead.name} />
+                                <DetailRow label="E-Mail" value={lead.email} />
+                                <DetailRow label="Firma" value={lead.firma} />
+                                <DetailRow label="Telefon" value={lead.telefon} />
+                                <DetailRow label="Branche" value={lead.branche} />
+                                <DetailRow label="Nachricht" value={lead.nachricht} />
+                              </div>
+                              <div>
+                                <DetailRow label="Quelle" value={lead.quelle} />
+                                <DetailRow label="UTM Source" value={lead.utm_source} />
+                                <DetailRow label="UTM Medium" value={lead.utm_medium} />
+                                <DetailRow label="UTM Campaign" value={lead.utm_campaign} />
+                                <DetailRow label="UTM Term" value={lead.utm_term} />
+                                <DetailRow label="UTM Content" value={lead.utm_content} />
+                                <DetailRow label="Referrer" value={lead.referrer} />
+                                <DetailRow label="Landing Path" value={lead.landing_path} />
+                                <DetailRow label="Eingetragen am" value={formatDate(lead.created_at)} />
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 )
               })}
             </tbody>
