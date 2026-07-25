@@ -203,28 +203,36 @@ async function seedeBranche(branche: StartBranche): Promise<void> {
     }
 
     // ----------------------------------------------------------
-    // Schritt 2: Entry Still generieren (Higgsfield)
+    // Schritt 2: Entry Still (pruefen ob schon vorhanden)
     // ----------------------------------------------------------
-    console.log(`  Schritt 2/6: Entry Still generieren (Higgsfield)...`)
-    const entryPrompt = szenen[0].videoPrompt
-      .replace(/5-second video|5s video|video/gi, 'photograph')
-      .replace(/subtle motion|movement|flowing/gi, 'frozen moment')
-    const entryStill = await higgsfield.generateImage({
-      prompt: entryPrompt,
-      aspect: '16:9',
-    })
-
-    // Entry Still herunterladen
-    const entryStillLokal = join(tempDir, 'entry-still.jpg')
-    await ladeDateiHerunter(entryStill.url, entryStillLokal)
-    console.log(`  -> Entry Still heruntergeladen`)
-
-    // Entry Still nach Supabase hochladen (Higgsfield braucht public URLs)
     const entryStillStoragePfad = `scrub/${branche.branche_key}/entry-still.jpg`
-    const entryStillUrl = await ladeNachSupabase(
-      admin, entryStillLokal, entryStillStoragePfad, 'image/jpeg'
-    )
-    console.log(`  -> Entry Still hochgeladen: ${entryStillStoragePfad}`)
+    let entryStillUrl: string
+
+    const { data: vorhandenerStill } = await admin.storage.from('asset-bank').list(`scrub/${branche.branche_key}`, { limit: 100 })
+    const stillExistiert = vorhandenerStill?.some(f => f.name === 'entry-still.jpg' && (f.metadata?.size || 0) > 1000)
+
+    if (stillExistiert) {
+      entryStillUrl = admin.storage.from('asset-bank').getPublicUrl(entryStillStoragePfad).data.publicUrl
+      console.log(`  Schritt 2/6: Entry Still bereits vorhanden (uebersprungen)`)
+    } else {
+      console.log(`  Schritt 2/6: Entry Still generieren (Higgsfield)...`)
+      const entryPrompt = szenen[0].videoPrompt
+        .replace(/5-second video|5s video|video/gi, 'photograph')
+        .replace(/subtle motion|movement|flowing/gi, 'frozen moment')
+      const entryStill = await higgsfield.generateImage({
+        prompt: entryPrompt,
+        aspect: '16:9',
+      })
+
+      const entryStillLokal = join(tempDir, 'entry-still.jpg')
+      await ladeDateiHerunter(entryStill.url, entryStillLokal)
+      console.log(`  -> Entry Still heruntergeladen`)
+
+      entryStillUrl = await ladeNachSupabase(
+        admin, entryStillLokal, entryStillStoragePfad, 'image/jpeg'
+      )
+      console.log(`  -> Entry Still hochgeladen: ${entryStillStoragePfad}`)
+    }
 
     // ----------------------------------------------------------
     // Schritt 3: 5 Videos sequentiell generieren (Frame-Chaining)
@@ -233,11 +241,47 @@ async function seedeBranche(branche: StartBranche): Promise<void> {
     let aktuellesStartBildUrl = entryStillUrl
     const rawVideoPfade: string[] = []
 
+    // Pruefen welche Chain-Frames schon existieren (Resume-Logik)
+    const { data: chainDateien } = await admin.storage.from('asset-bank').list(`scrub/${branche.branche_key}/chain`, { limit: 20 })
+    const chainFrames = new Map<number, string>()
+    for (const f of chainDateien || []) {
+      const match = f.name.match(/last-frame-(\d+)\.jpg/)
+      if (match && (f.metadata?.size || 0) > 1000) {
+        const idx = parseInt(match[1])
+        chainFrames.set(idx, admin.storage.from('asset-bank').getPublicUrl(`scrub/${branche.branche_key}/chain/${f.name}`).data.publicUrl)
+      }
+    }
+
+    // Pruefen welche Raw-Videos schon existieren
+    const { data: rawDateien } = await admin.storage.from('asset-bank').list(`scrub/${branche.branche_key}/raw`, { limit: 20 })
+    const vorhandeneRawVideos = new Set<number>()
+    for (const f of rawDateien || []) {
+      const match = f.name.match(/scene-(\d+)\.mp4/)
+      if (match && (f.metadata?.size || 0) > 10000) vorhandeneRawVideos.add(parseInt(match[1]))
+    }
+
     for (let i = 0; i < szenen.length; i++) {
       const szene = szenen[i]
+
+      // Resume: wenn Chain-Frame fuer diesen Schritt existiert UND Raw-Video existiert, ueberspringe
+      if (vorhandeneRawVideos.has(i + 1) && (i === szenen.length - 1 || chainFrames.has(i + 1))) {
+        console.log(`    Szene ${i + 1}/5: bereits vorhanden (uebersprungen)`)
+        // Raw-Video von Supabase runterladen fuer Encoding
+        const rawPfad = join(tempDir, `raw-scene-${i + 1}.mp4`)
+        const rawUrl = admin.storage.from('asset-bank').getPublicUrl(`scrub/${branche.branche_key}/raw/scene-${i + 1}.mp4`).data.publicUrl
+        await ladeDateiHerunter(rawUrl, rawPfad)
+        rawVideoPfade.push(rawPfad)
+        if (chainFrames.has(i + 1)) aktuellesStartBildUrl = chainFrames.get(i + 1)!
+        continue
+      }
+
+      // Falls vorheriger Chain-Frame existiert aber wir uebersprungen haben
+      if (i > 0 && chainFrames.has(i)) {
+        aktuellesStartBildUrl = chainFrames.get(i)!
+      }
+
       console.log(`    Szene ${i + 1}/5: Video generieren...`)
 
-      // Video generieren
       const video = await higgsfield.generateVideo({
         imageUrl: aktuellesStartBildUrl,
         prompt: szene.videoPrompt,
@@ -245,18 +289,20 @@ async function seedeBranche(branche: StartBranche): Promise<void> {
       })
       console.log(`    Szene ${i + 1}/5: Video generiert (Job ${video.jobId})`)
 
-      // Video herunterladen
       const rawPfad = join(tempDir, `raw-scene-${i + 1}.mp4`)
       await ladeDateiHerunter(video.url, rawPfad)
       rawVideoPfade.push(rawPfad)
       console.log(`    Szene ${i + 1}/5: Video heruntergeladen`)
 
-      // Letzten Frame extrahieren fuer naechstes Video (ausser beim letzten)
+      // Raw-Video nach Supabase sichern (fuer Resume)
+      const rawStoragePfad = `scrub/${branche.branche_key}/raw/scene-${i + 1}.mp4`
+      await ladeNachSupabase(admin, rawPfad, rawStoragePfad, 'video/mp4')
+
+      // Letzten Frame extrahieren fuer naechstes Video
       if (i < szenen.length - 1) {
         const lastFramePfad = join(tempDir, `last-frame-${i + 1}.jpg`)
         extrahiereLetztenFrame(rawPfad, lastFramePfad)
 
-        // Letzten Frame nach Supabase hochladen (Higgsfield braucht public URL)
         const lastFrameStoragePfad = `scrub/${branche.branche_key}/chain/last-frame-${i + 1}.jpg`
         aktuellesStartBildUrl = await ladeNachSupabase(
           admin, lastFramePfad, lastFrameStoragePfad, 'image/jpeg'
