@@ -6,6 +6,8 @@ import { collectProspectData } from '@/lib/pipeline/prospect-data'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 import { videoErlaubtFuerTier } from '@/config/plans'
+import { generiereVideo } from '@/lib/assets/pipeline'
+import { FLAGSHIP_VIDEO_PROMPTS } from '@/lib/pipeline/generate-flagship-demo'
 
 // Asset-Generierung braucht bis zu 180s (Hero + Signature-Paar parallel)
 export const maxDuration = 300
@@ -83,13 +85,54 @@ export async function POST(
       return NextResponse.json({ error: updateErr.message }, { status: 500 })
     }
 
+    // Video automatisch mit generieren wenn erlaubt und Hero-Bild vorhanden
+    let videoGenerated = false
+    if (ergebnis.videoJob && videoErlaubtFuerTier(demo.paket) && ergebnis.config.inhalte?.hero?.media?.datei) {
+      try {
+        const config = ergebnis.config
+        const branche = demo.branche || config.branche_key || ''
+        const scrubPrompt = config.scroll_animationen === true
+          ? FLAGSHIP_VIDEO_PROMPTS[branche]?.scrub
+          : undefined
+        const videoPrompt = ergebnis.videoJob.videoPrompt
+          || scrubPrompt
+          || `Cinematic 4K, static camera. Close-up scene related to ${branche}. Subtle ambient motion. Seamless 5-second loop. No face, no text, no logos.`
+
+        const video = await generiereVideo({
+          imageUrl: ergebnis.config.inhalte.hero.media.datei,
+          prompt: videoPrompt,
+          durationSeconds: 6,
+          kontext: ergebnis.videoJob.kontext || `video:demo:${branche}:${params.demoId}`,
+        })
+
+        if (video.videoUrl) {
+          ergebnis.config.inhalte.hero.video = {
+            src: video.videoUrl,
+            poster: ergebnis.config.inhalte.hero.media.datei,
+            modus: (config.scroll_animationen && scrubPrompt) ? 'scrub' : 'loop',
+          }
+          ergebnis.kostenCent += video.kostenCent
+          videoGenerated = true
+
+          // Config nochmal updaten mit Video
+          await admin.from('demos').update({
+            config: ergebnis.config,
+            kosten_cent: ergebnis.kostenCent,
+            updated_at: new Date().toISOString(),
+          }).eq('id', params.demoId)
+        }
+      } catch (e) {
+        ergebnis.warnungen.push(`Video-Generierung fehlgeschlagen: ${e instanceof Error ? e.message : 'Unbekannt'}`)
+      }
+    }
+
     const warning = ergebnis.warnungen.length > 0 ? ergebnis.warnungen.join(' · ') : null
     return NextResponse.json({
       ok: true,
       demo: updated,
       warning,
       kosten_cent: ergebnis.kostenCent,
-      videoJob: ergebnis.videoJob && videoErlaubtFuerTier(demo.paket) ? true : false,
+      videoGenerated,
     })
   } catch (err) {
     return NextResponse.json(
