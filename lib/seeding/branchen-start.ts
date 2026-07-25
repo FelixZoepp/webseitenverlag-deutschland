@@ -126,6 +126,13 @@ export const START_BRANCHEN: readonly StartBranche[] = [
     meta_kategorie: 'fitness_coaching',
     beschreibung: 'Personal Trainer: 1:1-Training, Ernährungscoaching, Rücken-Fit, Outdoor- und Studio-Sessions, Erstanalyse mit Zieldefinition.',
   },
+  // Freizeit & Gemeinschaft
+  {
+    branche_key: 'jugendraum',
+    name: 'Jugendraum / Freizeiteinrichtung',
+    meta_kategorie: 'dienstleistung_beratung',
+    beschreibung: 'Offener Jugendtreff / Jugendraum: Freizeitangebote, Workshops, Events, Raumvermietung, Ferienbetreuung, kreative Projekte für Jugendliche und junge Erwachsene.',
+  },
 ] as const
 
 export function startBranche(key: string): StartBranche | undefined {
