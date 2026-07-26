@@ -35,7 +35,7 @@ export function renderNav(nav: NavInhalt, hell: boolean, funnelUrl: string): str
 </nav>`
 }
 
-/** Multi-Video Scroll-Scrub (Premium): 2-Spalten-Layout, sticky Video links, Chapters rechts */
+/** Multi-Video Scroll-Scrub (Premium): Fullscreen Video + Text-Overlay unten */
 function renderScrubMulti(config: FlagshipConfig): string {
   const szenen = config.scrub_szenen!
   const assets = config.scrub_assets!
@@ -46,14 +46,13 @@ function renderScrubMulti(config: FlagshipConfig): string {
     </div>`).join('')
 
   const chapters = szenen.map((s, i) => `
-    <div class="scrub-chapter${i === 0 ? ' aktiv' : ''}" data-idx="${i}" style="text-align:${s.align}">
+    <div class="scrub-chapter${i === 0 ? ' aktiv' : ''}" data-idx="${i}">
       <span class="scrub-label">${esc(s.label)}</span>
       <h3>${esc(s.titel)}</h3>
       <p>${esc(s.text)}</p>
       <div class="scrub-tags">${s.tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>
     </div>`).join('')
 
-  // Scene config as JSON for the JS controller
   const sceneData = JSON.stringify(szenen.map((s, i) => ({
     idx: i,
     scroll: s.scroll,

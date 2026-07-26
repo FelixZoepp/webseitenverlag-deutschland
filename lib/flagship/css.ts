@@ -171,28 +171,25 @@ nav.scrolled~header .scroll-hint,nav.scrolled~.hero .scroll-hint{opacity:0}
 .vhero.scrub .vshade{position:sticky;top:0;height:100vh}
 .vhero.scrub .vinner{position:sticky;top:0;height:100vh;display:flex;align-items:center}
 
-/* Scroll-Scrub Multi-Szenen */
-.scrub-multi{display:grid;grid-template-columns:1fr 1fr;position:relative}
-.scrub-stage{position:sticky;top:0;height:100dvh;height:100vh;overflow:hidden;grid-row:1/-1}
+/* Scroll-Scrub Multi-Szenen — Fullscreen Video + Text-Overlay */
+.scrub-multi{position:relative}
+.scrub-stage{position:sticky;top:0;height:100dvh;height:100vh;overflow:hidden;z-index:0}
 .scrub-layer{position:absolute;inset:0;opacity:0;will-change:opacity}
 .scrub-layer video,.scrub-layer img{width:100%;height:100%;object-fit:cover}
 .scrub-layer .scrub-poster{position:absolute;inset:0;transition:opacity .3s}
 .scrub-layer[data-loaded] .scrub-poster{opacity:0}
-.scrub-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(${rgb(t.basis)},.7) 0%,rgba(${rgb(t.basis)},.3) 40%,transparent 70%);pointer-events:none;z-index:1}
-.scrub-story{grid-column:2;position:relative;z-index:2}
-.scrub-chapter{min-height:100dvh;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:20vh 48px 20vh 40px;opacity:.3;transition:opacity .4s}
+.scrub-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 0%,transparent 30%,rgba(0,0,0,.6) 70%,rgba(0,0,0,.85) 100%);pointer-events:none;z-index:1}
+.scrub-story{position:relative;z-index:2;margin-top:-100vh}
+.scrub-chapter{min-height:100dvh;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 48px 12vh;opacity:0;transition:opacity .4s}
 .scrub-chapter.aktiv{opacity:1}
 .scrub-chapter .scrub-label{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ak1);margin-bottom:16px}
-.scrub-chapter h3{font-size:clamp(28px,3.5vw,44px);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-bottom:16px}
-.scrub-chapter p{font-size:15px;line-height:1.65;color:var(--soft);max-width:420px;margin-bottom:20px}
+.scrub-chapter h3{font-size:clamp(28px,4vw,52px);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-bottom:16px;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.5)}
+.scrub-chapter p{font-size:16px;line-height:1.65;color:rgba(255,255,255,.8);max-width:520px;margin-bottom:20px;text-shadow:0 1px 8px rgba(0,0,0,.4)}
 .scrub-tags{display:flex;gap:8px;flex-wrap:wrap}
-.scrub-tags span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--soft)}
+.scrub-tags span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7)}
 @media(max-width:860px){
-  .scrub-multi{grid-template-columns:1fr}
-  .scrub-stage{height:50dvh;height:50vh;position:relative;grid-row:auto}
-  .scrub-story{grid-column:1}
-  .scrub-chapter{min-height:auto;padding:40px 24px}
-  .scrub-shade{background:linear-gradient(180deg,transparent 50%,rgba(${rgb(t.basis)},.8) 100%)}
+  .scrub-chapter{padding:0 24px 10vh}
+  .scrub-chapter h3{font-size:clamp(24px,6vw,36px)}
 }
 @media(hover:none)and(pointer:coarse){.scrub-chapter{min-height:60dvh}}
 
