@@ -394,6 +394,16 @@ export async function personalisiereFlagshipConfig(
   config.inhalte = ersetzeUeberall(config.inhalte, paare)
   config.funnel = ersetzeUeberall(config.funnel, paare)
 
+  // Nav-Logo: Firmenname intelligent splitten (letztes Wort = bold)
+  const firmaWorte = prospect.firma.split(/\s+/)
+  if (firmaWorte.length >= 2) {
+    config.inhalte.nav.logo_text = firmaWorte.slice(0, -1).join(' ')
+    config.inhalte.nav.logo_bold = firmaWorte[firmaWorte.length - 1]
+  } else {
+    config.inhalte.nav.logo_text = prospect.firma
+    config.inhalte.nav.logo_bold = undefined
+  }
+
   config.meta = {
     firma: prospect.firma,
     ort: prospect.ort ?? config.meta.ort,
@@ -472,6 +482,16 @@ export async function generiereFlagshipDemo(
   const paare = bauErsetzungsPaare(config.meta.firma, prospect.firma, config.meta.ort, prospect.ort, config.inhalte, config.meta.telefon, prospect.telefon)
   config.inhalte = ersetzeUeberall(config.inhalte, paare)
   config.funnel = ersetzeUeberall(config.funnel, paare)
+
+  // Nav-Logo: Firmenname intelligent splitten (letztes Wort = bold)
+  const firmaWorte = prospect.firma.split(/\s+/)
+  if (firmaWorte.length >= 2) {
+    config.inhalte.nav.logo_text = firmaWorte.slice(0, -1).join(' ')
+    config.inhalte.nav.logo_bold = firmaWorte[firmaWorte.length - 1]
+  } else {
+    config.inhalte.nav.logo_text = prospect.firma
+    config.inhalte.nav.logo_bold = undefined
+  }
 
   config.meta = {
     firma: prospect.firma,
