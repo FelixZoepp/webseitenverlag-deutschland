@@ -5,7 +5,7 @@ import Script from "next/script";
 import { h2Style, h3Style, ulStyle, defBox, ctaBox } from "@/lib/blog/styles";
 
 export const metadata: Metadata = {
-  title: "Social Media vs. Website: Warum Instagram allein nicht reicht",
+  title: "Social Media vs. Website: Instagram reicht nicht aus",
   description:
     "3.000 Follower, aber kaum Anfragen? Wir erklären, warum Social Media und Website keine Alternativen sind – und was passiert, wenn du nur auf Instagram setzt.",
   openGraph: {
@@ -143,8 +143,8 @@ export default function BlogArticle() {
               lineHeight: 1.1,
             }}
           >
-            Social Media vs. Website: Warum Instagram allein{" "}
-            <span className="accent">nicht reicht</span>
+            3.000 Follower, aber kaum Anfragen?{" "}
+            <span className="accent">Das ist kein Zufall.</span>
           </h1>
           <p
             style={{

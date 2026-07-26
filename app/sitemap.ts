@@ -4,7 +4,7 @@ import { veroeffentlichteArtikel } from '@/lib/blog/artikel'
 // B-02: Sitemap der Plattform-Domain. Nur öffentliche Marketing-Seiten —
 // Demos (/demo/*) und Kundenseiten bleiben bewusst draußen (noindex bzw.
 // eigene Domains mit eigener Sitemap).
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://webseitenverlag-deutschland.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.webseitenverlag-deutschland.de'
 
 export const revalidate = 3600
 

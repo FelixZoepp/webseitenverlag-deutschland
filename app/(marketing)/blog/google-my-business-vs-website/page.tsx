@@ -5,7 +5,7 @@ import Script from "next/script";
 import { h2Style, h3Style, ulStyle, defBox, ctaBox } from "@/lib/blog/styles";
 
 export const metadata: Metadata = {
-  title: "Google Unternehmensprofil vs. eigene Website: Was du wirklich brauchst",
+  title: "Google Unternehmensprofil vs. eigene Website – was zählt",
   description:
     "Reicht ein Google-Unternehmensprofil aus? Wir erklären, warum das Profil allein nicht genug ist – und wie beides zusammen das Maximum rausholt.",
   openGraph: {
@@ -144,8 +144,8 @@ export default function BlogArticle() {
               lineHeight: 1.1,
             }}
           >
-            Google Unternehmensprofil vs. eigene Website: Was du{" "}
-            <span className="accent">wirklich brauchst</span>
+            Reicht ein Google-Unternehmensprofil –{" "}
+            <span className="accent">oder brauchst du mehr?</span>
           </h1>
           <p
             style={{

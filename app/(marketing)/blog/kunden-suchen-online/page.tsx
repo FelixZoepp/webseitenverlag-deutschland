@@ -5,7 +5,7 @@ import Script from "next/script";
 import { h2Style, h3Style, ulStyle, defBox, ctaBox } from "@/lib/blog/styles";
 
 export const metadata: Metadata = {
-  title: "Kunden suchen online – auch nach dir (die Zahlen beweisen es)",
+  title: "Kunden suchen online – auch nach dir (Zahlen & Fakten)",
   description:
     "93 % aller Kaufentscheidungen beginnen mit einer Google-Suche. Wir zeigen, wie oft Kunden in deiner Branche suchen – und warum du dabei sein musst.",
   openGraph: {
@@ -143,8 +143,8 @@ export default function BlogArticle() {
               lineHeight: 1.1,
             }}
           >
-            Kunden suchen online – auch nach dir{" "}
-            <span className="accent">(die Zahlen beweisen es)</span>
+            Deine Kunden suchen gerade online –{" "}
+            <span className="accent">finden sie dich?</span>
           </h1>
           <p
             style={{

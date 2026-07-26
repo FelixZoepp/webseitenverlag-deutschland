@@ -1,0 +1,19 @@
+# Webseiten-Verlag Deutschland
+
+> Professionelle Webseiten für Selbstständige und kleine Unternehmen ab 99 € netto/Monat.
+
+## Über uns
+Der Webseiten-Verlag Deutschland erstellt professionelle Webseiten für lokale Unternehmen in Deutschland. Wir bieten ein Abo-Modell ohne Einmalkosten: Design, Hosting, SEO und Support inklusive.
+
+## Angebot
+- Starter (99 €/Monat): One-Page Website mit Fullscreen-Header
+- Business (169 €/Monat): Bis zu 5 Unterseiten, Video-Header möglich
+- Premium (249 €/Monat): Bis zu 10 Unterseiten, Scroll-Animationen, Video-Header
+
+## Branchen
+Handwerker, Gastronomen, Ärzte, Friseure, Fitnessstudios, Fotografen und weitere lokale Betriebe.
+
+## Kontakt
+- Website: https://www.webseitenverlag-deutschland.de
+- Demo anfordern: https://www.webseitenverlag-deutschland.de/entwurf
+- Blog: https://www.webseitenverlag-deutschland.de/blog

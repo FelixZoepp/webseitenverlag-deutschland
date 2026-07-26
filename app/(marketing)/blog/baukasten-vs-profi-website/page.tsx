@@ -5,7 +5,7 @@ import Script from "next/script";
 import { h2Style, h3Style, ulStyle, defBox, ctaBox, thStyle, tdStyle } from "@/lib/blog/styles";
 
 export const metadata: Metadata = {
-  title: "Jimdo, Wix & Co. vs. professionelle Website: Der ehrliche Vergleich",
+  title: "Jimdo & Wix vs. Profi-Website: Der ehrliche Vergleich",
   description:
     "Baukasten oder Profi-Website? Wir vergleichen ehrlich: Design, SEO, Performance, Support und Kosten – damit du die richtige Entscheidung triffst.",
   openGraph: {
@@ -144,8 +144,8 @@ export default function BlogArticle() {
               lineHeight: 1.1,
             }}
           >
-            Jimdo, Wix &amp; Co. vs. professionelle Website: Der ehrliche{" "}
-            <span className="accent">Vergleich</span>
+            Baukasten oder Profi-Website –{" "}
+            <span className="accent">was lohnt sich wirklich?</span>
           </h1>
           <p
             style={{

@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next'
 // B-02: robots.txt der Plattform-Domain. Demos, Admin, Dashboard, API und
 // Kundenseiten-Proxy sind für Crawler tabu (Demos tragen zusätzlich
 // noindex-Meta + X-Robots-Tag, dreifache Absicherung).
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://webseitenverlag-deutschland.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.webseitenverlag-deutschland.de'
 
 export default function robots(): MetadataRoute.Robots {
   return {

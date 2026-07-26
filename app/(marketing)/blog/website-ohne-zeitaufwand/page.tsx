@@ -5,7 +5,7 @@ import Script from "next/script";
 import { h2Style, h3Style, ulStyle, defBox, ctaBox } from "@/lib/blog/styles";
 
 export const metadata: Metadata = {
-  title: "Website ohne Zeitaufwand: Wie das Abo-Modell dir Arbeit abnimmt",
+  title: "Website ohne Zeitaufwand: Das Abo-Modell macht es möglich",
   description: "Keine Zeit für eine Website? Mit dem richtigen Anbieter brauchst du kaum eigene Zeit – wir erklären wie.",
   openGraph: {
     title: "Website ohne Zeitaufwand: Wie das Abo-Modell dir Arbeit abnimmt",
@@ -141,8 +141,8 @@ export default function BlogArticle() {
               lineHeight: 1.1,
             }}
           >
-            Website ohne Zeitaufwand: Wie das Abo-Modell dir{" "}
-            <span className="accent">Arbeit abnimmt</span>
+            Keine Zeit für eine Website?{" "}
+            <span className="accent">So geht es trotzdem.</span>
           </h1>
           <p
             style={{
