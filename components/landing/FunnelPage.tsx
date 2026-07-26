@@ -136,7 +136,7 @@ export default function FunnelPage() {
 
   async function absenden(e: React.FormEvent) {
     e.preventDefault();
-    if (!antworten.name || !antworten.email) {
+    if (!antworten.name || !antworten.email || !antworten.telefon) {
       setError("Bitte Name und E-Mail angeben.");
       return;
     }
@@ -412,10 +412,10 @@ export default function FunnelPage() {
               </div>
               <div>
                 <label htmlFor="f-telefon" className={labelCls}>
-                  Telefon <span className="font-normal text-[var(--ink-soft)]">(für schnellere Rückmeldung)</span>
+                  Telefon *
                 </label>
                 <input
-                  id="f-telefon" type="tel" placeholder="+49 123 456 789"
+                  id="f-telefon" type="tel" placeholder="+49 123 456 789" required
                   value={antworten.telefon}
                   onChange={(e) => setAntworten({ ...antworten, telefon: e.target.value })}
                   className={inputCls}

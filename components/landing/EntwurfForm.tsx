@@ -60,7 +60,7 @@ export default function EntwurfForm() {
     (step === 1 && data.branche) ||
     (step === 2 && data.mitarbeiter) ||
     (step === 3 && data.zeitrahmen) ||
-    (step === 4 && data.name && data.email);
+    (step === 4 && data.name && data.email && data.telefon);
 
   async function handleSubmit() {
     setSending(true);
@@ -336,9 +336,9 @@ export default function EntwurfForm() {
                   />
                 </div>
                 <div className="form-field">
-                  <label htmlFor="e-tel">Telefonnummer</label>
+                  <label htmlFor="e-tel">Telefonnummer *</label>
                   <input
-                    id="e-tel" type="tel" placeholder="+49 123 456 789"
+                    id="e-tel" type="tel" placeholder="+49 123 456 789" required
                     value={data.telefon}
                     onChange={(e) => setData({ ...data, telefon: e.target.value })}
                   />
