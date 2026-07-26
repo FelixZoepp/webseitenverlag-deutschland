@@ -204,7 +204,7 @@ export default function WvdClient() {
             <a href="#ablauf">Ablauf</a>
             <a href="/blog">Blog</a>
           </div>
-          <a href="/entwurf" className="nav-cta">Kostenlose Demo</a>
+          <a href="/entwurf" className="nav-cta">Kostenlose Demo anfordern</a>
           <button
             className="nav-burger"
             onClick={() => setMobileMenu(!mobileMenu)}
@@ -550,7 +550,7 @@ export default function WvdClient() {
                 {
                   icon: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.19 13.8 19.79 19.79 0 0 1 1.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />,
                   title: "Kostenlose Demo",
-                  desc: "In einem 15-Minuten-Gespräch lernen wir dich und dein Business kennen. Kostenlos und unverbindlich.",
+                  desc: "Fordere deine kostenlose Demo-Website an. Wir zeigen dir, wie deine Seite aussehen wird — ohne Risiko.",
                 },
                 {
                   icon: <><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></>,
@@ -974,18 +974,18 @@ export default function WvdClient() {
             <div style={{ textAlign: "center", maxWidth: 680, margin: "0 auto" }}>
               <span className="eyebrow" style={{ display: "inline-block", marginBottom: 16 }}>Der nächste Schritt</span>
               <h2 className="display" style={{ fontSize: "clamp(32px, 4.5vw, 52px)", marginBottom: 16 }}>
-                15 Minuten, die dein Business <span className="accent">verändern können</span>.
+                Endlich über die Webseite <span className="accent">Anfragen generieren</span>.
               </h2>
               <p style={{ color: "var(--text-secondary)", fontSize: 17, lineHeight: 1.6, marginBottom: 36 }}>
-                Kein Verkaufsgespräch. Kein Druck. Wir schauen uns gemeinsam an,
-                was eine Webseite für dein Business bringen kann – und ob wir der richtige Partner dafür sind.
+                Kein Risiko. Kein Vorschuss. Wir erstellen dir eine kostenlose Demo-Website
+                für dein Business — und du entscheidest, ob sie zu dir passt.
               </p>
               <a href="/entwurf" className="btn btn-primary" style={{ fontSize: 18, padding: "22px 48px" }}>
-                <span>Kostenlose Demo ansehen →</span>
+                <span>Kostenlose Demo anfordern →</span>
               </a>
               <div style={{ display: "flex", justifyContent: "center", gap: 32, marginTop: 28, fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--text-tertiary)" }}>
                 <span>✓ 100% kostenlos</span>
-                <span>✓ 15 Minuten</span>
+                <span>✓ Ohne Risiko</span>
                 <span>✓ Unverbindlich</span>
               </div>
             </div>
