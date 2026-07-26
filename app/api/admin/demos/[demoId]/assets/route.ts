@@ -47,8 +47,9 @@ export async function POST(
     return NextResponse.json({ error: 'Nur Flagship-Demos' }, { status: 400 })
   }
 
-  // Bereits Assets vorhanden? (Hero-Bild = Mindest-Check)
-  if (config.inhalte?.hero?.media?.datei) {
+  // Bereits ALLE Assets vorhanden? Hero + Signature + alle Leistungsbilder
+  const leistungenOhneBild = config.inhalte?.leistungen?.karten?.filter((k: Record<string, unknown>) => !k.media || !(k.media as { datei?: string }).datei).length || 0
+  if (config.inhalte?.hero?.media?.datei && config.inhalte?.signature?.nachher?.datei && leistungenOhneBild === 0) {
     return NextResponse.json({ ok: true, message: 'Assets bereits vorhanden' })
   }
 
@@ -86,8 +87,10 @@ export async function POST(
     }
 
     // Video automatisch mit generieren wenn erlaubt und Hero-Bild vorhanden
+    // NICHT wenn scroll_animationen aktiv — Scrub-Videos kommen aus dem Branchen-Profil
     let videoGenerated = false
-    if (ergebnis.videoJob && videoErlaubtFuerTier(demo.paket) && ergebnis.config.inhalte?.hero?.media?.datei) {
+    const hatScrub = ergebnis.config.scroll_animationen && ergebnis.config.scrub_assets?.clips?.length
+    if (!hatScrub && ergebnis.videoJob && videoErlaubtFuerTier(demo.paket) && ergebnis.config.inhalte?.hero?.media?.datei) {
       try {
         const config = ergebnis.config
         const branche = demo.branche || config.branche_key || ''
