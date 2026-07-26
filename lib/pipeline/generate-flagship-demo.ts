@@ -660,13 +660,13 @@ export async function generiereFlagshipDemo(
       : [
           `Professional ${row.name || brancheKey} workspace: ${karte.titel}.`,
           `Close-up of tools, materials and work in progress. Authentic craftsmanship.`,
-          `Bright natural light, shallow depth of field, 4:3 format.`,
+          `Bright natural light, shallow depth of field, 16:9 wide format.`,
           `Photorealistic editorial photography. No people, no text, no logos.`,
         ].join(' ')
     leistungsAufgaben.push(
       generiereAsset({
         prompt: leistPrompt,
-        aspect: '4:3',
+        aspect: '16:9',
         branche: brancheKey,
         szeneTyp: 'leistung',
         quelleOverride: 'demo_generiert',
