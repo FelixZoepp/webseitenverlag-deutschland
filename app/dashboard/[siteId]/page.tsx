@@ -94,6 +94,9 @@ export default async function SiteEditorPage({
         onboardingTermin={customer.onboarding_termin_am as string | null}
         hasBilder={(bilderCount || 0) > 0}
         previewAvailable={true}
+        feedbackRunde={(site.feedback_runde as number) || 0}
+        feedbackMaxRunden={(site.feedback_max_runden as number) || 3}
+        feedbackAutoFreigabeAm={site.feedback_auto_freigabe_am as string | null}
       />
     )
   }

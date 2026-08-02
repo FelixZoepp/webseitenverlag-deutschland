@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, Upload, Phone, Sparkles, Loader2, Eye, Rocket } from 'lucide-react'
+import { Check, Upload, Phone, Sparkles, Loader2, Eye, Rocket, MessageCircle, Monitor, Smartphone } from 'lucide-react'
 
 interface Props {
   siteId: string
@@ -12,14 +12,24 @@ interface Props {
   onboardingTermin: string | null
   hasBilder: boolean
   previewAvailable: boolean
+  feedbackRunde?: number
+  feedbackMaxRunden?: number
+  feedbackAutoFreigabeAm?: string | null
 }
 
 export default function KundenStatusDashboard({
   siteId, siteName, customerName, onboardingStatus, buildStatus,
   onboardingTermin, hasBilder, previewAvailable,
+  feedbackRunde = 0, feedbackMaxRunden = 3, feedbackAutoFreigabeAm,
 }: Props) {
   const [freigabeLoading, setFreigabeLoading] = useState(false)
   const [freigegeben, setFreigegeben] = useState(false)
+  const [feedbackText, setFeedbackText] = useState('')
+  const [feedbackSending, setFeedbackSending] = useState(false)
+  const [feedbackResult, setFeedbackResult] = useState<string | null>(null)
+  const [aktuelleRunde, setAktuelleRunde] = useState(feedbackRunde)
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
+  const rundenAufgebraucht = aktuelleRunde >= feedbackMaxRunden
 
   const firstName = customerName.split(' ')[0] || customerName
 
@@ -147,39 +157,161 @@ export default function KundenStatusDashboard({
         ))}
       </div>
 
-      {/* Freigabe-Button wenn Webseite fertig */}
+      {/* Preview + Feedback wenn Webseite fertig */}
       {buildStatus === 'FERTIG' && !freigegeben && onboardingStatus !== 'FREIGEGEBEN' && (
-        <div style={{
-          padding: '24px', borderRadius: '14px',
-          background: 'linear-gradient(135deg, #F0FDF4, #DCFCE7)',
-          border: '1px solid #BBF7D0', textAlign: 'center',
-        }}>
-          <p style={{ fontSize: '15px', fontWeight: 600, color: '#111827', marginBottom: '4px' }}>
-            Alles perfekt?
-          </p>
-          <p style={{ fontSize: '13px', color: '#6B7280', marginBottom: '16px' }}>
-            Sie können die Webseite im Editor noch anpassen oder direkt freigeben.
-          </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <a href={`/dashboard/${siteId}`} style={{
-              padding: '10px 20px', borderRadius: '8px', fontSize: '14px',
-              fontWeight: 600, border: '1px solid #D1D5DB', color: '#374151',
-              textDecoration: 'none', background: '#fff',
+        <>
+          {/* Preview mit Desktop/Mobile Toggle */}
+          {previewAvailable && (
+            <div style={{
+              borderRadius: '14px', border: '1px solid #E5E7EB', overflow: 'hidden',
+              marginBottom: '16px', background: '#fff',
             }}>
-              Erst bearbeiten
-            </a>
-            <button onClick={handleFreigabe} disabled={freigabeLoading} style={{
-              padding: '10px 24px', borderRadius: '8px', fontSize: '14px',
-              fontWeight: 600, background: '#16A34A', color: '#fff',
-              border: 'none', cursor: 'pointer', display: 'flex',
-              alignItems: 'center', gap: '6px',
-            }}>
-              {freigabeLoading
-                ? <><Loader2 className="w-4 h-4 animate-spin" /> Wird freigeschaltet...</>
-                : <><Rocket style={{ width: '16px', height: '16px' }} /> Webseite freigeben</>}
-            </button>
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 16px', borderBottom: '1px solid #E5E7EB', background: '#F9FAFB',
+              }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>Vorschau</span>
+                <div style={{ display: 'flex', borderRadius: '6px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                  <button onClick={() => setPreviewDevice('desktop')} style={{
+                    display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 10px',
+                    fontSize: '12px', fontWeight: 600, border: 'none', cursor: 'pointer',
+                    background: previewDevice === 'desktop' ? '#1E4A82' : '#fff',
+                    color: previewDevice === 'desktop' ? '#fff' : '#6B7280',
+                  }}>
+                    <Monitor style={{ width: '13px', height: '13px' }} /> Desktop
+                  </button>
+                  <button onClick={() => setPreviewDevice('mobile')} style={{
+                    display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 10px',
+                    fontSize: '12px', fontWeight: 600, border: 'none', cursor: 'pointer',
+                    borderLeft: '1px solid #E5E7EB',
+                    background: previewDevice === 'mobile' ? '#1E4A82' : '#fff',
+                    color: previewDevice === 'mobile' ? '#fff' : '#6B7280',
+                  }}>
+                    <Smartphone style={{ width: '13px', height: '13px' }} /> Mobil
+                  </button>
+                </div>
+              </div>
+              <div style={{
+                display: 'flex', justifyContent: 'center',
+                background: previewDevice === 'mobile' ? '#F3F4F6' : '#fff',
+              }}>
+                <iframe
+                  src={`/api/sites/${siteId}/preview`}
+                  title="Vorschau"
+                  style={{
+                    width: previewDevice === 'mobile' ? '390px' : '100%',
+                    height: previewDevice === 'mobile' ? '700px' : '500px',
+                    border: 'none', display: 'block', background: '#fff',
+                    borderRadius: previewDevice === 'mobile' ? '16px' : '0',
+                    transition: 'width 0.3s',
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Feedback-Panel mit Rundenzähler */}
+          <div style={{
+            padding: '24px', borderRadius: '14px',
+            border: '1px solid #E0E7FF', background: '#EEF2FF', marginBottom: '16px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <p style={{ fontSize: '15px', fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <MessageCircle style={{ width: '18px', height: '18px', color: '#4F46E5' }} />
+                Feedback & Änderungswünsche
+              </p>
+              <span style={{
+                fontSize: '12px', fontWeight: 700, padding: '4px 10px', borderRadius: '20px',
+                background: rundenAufgebraucht ? '#FEF2F2' : '#F0FDF4',
+                color: rundenAufgebraucht ? '#DC2626' : '#16A34A',
+              }}>
+                Runde {aktuelleRunde} von {feedbackMaxRunden}
+              </span>
+            </div>
+
+            {!rundenAufgebraucht ? (
+              <>
+                <p style={{ fontSize: '13px', color: '#6B7280', marginBottom: '12px' }}>
+                  Beschreiben Sie Ihre Änderungswünsche — unsere KI setzt sie automatisch um.
+                </p>
+                <textarea
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  rows={4}
+                  style={{
+                    width: '100%', padding: '12px', borderRadius: '8px',
+                    border: '1px solid #C7D2FE', fontSize: '14px', resize: 'vertical',
+                    fontFamily: 'inherit', outline: 'none',
+                  }}
+                  placeholder="z.B. Die Headline soll 'Ihr Experte für Photovoltaik' heißen, die Farbe des Buttons soll grüner sein..."
+                />
+                <button
+                  onClick={handleFeedback}
+                  disabled={feedbackSending || !feedbackText.trim()}
+                  style={{
+                    marginTop: '12px', padding: '10px 20px', borderRadius: '8px',
+                    fontSize: '14px', fontWeight: 600, background: '#4F46E5', color: '#fff',
+                    border: 'none', cursor: 'pointer', display: 'flex',
+                    alignItems: 'center', gap: '6px', opacity: feedbackSending || !feedbackText.trim() ? 0.5 : 1,
+                  }}
+                >
+                  {feedbackSending
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> KI überarbeitet...</>
+                    : <><MessageCircle style={{ width: '16px', height: '16px' }} /> Feedback absenden</>}
+                </button>
+              </>
+            ) : (
+              <p style={{ fontSize: '13px', color: '#6B7280' }}>
+                Alle {feedbackMaxRunden} inklusiven Feedback-Runden sind aufgebraucht.
+                Bitte geben Sie die Webseite frei oder kontaktieren Sie uns für eine zusätzliche Runde.
+              </p>
+            )}
+
+            {feedbackResult && (
+              <div style={{
+                marginTop: '12px', padding: '12px', borderRadius: '8px',
+                background: '#fff', border: '1px solid #C7D2FE', fontSize: '13px', color: '#374151',
+              }}>
+                {feedbackResult}
+              </div>
+            )}
           </div>
-        </div>
+
+          {/* Freigabe-Button */}
+          <div style={{
+            padding: '24px', borderRadius: '14px',
+            background: 'linear-gradient(135deg, #F0FDF4, #DCFCE7)',
+            border: '1px solid #BBF7D0', textAlign: 'center',
+          }}>
+            <p style={{ fontSize: '15px', fontWeight: 600, color: '#111827', marginBottom: '4px' }}>
+              Alles perfekt?
+            </p>
+            <p style={{ fontSize: '13px', color: '#6B7280', marginBottom: '16px' }}>
+              {feedbackAutoFreigabeAm
+                ? `Ohne Rückmeldung wird die Seite am ${new Date(feedbackAutoFreigabeAm).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })} automatisch freigeschaltet.`
+                : 'Sie können die Webseite im Editor noch anpassen oder direkt freigeben.'}
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <a href={`/dashboard/${siteId}`} style={{
+                padding: '10px 20px', borderRadius: '8px', fontSize: '14px',
+                fontWeight: 600, border: '1px solid #D1D5DB', color: '#374151',
+                textDecoration: 'none', background: '#fff',
+              }}>
+                Erst bearbeiten
+              </a>
+              <button onClick={handleFreigabe} disabled={freigabeLoading} style={{
+                padding: '10px 24px', borderRadius: '8px', fontSize: '14px',
+                fontWeight: 600, background: '#16A34A', color: '#fff',
+                border: 'none', cursor: 'pointer', display: 'flex',
+                alignItems: 'center', gap: '6px',
+              }}>
+                {freigabeLoading
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Wird freigeschaltet...</>
+                  : <><Rocket style={{ width: '16px', height: '16px' }} /> Webseite freigeben</>}
+              </button>
+            </div>
+          </div>
+        </>
       )}
 
       {freigegeben && (
@@ -195,4 +327,32 @@ export default function KundenStatusDashboard({
       </p>
     </div>
   )
+
+  async function handleFeedback() {
+    if (!feedbackText.trim()) return
+    setFeedbackSending(true)
+    setFeedbackResult(null)
+
+    try {
+      const res = await fetch('/api/customer/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ siteId, feedback: feedbackText.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+
+      setAktuelleRunde(data.runde)
+      setFeedbackText('')
+      setFeedbackResult(
+        data.angewendet
+          ? `Ihre Änderungen wurden umgesetzt (Runde ${data.runde} von ${data.maxRunden}). Schauen Sie sich die Vorschau an!`
+          : `Wir haben Ihr Feedback erhalten (Runde ${data.runde} von ${data.maxRunden}). ${data.response?.slice(0, 200) || ''}`
+      )
+    } catch (err: unknown) {
+      setFeedbackResult(err instanceof Error ? err.message : 'Fehler beim Senden')
+    } finally {
+      setFeedbackSending(false)
+    }
+  }
 }

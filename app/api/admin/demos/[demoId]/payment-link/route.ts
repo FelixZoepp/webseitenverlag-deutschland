@@ -18,6 +18,11 @@ export async function POST(
     return NextResponse.json({ error: 'Ungültiges Paket' }, { status: 400 })
   }
 
+  // Spezial-Deal: optionaler Custom-Preis in Euro (z.B. 149 für 149€/Monat)
+  const customPriceEuro = typeof body?.customPrice === 'number' ? body.customPrice : null
+  const customPriceCent = customPriceEuro ? Math.round(customPriceEuro * 100) : undefined
+  const customProductName = typeof body?.customProductName === 'string' ? body.customProductName : undefined
+
   const { data: demo, error: loadError } = await supabase
     .from('demos')
     .select('id, prospect_name, status, config')
@@ -38,6 +43,8 @@ export async function POST(
       demoId: demo.id,
       prospectName: demo.prospect_name,
       paket: paket as PackageTier,
+      customPriceCent,
+      customProductName,
     })
     url = session.url
     sessionId = session.sessionId

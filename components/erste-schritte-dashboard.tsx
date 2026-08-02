@@ -7,7 +7,8 @@
  * Standard-Ansicht für Kunden nach dem Livegang; Editor über ?view=editor.
  */
 
-import { Check, Globe, Image as ImageIcon, Newspaper, ClipboardList, Pencil, ExternalLink, Rocket } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Globe, Image as ImageIcon, Newspaper, ClipboardList, Pencil, ExternalLink, Rocket, Monitor, Smartphone } from 'lucide-react'
 
 interface Props {
   siteId: string
@@ -27,6 +28,7 @@ export default function ErsteSchritteDashboard({
   siteId, siteName, customerName, domainStatus, domainHostname,
   seoFreigegeben, seoOffen, hasBilder, wizardBearbeitet, wizardGesamt, wizardFertig,
 }: Props) {
+  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
   const firstName = customerName.split(' ')[0] || customerName
 
   const steps = [
@@ -133,23 +135,64 @@ export default function ErsteSchritteDashboard({
                 {domainStatus === 'AKTIV' && domainHostname ? domainHostname : siteName}
               </span>
             </div>
-            <a
-              href={`/api/sites/${siteId}/preview`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px',
-                fontWeight: 600, color: '#1E4A82', textDecoration: 'none',
-              }}
-            >
-              In neuem Tab öffnen <ExternalLink style={{ width: '13px', height: '13px' }} />
-            </a>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                display: 'flex', borderRadius: '6px', border: '1px solid #E5E7EB', overflow: 'hidden',
+              }}>
+                <button
+                  onClick={() => setDevice('desktop')}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 10px',
+                    fontSize: '12px', fontWeight: 600, border: 'none', cursor: 'pointer',
+                    background: device === 'desktop' ? '#1E4A82' : '#fff',
+                    color: device === 'desktop' ? '#fff' : '#6B7280',
+                  }}
+                >
+                  <Monitor style={{ width: '13px', height: '13px' }} /> Desktop
+                </button>
+                <button
+                  onClick={() => setDevice('mobile')}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 10px',
+                    fontSize: '12px', fontWeight: 600, border: 'none', cursor: 'pointer',
+                    borderLeft: '1px solid #E5E7EB',
+                    background: device === 'mobile' ? '#1E4A82' : '#fff',
+                    color: device === 'mobile' ? '#fff' : '#6B7280',
+                  }}
+                >
+                  <Smartphone style={{ width: '13px', height: '13px' }} /> Mobil
+                </button>
+              </div>
+              <a
+                href={`/api/sites/${siteId}/preview`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px',
+                  fontWeight: 600, color: '#1E4A82', textDecoration: 'none',
+                }}
+              >
+                In neuem Tab öffnen <ExternalLink style={{ width: '13px', height: '13px' }} />
+              </a>
+            </div>
           </div>
-          <iframe
-            src={`/api/sites/${siteId}/preview`}
-            title="Vorschau Ihrer Webseite"
-            style={{ width: '100%', height: '640px', border: 'none', display: 'block', background: '#fff' }}
-          />
+          <div style={{
+            display: 'flex', justifyContent: 'center', background: device === 'mobile' ? '#F3F4F6' : '#fff',
+            transition: 'background 0.2s',
+          }}>
+            <iframe
+              src={`/api/sites/${siteId}/preview`}
+              title="Vorschau Ihrer Webseite"
+              style={{
+                width: device === 'mobile' ? '390px' : '100%',
+                height: device === 'mobile' ? '844px' : '640px',
+                border: device === 'mobile' ? '1px solid #E5E7EB' : 'none',
+                borderRadius: device === 'mobile' ? '24px' : '0',
+                display: 'block', background: '#fff',
+                transition: 'width 0.3s, height 0.3s',
+              }}
+            />
+          </div>
         </div>
 
         {/* Get-started-Schritte */}

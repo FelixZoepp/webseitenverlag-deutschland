@@ -15,7 +15,7 @@ import { NextResponse } from 'next/server'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { randomBytes } from 'crypto'
 import Stripe from 'stripe'
-import { getStripe } from '@/lib/stripe'
+import { getStripe, AGB_VERSION } from '@/lib/stripe'
 import { sendDunningEmail, sendInvitationEmail, sendMagicLinkEmail } from '@/lib/email'
 import { stufeFuerTage, tageUeberfaellig } from '@/lib/dunning'
 import { getPackage, type PackageTier } from '@/lib/packages'
@@ -190,6 +190,14 @@ async function handleCheckoutCompleted(supabase: SupabaseClient, session: Stripe
   const ende = vertragsende(beginn, STANDARD_KONDITIONEN.laufzeit_monate)
   const pkg = getPackage(paket as PackageTier)
 
+  // Spezial-Deal: Custom-Preis aus Metadata (in Cent) → Euro für monthly_price
+  const customPriceCent = session.metadata?.custom_price_cent ? parseInt(session.metadata.custom_price_cent, 10) : null
+  const monthlyPrice = customPriceCent ? customPriceCent / 100 : pkg.price
+
+  // AGB-Akzeptanz dokumentieren (§3(3) AGB v1.1)
+  const agbVersion = session.metadata?.agb_version || AGB_VERSION
+  const agbAcceptedAt = new Date().toISOString()
+
   let customerId: string
   const { data: existingCustomer } = await supabase
     .from('customers')
@@ -205,10 +213,12 @@ async function handleCheckoutCompleted(supabase: SupabaseClient, session: Stripe
         package: paket,
         stripe_customer_id: stripeCustomerId,
         stripe_subscription_id: stripeSubscriptionId,
-        monthly_price: pkg.price,
+        monthly_price: monthlyPrice,
         contract_start: beginn,
         contract_end: ende,
         vertrags_status: 'ZAHLUNG_AKTIV',
+        agb_version: agbVersion,
+        agb_accepted_at: agbAcceptedAt,
       })
       .eq('id', customerId)
   } else {
@@ -223,10 +233,12 @@ async function handleCheckoutCompleted(supabase: SupabaseClient, session: Stripe
         stripe_customer_id: stripeCustomerId,
         stripe_subscription_id: stripeSubscriptionId,
         onboarding_status: 'AUSSTEHEND',
-        monthly_price: pkg.price,
+        monthly_price: monthlyPrice,
         contract_start: beginn,
         contract_end: ende,
         vertrags_status: 'ZAHLUNG_AKTIV',
+        agb_version: agbVersion,
+        agb_accepted_at: agbAcceptedAt,
       })
       .select('id')
       .single()
@@ -285,7 +297,7 @@ async function handleCheckoutCompleted(supabase: SupabaseClient, session: Stripe
       site_id: site.id,
       demo_id: demoId,
       paket,
-      monatsrate_cent: pkg.price * 100,
+      monatsrate_cent: customPriceCent || pkg.price * 100,
       laufzeit_monate: STANDARD_KONDITIONEN.laufzeit_monate,
       verlaengerung_monate: STANDARD_KONDITIONEN.verlaengerung_monate,
       kuendigungsfrist_monate: STANDARD_KONDITIONEN.kuendigungsfrist_monate,

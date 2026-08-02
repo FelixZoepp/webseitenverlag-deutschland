@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Loader2, Sparkles, Check, Eye, Rocket, Image } from 'lucide-react'
+import { ArrowLeft, Loader2, Sparkles, Check, Eye, Rocket, Image, Wand2, Send } from 'lucide-react'
 
 interface KundenBild {
   id: string
@@ -36,6 +36,9 @@ export default function BuildPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [publishing, setPublishing] = useState(false)
   const [published, setPublished] = useState(false)
+  const [adminPrompt, setAdminPrompt] = useState('')
+  const [prompting, setPrompting] = useState(false)
+  const [promptResult, setPromptResult] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/admin/customers/${customerId}`).then(async (r) => {
@@ -229,6 +232,67 @@ export default function BuildPage() {
           </button>
         </div>
       )}
+
+      {/* Admin-Prompt: nachträgliche Anpassungen per KI */}
+      {site && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mt-6">
+          <h2 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <Wand2 className="w-4 h-4" /> Seite per Anweisung anpassen
+          </h2>
+          <p className="text-xs text-gray-500 mb-4">
+            Änderungen direkt per Prompt — die KI passt die Kunden-Seite an, ohne dass der Kunde etwas tun muss.
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={adminPrompt}
+              onChange={(e) => setAdminPrompt(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !prompting && adminPrompt.trim()) handleAdminPrompt() }}
+              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="z.B. Ändere die Headline zu 'Ihr Partner für Photovoltaik' und mache den CTA grüner"
+            />
+            <button
+              onClick={handleAdminPrompt}
+              disabled={prompting || !adminPrompt.trim()}
+              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {prompting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Anwenden
+            </button>
+          </div>
+          {promptResult && (
+            <div className={`mt-3 rounded-lg p-3 text-sm ${promptResult.includes('nicht') || promptResult.includes('Fehler') ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700'}`}>
+              {promptResult}
+            </div>
+          )}
+        </div>
+      )}
     </main>
   )
+
+  async function handleAdminPrompt() {
+    if (!site || !adminPrompt.trim()) return
+    setPrompting(true)
+    setPromptResult(null)
+
+    try {
+      const res = await fetch(`/api/admin/sites/${site.id}/prompt`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: adminPrompt.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+
+      setPromptResult(data.applied ? `Angewendet: ${data.response.slice(0, 200)}` : data.response)
+      if (data.applied) {
+        setAdminPrompt('')
+        setPreviewUrl(`/api/sites/${site.id}/preview?t=${Date.now()}`)
+      }
+    } catch (err: unknown) {
+      setPromptResult(err instanceof Error ? err.message : 'Fehler')
+    } finally {
+      setPrompting(false)
+    }
+  }
 }

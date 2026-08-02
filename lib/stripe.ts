@@ -1,12 +1,16 @@
 /**
  * Stripe-Integration: Checkout-Sessions für den Closing-Flow.
  * Preise kommen inline aus lib/packages.ts — keine Produktpflege in Stripe nötig.
+ * Custom-Pricing (Spezial-Deals) über optionalen customPriceCent-Parameter.
  */
 
 import Stripe from 'stripe'
 import { getPackage, PackageTier } from './packages'
 import { vertragsKonditionenText } from '@/config/vertraege'
 import { getStripePriceId } from '@/config/stripe-produkte'
+
+/** AGB-Version, die beim Checkout akzeptiert wird. Bei Änderung hier erhöhen. */
+export const AGB_VERSION = '1.1'
 
 let stripeClient: Stripe | null = null
 
@@ -20,11 +24,15 @@ export function getStripe(): Stripe {
 }
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://webseitenverlag-deutschland.vercel.app'
+const AGB_URL = `${APP_URL}/agb`
 
 /**
  * Erstellt eine Checkout-Session (Monats-Abo) für eine Demo.
  * Der Link wird im Closing an den Kunden gesendet.
  * Hinweis: Checkout-Links laufen nach 24h ab — bei Bedarf einfach neu erstellen.
+ *
+ * customPriceCent: Spezial-Deal-Preis in Cent (z.B. 14900 für 149€/Monat).
+ * Wenn gesetzt, überschreibt er den Paketpreis.
  */
 export async function createDemoCheckoutSession(params: {
   demoId: string
@@ -32,19 +40,18 @@ export async function createDemoCheckoutSession(params: {
   paket: PackageTier
   /** Optional: bereits bekannte Site (Demo-Site) für die Webhook-Metadata */
   siteId?: string
+  /** Optional: Custom-Preis in Cent — überschreibt den Paketpreis (Spezial-Deals) */
+  customPriceCent?: number
+  /** Optional: Custom-Produktname für den Checkout */
+  customProductName?: string
 }): Promise<{ url: string; sessionId: string }> {
   const pkg = getPackage(params.paket)
+  const priceCent = params.customPriceCent ?? pkg.price * 100
+  const produktName = params.customProductName ?? `Website-Paket ${pkg.name} — ${params.prospectName}`
 
-  // Vertragskonditionen transparent im Checkout (24/12/3 aus config/vertraege.ts).
-  // Consent-Checkbox (consent_collection) braucht eine in den Stripe-Settings
-  // hinterlegte AGB-URL — sonst lehnt die API die Session ab. Deshalb erst
-  // aktiv, wenn STRIPE_TOS_CONSENT=1 gesetzt ist (WARTELISTE).
   const konditionen = vertragsKonditionenText()
-  const mitConsent = process.env.STRIPE_TOS_CONSENT === '1'
-  const priceId = getStripePriceId(params.paket)
+  const priceId = params.customPriceCent ? null : getStripePriceId(params.paket)
 
-  // Baustein C §C.4: Drei Stripe-Produkte — wenn eine Price-ID gepflegt ist
-  // (config/stripe-produkte.ts), zählt NUR die; sonst price_data-Fallback.
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
     priceId
       ? { quantity: 1, price: priceId }
@@ -53,18 +60,18 @@ export async function createDemoCheckoutSession(params: {
           price_data: {
             currency: 'eur',
             recurring: { interval: 'month' },
-            unit_amount: pkg.price * 100,
+            unit_amount: priceCent,
             product_data: {
-              name: `Website-Paket ${pkg.name} — ${params.prospectName}`,
-              description: pkg.stripeDescription,
+              name: produktName,
+              description: params.customPriceCent
+                ? `Individuelle Servicepauschale — ${(priceCent / 100).toFixed(0)} €/Monat netto`
+                : pkg.stripeDescription,
             },
           },
         },
   ]
 
-  // Phase 5 (§6.1): Setup-Fee als einmaliger Posten — Wert aus lib/packages.ts
-  // (Config, 0 = kein Posten). Im Subscription-Mode ist das die erste Rechnung.
-  if (pkg.setupFee > 0) {
+  if (!params.customPriceCent && pkg.setupFee > 0) {
     lineItems.push({
       quantity: 1,
       price_data: {
@@ -75,29 +82,31 @@ export async function createDemoCheckoutSession(params: {
     })
   }
 
-  // Phase 5 (§6.1): metadata {lead_id, site_id, plan} — demo_id/paket bleiben
-  // als Bestands-Schlüssel für den Webhook erhalten (additiv, kein Bruch).
   const metadata = {
     demo_id: params.demoId,
     lead_id: params.demoId,
     site_id: params.siteId || '',
     paket: params.paket,
     plan: params.paket,
+    agb_version: AGB_VERSION,
+    ...(params.customPriceCent ? { custom_price_cent: String(priceCent) } : {}),
   }
 
   const session = await getStripe().checkout.sessions.create({
     mode: 'subscription',
     locale: 'de',
-    // §6.1: Karte + SEPA-Lastschrift für deutsche Handwerks-Kunden
     payment_method_types: ['card', 'sepa_debit'],
     custom_text: {
       submit: { message: konditionen },
-      ...(mitConsent ? { terms_of_service_acceptance: { message: konditionen } } : {}),
+      terms_of_service_acceptance: { message: konditionen },
     },
-    ...(mitConsent ? { consent_collection: { terms_of_service: 'required' as const } } : {}),
+    consent_collection: { terms_of_service: 'required' },
     line_items: lineItems,
     metadata,
-    subscription_data: { metadata },
+    subscription_data: {
+      metadata,
+      description: `Servicepauschale ${(priceCent / 100).toFixed(0)} €/Monat — ${params.prospectName}`,
+    },
     success_url: `${APP_URL}/willkommen?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${APP_URL}/`,
   })

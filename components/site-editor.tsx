@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Site, ChatMessage, SiteConfig, ConfigVersion, PageMeta, isMultiPageConfig } from '@/types'
-import { MessageSquare, Settings, History, Send, Loader2, Upload, RotateCcw, Eye, AlertCircle, Check, FileText, Home, Info, Briefcase, Phone, Scale, Plus, MoreVertical, Trash2, Globe, Palette, Zap, Clock } from 'lucide-react'
+import { MessageSquare, Settings, History, Send, Loader2, Upload, RotateCcw, Eye, AlertCircle, Check, FileText, Home, Info, Briefcase, Phone, Scale, Plus, MoreVertical, Trash2, Globe, Palette, Zap, Clock, Monitor, Smartphone } from 'lucide-react'
 import { configsEqual } from '@/lib/config-utils'
 
 type Tab = 'chat' | 'manual' | 'history'
@@ -32,6 +32,7 @@ export default function SiteEditor({ site: initialSite, messages: initialMessage
   const [pendingUpsell, setPendingUpsell] = useState<{ upsellId: string } | null>(null)
   const [upsellResponding, setUpsellResponding] = useState(false)
   const [fullscreenPreview, setFullscreenPreview] = useState(false)
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
   const chatEndRef = useRef<HTMLDivElement>(null)
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -280,7 +281,24 @@ export default function SiteEditor({ site: initialSite, messages: initialMessage
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--za-fg-3)' }}>
               <Eye className="w-4 h-4" /> Vorschau {isMultiPage && !isGlobalSettings && `— ${currentPageTitle}`}
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', borderRadius: '4px', border: '1px solid var(--za-border)', overflow: 'hidden' }}>
+                <button onClick={() => setPreviewDevice('desktop')} style={{
+                  display: 'flex', alignItems: 'center', padding: '2px 6px', border: 'none', cursor: 'pointer',
+                  background: previewDevice === 'desktop' ? 'var(--za-accent)' : 'transparent',
+                  color: previewDevice === 'desktop' ? '#fff' : 'var(--za-fg-4)',
+                }}>
+                  <Monitor className="w-3 h-3" />
+                </button>
+                <button onClick={() => setPreviewDevice('mobile')} style={{
+                  display: 'flex', alignItems: 'center', padding: '2px 6px', border: 'none', cursor: 'pointer',
+                  borderLeft: '1px solid var(--za-border)',
+                  background: previewDevice === 'mobile' ? 'var(--za-accent)' : 'transparent',
+                  color: previewDevice === 'mobile' ? '#fff' : 'var(--za-fg-4)',
+                }}>
+                  <Smartphone className="w-3 h-3" />
+                </button>
+              </div>
               <button onClick={refreshPreview} style={{ fontSize: '11px', color: 'var(--za-fg-4)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <RotateCcw className="w-3 h-3" /> Aktualisieren
               </button>
@@ -289,10 +307,15 @@ export default function SiteEditor({ site: initialSite, messages: initialMessage
               </button>
             </div>
           </div>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'center', background: previewDevice === 'mobile' ? 'var(--za-bg-2)' : 'transparent' }}>
             <iframe key={`${previewKey}-${currentPage}`}
               src={`/api/sites/${site.id}/preview${isMultiPage ? `?page=${isGlobalSettings ? 'home' : currentPage}` : ''}`}
-              style={{ width: '100%', height: '100%', border: 0 }} title="Vorschau" />
+              style={{
+                width: previewDevice === 'mobile' ? '390px' : '100%',
+                height: '100%', border: 0,
+                borderLeft: previewDevice === 'mobile' ? '1px solid var(--za-border)' : 'none',
+                borderRight: previewDevice === 'mobile' ? '1px solid var(--za-border)' : 'none',
+              }} title="Vorschau" />
           </div>
         </div>
 
