@@ -24,7 +24,6 @@ export function getStripe(): Stripe {
 }
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://webseitenverlag-deutschland.vercel.app'
-const AGB_URL = `${APP_URL}/agb`
 
 /**
  * Erstellt eine Checkout-Session (Monats-Abo) für eine Demo.
