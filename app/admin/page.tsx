@@ -98,9 +98,10 @@ export default async function AdminDashboard() {
       </div>
 
       {/* KPI Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         <KPI label="MRR" value={fmt(mrr)} unit="€" sub={`${activeCustomers.length} aktive Kunden`} delay={60} />
         <KPI label="ARR" value={fmt(arr)} unit="€" sub="Jährlich wiederkehrend" delay={140} />
+        <KPI label="2-Jahres-ARR" value={fmt(mrr * 24)} unit="€" sub="Vertragslaufzeit (24 Mo)" delay={180} />
         <KPI label="Sites" value={String(totalSites || 0)} sub={`${activeCustomers.length} Kunden`} delay={220} />
         <KPI label="Leads · MTD" value={String(leadsThisMonth || 0)} sub={now.toLocaleDateString('de-DE', { month: 'long' })} delay={300} />
       </div>
