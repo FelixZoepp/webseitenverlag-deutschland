@@ -32,21 +32,21 @@ export default async function AdminDashboard() {
   const mrr = activeCustomers.reduce((sum, c) => sum + (parseFloat(c.monthly_price) || 0), 0)
   const arr = mrr * 12
   const totalContractValue = activeCustomers.reduce((sum, c) => {
-    const years = c.contract_years || 4
+    const years = c.contract_years || 2
     const monthly = parseFloat(c.monthly_price) || 0
     const setup = parseFloat(c.setup_fee) || 0
     return sum + (monthly * 12 * years) + setup
   }, 0)
 
-  // ARR over 4 years
+  // ARR over 2 years (Vertragslaufzeit)
   const arrByYear: { year: number; revenue: number; customers: number }[] = []
-  for (let y = 0; y < 4; y++) {
+  for (let y = 0; y < 2; y++) {
     const yearDate = new Date(now.getFullYear() + y, 0, 1)
     const yearEnd = new Date(now.getFullYear() + y, 11, 31)
     const activeInYear = activeCustomers.filter((c) => {
       if (!c.contract_start) return true
       const start = new Date(c.contract_start)
-      const end = c.contract_end ? new Date(c.contract_end) : new Date(start.getFullYear() + (c.contract_years || 4), start.getMonth(), start.getDate())
+      const end = c.contract_end ? new Date(c.contract_end) : new Date(start.getFullYear() + (c.contract_years || 2), start.getMonth(), start.getDate())
       return start <= yearEnd && end >= yearDate
     })
     arrByYear.push({ year: now.getFullYear() + y, revenue: activeInYear.reduce((s, c) => s + (parseFloat(c.monthly_price) || 0) * 12, 0), customers: activeInYear.length })
@@ -110,7 +110,7 @@ export default async function AdminDashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', marginBottom: '16px' }}>
         <div className="panel fade-up" style={{ animationDelay: '360ms' }}>
           <div style={{ marginBottom: '18px' }}>
-            <span className="panel-eyebrow">Prognose · 4 Jahre</span>
+            <span className="panel-eyebrow">Prognose · 2 Jahre</span>
             <div className="panel-title">ARR-Entwicklung (Vertragslaufzeit)</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
