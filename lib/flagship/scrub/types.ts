@@ -95,7 +95,50 @@ export interface ScrubConfig {
   /** Starter-Semantik wie maler: Layout eingefroren, Chat-Edit nur auf Texte */
   frozen?: boolean
   herkunft?: { quellen?: string[]; generator?: string }
+  /** Unterseiten-Inhalte — wenn gesetzt, wird die Nav erweitert */
+  unterseiten?: ScrubUnterseiten
 }
+
+/** Karriere-Seite: Benefits, offene Stellen, Bewerbungsformular */
+export interface ScrubKarriereInhalt {
+  eyebrow: string
+  headline: string
+  lead: string
+  benefits: { icon: string; titel: string; text: string }[]
+  stellen: { titel: string; ort: string; typ: string; beschreibung: string }[]
+  cta_label: string
+}
+
+/** Erfahrungen: Team-Testimonials + Fallstudien */
+export interface ScrubErfahrungenInhalt {
+  eyebrow: string
+  headline: string
+  stimmen: { name: string; rolle: string; text: string; initialen: string }[]
+  fallstudien: { titel: string; kunde: string; ergebnis: string; beschreibung: string }[]
+}
+
+/** Leistungen: Detaillierte Services */
+export interface ScrubLeistungenInhalt {
+  eyebrow: string
+  headline: string
+  lead: string
+  leistungen: { titel: string; text: string; icon: string }[]
+}
+
+export interface ScrubUnterseiten {
+  karriere?: ScrubKarriereInhalt
+  erfahrungen?: ScrubErfahrungenInhalt
+  leistungen?: ScrubLeistungenInhalt
+}
+
+export type ScrubUnterseitenSlug = 'karriere' | 'erfahrungen' | 'leistungen' | 'kontakt'
+
+export const SCRUB_UNTERSEITEN: { slug: ScrubUnterseitenSlug; label: string }[] = [
+  { slug: 'leistungen', label: 'Leistungen' },
+  { slug: 'erfahrungen', label: 'Erfahrungen' },
+  { slug: 'karriere', label: 'Karriere' },
+  { slug: 'kontakt', label: 'Kontakt' },
+]
 
 export function istScrubKomposition(config: unknown): config is ScrubConfig {
   return (

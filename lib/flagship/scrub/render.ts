@@ -18,11 +18,12 @@ import type { FlagshipRenderOptionen } from '../types'
 import { esc, escAttr } from '../html'
 import { scrubCss } from './css'
 import { scrubJs } from './js'
-import type { ScrubConfig } from './types'
+import { SCRUB_UNTERSEITEN, type ScrubConfig, type ScrubUnterseitenSlug } from './types'
 import {
   renderScrubFooter, renderScrubHeader, renderScrubKontakt, renderScrubRibbon,
   renderScrubStatisch, renderScrubWrap,
 } from './sections'
+import { renderScrubKarriere, renderScrubErfahrungen, renderScrubLeistungen, renderScrubKontaktSeite } from './unterseiten'
 
 function jsonLd(config: ScrubConfig): string {
   const m = config.meta
@@ -39,14 +40,20 @@ function jsonLd(config: ScrubConfig): string {
   return JSON.stringify(daten).replace(/</g, '\\u003c')
 }
 
+function scrubNavLinks(basisPfad: string): { label: string; href: string }[] {
+  return SCRUB_UNTERSEITEN.map(u => ({ label: u.label, href: `${basisPfad}/${u.slug}` }))
+}
+
 export function renderScrubStory(config: ScrubConfig, opts: FlagshipRenderOptionen = {}): string {
   const { meta, inhalte } = config
   const titel = meta.seo_titel || `${meta.firma} – ${meta.ort}`
   const beschreibung = meta.seo_beschreibung || ''
   const noindex = opts.noindex !== false ? '<meta name="robots" content="noindex">' : ''
 
+  const navLinks = config.unterseiten ? scrubNavLinks(opts.basisPfad || '') : undefined
+
   const body = [
-    renderScrubHeader(inhalte.header),
+    renderScrubHeader(inhalte.header, navLinks),
     inhalte.frames ? renderScrubWrap(inhalte) : renderScrubStatisch(inhalte),
     renderScrubKontakt(inhalte.kontakt, opts.submitZiel),
     renderScrubFooter(inhalte.footer, inhalte.header, meta),
@@ -81,6 +88,67 @@ ${scrubJs({
     submitZiel: opts.submitZiel,
   })}
 </script>
+</body>
+</html>`
+}
+
+export function renderScrubUnterseite(
+  config: ScrubConfig,
+  seite: ScrubUnterseitenSlug,
+  opts: FlagshipRenderOptionen = {},
+): string {
+  const { meta, inhalte, design } = config
+  const basisPfad = opts.basisPfad || ''
+  const navLinks = scrubNavLinks(basisPfad)
+  const seitenLabel = SCRUB_UNTERSEITEN.find(u => u.slug === seite)?.label || seite
+  const titel = `${seitenLabel} — ${meta.firma}`
+
+  let sektionen = ''
+  switch (seite) {
+    case 'karriere':
+      sektionen = config.unterseiten?.karriere
+        ? renderScrubKarriere(config.unterseiten.karriere, opts.submitZiel)
+        : ''
+      break
+    case 'erfahrungen':
+      sektionen = config.unterseiten?.erfahrungen
+        ? renderScrubErfahrungen(config.unterseiten.erfahrungen)
+        : ''
+      break
+    case 'leistungen':
+      sektionen = config.unterseiten?.leistungen
+        ? renderScrubLeistungen(config.unterseiten.leistungen)
+        : ''
+      break
+    case 'kontakt':
+      sektionen = renderScrubKontaktSeite(inhalte.kontakt, opts.submitZiel)
+      break
+  }
+
+  if (!sektionen) return ''
+
+  const noindex = opts.noindex !== false ? '<meta name="robots" content="noindex">' : ''
+  const body = [
+    renderScrubHeader(inhalte.header, navLinks),
+    sektionen,
+    renderScrubFooter(inhalte.footer, inhalte.header, meta),
+    opts.demo ? renderScrubRibbon() : '',
+  ].filter(Boolean).join('\n\n')
+
+  return `<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${esc(titel)}</title>
+<meta name="description" content="${escAttr(meta.seo_beschreibung || '')}">
+${noindex}
+<style>
+${scrubCss(design)}
+</style>
+</head>
+<body>
+${body}
 </body>
 </html>`
 }

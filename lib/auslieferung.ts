@@ -21,6 +21,9 @@ import { renderAnfrageSeite } from '@/lib/flagship/anfrage'
 import { UNTERSEITEN } from '@/lib/flagship/types'
 import type { UnterseitenSlug } from '@/lib/flagship/types'
 import type { FlagshipConfig } from '@/lib/flagship/types'
+import { istScrubKomposition } from '@/lib/flagship/scrub/types'
+import { SCRUB_UNTERSEITEN, type ScrubUnterseitenSlug } from '@/lib/flagship/scrub/types'
+import { renderScrubUnterseite } from '@/lib/flagship/scrub/render'
 
 export interface Rechtstexte {
   impressum: string
@@ -214,6 +217,16 @@ async function renderEngineSeite(
     const fsConfig = config as unknown as FlagshipConfig
     // Live-Sites indexieren (noindex steuert der Aufrufer über site.noindex)
     if (slug === '') return renderFlagshipPage(fsConfig, { noindex: false })
+    // Scrub-Story Unterseiten (Karriere, Erfahrungen, Leistungen, Kontakt)
+    if (istScrubKomposition(fsConfig)) {
+      const scrubSeite = SCRUB_UNTERSEITEN.find(u => u.slug === slug)
+      if (scrubSeite) {
+        return renderScrubUnterseite(fsConfig, slug as ScrubUnterseitenSlug, {
+          noindex: false,
+          submitZiel: `/api/public/forms/${site.id}/submit`,
+        })
+      }
+    }
     const funnelSlug = fsConfig.funnel.modus === 'reservierung' ? 'reservierung' : 'anfrage'
     if (slug === funnelSlug) {
       return renderAnfrageSeite(fsConfig, {

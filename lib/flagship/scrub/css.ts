@@ -133,6 +133,43 @@ textarea.ss-feld{min-height:110px;resize:vertical}
   .ss-kontakt-karte{padding:28px 20px}
 }
 
+/* ---------- Unterseiten (Karriere, Erfahrungen, Leistungen) ---------- */
+.ss-seite{padding:96px 6vw;border-bottom:1px solid rgba(255,255,255,.06)}
+.ss-seite-wrap{max-width:900px;margin:0 auto}
+.ss-h2{font-size:clamp(24px,3vw,36px);font-weight:800;letter-spacing:-0.02em;margin:0 0 32px}
+.ss-benefits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.ss-benefit{padding:28px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.ss-benefit-icon{font-size:28px;display:block;margin-bottom:12px}
+.ss-benefit h3{margin:0 0 8px;font-size:18px;font-weight:700}
+.ss-benefit p{margin:0;font-size:14px;line-height:1.6;color:var(--ss-muted)}
+.ss-stellen-list{display:flex;flex-direction:column;gap:16px}
+.ss-stelle{padding:28px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.ss-stelle-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.ss-stelle h3{margin:0;font-size:18px;font-weight:700}
+.ss-stelle-meta{font-size:13px;color:var(--ss-cyan)}
+.ss-stelle p{margin:0 0 16px;font-size:14px;line-height:1.6;color:var(--ss-muted)}
+.ss-stimmen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.ss-stimme{padding:28px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.ss-stimme-text{margin:0 0 16px;font-size:16px;line-height:1.6;font-style:italic;color:var(--ss-text)}
+.ss-stimme-autor{display:flex;align-items:center;gap:12px}
+.ss-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,rgba(${a1},.3),rgba(${a2},.3));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.ss-stimme-autor small{color:var(--ss-muted)}
+.ss-fallstudien-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.ss-fallstudie{padding:28px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.ss-fallstudie h3{margin:8px 0;font-size:18px;font-weight:700}
+.ss-fallstudie p{margin:0 0 12px;font-size:14px;line-height:1.6;color:var(--ss-muted)}
+.ss-ergebnis{font-size:14px;padding:12px;border-radius:8px;background:rgba(${a1},.08);border:1px solid rgba(${a1},.2);color:var(--ss-akzent)}
+.ss-leistungen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.ss-leistung{padding:28px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);position:relative}
+.ss-leistung-nr{position:absolute;top:16px;right:20px;font-size:48px;font-weight:900;opacity:.06}
+.ss-leistung-icon{font-size:28px;display:block;margin-bottom:12px}
+.ss-leistung h3{margin:0 0 8px;font-size:18px;font-weight:700}
+.ss-leistung p{margin:0;font-size:14px;line-height:1.6;color:var(--ss-muted)}
+.ss-nav{display:flex;gap:24px;align-items:center}
+.ss-nav a{font-size:14px;font-weight:500;color:var(--ss-muted);transition:color .2s}
+.ss-nav a:hover{color:var(--ss-text)}
+@media (max-width:860px){.ss-nav{display:none}}
+
 /* ---------- Reduced Motion: Poster statt Canvas, keine Animationen ---------- */
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}

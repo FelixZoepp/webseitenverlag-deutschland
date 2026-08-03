@@ -12,11 +12,15 @@ import { esc, escAttr, mediaSlot } from '../html'
 import type { FlagshipMeta } from '../types'
 import type { ScrubInhalte, ScrubSzene } from './types'
 
-export function renderScrubHeader(header: ScrubInhalte['header']): string {
+export function renderScrubHeader(header: ScrubInhalte['header'], navLinks?: { label: string; href: string }[]): string {
+  const nav = navLinks?.length
+    ? `<nav class="ss-nav">${navLinks.map(l => `<a href="${escAttr(l.href)}">${esc(l.label)}</a>`).join('')}</nav>`
+    : ''
   return `<!-- sektion:ss-kopf -->
 <header class="ss-kopf">
   <div class="ss-kopf-inner">
-    <a class="ss-logo" href="#top">${esc(header.logo_text)}</a>
+    <a class="ss-logo" href="/">${esc(header.logo_text)}</a>
+    ${nav}
     <a class="ss-btn-primary" href="#kontakt">${esc(header.cta_label)}</a>
   </div>
 </header>`
