@@ -4,17 +4,20 @@ import { renderAnfrageSeite } from '@/lib/flagship/anfrage'
 import { renderUnterseite } from '@/lib/flagship/render'
 import type { FlagshipConfig, UnterseitenSlug } from '@/lib/flagship/types'
 import { UNTERSEITEN } from '@/lib/flagship/types'
+import { istScrubKomposition, SCRUB_UNTERSEITEN, type ScrubUnterseitenSlug } from '@/lib/flagship/scrub/types'
+import { renderScrubUnterseite } from '@/lib/flagship/scrub/render'
 import { finalisiereDemoHtml } from '@/lib/demo-badge'
 
 // Funnel-Unterseite der Flagship-Demos (/demo/{token}/anfrage bzw. /reservierung).
 // Multipage: Inhalts-Unterseiten (/demo/{token}/leistungen, /ergebnisse, /ueber-uns, /kontakt).
-// Demo-Modus: kein Submit-Ziel — der Wizard zeigt den Erfolgs-Screen ohne Persistenz.
+// Scrub: Unterseiten (/demo/{token}/karriere, /erfahrungen, /leistungen, /kontakt).
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
 const UNTERSEITEN_SLUGS = new Set<string>(UNTERSEITEN.map((u) => u.slug))
+const SCRUB_SLUGS = new Set<string>(SCRUB_UNTERSEITEN.map((u) => u.slug))
 
 export async function GET(
   _request: Request,
@@ -25,8 +28,9 @@ export async function GET(
 
   const istFunnel = seite === 'anfrage' || seite === 'reservierung'
   const istUnterseite = UNTERSEITEN_SLUGS.has(seite)
+  const istScrubSeite = SCRUB_SLUGS.has(seite)
 
-  if (!istFunnel && !istUnterseite) {
+  if (!istFunnel && !istUnterseite && !istScrubSeite) {
     return new NextResponse('Nicht gefunden', { status: 404 })
   }
 
@@ -46,14 +50,32 @@ export async function GET(
 
   const basisPfad = `/demo/${token}`
 
-  // B-01/B-16: Badge + noindex + OG auch auf allen Unterseiten
   const badgeOptionen = {
     prospectName: (demo as { prospect_name?: string }).prospect_name ?? 'Ihre Firma',
     paymentLinkUrl: (demo as { payment_link_url?: string | null }).payment_link_url ?? null,
     origin: new URL(_request.url).origin,
   }
 
-  // Multipage-Unterseiten (leistungen, ergebnisse, ueber-uns, kontakt)
+  // Scrub-Story Unterseiten (karriere, erfahrungen, leistungen, kontakt)
+  if (istScrubSeite && istScrubKomposition(config)) {
+    const rendered = renderScrubUnterseite(config, seite as ScrubUnterseitenSlug, {
+      demo: true,
+      basisPfad,
+      submitZiel: null,
+    })
+    if (!rendered) return new NextResponse('Nicht gefunden', { status: 404 })
+    const html = finalisiereDemoHtml(rendered, badgeOptionen)
+    return new NextResponse(html, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'X-Robots-Tag': 'noindex, nofollow',
+      },
+    })
+  }
+
+  // Standard Multipage-Unterseiten (leistungen, ergebnisse, ueber-uns, kontakt)
   if (istUnterseite) {
     if (config.seiten_modus !== 'multipage') {
       return new NextResponse('Nicht gefunden', { status: 404 })
