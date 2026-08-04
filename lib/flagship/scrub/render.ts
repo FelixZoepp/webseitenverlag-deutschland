@@ -47,10 +47,6 @@ function scrubNavLinks(basisPfad: string): { label: string; href: string }[] {
   return SCRUB_UNTERSEITEN.map(u => ({ label: u.label, href: `${basisPfad}/${u.slug}` }))
 }
 
-/** Anchor-Links für die Startseite (scrollt zu den Sektionen statt Seitenwechsel) */
-function scrubAnchorLinks(): { label: string; href: string }[] {
-  return SCRUB_UNTERSEITEN.filter(u => u.slug !== 'kontakt').map(u => ({ label: u.label, href: `#${u.slug}` }))
-}
 
 export function renderScrubStory(config: ScrubConfig, opts: FlagshipRenderOptionen = {}): string {
   const { meta, inhalte } = config
