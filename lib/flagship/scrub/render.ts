@@ -65,7 +65,7 @@ export function renderScrubStory(config: ScrubConfig, opts: FlagshipRenderOption
     const hell = fsCfg.design?.typo_modus === 'sans_bold_hell'
     const funnelUrl = '#kontakt'
     const funnelLabel = inhalte.header.cta_label || 'Anfrage senden'
-    flagshipBody = [
+    const sektionen = [
       inh.fakten ? renderFakten(inh.fakten as Parameters<typeof renderFakten>[0]) : '',
       inh.empathie ? renderEmpathie(inh.empathie as Parameters<typeof renderEmpathie>[0]) : '',
       inh.signature ? renderSignature(inh.signature as Parameters<typeof renderSignature>[0]) : '',
@@ -78,7 +78,9 @@ export function renderScrubStory(config: ScrubConfig, opts: FlagshipRenderOption
       inh.faq ? renderFaq(inh.faq as Parameters<typeof renderFaq>[0]) : '',
       inh.conversion ? renderConversion(inh.conversion as Parameters<typeof renderConversion>[0], hell, funnelUrl, funnelLabel) : '',
     ].filter(Boolean).join('\n\n')
-    flagshipStyles = flagshipCss(fsCfg.design as Parameters<typeof flagshipCss>[0])
+    // Scope: Flagship-CSS darf den Scrub-Header nicht überschreiben
+    flagshipBody = `<div class="fs-scope">${sektionen}</div>`
+    flagshipStyles = `.fs-scope { all: initial; display: block; }\n` + flagshipCss(fsCfg.design as Parameters<typeof flagshipCss>[0]).replace(/\bbody\b/g, '.fs-scope').replace(/\bhtml\b/g, '.fs-scope')
   }
 
   const body = [
