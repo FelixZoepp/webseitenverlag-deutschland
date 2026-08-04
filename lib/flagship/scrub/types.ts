@@ -125,16 +125,37 @@ export interface ScrubLeistungenInhalt {
   leistungen: { titel: string; text: string; icon: string }[]
 }
 
+/** Ziele-Seite: Trainingsziele mit Beschreibung */
+export interface ScrubZieleInhalt {
+  eyebrow: string
+  headline: string
+  lead: string
+  ziele: { titel: string; text: string; icon: string }[]
+}
+
+/** Angebote-Seite: Mitgliedschaften, Pakete, Preise */
+export interface ScrubAngeboteInhalt {
+  eyebrow: string
+  headline: string
+  lead: string
+  pakete: { titel: string; preis: string; intervall: string; features: string[]; highlight?: boolean }[]
+  hinweis?: string
+}
+
 export interface ScrubUnterseiten {
   karriere?: ScrubKarriereInhalt
   erfahrungen?: ScrubErfahrungenInhalt
   leistungen?: ScrubLeistungenInhalt
+  ziele?: ScrubZieleInhalt
+  angebote?: ScrubAngeboteInhalt
 }
 
-export type ScrubUnterseitenSlug = 'karriere' | 'erfahrungen' | 'leistungen' | 'kontakt'
+export type ScrubUnterseitenSlug = 'karriere' | 'erfahrungen' | 'leistungen' | 'kontakt' | 'ziele' | 'angebote'
 
 export const SCRUB_UNTERSEITEN: { slug: ScrubUnterseitenSlug; label: string }[] = [
   { slug: 'leistungen', label: 'Leistungen' },
+  { slug: 'ziele', label: 'Ziele' },
+  { slug: 'angebote', label: 'Angebote' },
   { slug: 'erfahrungen', label: 'Erfahrungen' },
   { slug: 'karriere', label: 'Karriere' },
   { slug: 'kontakt', label: 'Kontakt' },

@@ -176,6 +176,20 @@ textarea.ss-feld{min-height:110px;resize:vertical}
 .ss-fallstudie p{margin:0 0 16px;font-size:14px;line-height:1.7;color:var(--ss-muted)}
 .ss-ergebnis{font-size:14px;padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,rgba(${a1},.1),rgba(${a1},.04));border:1px solid rgba(${a1},.2);color:var(--ss-akzent);font-weight:500}
 
+/* Angebote / Preise */
+.ss-pakete-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;align-items:start}
+.ss-paket{padding:32px;border-radius:20px;background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);text-align:center;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;position:relative}
+.ss-paket:hover{transform:translateY(-4px);border-color:rgba(${a1},.25);box-shadow:0 12px 40px -12px rgba(0,0,0,.5)}
+.ss-paket-highlight{border-color:rgba(${a1},.4);background:linear-gradient(135deg,rgba(${a1},.08),rgba(${a1},.02));box-shadow:0 0 32px rgba(${a1},.1)}
+.ss-paket-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#0a0c10;background:var(--ss-akzent);padding:5px 16px;border-radius:999px;white-space:nowrap}
+.ss-paket h3{margin:16px 0 8px;font-size:20px;font-weight:700}
+.ss-paket-preis{margin-bottom:20px}
+.ss-preis-zahl{font-size:clamp(36px,4vw,48px);font-weight:900;letter-spacing:-0.03em;background:linear-gradient(135deg,var(--ss-akzent),var(--ss-cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.ss-preis-intervall{font-size:16px;color:var(--ss-muted);margin-left:4px}
+.ss-paket-features{list-style:none;padding:0;margin:0 0 24px;text-align:left}
+.ss-paket-features li{padding:8px 0;font-size:14px;color:var(--ss-muted);border-bottom:1px solid rgba(255,255,255,.05)}
+.ss-paket-features li::before{content:'✓ ';color:var(--ss-akzent);font-weight:700}
+
 /* Leistungen */
 .ss-leistungen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
 .ss-leistung{position:relative;overflow:hidden}

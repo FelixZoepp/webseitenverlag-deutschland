@@ -4,7 +4,7 @@
  */
 
 import { esc, escAttr } from '../html'
-import type { ScrubKarriereInhalt, ScrubErfahrungenInhalt, ScrubLeistungenInhalt, ScrubInhalte } from './types'
+import type { ScrubKarriereInhalt, ScrubErfahrungenInhalt, ScrubLeistungenInhalt, ScrubZieleInhalt, ScrubAngeboteInhalt, ScrubInhalte } from './types'
 
 export function renderScrubKarriere(k: ScrubKarriereInhalt, submitZiel?: string | null): string {
   const benefits = k.benefits.map((b) =>
@@ -166,6 +166,69 @@ export function renderScrubKontaktSeite(kontakt: ScrubInhalte['kontakt'], submit
       <button class="ss-btn-primary" type="submit">${esc(kontakt.cta_label)}</button>
       <p class="ss-form-erfolg" data-form-erfolg>Danke! Wir melden uns innerhalb von 24 Stunden.</p>
     </form>
+  </div>
+</section>`
+}
+
+export function renderScrubZiele(z: ScrubZieleInhalt): string {
+  const items = z.ziele.map((g) =>
+    `<div class="ss-leistung">
+      <span class="ss-leistung-icon">${esc(g.icon)}</span>
+      <h3>${esc(g.titel)}</h3>
+      <p>${esc(g.text)}</p>
+    </div>`
+  ).join('\n    ')
+
+  return `<!-- sektion:ss-ziele -->
+<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <span class="ss-kicker">${esc(z.eyebrow)}</span>
+    <h1 class="ss-title">${esc(z.headline)}</h1>
+    <p class="ss-body">${esc(z.lead)}</p>
+  </div>
+</section>
+
+<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <div class="ss-leistungen-grid">
+    ${items}
+    </div>
+  </div>
+</section>`
+}
+
+export function renderScrubAngebote(a: ScrubAngeboteInhalt): string {
+  const pakete = a.pakete.map((p) => {
+    const features = p.features.map((f) => `<li>${esc(f)}</li>`).join('\n          ')
+    const hl = p.highlight ? ' ss-paket-highlight' : ''
+    return `<div class="ss-paket${hl}">
+      ${p.highlight ? '<span class="ss-paket-badge">Beliebteste Wahl</span>' : ''}
+      <h3>${esc(p.titel)}</h3>
+      <div class="ss-paket-preis"><span class="ss-preis-zahl">${esc(p.preis)}</span><span class="ss-preis-intervall">/${esc(p.intervall)}</span></div>
+      <ul class="ss-paket-features">
+          ${features}
+      </ul>
+      <a class="ss-btn-primary" href="#kontakt">Jetzt starten</a>
+    </div>`
+  }).join('\n    ')
+
+  const hinweis = a.hinweis ? `<p class="ss-body" style="text-align:center;margin-top:32px">${esc(a.hinweis)}</p>` : ''
+
+  return `<!-- sektion:ss-angebote -->
+<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <span class="ss-kicker">${esc(a.eyebrow)}</span>
+    <h1 class="ss-title">${esc(a.headline)}</h1>
+    <p class="ss-body">${esc(a.lead)}</p>
+  </div>
+</section>
+
+<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <div class="ss-pakete-grid">
+    ${pakete}
+    </div>
+    ${hinweis}
   </div>
 </section>`
 }

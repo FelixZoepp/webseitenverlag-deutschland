@@ -23,7 +23,7 @@ import {
   renderScrubFooter, renderScrubHeader, renderScrubKontakt, renderScrubRibbon,
   renderScrubStatisch, renderScrubWrap,
 } from './sections'
-import { renderScrubKarriere, renderScrubErfahrungen, renderScrubLeistungen, renderScrubKontaktSeite } from './unterseiten'
+import { renderScrubKarriere, renderScrubErfahrungen, renderScrubLeistungen, renderScrubKontaktSeite, renderScrubZiele, renderScrubAngebote } from './unterseiten'
 
 function jsonLd(config: ScrubConfig): string {
   const m = config.meta
@@ -118,6 +118,16 @@ export function renderScrubUnterseite(
     case 'leistungen':
       sektionen = config.unterseiten?.leistungen
         ? renderScrubLeistungen(config.unterseiten.leistungen)
+        : ''
+      break
+    case 'ziele':
+      sektionen = config.unterseiten?.ziele
+        ? renderScrubZiele(config.unterseiten.ziele)
+        : ''
+      break
+    case 'angebote':
+      sektionen = config.unterseiten?.angebote
+        ? renderScrubAngebote(config.unterseiten.angebote)
         : ''
       break
     case 'kontakt':
