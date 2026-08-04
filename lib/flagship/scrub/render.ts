@@ -78,9 +78,18 @@ export function renderScrubStory(config: ScrubConfig, opts: FlagshipRenderOption
       inh.faq ? renderFaq(inh.faq as Parameters<typeof renderFaq>[0]) : '',
       inh.conversion ? renderConversion(inh.conversion as Parameters<typeof renderConversion>[0], hell, funnelUrl, funnelLabel) : '',
     ].filter(Boolean).join('\n\n')
-    // Scope: Flagship-CSS darf den Scrub-Header nicht überschreiben
+    // Scope: Flagship-Sektionen in Container, globale CSS-Regeln umschreiben
     flagshipBody = `<div class="fs-scope">${sektionen}</div>`
-    flagshipStyles = `.fs-scope { all: initial; display: block; }\n` + flagshipCss(fsCfg.design as Parameters<typeof flagshipCss>[0]).replace(/\bbody\b/g, '.fs-scope').replace(/\bhtml\b/g, '.fs-scope')
+    const rawCss = flagshipCss(fsCfg.design as Parameters<typeof flagshipCss>[0])
+    // Globale Selektoren auf .fs-scope umleiten, damit Scrub-Header unangetastet bleibt
+    flagshipStyles = rawCss
+      .replace(/^body\s*\{/gm, '.fs-scope {')
+      .replace(/^html\s*\{/gm, '.fs-scope {')
+      .replace(/^\*\s*\{/gm, '.fs-scope * {')
+      .replace(/^a\s*\{/gm, '.fs-scope a {')
+      .replace(/^img\s*\{/gm, '.fs-scope img {')
+      .replace(/^section\[id\]/gm, '.fs-scope section[id]')
+      .replace(/^section\s*\{/gm, '.fs-scope section {')
   }
 
   const body = [
