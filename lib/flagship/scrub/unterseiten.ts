@@ -29,7 +29,7 @@ export function renderScrubKarriere(k: ScrubKarriereInhalt, submitZiel?: string 
   const action = submitZiel ? ` action="${escAttr(submitZiel)}" method="post"` : ''
 
   return `<!-- sektion:ss-karriere -->
-<section class="ss-seite">
+<section class="ss-seite" id="karriere">
   <div class="ss-seite-wrap">
     <span class="ss-kicker">${esc(k.eyebrow)}</span>
     <h1 class="ss-title">${esc(k.headline)}</h1>
@@ -102,7 +102,7 @@ export function renderScrubErfahrungen(e: ScrubErfahrungenInhalt): string {
     : ''
 
   return `<!-- sektion:ss-erfahrungen -->
-<section class="ss-seite">
+<section class="ss-seite" id="erfahrungen">
   <div class="ss-seite-wrap">
     <span class="ss-kicker">${esc(e.eyebrow)}</span>
     <h1 class="ss-title">${esc(e.headline)}</h1>
@@ -132,7 +132,7 @@ export function renderScrubLeistungen(l: ScrubLeistungenInhalt): string {
   ).join('\n    ')
 
   return `<!-- sektion:ss-leistungen -->
-<section class="ss-seite">
+<section class="ss-seite" id="leistungen">
   <div class="ss-seite-wrap">
     <span class="ss-kicker">${esc(l.eyebrow)}</span>
     <h1 class="ss-title">${esc(l.headline)}</h1>
@@ -180,7 +180,7 @@ export function renderScrubZiele(z: ScrubZieleInhalt): string {
   ).join('\n    ')
 
   return `<!-- sektion:ss-ziele -->
-<section class="ss-seite">
+<section class="ss-seite" id="ziele">
   <div class="ss-seite-wrap">
     <span class="ss-kicker">${esc(z.eyebrow)}</span>
     <h1 class="ss-title">${esc(z.headline)}</h1>
@@ -215,7 +215,7 @@ export function renderScrubAngebote(a: ScrubAngeboteInhalt): string {
   const hinweis = a.hinweis ? `<p class="ss-body" style="text-align:center;margin-top:32px">${esc(a.hinweis)}</p>` : ''
 
   return `<!-- sektion:ss-angebote -->
-<section class="ss-seite">
+<section class="ss-seite" id="angebote">
   <div class="ss-seite-wrap">
     <span class="ss-kicker">${esc(a.eyebrow)}</span>
     <h1 class="ss-title">${esc(a.headline)}</h1>

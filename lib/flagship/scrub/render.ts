@@ -24,6 +24,9 @@ import {
   renderScrubStatisch, renderScrubWrap,
 } from './sections'
 import { renderScrubKarriere, renderScrubErfahrungen, renderScrubLeistungen, renderScrubKontaktSeite, renderScrubZiele, renderScrubAngebote } from './unterseiten'
+import { renderFakten, renderEmpathie, renderSignature, renderLeistungen, renderAblauf, renderErgebnisse, renderZahlen, renderStimmen, renderLokal, renderFaq, renderConversion } from '../sections'
+import { flagshipCss } from '../css'
+import type { FlagshipConfig } from '../types'
 
 function jsonLd(config: ScrubConfig): string {
   const m = config.meta
@@ -44,17 +47,49 @@ function scrubNavLinks(basisPfad: string): { label: string; href: string }[] {
   return SCRUB_UNTERSEITEN.map(u => ({ label: u.label, href: `${basisPfad}/${u.slug}` }))
 }
 
+/** Anchor-Links für die Startseite (scrollt zu den Sektionen statt Seitenwechsel) */
+function scrubAnchorLinks(): { label: string; href: string }[] {
+  return SCRUB_UNTERSEITEN.filter(u => u.slug !== 'kontakt').map(u => ({ label: u.label, href: `#${u.slug}` }))
+}
+
 export function renderScrubStory(config: ScrubConfig, opts: FlagshipRenderOptionen = {}): string {
   const { meta, inhalte } = config
   const titel = meta.seo_titel || `${meta.firma} – ${meta.ort}`
   const beschreibung = meta.seo_beschreibung || ''
   const noindex = opts.noindex !== false ? '<meta name="robots" content="noindex">' : ''
 
-  const navLinks = config.unterseiten ? scrubNavLinks(opts.basisPfad || '') : undefined
+  const navLinks = config.unterseiten ? scrubAnchorLinks() : undefined
+
+  // Flagship-Sektionen nach dem Scrub-Hero (aus branchen_profile Vorlage)
+  const fs = (config as unknown as Record<string, unknown>).flagship_sektionen as FlagshipConfig | undefined
+  let flagshipBody = ''
+  let flagshipStyles = ''
+  if (fs?.inhalte) {
+    const inh = fs.inhalte as unknown as Record<string, unknown>
+    const hell = fs.design?.typo_modus === 'sans_bold_hell'
+    const funnelUrl = '#kontakt'
+    const funnelLabel = 'Probetraining buchen'
+    const sektionen = [
+      inh.fakten ? renderFakten(inh.fakten as Parameters<typeof renderFakten>[0]) : '',
+      inh.empathie ? renderEmpathie(inh.empathie as Parameters<typeof renderEmpathie>[0]) : '',
+      inh.signature ? renderSignature(inh.signature as Parameters<typeof renderSignature>[0]) : '',
+      inh.leistungen ? renderLeistungen(inh.leistungen as Parameters<typeof renderLeistungen>[0]) : '',
+      inh.ablauf ? renderAblauf(inh.ablauf as Parameters<typeof renderAblauf>[0]) : '',
+      inh.ergebnisse ? renderErgebnisse(inh.ergebnisse as Parameters<typeof renderErgebnisse>[0]) : '',
+      inh.zahlen ? renderZahlen(inh.zahlen as Parameters<typeof renderZahlen>[0]) : '',
+      inh.stimmen ? renderStimmen(inh.stimmen as Parameters<typeof renderStimmen>[0]) : '',
+      inh.lokal ? renderLokal(inh.lokal as Parameters<typeof renderLokal>[0]) : '',
+      inh.faq ? renderFaq(inh.faq as Parameters<typeof renderFaq>[0]) : '',
+      inh.conversion ? renderConversion(inh.conversion as Parameters<typeof renderConversion>[0], hell, funnelUrl, funnelLabel) : '',
+    ].filter(Boolean)
+    flagshipBody = sektionen.join('\n\n')
+    flagshipStyles = flagshipCss(fs.design as Parameters<typeof flagshipCss>[0])
+  }
 
   const body = [
     renderScrubHeader(inhalte.header, navLinks),
     inhalte.frames ? renderScrubWrap(inhalte) : renderScrubStatisch(inhalte),
+    flagshipBody,
     renderScrubKontakt(inhalte.kontakt, opts.submitZiel),
     renderScrubFooter(inhalte.footer, inhalte.header, meta),
     opts.demo ? renderScrubRibbon() : '',
@@ -75,6 +110,7 @@ ${noindex}
 <script type="application/ld+json">${jsonLd(config)}</script>
 <style>
 ${scrubCss(config.design)}
+${flagshipStyles}
 </style>
 </head>
 <body>
