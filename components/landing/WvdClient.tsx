@@ -28,10 +28,10 @@ const BEISPIEL_DEMOS = [
     wunsch: "Wollte mich von den großen Portalen unabhängig machen.",
   },
   {
-    branche: "Fitness",
-    url: "/demo/noWARq3BafqOSaTxRq1L1po_cZtIUQAL",
+    branche: "Gartengestaltung",
+    url: "/demo/8Xl3ZnKJ0JOpb-KH",
     bild: "/beispiele/garten.png",
-    wunsch: "Brauchte eine moderne Website, die neue Mitglieder überzeugt.",
+    wunsch: "Meine alte Website hat nie jemanden zum Anrufen gebracht.",
   },
 ];
 
