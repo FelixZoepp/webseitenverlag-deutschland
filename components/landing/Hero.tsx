@@ -79,45 +79,21 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Visual */}
+        {/* Video */}
         <div
-          className="relative aspect-[4/3]"
+          className="relative aspect-video"
           style={{ opacity: 0, animation: "fadeInUp 1s var(--smooth) 0.4s forwards" }}
         >
-          <div className="absolute inset-0 flex items-end overflow-hidden rounded-3xl bg-gradient-to-br from-[#2563eb] via-[#3b82f6] to-[#1e40af] p-7 shadow-[var(--shadow-image)]">
-            <span className="font-[family-name:var(--font-mono)] text-xs text-white/50">
-              Ihre neue Webseite &ndash; modern &amp; mobil-optimiert
-            </span>
-          </div>
-
-          {/* Floating Card */}
-          <div className="absolute -bottom-[6%] -left-[6%] z-10 w-[55%] overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-              <span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
-              <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
-              <span className="ml-2 font-[family-name:var(--font-mono)] text-[10px] text-[var(--ink-soft)]">
-                ihre-firma.de
-              </span>
-            </div>
-            <div className="space-y-2.5 p-4">
-              <div className="h-3 w-3/4 rounded bg-[var(--blue)]/20" />
-              <div className="h-2 w-full rounded bg-slate-100" />
-              <div className="h-2 w-5/6 rounded bg-slate-100" />
-              <div className="mt-3 h-8 w-1/2 rounded-full bg-[var(--blue)]" />
-            </div>
-          </div>
-
-          {/* Speed Badge */}
-          <div className="absolute -right-[4%] top-[15%] z-10 flex items-center gap-2 rounded-2xl border border-white/10 bg-[#0f172a]/90 px-4 py-3 shadow-xl backdrop-blur-md">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-green-400">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-            <div>
-              <div className="font-[family-name:var(--font-mono)] text-xs text-white/50">Ladezeit</div>
-              <div className="text-sm font-bold text-white">0.8s</div>
-            </div>
-          </div>
+          <video
+            className="absolute inset-0 w-full h-full rounded-3xl object-cover shadow-[var(--shadow-image)]"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+          >
+            <source src="https://objeupustvkaayxvedog.supabase.co/storage/v1/object/public/asset-bank/landing/hero-video.mp4" type="video/mp4" />
+          </video>
         </div>
       </div>
     </section>
