@@ -55,12 +55,21 @@ export default function EntwurfForm() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [honeypot, setHoneypot] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+  const isValidPhone = (p: string) => /^\+?\d[\d\s\-()]{6,}$/.test(p.trim());
 
   const canNext =
     (step === 1 && data.branche) ||
     (step === 2 && data.mitarbeiter) ||
     (step === 3 && data.zeitrahmen) ||
-    (step === 4 && data.name && data.email && data.telefon);
+    (step === 4 && data.name && data.email && isValidEmail(data.email) && data.telefon && isValidPhone(data.telefon) && otpVerified);
 
   async function handleSubmit() {
     setSending(true);
@@ -93,6 +102,46 @@ export default function EntwurfForm() {
       setError("Es gab ein Problem beim Senden. Bitte versuchen Sie es erneut.");
     } finally {
       setSending(false);
+    }
+  }
+
+  async function sendOtp() {
+    if (!isValidPhone(data.telefon)) { setOtpError("Bitte geben Sie eine gültige Telefonnummer ein."); return; }
+    setOtpSending(true);
+    setOtpError("");
+    try {
+      const res = await fetch("/api/public/verify-phone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: data.telefon.trim() }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "SMS konnte nicht gesendet werden");
+      setOtpSent(true);
+    } catch (e) {
+      setOtpError(e instanceof Error ? e.message : "Fehler beim Senden");
+    } finally {
+      setOtpSending(false);
+    }
+  }
+
+  async function verifyOtp() {
+    if (otpCode.length < 6) { setOtpError("Bitte geben Sie den 6-stelligen Code ein."); return; }
+    setOtpSending(true);
+    setOtpError("");
+    try {
+      const res = await fetch("/api/public/verify-phone", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: data.telefon.trim(), code: otpCode }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Code ungültig");
+      setOtpVerified(true);
+    } catch (e) {
+      setOtpError(e instanceof Error ? e.message : "Code ungültig");
+    } finally {
+      setOtpSending(false);
     }
   }
 
@@ -332,16 +381,65 @@ export default function EntwurfForm() {
                   <input
                     id="e-email" type="email" placeholder="max@firma.de" required
                     value={data.email}
-                    onChange={(e) => setData({ ...data, email: e.target.value })}
+                    onChange={(e) => { setData({ ...data, email: e.target.value }); setEmailError(e.target.value && !isValidEmail(e.target.value) ? "Bitte geben Sie eine gültige E-Mail-Adresse ein." : ""); }}
+                    onBlur={() => { if (data.email && !isValidEmail(data.email)) setEmailError("Bitte geben Sie eine gültige E-Mail-Adresse ein."); }}
+                    style={emailError ? { borderColor: "var(--danger-600)" } : {}}
                   />
+                  {emailError && <span style={{ fontSize: 12, color: "var(--danger-600)", marginTop: 4, display: "block" }}>{emailError}</span>}
                 </div>
                 <div className="form-field">
                   <label htmlFor="e-tel">Telefonnummer *</label>
-                  <input
-                    id="e-tel" type="tel" placeholder="+49 123 456 789" required
-                    value={data.telefon}
-                    onChange={(e) => setData({ ...data, telefon: e.target.value })}
-                  />
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input
+                      id="e-tel" type="tel" placeholder="+49 123 456 789" required
+                      value={data.telefon}
+                      onChange={(e) => { setData({ ...data, telefon: e.target.value }); setOtpVerified(false); setOtpSent(false); setOtpCode(""); setOtpError(""); }}
+                      disabled={otpVerified}
+                      style={{ flex: 1, ...(otpVerified ? { borderColor: "var(--green-500)", background: "var(--green-050)" } : {}) }}
+                    />
+                    {!otpVerified && !otpSent && (
+                      <button
+                        type="button"
+                        onClick={sendOtp}
+                        disabled={!isValidPhone(data.telefon) || otpSending}
+                        className="btn btn-primary"
+                        style={{ padding: "10px 16px", fontSize: 13, whiteSpace: "nowrap", opacity: isValidPhone(data.telefon) && !otpSending ? 1 : 0.4 }}
+                      >
+                        {otpSending ? "..." : "Code senden"}
+                      </button>
+                    )}
+                    {otpVerified && (
+                      <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--green-600)", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 16, height: 16 }}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></svg>
+                        Verifiziert
+                      </span>
+                    )}
+                  </div>
+                  {otpSent && !otpVerified && (
+                    <div style={{ marginTop: 8 }}>
+                      <label style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 4, display: "block" }}>SMS-Code eingeben:</label>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <input
+                          type="text"
+                          placeholder="123456"
+                          maxLength={6}
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                          style={{ width: 120, textAlign: "center", letterSpacing: "0.3em", fontWeight: 700, fontSize: 18 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={verifyOtp}
+                          disabled={otpCode.length < 6 || otpSending}
+                          className="btn btn-primary"
+                          style={{ padding: "10px 16px", fontSize: 13, opacity: otpCode.length >= 6 && !otpSending ? 1 : 0.4 }}
+                        >
+                          {otpSending ? "..." : "Bestätigen"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {otpError && <span style={{ fontSize: 12, color: "var(--danger-600)", marginTop: 4, display: "block" }}>{otpError}</span>}
                 </div>
                 {/* Honeypot — für Menschen unsichtbar, Bots füllen es aus */}
                 <div style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0, overflow: "hidden" }} aria-hidden="true">
