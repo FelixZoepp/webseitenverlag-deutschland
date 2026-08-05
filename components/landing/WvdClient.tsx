@@ -253,11 +253,17 @@ export default function WvdClient() {
 
           {/* Video-Karte (rechts ab 1024px, mobil zwischen CTA und Trust-Pills) */}
           <div className="hero-video-wrap">
-            <div className="hero-video-card" data-slot="hero_video_poster">
-              <div className="hero-video-poster" aria-hidden="true" />
-              <button className="video-play-btn" aria-label="Video abspielen">
-                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-              </button>
+            <div className="hero-video-card">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
+              >
+                <source src="https://objeupustvkaayxvedog.supabase.co/storage/v1/object/public/asset-bank/landing/hero-video.mp4" type="video/mp4" />
+              </video>
             </div>
           </div>
 
