@@ -237,21 +237,8 @@ export default function WvdClient() {
             Webseiten, die<br />Kunden bringen.
             <span className="accent">Für unter 100 €<br />im Monat.</span>
           </h1>
-          <p className="hero-lead">
-            Professionelle Webseite erstellen lassen – ohne tausende Euro vorab.
-            <strong> Ab 99 € netto/Monat, komplett fertig in wenigen Tagen.</strong>{" "}
-            Design, Hosting, SEO und Support inklusive. Damit du online gefunden wirst und neue Kunden gewinnst.
-          </p>
-          <div className="cta-row">
-            <a href="/entwurf" className="btn btn-primary">
-              <span>Kostenlose Demo ansehen →</span>
-            </a>
-            <a href="#ergebnisse" className="btn btn-ghost">
-              <span>Beispiele ansehen</span>
-            </a>
-          </div>
 
-          {/* Video-Karte (rechts ab 1024px, mobil zwischen CTA und Trust-Pills) */}
+          {/* Video: mobil nach Headline, Desktop rechts (über CSS order) */}
           <div className="hero-video-wrap">
             <div className="hero-video-card" style={{ position: 'relative', cursor: 'pointer' }} onClick={(e) => {
               const video = e.currentTarget.querySelector('video');
@@ -288,6 +275,20 @@ export default function WvdClient() {
                 </div>
               </div>
             </div>
+          </div>
+
+          <p className="hero-lead">
+            Professionelle Webseite erstellen lassen – ohne tausende Euro vorab.
+            <strong> Ab 99 € netto/Monat, komplett fertig in wenigen Tagen.</strong>{" "}
+            Design, Hosting, SEO und Support inklusive. Damit du online gefunden wirst und neue Kunden gewinnst.
+          </p>
+          <div className="cta-row">
+            <a href="/entwurf" className="btn btn-primary">
+              <span>Kostenlose Demo ansehen →</span>
+            </a>
+            <a href="#ergebnisse" className="btn btn-ghost">
+              <span>Beispiele ansehen</span>
+            </a>
           </div>
 
           <div className="trust">
