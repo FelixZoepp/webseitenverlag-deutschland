@@ -253,17 +253,40 @@ export default function WvdClient() {
 
           {/* Video-Karte (rechts ab 1024px, mobil zwischen CTA und Trust-Pills) */}
           <div className="hero-video-wrap">
-            <div className="hero-video-card">
+            <div className="hero-video-card" style={{ position: 'relative', cursor: 'pointer' }} onClick={(e) => {
+              const video = e.currentTarget.querySelector('video');
+              const btn = e.currentTarget.querySelector('.video-play-overlay');
+              if (!video) return;
+              if (video.paused) {
+                video.muted = false;
+                video.play();
+                if (btn) (btn as HTMLElement).style.opacity = '0';
+              } else {
+                video.pause();
+                if (btn) (btn as HTMLElement).style.opacity = '1';
+              }
+            }}>
               <video
-                autoPlay
-                loop
                 muted
                 playsInline
                 preload="metadata"
+                controls={false}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
               >
                 <source src="https://objeupustvkaayxvedog.supabase.co/storage/v1/object/public/asset-bank/landing/hero-video.mp4" type="video/mp4" />
               </video>
+              <div className="video-play-overlay" style={{
+                position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(0,0,0,0.3)', borderRadius: 'inherit', transition: 'opacity 0.3s',
+              }}>
+                <div style={{
+                  width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.95)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                }}>
+                  <svg viewBox="0 0 24 24" fill="#0f172a" style={{ width: 28, height: 28, marginLeft: 3 }}><path d="M8 5v14l11-7z" /></svg>
+                </div>
+              </div>
             </div>
           </div>
 
