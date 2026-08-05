@@ -245,6 +245,7 @@ export default function WvdClient() {
                 playsInline
                 preload="metadata"
                 controls
+                poster="https://objeupustvkaayxvedog.supabase.co/storage/v1/object/public/asset-bank/landing/hero-poster.jpg"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit', display: 'block' }}
               >
                 <source src="https://objeupustvkaayxvedog.supabase.co/storage/v1/object/public/asset-bank/landing/hero-video.mp4" type="video/mp4" />
