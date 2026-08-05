@@ -17,7 +17,7 @@ const BEISPIEL_DEMOS = [
   },
   {
     branche: "Solar / PV",
-    url: "/demo/n6cCOyqk3_3w49Gy",
+    url: "/demo/o1QB01EtoBQNpZ8L",
     bild: "/beispiele/solar.png",
     wunsch: "Hatte keine Website — Kunden kamen nur per Mundpropaganda.",
   },
@@ -31,7 +31,7 @@ const BEISPIEL_DEMOS = [
     branche: "Fitness",
     url: "/demo/noWARq3BafqOSaTxRq1L1po_cZtIUQAL",
     bild: "/beispiele/garten.png",
-    wunsch: "Brauchte eine moderne Seite, die Mitglieder überzeugt.",
+    wunsch: "Brauchte eine moderne Website, die neue Mitglieder überzeugt.",
   },
 ];
 
