@@ -17,21 +17,21 @@ const BEISPIEL_DEMOS = [
   },
   {
     branche: "Solar / PV",
-    url: "https://sonnenstrom-journey.higgsfield.app",
+    url: "/demo/n6cCOyqk3_3w49Gy",
     bild: "/beispiele/solar.png",
     wunsch: "Hatte keine Website — Kunden kamen nur per Mundpropaganda.",
   },
   {
     branche: "Dachdecker",
-    url: "https://dachmeister.higgsfield.app",
+    url: "/demo/bNLTJOdXE_h-MdIAWUPc",
     bild: "/beispiele/dachdecker.png",
     wunsch: "Wollte mich von den großen Portalen unabhängig machen.",
   },
   {
-    branche: "Gartengestaltung",
-    url: "https://garden-scroll.higgsfield.app",
+    branche: "Fitness",
+    url: "/demo/noWARq3BafqOSaTxRq1L1po_cZtIUQAL",
     bild: "/beispiele/garten.png",
-    wunsch: "Meine alte Website hat nie jemanden zum Anrufen gebracht.",
+    wunsch: "Brauchte eine moderne Seite, die Mitglieder überzeugt.",
   },
 ];
 
