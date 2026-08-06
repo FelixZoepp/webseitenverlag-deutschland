@@ -363,7 +363,7 @@ async function handleCheckoutCompleted(supabase: SupabaseClient, session: Stripe
     const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
       from: 'Webseiten-Verlag Deutschland <info@webseitenverlag-deutschland.de>',
-      to: 'felix@content-leads.de',
+      to: 'felix@zoeppmedia.de',
       subject: 'Neuer Kunde für Webseitenverlag Deutschland',
       html: `<p><strong>Neuer Kunde abgeschlossen!</strong></p><p>Firma: ${companyName}<br>E-Mail: ${email}<br>Paket: ${paket}<br>Monatspreis: ${monthlyPrice}€</p>`,
     })
