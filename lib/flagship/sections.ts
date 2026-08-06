@@ -12,7 +12,7 @@ import type {
 import { esc, escAttr, em, hl, icon, mediaSlot } from './html'
 
 function logoHtml(nav: NavInhalt, hell: boolean): string {
-  const bild = (nav as Record<string, unknown>).logo_bild as string | undefined
+  const bild = (nav as unknown as Record<string, unknown>).logo_bild as string | undefined
   if (bild) {
     return `<img src="${escAttr(bild)}" alt="${escAttr(nav.logo_text || '')}" style="height:40px;width:auto">`
   }
