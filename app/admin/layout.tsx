@@ -69,6 +69,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="16" height="16"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
               Kennzahlen
             </Link>
+            <Link href="/admin/marketing" className="sb-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="16" height="16"><path d="M3 11l18-7-7 18-2.5-7.5z"/></svg>
+              Marketing
+            </Link>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
