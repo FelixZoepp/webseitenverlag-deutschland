@@ -280,6 +280,33 @@ async function handleCheckoutCompleted(supabase: SupabaseClient, session: Stripe
     })
     .eq('id', demoId)
 
+  // 4b. Lead schließen und mit dem Kunden verknüpfen — daran hängt die
+  //     Ads-Attribution im Marketing-Dashboard (Kampagne → Lead → Vertrag/MRR).
+  const { data: kaufLead } = await supabase
+    .from('leads')
+    .select('id, crm_stage')
+    .eq('demo_id', demoId)
+    .maybeSingle()
+  if (kaufLead) {
+    await supabase
+      .from('leads')
+      .update({
+        converted_customer_id: customerId,
+        status: 'GEWONNEN',
+        crm_stage: 'closed',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', kaufLead.id)
+    if (kaufLead.crm_stage !== 'closed') {
+      const { error: logError } = await supabase.from('lead_stage_events').insert({
+        lead_id: kaufLead.id,
+        von_stage: kaufLead.crm_stage,
+        zu_stage: 'closed',
+      })
+      if (logError) console.error(`[STRIPE] Stage-Event-Log fehlgeschlagen: ${logError.message}`)
+    }
+  }
+
   // 5. Vertrag anlegen (Standard-Konditionen aus config/vertraege.ts) — Fehler blockiert das Provisioning nicht,
   //    sondern wird als manuelle Aufgabe sichtbar (Demo ist bereits CONVERTED,
   //    ein Stripe-Retry würde sonst doppelt provisionieren)

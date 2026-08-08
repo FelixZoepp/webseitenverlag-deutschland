@@ -97,6 +97,13 @@ export default function CrmPage() {
   async function stageWechseln(lead: CrmLead, stage: CrmStage) {
     if (lead.crm_stage === stage) return
     const vorher = lead.crm_stage
+    // Verlust-Grund fürs Marketing-Dashboard (Abbruch = kein Stage-Wechsel)
+    let verlorenGrund: string | undefined
+    if (stage === 'verloren') {
+      const eingabe = window.prompt(`Warum ist "${lead.name}" verloren? (z. B. zu teuer, keine Antwort, Wettbewerber)`)
+      if (eingabe === null) return
+      verlorenGrund = eingabe.trim() || undefined
+    }
     setBusy(true)
     setError(null)
     // Optimistisch: Karte wechselt sofort die Spalte, bei Fehler Rollback.
@@ -106,7 +113,7 @@ export default function CrmPage() {
       const res = await fetch(`/api/admin/leads/${lead.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ crm_stage: stage }),
+        body: JSON.stringify({ crm_stage: stage, ...(verlorenGrund ? { verloren_grund: verlorenGrund } : {}) }),
       })
       if (!res.ok) {
         const data = await res.json().catch(() => null)
