@@ -8,8 +8,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  const key = (process.env.STRIPE_SECRET_KEY || '').trim()
-  if (!key) return NextResponse.json({ error: 'STRIPE_SECRET_KEY nicht gesetzt' }, { status: 500 })
+  const rawKey = process.env.STRIPE_SECRET_KEY || ''
+  // Entferne alle Whitespace-Zeichen (Newlines, Tabs, Spaces, \r) — Vercel speichert manchmal mit Zeilenumbruch
+  const key = rawKey.replace(/\s+/g, '')
+  if (!key) return NextResponse.json({ error: 'STRIPE_SECRET_KEY nicht gesetzt', rawLen: rawKey.length }, { status: 500 })
   const stripe = new Stripe(key)
 
   const session = await stripe.checkout.sessions.create({
