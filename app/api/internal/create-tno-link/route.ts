@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     const product = await stripe.products.create({
       name: 'TNO Industriesparring — Webseite Starter',
       description: 'Professionelle Webseite inkl. Hosting, SSL, SEO-Grundoptimierung, Kontaktformular. 99 €/Monat netto. Mindestlaufzeit 24 Monate.',
+      tax_code: 'txcd_10103001', // SaaS / Digital Services
       metadata: {
         demo_id: '9760c44d-ceb1-4c4d-9f85-0387dbf43ff8',
         paket: 'starter',
