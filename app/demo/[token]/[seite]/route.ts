@@ -8,13 +8,17 @@ import { istScrubKomposition, SCRUB_UNTERSEITEN, type ScrubUnterseitenSlug } fro
 import { renderScrubUnterseite } from '@/lib/flagship/scrub/render'
 import { finalisiereDemoHtml } from '@/lib/demo-badge'
 
+export const dynamic = 'force-dynamic'
+
 // Funnel-Unterseite der Flagship-Demos (/demo/{token}/anfrage bzw. /reservierung).
 // Multipage: Inhalts-Unterseiten (/demo/{token}/leistungen, /ergebnisse, /ueber-uns, /kontakt).
 // Scrub: Unterseiten (/demo/{token}/karriere, /erfahrungen, /leistungen, /kontakt).
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
 const UNTERSEITEN_SLUGS = new Set<string>(UNTERSEITEN.map((u) => u.slug))
 const SCRUB_SLUGS = new Set<string>(SCRUB_UNTERSEITEN.map((u) => u.slug))
@@ -30,31 +34,53 @@ export async function GET(
   const istUnterseite = UNTERSEITEN_SLUGS.has(seite)
   const istScrubSeite = SCRUB_SLUGS.has(seite)
 
-  if (!istFunnel && !istUnterseite && !istScrubSeite) {
-    return new NextResponse('Nicht gefunden', { status: 404 })
-  }
-
-  const { data: demo } = await supabase
+  const { data: demo } = await getSupabase()
     .from('demos')
-    .select('id, config, expires_at, prospect_name, payment_link_url')
+    .select('id, config, expires_at, prospect_name, payment_link_url, engine')
     .eq('share_token', token)
     .single()
 
-  const config = demo?.config as FlagshipConfig | undefined
-  if (!demo || config?.engine !== 'flagship') {
-    return new NextResponse('Nicht gefunden', { status: 404 })
-  }
+  if (!demo) return new NextResponse('Demo nicht gefunden [v2]', { status: 404 })
   if (demo.expires_at && new Date(demo.expires_at) < new Date()) {
     return new NextResponse('Diese Demo ist abgelaufen.', { status: 404 })
   }
-
-  const basisPfad = `/demo/${token}`
 
   const badgeOptionen = {
     prospectName: (demo as { prospect_name?: string }).prospect_name ?? 'Ihre Firma',
     paymentLinkUrl: (demo as { payment_link_url?: string | null }).payment_link_url ?? null,
     origin: new URL(_request.url).origin,
   }
+
+  // Custom-HTML Unterseiten — Page-HTML separat laden (config kann >64KB sein)
+  if (demo.engine === 'custom') {
+    const { data: pageRow } = await getSupabase()
+      .from('demos')
+      .select('config->pages->' + seite)
+      .eq('id', demo.id)
+      .single()
+
+    const pageHtml = pageRow ? Object.values(pageRow)[0] as string | null : null
+    if (pageHtml && typeof pageHtml === 'string') {
+      const html = finalisiereDemoHtml(pageHtml, badgeOptionen)
+      return new NextResponse(html, {
+        status: 200,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' },
+      })
+    }
+    return new NextResponse('Seite nicht gefunden', { status: 404 })
+  }
+
+  const config = demo?.config as FlagshipConfig | undefined
+  if (config?.engine !== 'flagship') {
+    return new NextResponse('Nicht gefunden (kein flagship)', { status: 404, headers: { 'X-Debug': `engine=${demo.engine}` } })
+  }
+
+  if (!istFunnel && !istUnterseite && !istScrubSeite) {
+    return new NextResponse('Nicht gefunden', { status: 404 })
+  }
+
+  const basisPfad = `/demo/${token}`
+
 
   // Scrub-Story Unterseiten (karriere, erfahrungen, leistungen, kontakt)
   if (istScrubSeite && istScrubKomposition(config)) {
