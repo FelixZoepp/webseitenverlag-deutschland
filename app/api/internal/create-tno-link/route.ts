@@ -8,7 +8,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+  const key = (process.env.STRIPE_SECRET_KEY || '').trim()
+  if (!key) return NextResponse.json({ error: 'STRIPE_SECRET_KEY nicht gesetzt' }, { status: 500 })
+  const stripe = new Stripe(key)
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
