@@ -51,6 +51,8 @@ export async function GET(request: Request) {
       plan: 'starter',
       agb_version: '1.1',
     },
+    // @ts-expect-error Stripe Managed Payments: custom_text nicht erlaubt, stattdessen managed_payments deaktivieren
+    managed_payments: { enabled: false },
     custom_text: {
       submit: { message: 'Mit der Buchung akzeptieren Sie die AGB (v1.1). Mindestlaufzeit: 24 Monate. Kostenlose Testphase bis 01.09.2026, danach 99 €/Monat netto.' },
     },
