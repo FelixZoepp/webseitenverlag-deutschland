@@ -16,7 +16,7 @@ let stripeClient: Stripe | null = null
 
 export function getStripe(): Stripe {
   if (!stripeClient) {
-    const key = process.env.STRIPE_SECRET_KEY
+    const key = (process.env.STRIPE_SECRET_KEY || '').replace(/\s+/g, '')
     if (!key) throw new Error('STRIPE_SECRET_KEY ist nicht gesetzt')
     stripeClient = new Stripe(key)
   }
@@ -65,6 +65,7 @@ export async function createDemoCheckoutSession(params: {
               description: params.customPriceCent
                 ? `Individuelle Servicepauschale — ${(priceCent / 100).toFixed(0)} €/Monat netto`
                 : pkg.stripeDescription,
+              tax_code: 'txcd_10103001',
             },
           },
         },
@@ -91,20 +92,18 @@ export async function createDemoCheckoutSession(params: {
     ...(params.customPriceCent ? { custom_price_cent: String(priceCent) } : {}),
   }
 
+  // Stripe Managed Payments: payment_method_types und custom_text nicht erlaubt
   const session = await getStripe().checkout.sessions.create({
     mode: 'subscription',
     locale: 'de',
-    payment_method_types: ['card', 'sepa_debit'],
-    custom_text: {
-      submit: { message: konditionen },
-      terms_of_service_acceptance: { message: konditionen },
-    },
+    billing_address_collection: 'required',
+    phone_number_collection: { enabled: true },
     consent_collection: { terms_of_service: 'required' },
     line_items: lineItems,
     metadata,
     subscription_data: {
       metadata,
-      description: `Servicepauschale ${(priceCent / 100).toFixed(0)} €/Monat — ${params.prospectName}`,
+      description: `Servicepauschale ${(priceCent / 100).toFixed(0)} €/Monat — ${params.prospectName}. ${konditionen}`,
     },
     success_url: `${APP_URL}/willkommen?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${APP_URL}/`,
@@ -139,7 +138,7 @@ export async function createUpsellCheckoutSession(params: {
         currency: 'eur',
         recurring: { interval: 'month' },
         unit_amount: params.monatCent,
-        product_data: { name: params.produktName },
+        product_data: { name: params.produktName, tax_code: 'txcd_10103001' },
       },
     })
   }
@@ -149,7 +148,7 @@ export async function createUpsellCheckoutSession(params: {
       price_data: {
         currency: 'eur',
         unit_amount: params.einmalCent,
-        product_data: { name: `${params.produktName} — Einrichtung (einmalig)` },
+        product_data: { name: `${params.produktName} — Einrichtung (einmalig)`, tax_code: 'txcd_10103001' },
       },
     })
   }
