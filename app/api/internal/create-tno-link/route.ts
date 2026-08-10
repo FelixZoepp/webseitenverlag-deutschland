@@ -15,8 +15,16 @@ export async function GET(request: Request) {
 
   try {
     const session = await stripe.checkout.sessions.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...(({ managed_payments: { enabled: false } }) as any),
       mode: 'subscription',
       locale: 'de',
+      payment_method_types: ['card', 'sepa_debit'],
+      managed_payments: { enabled: false },
+      custom_text: {
+        submit: { message: 'Mindestlaufzeit 24 Monate. Kostenlose Testphase bis 01.09.2026, danach 99 €/Monat netto.' },
+      },
+      consent_collection: { terms_of_service: 'required' },
       line_items: [{
         quantity: 1,
         price_data: {
