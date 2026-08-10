@@ -3,12 +3,7 @@
  *
  * Funnel je UTM-Kampagne (Leads → Termine → Gewonnen → MRR), ARPU,
  * Upsell-Quote je Produkt, Churn, MRR-Entwicklung (12 Monate).
- *
- * Hinweise:
- *  - "Show"-Stufe (erschienen zum Termin) wird nicht separat getrackt —
- *    Termine kommen aus leads.status TERMIN/GEWONNEN.
- *  - Meta-Ads-Adspend-Import ist bewusst offen (API-Key → WARTELISTE);
- *    kein eigenes Ads-Reporting-Dashboard (§14).
+ * Meta Ads → eigener Tab /admin/marketing.
  */
 import { createClient } from '@/lib/supabase/server'
 import { UPSELL_PRODUCTS, PLAN_UPGRADE_PREFIX } from '@/config/upsells'
@@ -212,7 +207,7 @@ export default async function KennzahlenPage() {
         </table>
       </div>
       <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '32px' }}>
-        Show-Stufe wird nicht separat getrackt; Adspend-Import (Meta) folgt mit API-Zugang (WARTELISTE).
+        Show-Stufe wird nicht separat getrackt.
       </p>
 
       <h2 style={{ fontSize: '17px', fontWeight: 600, color: '#111827', marginBottom: '12px' }}>Upsell-Quote je Produkt</h2>
