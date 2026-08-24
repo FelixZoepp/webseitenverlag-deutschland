@@ -16,9 +16,9 @@
 import './asset-slots'
 import type { FlagshipRenderOptionen } from '../types'
 import { esc, escAttr } from '../html'
-import { scrubCss, scrubLightCss } from './css'
+import { scrubLightCss } from './css'
 import { scrubJs } from './js'
-import { SCRUB_UNTERSEITEN, scrubAlleNavLinks, type ScrubConfig, type ScrubUnterseitenSlug } from './types'
+import { scrubAlleNavLinks, type ScrubConfig } from './types'
 import {
   renderScrubFooter, renderScrubHeader, renderScrubKontakt, renderScrubRibbon,
   renderScrubStatisch, renderScrubWrap,
@@ -42,12 +42,6 @@ function jsonLd(config: ScrubConfig): string {
   // '<' escapen, damit '</script>' in Inhalten nicht aus dem JSON-LD-Block ausbricht
   return JSON.stringify(daten).replace(/</g, '\\u003c')
 }
-
-/** Fallback: nur feste Unterseiten (ohne dynamische aus Config) */
-function scrubNavLinks(basisPfad: string): { label: string; href: string }[] {
-  return SCRUB_UNTERSEITEN.map(u => ({ label: u.label, href: `${basisPfad}/${u.slug}` }))
-}
-
 
 export function renderScrubStory(config: ScrubConfig, opts: FlagshipRenderOptionen = {}): string {
   const { meta, inhalte } = config
