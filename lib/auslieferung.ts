@@ -22,7 +22,7 @@ import { UNTERSEITEN } from '@/lib/flagship/types'
 import type { UnterseitenSlug } from '@/lib/flagship/types'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 import { istScrubKomposition } from '@/lib/flagship/scrub/types'
-import { SCRUB_UNTERSEITEN, type ScrubUnterseitenSlug } from '@/lib/flagship/scrub/types'
+import { SCRUB_UNTERSEITEN, type ScrubConfig } from '@/lib/flagship/scrub/types'
 import { renderScrubUnterseite } from '@/lib/flagship/scrub/render'
 
 export interface Rechtstexte {
@@ -217,11 +217,13 @@ async function renderEngineSeite(
     const fsConfig = config as unknown as FlagshipConfig
     // Live-Sites indexieren (noindex steuert der Aufrufer über site.noindex)
     if (slug === '') return renderFlagshipPage(fsConfig, { noindex: false })
-    // Scrub-Story Unterseiten (Karriere, Erfahrungen, Leistungen, Kontakt)
+    // Scrub-Story Unterseiten (feste + dynamische Slugs aus Config)
     if (istScrubKomposition(fsConfig)) {
-      const scrubSeite = SCRUB_UNTERSEITEN.find(u => u.slug === slug)
-      if (scrubSeite) {
-        return renderScrubUnterseite(fsConfig, slug as ScrubUnterseitenSlug, {
+      const istFesterSlug = SCRUB_UNTERSEITEN.some(u => u.slug === slug)
+      const istZielgruppe = !!(fsConfig as unknown as ScrubConfig).unterseiten?.zielgruppen?.[slug]
+      const istLeistungDetail = !!(fsConfig as unknown as ScrubConfig).unterseiten?.leistung_details?.[slug]
+      if (istFesterSlug || istZielgruppe || istLeistungDetail) {
+        return renderScrubUnterseite(fsConfig as unknown as ScrubConfig, slug, {
           noindex: false,
           submitZiel: `/api/public/forms/${site.id}/submit`,
         })

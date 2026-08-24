@@ -4,7 +4,7 @@
  */
 
 import { esc, escAttr } from '../html'
-import type { ScrubKarriereInhalt, ScrubErfahrungenInhalt, ScrubLeistungenInhalt, ScrubZieleInhalt, ScrubAngeboteInhalt, ScrubInhalte } from './types'
+import type { ScrubKarriereInhalt, ScrubErfahrungenInhalt, ScrubLeistungenInhalt, ScrubZieleInhalt, ScrubAngeboteInhalt, ScrubInhalte, ScrubZielgruppeInhalt, ScrubLeistungDetailInhalt, ScrubProjekt } from './types'
 
 export function renderScrubKarriere(k: ScrubKarriereInhalt, submitZiel?: string | null): string {
   const benefits = k.benefits.map((b) =>
@@ -101,6 +101,83 @@ export function renderScrubErfahrungen(e: ScrubErfahrungenInhalt): string {
 </section>`
     : ''
 
+  const projekte = (e.projekte && e.projekte.length > 0)
+    ? `<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <h2 class="ss-h2">Vorher &amp; Nachher</h2>
+    <div class="ss-projekte-grid">
+    ${e.projekte.map((p: ScrubProjekt, idx: number) => {
+      const kennzahlen = p.kennzahlen?.map((k) =>
+        `<div class="ss-kz"><span class="ss-kz-wert">${esc(k.wert)}</span><span class="ss-kz-label">${esc(k.label)}</span></div>`
+      ).join('\n          ') || ''
+      const hatBilder = p.bild_vorher && p.bild_nachher
+      const slider = hatBilder
+        ? `<div class="ss-slider" data-slider="${idx}">
+          <div class="ss-slider-nachher">
+            <img src="${escAttr(p.bild_nachher!)}" alt="Nachher: ${escAttr(p.titel)}" loading="lazy">
+          </div>
+          <div class="ss-slider-vorher" style="width:50%">
+            <img src="${escAttr(p.bild_vorher!)}" alt="Vorher: ${escAttr(p.titel)}" loading="lazy">
+          </div>
+          <div class="ss-slider-handle" style="left:50%">
+            <div class="ss-slider-line"></div>
+            <div class="ss-slider-knob"><span>◀</span><span>▶</span></div>
+            <div class="ss-slider-line"></div>
+          </div>
+          <span class="ss-slider-label ss-slider-label-v">Vorher</span>
+          <span class="ss-slider-label ss-slider-label-n">Nachher</span>
+        </div>`
+        : ''
+      const textVergleich = `<div class="ss-vorher-nachher">
+          <div class="ss-vn-block ss-vn-vorher">
+            <span class="ss-pill">Vorher</span>
+            <p>${esc(p.vorher)}</p>
+          </div>
+          <div class="ss-vn-block ss-vn-nachher">
+            <span class="ss-pill" style="background:var(--ss-akzent1);color:var(--ss-basis)">Nachher</span>
+            <p>${esc(p.nachher)}</p>
+          </div>
+        </div>`
+      return `<div class="ss-projekt">
+        <div class="ss-projekt-header">
+          <h3>${esc(p.titel)}</h3>
+          <div class="ss-stelle-meta"><span>${esc(p.ort)}</span> &middot; <span>${esc(p.typ)}</span></div>
+        </div>
+        ${slider}
+        ${textVergleich}
+        <div class="ss-ergebnis"><strong>Ergebnis:</strong> ${esc(p.ergebnis)}</div>
+        ${kennzahlen ? `<div class="ss-kennzahlen">${kennzahlen}</div>` : ''}
+      </div>`
+    }).join('\n    ')}
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  document.querySelectorAll('[data-slider]').forEach(function(el){
+    var vorher=el.querySelector('.ss-slider-vorher');
+    var handle=el.querySelector('.ss-slider-handle');
+    if(!vorher||!handle) return;
+    var dragging=false;
+    function pos(e){
+      var r=el.getBoundingClientRect();
+      var x=((e.touches?e.touches[0].clientX:e.clientX)-r.left)/r.width;
+      x=Math.max(0.05,Math.min(0.95,x));
+      vorher.style.width=(x*100)+'%';
+      handle.style.left=(x*100)+'%';
+    }
+    handle.addEventListener('mousedown',function(){dragging=true});
+    handle.addEventListener('touchstart',function(){dragging=true},{passive:true});
+    window.addEventListener('mousemove',function(e){if(dragging){e.preventDefault();pos(e)}});
+    window.addEventListener('touchmove',function(e){if(dragging)pos(e)},{passive:true});
+    window.addEventListener('mouseup',function(){dragging=false});
+    window.addEventListener('touchend',function(){dragging=false});
+    el.addEventListener('click',function(e){pos(e)});
+  });
+})();
+</script>`
+    : ''
+
   return `<!-- sektion:ss-erfahrungen -->
 <section class="ss-seite" id="erfahrungen">
   <div class="ss-seite-wrap">
@@ -109,9 +186,11 @@ export function renderScrubErfahrungen(e: ScrubErfahrungenInhalt): string {
   </div>
 </section>
 
+${projekte}
+
 <section class="ss-seite">
   <div class="ss-seite-wrap">
-    <h2 class="ss-h2">Was unser Team sagt</h2>
+    <h2 class="ss-h2">Was unsere Kunden sagen</h2>
     <div class="ss-stimmen-grid">
     ${stimmen}
     </div>
@@ -229,6 +308,131 @@ export function renderScrubAngebote(a: ScrubAngeboteInhalt): string {
     ${pakete}
     </div>
     ${hinweis}
+  </div>
+</section>`
+}
+
+export function renderScrubZielgruppe(z: ScrubZielgruppeInhalt): string {
+  const herausforderungen = z.herausforderungen.map((h) =>
+    `<div class="ss-leistung">
+      <span class="ss-leistung-icon">${esc(h.icon)}</span>
+      <h3>${esc(h.titel)}</h3>
+      <p>${esc(h.text)}</p>
+    </div>`
+  ).join('\n    ')
+
+  const loesungen = z.loesungen.map((l) =>
+    `<div class="ss-benefit">
+      <span class="ss-benefit-icon">${esc(l.icon)}</span>
+      <h3>${esc(l.titel)}</h3>
+      <p>${esc(l.text)}</p>
+    </div>`
+  ).join('\n    ')
+
+  const leistungen = z.relevante_leistungen.map((r) =>
+    `<div class="ss-stelle">
+      <div class="ss-stelle-header">
+        <h3>${esc(r.titel)}</h3>
+      </div>
+      <p>${esc(r.text)}</p>
+      ${r.href ? `<a class="ss-btn-sekundaer" href="${escAttr(r.href)}">Mehr erfahren</a>` : ''}
+    </div>`
+  ).join('\n    ')
+
+  return `<!-- sektion:ss-zielgruppe-${escAttr(z.slug)} -->
+<section class="ss-seite" id="${escAttr(z.slug)}">
+  <div class="ss-seite-wrap">
+    <span class="ss-kicker">${esc(z.eyebrow)}</span>
+    <h1 class="ss-title">${esc(z.headline)}</h1>
+    <p class="ss-body">${esc(z.lead)}</p>
+  </div>
+</section>
+
+<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <h2 class="ss-h2">Typische Herausforderungen</h2>
+    <div class="ss-leistungen-grid">
+    ${herausforderungen}
+    </div>
+  </div>
+</section>
+
+<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <h2 class="ss-h2">So unterstützen wir Sie</h2>
+    <div class="ss-benefits-grid">
+    ${loesungen}
+    </div>
+  </div>
+</section>
+
+<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <h2 class="ss-h2">Relevante Leistungen</h2>
+    <div class="ss-stellen-list">
+    ${leistungen}
+    </div>
+  </div>
+</section>
+
+<section class="ss-seite">
+  <div class="ss-seite-wrap" style="max-width:640px;text-align:center">
+    <h2 class="ss-h2">${esc(z.cta.headline)}</h2>
+    <p class="ss-body">${esc(z.cta.text)}</p>
+    <a class="ss-btn-primary" href="#kontakt" style="margin-top:24px;display:inline-block">${esc(z.cta.label)}</a>
+  </div>
+</section>`
+}
+
+export function renderScrubLeistungDetail(l: ScrubLeistungDetailInhalt): string {
+  const ablauf = l.ablauf.map((a) =>
+    `<div class="ss-leistung">
+      <span class="ss-leistung-nr">${esc(a.schritt)}</span>
+      <h3>${esc(a.titel)}</h3>
+      <p>${esc(a.text)}</p>
+    </div>`
+  ).join('\n    ')
+
+  const vorteile = l.vorteile.map((v) =>
+    `<div class="ss-benefit">
+      <span class="ss-benefit-icon">${esc(v.icon)}</span>
+      <h3>${esc(v.titel)}</h3>
+      <p>${esc(v.text)}</p>
+    </div>`
+  ).join('\n    ')
+
+  return `<!-- sektion:ss-leistung-${escAttr(l.slug)} -->
+<section class="ss-seite" id="${escAttr(l.slug)}">
+  <div class="ss-seite-wrap">
+    <span class="ss-kicker">${esc(l.eyebrow)}</span>
+    <h1 class="ss-title">${esc(l.headline)}</h1>
+    <p class="ss-body">${esc(l.lead)}</p>
+  </div>
+</section>
+
+<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <h2 class="ss-h2">Unser Ablauf</h2>
+    <div class="ss-leistungen-grid">
+    ${ablauf}
+    </div>
+  </div>
+</section>
+
+<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <h2 class="ss-h2">Ihre Vorteile</h2>
+    <div class="ss-benefits-grid">
+    ${vorteile}
+    </div>
+  </div>
+</section>
+
+<section class="ss-seite">
+  <div class="ss-seite-wrap" style="max-width:640px;text-align:center">
+    <h2 class="ss-h2">${esc(l.cta.headline)}</h2>
+    <p class="ss-body">${esc(l.cta.text)}</p>
+    <a class="ss-btn-primary" href="#kontakt" style="margin-top:24px;display:inline-block">${esc(l.cta.label)}</a>
   </div>
 </section>`
 }

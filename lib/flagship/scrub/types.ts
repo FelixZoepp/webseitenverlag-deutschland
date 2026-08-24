@@ -109,12 +109,29 @@ export interface ScrubKarriereInhalt {
   cta_label: string
 }
 
-/** Erfahrungen: Team-Testimonials + Fallstudien */
+/** Vorher/Nachher-Projekt */
+export interface ScrubProjekt {
+  titel: string
+  ort: string
+  typ: string
+  vorher: string
+  nachher: string
+  ergebnis: string
+  kennzahlen?: { label: string; wert: string }[]
+  /** Bild-URL für Vorher-Zustand (optional — ohne Bild wird Text-Vergleich angezeigt) */
+  bild_vorher?: string
+  /** Bild-URL für Nachher-Zustand */
+  bild_nachher?: string
+}
+
+/** Erfahrungen: Team-Testimonials + Fallstudien + Vorher/Nachher-Projekte */
 export interface ScrubErfahrungenInhalt {
   eyebrow: string
   headline: string
   stimmen: { name: string; rolle: string; text: string; initialen: string }[]
   fallstudien: { titel: string; kunde: string; ergebnis: string; beschreibung: string }[]
+  /** Vorher/Nachher-Projektbeispiele */
+  projekte?: ScrubProjekt[]
 }
 
 /** Leistungen: Detaillierte Services */
@@ -142,14 +159,55 @@ export interface ScrubAngeboteInhalt {
   hinweis?: string
 }
 
+/** Zielgruppen-Seite: SEO-Landingpage für eine spezifische Zielgruppe (z. B. Investoren, Hausverwaltungen) */
+export interface ScrubZielgruppeInhalt {
+  slug: string
+  nav_label: string
+  seo_titel: string
+  seo_beschreibung: string
+  eyebrow: string
+  headline: string
+  lead: string
+  /** Probleme/Herausforderungen dieser Zielgruppe */
+  herausforderungen: { titel: string; text: string; icon: string }[]
+  /** Wie das Unternehmen diese Probleme löst */
+  loesungen: { titel: string; text: string; icon: string }[]
+  /** Relevante Leistungen für diese Zielgruppe */
+  relevante_leistungen: { titel: string; text: string; href?: string }[]
+  /** Abschluss-CTA */
+  cta: { headline: string; text: string; label: string }
+}
+
+/** Leistungs-Detail-Seite: Einzelne Leistung mit Ablauf, Vorteilen, CTA */
+export interface ScrubLeistungDetailInhalt {
+  slug: string
+  nav_label: string
+  seo_titel: string
+  seo_beschreibung: string
+  eyebrow: string
+  headline: string
+  lead: string
+  /** Ablauf/Prozess-Schritte */
+  ablauf: { schritt: string; titel: string; text: string }[]
+  /** Vorteile dieser Leistung */
+  vorteile: { titel: string; text: string; icon: string }[]
+  /** Abschluss-CTA */
+  cta: { headline: string; text: string; label: string }
+}
+
 export interface ScrubUnterseiten {
   karriere?: ScrubKarriereInhalt
   erfahrungen?: ScrubErfahrungenInhalt
   leistungen?: ScrubLeistungenInhalt
   ziele?: ScrubZieleInhalt
   angebote?: ScrubAngeboteInhalt
+  /** Dynamische Zielgruppen-SEO-Seiten (slug → Inhalt) */
+  zielgruppen?: Record<string, ScrubZielgruppeInhalt>
+  /** Dynamische Leistungs-Detail-Seiten (slug → Inhalt) */
+  leistung_details?: Record<string, ScrubLeistungDetailInhalt>
 }
 
+/** Feste Unterseiten-Slugs */
 export type ScrubUnterseitenSlug = 'karriere' | 'erfahrungen' | 'leistungen' | 'kontakt' | 'ziele' | 'angebote'
 
 export const SCRUB_UNTERSEITEN: { slug: ScrubUnterseitenSlug; label: string }[] = [
@@ -160,6 +218,54 @@ export const SCRUB_UNTERSEITEN: { slug: ScrubUnterseitenSlug; label: string }[] 
   { slug: 'karriere', label: 'Karriere' },
   { slug: 'kontakt', label: 'Kontakt' },
 ]
+
+/** Nav-Link mit optionalen Unter-Links für Dropdown */
+export interface ScrubNavLink {
+  label: string
+  href: string
+  children?: { label: string; href: string }[]
+}
+
+/** Alle Nav-Links inkl. dynamischer Seiten aus der Config.
+ *  Leistungs-Details werden unter "Leistungen" gruppiert,
+ *  regionale SEO-Seiten bleiben unsichtbar in der Nav (nur intern verlinkt). */
+export function scrubAlleNavLinks(
+  config: ScrubConfig,
+  basisPfad: string
+): ScrubNavLink[] {
+  const links: ScrubNavLink[] = []
+
+  // Leistungen + Detail-Unterseiten als Dropdown
+  if (config.unterseiten?.leistungen || config.unterseiten?.leistung_details) {
+    const children: { label: string; href: string }[] = []
+    if (config.unterseiten.leistung_details) {
+      for (const ld of Object.values(config.unterseiten.leistung_details)) {
+        children.push({ label: ld.nav_label, href: `${basisPfad}/${ld.slug}` })
+      }
+    }
+    links.push({
+      label: 'Leistungen',
+      href: `${basisPfad}/leistungen`,
+      children: children.length > 0 ? children : undefined,
+    })
+  }
+
+  // Zielgruppen — nur nicht-regionale (Investoren, Hausverwaltungen) in Hauptnav
+  if (config.unterseiten?.zielgruppen) {
+    for (const zg of Object.values(config.unterseiten.zielgruppen)) {
+      // Regionale SEO-Seiten (sanierung-*) nicht in der Hauptnav
+      if (zg.slug.startsWith('sanierung-')) continue
+      links.push({ label: zg.nav_label, href: `${basisPfad}/${zg.slug}` })
+    }
+  }
+
+  if (config.unterseiten?.ziele) links.push({ label: 'Ziele', href: `${basisPfad}/ziele` })
+  if (config.unterseiten?.angebote) links.push({ label: 'Angebote', href: `${basisPfad}/angebote` })
+  if (config.unterseiten?.erfahrungen) links.push({ label: 'Referenzen', href: `${basisPfad}/erfahrungen` })
+  if (config.unterseiten?.karriere) links.push({ label: 'Karriere', href: `${basisPfad}/karriere` })
+  links.push({ label: 'Kontakt', href: `${basisPfad}/kontakt` })
+  return links
+}
 
 export function istScrubKomposition(config: unknown): config is ScrubConfig {
   return (

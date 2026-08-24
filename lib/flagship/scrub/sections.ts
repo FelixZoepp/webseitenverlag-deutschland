@@ -10,20 +10,66 @@
 
 import { esc, escAttr, mediaSlot } from '../html'
 import type { FlagshipMeta } from '../types'
-import type { ScrubInhalte, ScrubSzene } from './types'
+import type { ScrubInhalte, ScrubSzene, ScrubNavLink } from './types'
 
-export function renderScrubHeader(header: ScrubInhalte['header'], navLinks?: { label: string; href: string }[]): string {
-  const nav = navLinks?.length
-    ? `<nav class="ss-nav">${navLinks.map(l => `<a href="${escAttr(l.href)}">${esc(l.label)}</a>`).join('')}</nav>`
+export function renderScrubHeader(header: ScrubInhalte['header'], navLinks?: ScrubNavLink[]): string {
+  const desktopNav = navLinks?.length
+    ? `<nav class="ss-nav">${navLinks.map(l => {
+        if (l.children?.length) {
+          return `<div class="ss-nav-dropdown">
+            <a href="${escAttr(l.href)}" class="ss-nav-link">${esc(l.label)} <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <div class="ss-nav-dropdown-menu">${l.children.map(c =>
+              `<a href="${escAttr(c.href)}">${esc(c.label)}</a>`
+            ).join('')}</div>
+          </div>`
+        }
+        return `<a href="${escAttr(l.href)}" class="ss-nav-link">${esc(l.label)}</a>`
+      }).join('')}</nav>`
     : ''
+
+  const mobileLinks = navLinks?.length
+    ? navLinks.flatMap(l => {
+        const items = [`<a href="${escAttr(l.href)}" class="ss-mobile-link">${esc(l.label)}</a>`]
+        if (l.children?.length) {
+          items.push(...l.children.map(c =>
+            `<a href="${escAttr(c.href)}" class="ss-mobile-link ss-mobile-sub">${esc(c.label)}</a>`
+          ))
+        }
+        return items
+      }).join('')
+    : ''
+
   return `<!-- sektion:ss-kopf -->
 <header class="ss-kopf">
   <div class="ss-kopf-inner">
     <a class="ss-logo" href="/">${esc(header.logo_text)}</a>
-    ${nav}
-    <a class="ss-btn-primary" href="#kontakt">${esc(header.cta_label)}</a>
+    ${desktopNav}
+    <div class="ss-kopf-rechts">
+      <a class="ss-btn-primary ss-btn-kopf" href="/kontakt">${esc(header.cta_label)}</a>
+      <button class="ss-burger" aria-label="Menü öffnen" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
-</header>`
+  <div class="ss-mobile-menu">
+    ${mobileLinks}
+    <a class="ss-btn-primary" href="/kontakt" style="margin-top:8px;width:100%;text-align:center">${esc(header.cta_label)}</a>
+  </div>
+</header>
+<script>
+(function(){
+  var b=document.querySelector('.ss-burger'),m=document.querySelector('.ss-mobile-menu');
+  if(!b||!m) return;
+  b.addEventListener('click',function(){
+    var open=m.classList.toggle('ss-open');
+    b.classList.toggle('ss-open',open);
+    b.setAttribute('aria-expanded',String(open));
+  });
+  m.addEventListener('click',function(e){
+    if(e.target.tagName==='A'){m.classList.remove('ss-open');b.classList.remove('ss-open');b.setAttribute('aria-expanded','false')}
+  });
+})();
+</script>`
 }
 
 /** Copy-Block einer Szene (identisch in Scrub- und Poster-Modus) */

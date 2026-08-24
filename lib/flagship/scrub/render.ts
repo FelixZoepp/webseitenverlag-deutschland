@@ -16,14 +16,14 @@
 import './asset-slots'
 import type { FlagshipRenderOptionen } from '../types'
 import { esc, escAttr } from '../html'
-import { scrubCss } from './css'
+import { scrubCss, scrubLightCss } from './css'
 import { scrubJs } from './js'
-import { SCRUB_UNTERSEITEN, type ScrubConfig, type ScrubUnterseitenSlug } from './types'
+import { SCRUB_UNTERSEITEN, scrubAlleNavLinks, type ScrubConfig, type ScrubUnterseitenSlug } from './types'
 import {
   renderScrubFooter, renderScrubHeader, renderScrubKontakt, renderScrubRibbon,
   renderScrubStatisch, renderScrubWrap,
 } from './sections'
-import { renderScrubKarriere, renderScrubErfahrungen, renderScrubLeistungen, renderScrubKontaktSeite, renderScrubZiele, renderScrubAngebote } from './unterseiten'
+import { renderScrubKarriere, renderScrubErfahrungen, renderScrubLeistungen, renderScrubKontaktSeite, renderScrubZiele, renderScrubAngebote, renderScrubZielgruppe, renderScrubLeistungDetail } from './unterseiten'
 import { renderFakten, renderEmpathie, renderSignature, renderLeistungen, renderAblauf, renderErgebnisse, renderZahlen, renderStimmen, renderLokal, renderFaq, renderConversion } from '../sections'
 import { flagshipCss } from '../css'
 import type { FlagshipConfig } from '../types'
@@ -43,6 +43,7 @@ function jsonLd(config: ScrubConfig): string {
   return JSON.stringify(daten).replace(/</g, '\\u003c')
 }
 
+/** Fallback: nur feste Unterseiten (ohne dynamische aus Config) */
 function scrubNavLinks(basisPfad: string): { label: string; href: string }[] {
   return SCRUB_UNTERSEITEN.map(u => ({ label: u.label, href: `${basisPfad}/${u.slug}` }))
 }
@@ -54,7 +55,7 @@ export function renderScrubStory(config: ScrubConfig, opts: FlagshipRenderOption
   const beschreibung = meta.seo_beschreibung || ''
   const noindex = opts.noindex !== false ? '<meta name="robots" content="noindex">' : ''
 
-  const navLinks = config.unterseiten ? scrubNavLinks(opts.basisPfad || '') : undefined
+  const navLinks = config.unterseiten ? scrubAlleNavLinks(config, opts.basisPfad || '') : undefined
 
   // Flagship-Sektionen nach dem Scrub-Hero (aus branchen_profile Vorlage)
   const fsCfg = (config as unknown as Record<string, unknown>).flagship_sektionen as FlagshipConfig | undefined
@@ -115,7 +116,7 @@ ${noindex}
 <meta property="og:locale" content="de_DE">
 <script type="application/ld+json">${jsonLd(config)}</script>
 <style>
-${scrubCss(config.design)}
+${scrubLightCss(config.design)}
 ${flagshipStyles}
 </style>
 </head>
@@ -134,56 +135,106 @@ ${scrubJs({
 </html>`
 }
 
+/**
+ * Rendert eine Scrub-Unterseite — feste Slugs (karriere, leistungen, …) UND
+ * dynamische Slugs (zielgruppen, leistung_details aus der Config).
+ */
 export function renderScrubUnterseite(
   config: ScrubConfig,
-  seite: ScrubUnterseitenSlug,
+  seite: string,
   opts: FlagshipRenderOptionen = {},
 ): string {
   const { meta, inhalte, design } = config
   const basisPfad = opts.basisPfad || ''
-  const navLinks = scrubNavLinks(basisPfad)
-  const seitenLabel = SCRUB_UNTERSEITEN.find(u => u.slug === seite)?.label || seite
-  const titel = `${seitenLabel} — ${meta.firma}`
+  const navLinks = scrubAlleNavLinks(config, basisPfad)
 
   let sektionen = ''
+  let seitenTitel = ''
+  let seitenBeschreibung = meta.seo_beschreibung || ''
+
+  // 1. Feste Unterseiten
   switch (seite) {
     case 'karriere':
       sektionen = config.unterseiten?.karriere
         ? renderScrubKarriere(config.unterseiten.karriere, opts.submitZiel)
         : ''
+      seitenTitel = `Karriere — ${meta.firma}`
       break
     case 'erfahrungen':
       sektionen = config.unterseiten?.erfahrungen
         ? renderScrubErfahrungen(config.unterseiten.erfahrungen)
         : ''
+      seitenTitel = `Erfahrungen — ${meta.firma}`
       break
     case 'leistungen':
       sektionen = config.unterseiten?.leistungen
         ? renderScrubLeistungen(config.unterseiten.leistungen)
         : ''
+      seitenTitel = `Leistungen — ${meta.firma}`
       break
     case 'ziele':
       sektionen = config.unterseiten?.ziele
         ? renderScrubZiele(config.unterseiten.ziele)
         : ''
+      seitenTitel = `Ziele — ${meta.firma}`
       break
     case 'angebote':
       sektionen = config.unterseiten?.angebote
         ? renderScrubAngebote(config.unterseiten.angebote)
         : ''
+      seitenTitel = `Angebote — ${meta.firma}`
       break
     case 'kontakt':
       sektionen = renderScrubKontaktSeite(inhalte.kontakt, opts.submitZiel)
+      seitenTitel = `Kontakt — ${meta.firma}`
       break
+  }
+
+  // 2. Dynamische Zielgruppen-Seiten
+  if (!sektionen && config.unterseiten?.zielgruppen?.[seite]) {
+    const zg = config.unterseiten.zielgruppen[seite]
+    sektionen = renderScrubZielgruppe(zg)
+    seitenTitel = zg.seo_titel || `${zg.nav_label} — ${meta.firma}`
+    seitenBeschreibung = zg.seo_beschreibung || seitenBeschreibung
+  }
+
+  // 3. Dynamische Leistungs-Detail-Seiten
+  if (!sektionen && config.unterseiten?.leistung_details?.[seite]) {
+    const ld = config.unterseiten.leistung_details[seite]
+    sektionen = renderScrubLeistungDetail(ld)
+    seitenTitel = ld.seo_titel || `${ld.nav_label} — ${meta.firma}`
+    seitenBeschreibung = ld.seo_beschreibung || seitenBeschreibung
   }
 
   if (!sektionen) return ''
 
+  const titel = seitenTitel || `${seite} — ${meta.firma}`
   const noindex = opts.noindex !== false ? '<meta name="robots" content="noindex">' : ''
+
+  // Light-Footer für Unterseiten
+  const lightFooter = `<footer class="ss-footer">
+  <div class="ss-footer-inner">
+    <div class="ss-footer-col" style="max-width:320px">
+      <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em">${esc(inhalte.header.logo_text)}</div>
+      <p style="margin:4px 0 0;line-height:1.5;color:rgba(255,255,255,.65)">${esc(inhalte.footer.beschreibung)}</p>
+    </div>
+    <div class="ss-footer-col">
+      ${navLinks.slice(0, 5).map(l => `<a href="${escAttr(l.href)}">${esc(l.label)}</a>`).join('\n      ')}
+    </div>
+    <div class="ss-footer-col">
+      ${meta.email ? `<a href="mailto:${escAttr(meta.email)}">${esc(meta.email)}</a>` : ''}
+      ${meta.telefon ? `<a href="tel:${escAttr(meta.telefon)}">${esc(meta.telefon)}</a>` : ''}
+      <a href="/impressum">Impressum</a>
+      <a href="/datenschutz">Datenschutz</a>
+    </div>
+  </div>
+  <div class="ss-footer-copy">&copy; ${new Date().getFullYear()} ${esc(meta.firma)}</div>
+</footer>`
+
   const body = [
     renderScrubHeader(inhalte.header, navLinks),
     sektionen,
-    renderScrubFooter(inhalte.footer, inhalte.header, meta),
+    lightFooter,
     opts.demo ? renderScrubRibbon() : '',
   ].filter(Boolean).join('\n\n')
 
@@ -193,10 +244,10 @@ export function renderScrubUnterseite(
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${esc(titel)}</title>
-<meta name="description" content="${escAttr(meta.seo_beschreibung || '')}">
+<meta name="description" content="${escAttr(seitenBeschreibung)}">
 ${noindex}
 <style>
-${scrubCss(design)}
+${scrubLightCss(design)}
 </style>
 </head>
 <body>
