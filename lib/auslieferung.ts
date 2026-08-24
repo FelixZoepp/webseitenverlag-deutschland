@@ -226,6 +226,7 @@ async function renderEngineSeite(
         return renderScrubUnterseite(fsConfig as unknown as ScrubConfig, slug, {
           noindex: false,
           submitZiel: `/api/public/forms/${site.id}/submit`,
+          basisPfad: '',
         })
       }
     }

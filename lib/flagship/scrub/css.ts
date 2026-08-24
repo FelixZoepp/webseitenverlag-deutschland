@@ -281,8 +281,10 @@ textarea.ss-feld{min-height:110px;resize:vertical}
  * Basiert auf dem Apple-Red-Software-System Design (adaptiert auf die Kunden-Akzentfarbe).
  * Weißer Canvas, weiße Cards, weiche Schatten, Inter Tight Font.
  */
-export function scrubLightCss(design: ScrubDesign): string {
-  const accent = design.akzent2 || '#0A7AFF' // Cyan-Akzent als Primärfarbe im Light-Modus
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function scrubLightCss(_design: ScrubDesign): string {
+  // Im Light-Modus: Cyan (#00e5ff) ist auf Weiß unsichtbar → professionelles Dunkelblau
+  const accent = '#0A5C99' // Kräftiges, lesbares Blau für Light-Backgrounds
   const accentRgb = rgb(accent)
   return `
 @import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap");
@@ -452,6 +454,13 @@ textarea.ss-feld{height:auto;min-height:120px;padding:14px 16px;resize:vertical}
 .ss-footer a{color:rgba(255,255,255,.7)}
 .ss-footer a:hover{color:#fff}
 .ss-footer-copy{max-width:1200px;margin:32px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,.1);font-size:13px;color:rgba(255,255,255,.45)}
+
+/* ========= Homepage: Light Hero ========= */
+.sl-hero{padding:clamp(120px,16vw,200px) 24px clamp(64px,10vw,120px);text-align:center}
+.sl-hero-inner{max-width:720px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:16px}
+.sl-hero .ss-title{text-align:center}
+.sl-hero .ss-body{text-align:center;max-width:560px}
+.sl-hero .ss-actions{margin-top:8px}
 
 /* ========= Homepage: Stage / Scenes / Poster / Kontakt ========= */
 /* Stage (Sticky-Canvas, Scrub-Modus) */

@@ -17,11 +17,10 @@ import './asset-slots'
 import type { FlagshipRenderOptionen } from '../types'
 import { esc, escAttr } from '../html'
 import { scrubLightCss } from './css'
-import { scrubJs } from './js'
+// scrubJs nicht mehr benötigt — Homepage ist jetzt statisches Light-Layout
 import { scrubAlleNavLinks, type ScrubConfig } from './types'
 import {
-  renderScrubFooter, renderScrubHeader, renderScrubKontakt, renderScrubRibbon,
-  renderScrubStatisch, renderScrubWrap,
+  renderScrubHeader, renderScrubRibbon,
 } from './sections'
 import { renderScrubKarriere, renderScrubErfahrungen, renderScrubLeistungen, renderScrubKontaktSeite, renderScrubZiele, renderScrubAngebote, renderScrubZielgruppe, renderScrubLeistungDetail } from './unterseiten'
 import { renderFakten, renderEmpathie, renderSignature, renderLeistungen, renderAblauf, renderErgebnisse, renderZahlen, renderStimmen, renderLokal, renderFaq, renderConversion } from '../sections'
@@ -87,12 +86,79 @@ export function renderScrubStory(config: ScrubConfig, opts: FlagshipRenderOption
       .replace(/^section\s*\{/gm, '.fs-scope section {')
   }
 
+  // Light-Landing: Hero + Szenen als Feature-Cards + Kontakt (KEIN Scroll-Scrub)
+  const heroSzene = inhalte.szenen[0]
+  const featureSzenen = inhalte.szenen.slice(1)
+
+  const heroHtml = `<section class="sl-hero">
+  <div class="sl-hero-inner">
+    <span class="ss-kicker">${esc(heroSzene?.kicker || '')}</span>
+    <h1 class="ss-title">${esc(heroSzene?.titel || meta.firma)}</h1>
+    <p class="ss-body">${esc(heroSzene?.text || beschreibung)}</p>
+    <div class="ss-actions">
+      <a class="ss-btn-primary" href="/kontakt">${esc(inhalte.header.cta_label)}</a>
+    </div>
+  </div>
+</section>`
+
+  const featuresHtml = featureSzenen.length > 0 ? `<section class="ss-seite">
+  <div class="ss-seite-wrap">
+    <div class="ss-leistungen-grid">
+    ${featureSzenen.map((s, i) => `<div class="ss-leistung">
+      <span class="ss-leistung-nr">${String(i + 2).padStart(2, '0')}</span>
+      <h3>${esc(s.titel)}</h3>
+      <p>${esc(s.text)}</p>
+      ${s.tags.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">${s.tags.map(t => `<span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px;background:var(--sl-accent-soft);color:var(--sl-accent)">${esc(t)}</span>`).join('')}</div>` : ''}
+    </div>`).join('\n    ')}
+    </div>
+  </div>
+</section>` : ''
+
+  // Kontakt-Sektion im Light-Design
+  const kontaktHtml = `<section class="ss-seite" id="kontakt">
+  <div class="ss-seite-wrap" style="max-width:640px">
+    <span class="ss-kicker">${esc(inhalte.kontakt.pill)}</span>
+    <h2 class="ss-title" style="font-size:clamp(28px,3.4vw,42px)">${esc(inhalte.kontakt.h2)}</h2>
+    <p class="ss-body">${esc(inhalte.kontakt.lead)}</p>
+    <form data-kontakt-form${opts.submitZiel ? ` action="${escAttr(opts.submitZiel)}" method="post"` : ''} style="display:grid;gap:12px;margin-top:24px">
+      <input class="ss-feld" type="text" name="name" placeholder="Name" required>
+      <input class="ss-feld" type="email" name="email" placeholder="E-Mail" required>
+      <input class="ss-feld" type="tel" name="telefon" placeholder="Telefon">
+      <textarea class="ss-feld" name="nachricht" placeholder="Beschreiben Sie Ihr Projekt..."></textarea>
+      <label class="ss-check"><input type="checkbox" name="datenschutz" required> <span>Ich habe die <a href="/datenschutz">Datenschutzerklärung</a> gelesen und stimme zu.</span></label>
+      <button class="ss-btn-primary" type="submit">${esc(inhalte.kontakt.cta_label)}</button>
+      <p class="ss-form-erfolg" data-form-erfolg>Danke! Wir melden uns innerhalb von 24 Stunden.</p>
+    </form>
+  </div>
+</section>`
+
+  // Light-Footer
+  const footerHtml = `<footer class="ss-footer">
+  <div class="ss-footer-inner">
+    <div class="ss-footer-col" style="max-width:320px">
+      <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em">${esc(inhalte.header.logo_text)}</div>
+      <p style="margin:4px 0 0;line-height:1.5;color:rgba(255,255,255,.65)">${esc(inhalte.footer.beschreibung)}</p>
+    </div>
+    <div class="ss-footer-col">
+      ${(navLinks || []).slice(0, 5).map(l => `<a href="${escAttr(l.href)}">${esc(l.label)}</a>`).join('\n      ')}
+    </div>
+    <div class="ss-footer-col">
+      ${meta.email ? `<a href="mailto:${escAttr(meta.email)}">${esc(meta.email)}</a>` : ''}
+      ${meta.telefon ? `<a href="tel:${escAttr(meta.telefon)}">${esc(meta.telefon)}</a>` : ''}
+      <a href="/impressum">Impressum</a>
+      <a href="/datenschutz">Datenschutz</a>
+    </div>
+  </div>
+  <div class="ss-footer-copy">&copy; ${new Date().getFullYear()} ${esc(meta.firma)}</div>
+</footer>`
+
   const body = [
     renderScrubHeader(inhalte.header, navLinks),
-    inhalte.frames ? renderScrubWrap(inhalte) : renderScrubStatisch(inhalte),
+    heroHtml,
+    featuresHtml,
     flagshipBody,
-    renderScrubKontakt(inhalte.kontakt, opts.submitZiel),
-    renderScrubFooter(inhalte.footer, inhalte.header, meta),
+    kontaktHtml,
+    footerHtml,
     opts.demo ? renderScrubRibbon() : '',
   ].filter(Boolean).join('\n\n')
 
@@ -118,13 +184,6 @@ ${flagshipStyles}
 
 ${body}
 
-<script>
-${scrubJs({
-    frames: inhalte.frames ?? null,
-    gewichte: inhalte.szenen.map((s) => s.scroll),
-    submitZiel: opts.submitZiel,
-  })}
-</script>
 </body>
 </html>`
 }
@@ -138,7 +197,7 @@ export function renderScrubUnterseite(
   seite: string,
   opts: FlagshipRenderOptionen = {},
 ): string {
-  const { meta, inhalte, design } = config
+  const { meta, inhalte } = config
   const basisPfad = opts.basisPfad || ''
   const navLinks = scrubAlleNavLinks(config, basisPfad)
 
@@ -241,7 +300,7 @@ export function renderScrubUnterseite(
 <meta name="description" content="${escAttr(seitenBeschreibung)}">
 ${noindex}
 <style>
-${scrubLightCss(design)}
+${scrubLightCss(config.design)}
 </style>
 </head>
 <body>
