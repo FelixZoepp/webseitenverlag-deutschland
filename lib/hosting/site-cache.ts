@@ -52,6 +52,13 @@ async function resolveSiteId(host: string): Promise<string | null> {
     }
   }
 
+  // Fallback: wenn der Host kein Punkt enthält, ist es ein reiner Subdomain-Slug
+  // (z. B. von /kundenseite/<slug> direkt aufgerufen ohne DNS-Routing)
+  if (!host.includes('.')) {
+    const { data } = await supabase.from('sites').select('id').eq('subdomain', host).maybeSingle()
+    if (data?.id) return data.id as string
+  }
+
   const { data: domain } = await supabase
     .from('domains')
     .select('site_id')
