@@ -145,7 +145,15 @@ export async function GET(
     }
     if (auslieferung.ergebnis !== 'ok' || !auslieferung.html) return nichtGefunden()
 
-    return htmlAntwort(auslieferung.html, 200, auslieferung.noindex)
+    // Wenn über /kundenseite/<host> zugegriffen: interne Links umschreiben
+    // damit Navigation funktioniert (Produktion nutzt Subdomain-Routing, kein Rewrite nötig)
+    let html = auslieferung.html
+    if (!host.includes('.')) {
+      const prefix = `/kundenseite/${host}`
+      html = html.replace(/href="\//g, `href="${prefix}/`)
+    }
+
+    return htmlAntwort(html, 200, auslieferung.noindex)
   } catch (e) {
     console.error('[kundenseite] Auslieferung fehlgeschlagen:', host, pfad, e)
     return nichtGefunden()
