@@ -62,9 +62,7 @@ export async function createDemoCheckoutSession(params: {
             unit_amount: priceCent,
             product_data: {
               name: produktName,
-              description: params.customPriceCent
-                ? `Individuelle Servicepauschale — ${(priceCent / 100).toFixed(0)} €/Monat netto`
-                : pkg.stripeDescription,
+              description: pkg.stripeDescription,
               tax_code: 'txcd_10103001',
             },
           },

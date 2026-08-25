@@ -8,7 +8,7 @@ export interface PackageDefinition {
   label: string
   maxPages: number
   features: string[]
-  /** Kurzbeschreibung für den Stripe-Checkout (max ~200 Zeichen) */
+  /** Leistungsbeschreibung für den Stripe-Checkout */
   stripeDescription: string
   /** Einmalige Einrichtungsgebühr in € netto (0 = kein Setup-Posten im Checkout) */
   setupFee: number
@@ -36,7 +36,7 @@ export const PACKAGES: PackageDefinition[] = [
       'Spam-Schutz',
       'DSGVO-Paket (Impressum, Datenschutz, Cookie-Banner)',
     ],
-    stripeDescription: 'Professionelle One-Pager-Website mit eigener Domain, Hosting, KI-Editor, Kontaktformular, DSGVO-Paket & mobilem Design.',
+    stripeDescription: 'Enthaltene Leistungen: 1 professionelle Webseite (One-Pager), eigene Domain inkl. SSL-Zertifikat, Hosting inklusive, KI-gestützter Website-Editor mit Chatbot, Kontaktformular mit Anfragen-Inbox, Spam-Schutz, mobile-optimiertes Responsive Design, DSGVO-Komplettpaket (Impressum, Datenschutzerklärung, Cookie-Banner). Laufende Betreuung & technischer Support inklusive.',
     setupFee: 0,
     seoLevel: 'basic',
     schemaOrg: false,
@@ -58,7 +58,7 @@ export const PACKAGES: PackageDefinition[] = [
       'Strukturierte Daten (Schema.org LocalBusiness)',
       'Erweiterte Templates',
     ],
-    stripeDescription: 'Alles aus Starter + bis zu 5 Unterseiten, lokales SEO-Setup (Stadt + Branche), strukturierte Daten für Google & erweiterte Design-Templates.',
+    stripeDescription: 'Enthaltene Leistungen: Professionelle Webseite mit bis zu 5 Unterseiten, eigene Domain inkl. SSL-Zertifikat, Hosting inklusive, KI-gestützter Website-Editor mit Chatbot, Kontaktformular mit Anfragen-Inbox, Spam-Schutz, mobile-optimiertes Responsive Design, DSGVO-Komplettpaket (Impressum, Datenschutzerklärung, Cookie-Banner), lokales SEO-Setup (Stadt + Branche), lokale Keywords in Texten & Meta-Tags, strukturierte Daten (Schema.org LocalBusiness) für bessere Google-Sichtbarkeit, erweiterte Premium-Design-Templates. Laufende Betreuung & technischer Support inklusive.',
     setupFee: 0,
     seoLevel: 'local',
     schemaOrg: true,
@@ -79,7 +79,7 @@ export const PACKAGES: PackageDefinition[] = [
       'Programmatische Landing-Pages',
       'Monatlicher Performance-Report',
     ],
-    stripeDescription: 'Das Komplettpaket: bis zu 10 Unterseiten, 4 SEO-Artikel/Monat, automatische Landing-Pages, Video-Header, Performance-Reports & Priority-Support.',
+    stripeDescription: 'Enthaltene Leistungen: Professionelle Webseite mit bis zu 10 Unterseiten, eigene Domain inkl. SSL-Zertifikat, Hosting inklusive, KI-gestützter Website-Editor mit Chatbot, Kontaktformular mit Anfragen-Inbox, Spam-Schutz, mobile-optimiertes Responsive Design, DSGVO-Komplettpaket (Impressum, Datenschutzerklärung, Cookie-Banner), lokales SEO-Setup (Stadt + Branche), lokale Keywords in Texten & Meta-Tags, strukturierte Daten (Schema.org LocalBusiness) für bessere Google-Sichtbarkeit, erweiterte Premium-Design-Templates, 4 SEO-optimierte Blog-Artikel pro Monat (KI-generiert), programmatische Landing-Pages für lokale Suchbegriffe, monatlicher Performance-Report. Laufende Betreuung & Priority-Support inklusive.',
     setupFee: 0,
     seoLevel: 'advanced',
     schemaOrg: true,
