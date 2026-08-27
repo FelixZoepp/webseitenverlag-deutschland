@@ -62,7 +62,7 @@ export async function createDemoCheckoutSession(params: {
             unit_amount: priceCent,
             product_data: {
               name: produktName,
-              description: pkg.stripeDescription,
+              description: `${pkg.stripeDescription} ${konditionen}`,
               tax_code: 'txcd_10103001',
             },
           },
