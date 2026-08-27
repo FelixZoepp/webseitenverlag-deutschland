@@ -49,24 +49,21 @@ export async function createDemoCheckoutSession(params: {
   const produktName = params.customProductName ?? `Website-Paket ${pkg.name} — ${params.prospectName}`
 
   const konditionen = vertragsKonditionenText()
-  const priceId = params.customPriceCent ? null : getStripePriceId(params.paket)
 
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-    priceId
-      ? { quantity: 1, price: priceId }
-      : {
-          quantity: 1,
-          price_data: {
-            currency: 'eur',
-            recurring: { interval: 'month' },
-            unit_amount: priceCent,
-            product_data: {
-              name: produktName,
-              description: `${pkg.stripeDescription} ${konditionen}`,
-              tax_code: 'txcd_10103001',
-            },
-          },
+    {
+      quantity: 1,
+      price_data: {
+        currency: 'eur',
+        recurring: { interval: 'month' },
+        unit_amount: priceCent,
+        product_data: {
+          name: produktName,
+          description: `${pkg.stripeDescription} ${konditionen}`,
+          tax_code: 'txcd_10103001',
         },
+      },
+    },
   ]
 
   if (!params.customPriceCent && pkg.setupFee > 0) {
