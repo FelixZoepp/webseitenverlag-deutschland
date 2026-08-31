@@ -91,6 +91,7 @@ export async function createDemoCheckoutSession(params: {
   const session = await getStripe().checkout.sessions.create({
     mode: 'subscription',
     locale: 'de',
+    automatic_tax: { enabled: true },
     billing_address_collection: 'required',
     phone_number_collection: { enabled: true },
     consent_collection: { terms_of_service: 'required' },
@@ -159,6 +160,7 @@ export async function createUpsellCheckoutSession(params: {
   const session = await getStripe().checkout.sessions.create({
     mode: params.monatCent > 0 ? 'subscription' : 'payment',
     locale: 'de',
+    automatic_tax: { enabled: true },
     line_items: lineItems,
     metadata,
     ...(params.monatCent > 0 ? { subscription_data: { metadata } } : {}),
