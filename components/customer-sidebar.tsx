@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { MessageSquare, BarChart3, Mail, Zap, FileText, HelpCircle, Settings, LogOut, Globe, ExternalLink, Image, Receipt, Search, Scale } from 'lucide-react'
+import { MessageSquare, BarChart3, Mail, Zap, FileText, HelpCircle, Settings, LogOut, Globe, ExternalLink, Image, Receipt, Search, Scale, Star } from 'lucide-react'
 
 interface Props {
   siteId: string
@@ -35,6 +35,7 @@ export default function CustomerSidebar({ siteId, siteName, siteStatus, siteDoma
     { href: `${base}/seo`, label: 'SEO-Seiten', icon: <Search className="w-4 h-4" />, badge: null },
     { href: `${base}/rechnungen`, label: 'Rechnungen', icon: <Receipt className="w-4 h-4" />, badge: null },
     { href: `${base}/rechtstexte`, label: 'Rechtstexte', icon: <Scale className="w-4 h-4" />, badge: null },
+    { href: `${base}/bewertungen`, label: 'Bewertungen', icon: <Star className="w-4 h-4" />, badge: null },
     { href: `${base}/erweiterungen`, label: 'Erweiterungen', icon: <Zap className="w-4 h-4" />, badge: null },
   ]
 

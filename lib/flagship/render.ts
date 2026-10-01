@@ -119,6 +119,7 @@ export function renderFlagshipPage(config: FlagshipConfig | GalabauConfig | Male
   const funnelLabel = config.funnel.modus === 'reservierung' ? 'Tisch reservieren' : 'Anfrage starten'
   const titel = meta.seo_titel || `${meta.firma} – ${meta.ort}`
   const multipage = config.seiten_modus === 'multipage'
+  const rechtstextePfad = (config as FlagshipConfig).rechtstexte ? basisPfad : null
 
   // Im Multipage-Modus: Nav-Links auf Unterseiten statt Anker
   const navInhalt: NavInhalt = multipage
@@ -139,7 +140,7 @@ export function renderFlagshipPage(config: FlagshipConfig | GalabauConfig | Male
       renderStimmen(inhalte.stimmen),
       renderFaq(inhalte.faq),
       renderConversion(inhalte.conversion, hell, funnelUrl, funnelLabel),
-      renderFooter(inhalte.footer, navInhalt, hell, meta.firma),
+      renderFooter(inhalte.footer, navInhalt, hell, meta.firma, rechtstextePfad),
       opts.demo ? renderRibbon() : '',
     ].filter(Boolean).join('\n\n')
   } else {
@@ -162,7 +163,7 @@ export function renderFlagshipPage(config: FlagshipConfig | GalabauConfig | Male
       renderLokal(inhalte.lokal),
       renderFaq(inhalte.faq),
       renderConversion(inhalte.conversion, hell, funnelUrl, funnelLabel),
-      renderFooter(inhalte.footer, navInhalt, hell, meta.firma),
+      renderFooter(inhalte.footer, navInhalt, hell, meta.firma, rechtstextePfad),
       opts.demo ? renderRibbon() : '',
     ].filter(Boolean).join('\n\n')
   }
@@ -231,7 +232,7 @@ export function renderUnterseite(
   const body = [
     renderNav(navInhalt, hell, funnelUrl),
     ...sektionen,
-    renderFooter(inhalte.footer, navInhalt, hell, meta.firma),
+    renderFooter(inhalte.footer, navInhalt, hell, meta.firma, config.rechtstexte ? basisPfad : null),
     opts.demo ? renderRibbon() : '',
   ].filter(Boolean).join('\n\n')
 

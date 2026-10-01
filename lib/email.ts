@@ -207,3 +207,58 @@ export async function sendInvitationEmail(
     return { success: false, error: err instanceof Error ? err.message : 'Fehler' }
   }
 }
+
+/**
+ * Bewertungs-Autopilot: Zufriedenheits-Mail an Lead senden.
+ * Empfänger klickt Ja → Google-Review-Link, Nein → internes Feedback.
+ */
+export async function sendReviewRequest(opts: {
+  toEmail: string
+  toName: string
+  firmenName: string
+  absenderName: string
+  betreff: string
+  nachricht: string
+  jaUrl: string
+  neinUrl: string
+}): Promise<{ success: boolean; error?: string }> {
+  const { toEmail, toName, firmenName, absenderName, betreff, nachricht, jaUrl, neinUrl } = opts
+  const anrede = toName ? toName.split(' ')[0] : 'Guten Tag'
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f9fafb">
+  <div style="max-width:520px;margin:0 auto;padding:32px 16px">
+    <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+      <div style="padding:36px 32px;text-align:center">
+        <h1 style="font-size:20px;color:#111827;margin:0 0 8px;font-weight:700">${firmenName}</h1>
+        <p style="color:#6b7280;margin:0 0 28px;font-size:14px">Kurze Frage zu Ihrer Erfahrung</p>
+        <p style="color:#374151;font-size:16px;line-height:1.6;margin:0 0 12px">${anrede},</p>
+        <p style="color:#374151;font-size:16px;line-height:1.6;margin:0 0 32px">${nachricht}</p>
+        <p style="color:#111827;font-size:18px;font-weight:600;margin:0 0 24px">Waren Sie zufrieden?</p>
+        <div>
+          <a href="${jaUrl}" style="display:inline-block;background:#059669;color:#fff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;margin:0 6px 8px">Ja, sehr!</a>
+          <a href="${neinUrl}" style="display:inline-block;background:#f3f4f6;color:#374151;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;margin:0 6px 8px">Nicht ganz</a>
+        </div>
+      </div>
+      <div style="padding:16px 32px;background:#f9fafb;border-top:1px solid #e5e7eb">
+        <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center">Diese Nachricht wurde im Auftrag von ${firmenName} gesendet.</p>
+      </div>
+    </div>
+  </div>
+</body></html>`
+
+  try {
+    await getResend().emails.send({
+      from: `${absenderName} <${FROM_EMAIL}>`,
+      to: toEmail,
+      subject: betreff,
+      html,
+      text: `${anrede},\n\n${nachricht}\n\nWaren Sie zufrieden?\n\nJa: ${jaUrl}\nNicht ganz: ${neinUrl}\n\n— ${firmenName}`,
+    })
+    return { success: true }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Review-Mail fehlgeschlagen'
+    console.error('Review request error:', msg)
+    return { success: false, error: msg }
+  }
+}

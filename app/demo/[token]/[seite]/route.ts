@@ -7,16 +7,19 @@ import { UNTERSEITEN } from '@/lib/flagship/types'
 import { istScrubKomposition, SCRUB_UNTERSEITEN, type ScrubUnterseitenSlug } from '@/lib/flagship/scrub/types'
 import { renderScrubUnterseite } from '@/lib/flagship/scrub/render'
 import { finalisiereDemoHtml } from '@/lib/demo-badge'
+import { rechtstexteAus, renderRechtstextSeite } from '@/lib/auslieferung'
 
 export const dynamic = 'force-dynamic'
 
 // Funnel-Unterseite der Flagship-Demos (/demo/{token}/anfrage bzw. /reservierung).
 // Multipage: Inhalts-Unterseiten (/demo/{token}/leistungen, /ergebnisse, /ueber-uns, /kontakt).
 // Scrub: Unterseiten (/demo/{token}/karriere, /erfahrungen, /leistungen, /kontakt).
+// cache:'no-store' verhindert, dass Nexts Data Cache die PostgREST-GETs einfriert (Next 14)
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }) } }
   )
 }
 
@@ -49,6 +52,26 @@ export async function GET(
     prospectName: (demo as { prospect_name?: string }).prospect_name ?? 'Ihre Firma',
     paymentLinkUrl: (demo as { payment_link_url?: string | null }).payment_link_url ?? null,
     origin: new URL(_request.url).origin,
+  }
+
+  // Rechtstexte gewinnen immer — wie bei Live-Sites (lib/auslieferung.ts)
+  if (seite === 'impressum' || seite === 'datenschutz') {
+    const rechtstexte = rechtstexteAus(demo.config as Record<string, unknown> | null)
+    if (!rechtstexte) return new NextResponse('Nicht gefunden', { status: 404 })
+    const firma =
+      ((demo.config as { meta?: { firma?: string } } | null)?.meta?.firma) ||
+      (demo as { prospect_name?: string }).prospect_name ||
+      'Diese Website'
+    const html = renderRechtstextSeite(
+      seite,
+      seite === 'impressum' ? rechtstexte.impressum : rechtstexte.datenschutz,
+      firma,
+      `/demo/${token}`
+    )
+    return new NextResponse(html, {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' },
+    })
   }
 
   // Custom-HTML Unterseiten — Page-HTML separat laden (config kann >64KB sein)

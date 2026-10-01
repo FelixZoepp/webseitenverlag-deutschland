@@ -23,6 +23,16 @@ export type RoutingDecision =
   | { type: 'redirect'; hostname: string; pathname?: string }
   | { type: 'rewrite'; pathname: string }
 
+/**
+ * Statische Kundenseiten: Host → HTML-Einstieg in /public.
+ * "/" wird auf die Datei rewritten, alle anderen Pfade laufen durch
+ * (die livara-*.html-Unterseiten liegen als echte Dateien in /public).
+ */
+export const STATIC_SITE_HOSTS: Record<string, string> = {
+  'livaraservice-gmbh.de': '/livara.html',
+  'www.livaraservice-gmbh.de': '/livara.html',
+}
+
 /** Pfade, die auf dem App-Host erlaubt sind */
 export const APP_PATH_PREFIXES = ['/dashboard', '/login', '/register', '/api', '/willkommen']
 /** Pfade, die NICHT auf die Marketing-Domain gehören */
@@ -53,6 +63,18 @@ export function entscheideRouting(
 
   if (env.allowHostOverride && overrideHost && /^[a-z0-9.-]+$/i.test(overrideHost)) {
     host = stripPort(overrideHost)
+  }
+
+  // Statische Kundenseite (z. B. livaraservice-gmbh.de → /public/livara.html)
+  const staticSite = STATIC_SITE_HOSTS[host]
+  if (staticSite) {
+    if (pathname === '/') return { type: 'rewrite', pathname: staticSite }
+    // Host-eigene robots.txt/sitemap.xml (z. B. /livara-robots.txt in /public),
+    // damit die Kundendomain nicht die Plattform-Sitemap ausliefert.
+    const basis = staticSite.replace(/\.html$/, '')
+    if (pathname === '/robots.txt') return { type: 'rewrite', pathname: `${basis}-robots.txt` }
+    if (pathname === '/sitemap.xml') return { type: 'rewrite', pathname: `${basis}-sitemap.xml` }
+    return { type: 'passthrough' }
   }
 
   if (app && host === app) {

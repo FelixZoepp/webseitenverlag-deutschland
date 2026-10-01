@@ -1,0 +1,68 @@
+# Review package: 914ea68..HEAD
+
+## Commits
+b05331f feat: allow SVG logos, add favicon fallback for logo extraction
+
+## Files changed
+ lib/scrape-prospect.ts | 25 ++++++++++++++++++++++---
+ 1 file changed, 22 insertions(+), 3 deletions(-)
+
+## Diff
+diff --git a/lib/scrape-prospect.ts b/lib/scrape-prospect.ts
+index 0143954..3487507 100644
+--- a/lib/scrape-prospect.ts
++++ b/lib/scrape-prospect.ts
+@@ -128,31 +128,50 @@ function extractImages(html: string, baseUrl: string): { images: string[]; logoU
+   for (const tag of imgTags) {
+     const srcMatch = tag.match(/\ssrc=["']([^"']+)["']/i)
+     if (!srcMatch) continue
+     const src = srcMatch[1]
+     if (src.startsWith('data:')) continue
+     const abs = absolutize(src, baseUrl)
+     if (!abs) continue
+ 
+     const lower = `${tag.toLowerCase()} ${abs.toLowerCase()}`
+     const isLogo = lower.includes('logo')
+-    const isJunk = /sprite|icon|pixel|tracking|badge|placeholder|captcha|avatar-default|\.svg(\?|$)/.test(abs.toLowerCase())
++    const isSvg = /\.svg(\?|$)/i.test(abs)
++    const isJunk = /sprite|icon|pixel|tracking|badge|placeholder|captcha|avatar-default/.test(abs.toLowerCase())
+ 
+     if (isLogo && !logoUrl) {
+-      logoUrl = abs
++      logoUrl = abs  // Logo-SVGs sind erlaubt
+       continue
+     }
+-    if (isJunk) continue
++    if (isJunk || isSvg) continue  // Nicht-Logo SVGs und Junk weiter filtern
+     if (!images.includes(abs)) images.push(abs)
+     if (images.length >= MAX_IMAGES) break
+   }
+ 
++  // Fallback: <link rel="icon/apple-touch-icon"> als Logo
++  if (!logoUrl) {
++    const patterns = [
++      /<link[^>]+rel=["'](?:icon|apple-touch-icon|shortcut\s+icon)["'][^>]+href=["']([^"']+)["']/i,
++      /<link[^>]+href=["']([^"']+)["'][^>]+rel=["'](?:icon|apple-touch-icon|shortcut\s+icon)["']/i,
++    ]
++    for (const pattern of patterns) {
++      const match = html.match(pattern)
++      if (match?.[1]) {
++        const abs = absolutize(match[1], baseUrl)
++        if (abs) {
++          logoUrl = abs
++          break
++        }
++      }
++    }
++  }
++
+   return { images, logoUrl }
+ }
+ 
+ function extractContact(html: string, text: string): { phone: string | null; email: string | null } {
+   const telMatch = html.match(/href=["']tel:([^"']+)["']/i)
+   const mailMatch = html.match(/href=["']mailto:([^"'?]+)/i)
+ 
+   let phone = telMatch ? decodeURIComponent(telMatch[1]).trim() : null
+   if (!phone) {
+     const textPhone = text.match(/(?:tel(?:efon)?\.?:?\s*)((?:\+49|0)[\d\s\/\-()]{7,20})/i)

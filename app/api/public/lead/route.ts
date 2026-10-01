@@ -5,11 +5,6 @@ import { Resend } from 'resend'
 
 export const dynamic = 'force-dynamic'
 
-// TODO: Rate-Limiting fehlt hier. Das bisherige In-Memory-Map-Limit wurde entfernt,
-// weil es auf Vercel Serverless nicht instanz-übergreifend funktioniert.
-// Lösung: IP-Spalte in `leads` ergänzen und DB-basiertes Count-Query verwenden
-// (analog zu form_submissions/submit/route.ts), oder Upstash Redis einbinden.
-
 function str(v: unknown, max = 500): string | null {
   if (typeof v !== 'string') return null
   const s = v.trim().slice(0, max)
@@ -31,9 +26,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Name und E-Mail sind erforderlich.' }, { status: 400 })
   }
 
+  // Rate Limiting: max 5 Leads pro IP pro Stunde (DB-basiert)
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown'
+  const supabaseRl = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } }
+  )
+  const oneHourAgo = new Date(Date.now() - 3600_000).toISOString()
+  const { count: recentCount } = await supabaseRl
+    .from('leads')
+    .select('*', { count: 'exact', head: true })
+    .eq('ip_address', ip)
+    .gte('created_at', oneHourAgo)
+  if ((recentCount || 0) >= 5) {
+    return NextResponse.json({ error: 'Zu viele Anfragen. Bitte versuchen Sie es später.' }, { status: 429 })
+  }
+
   const lead = {
     name,
     email,
+    ip_address: ip,
     firma: str(body.firma, 200),
     telefon: str(body.telefon, 50),
     website: str(body.website, 300),

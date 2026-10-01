@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/abnahme",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/review-autopilot",
+      "schedule": "0 10 * * *"
     }
   ]
 }

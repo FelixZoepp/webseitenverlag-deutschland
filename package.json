@@ -16,6 +16,7 @@
     "test:kuendigung": "npx tsx scripts/test-kuendigung.ts",
     "test:flagship": "npx tsx scripts/test-flagship.ts",
     "test:hosting": "npx tsx scripts/test-hosting.ts",
+    "test:custom-engine": "npx tsx scripts/test-custom-engine.ts",
     "test:assets": "npx tsx scripts/test-assets.ts",
     "test:phase3": "npx tsx scripts/test-phase3.ts",
     "test:qa-gate": "npx tsx scripts/test-qa-gate.ts",

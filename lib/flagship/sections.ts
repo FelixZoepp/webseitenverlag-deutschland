@@ -540,10 +540,13 @@ export function renderConversion(c: ConversionInhalt, hell: boolean, funnelUrl: 
 </section>`
 }
 
-export function renderFooter(f: FooterInhalt, nav: NavInhalt, hell: boolean, firma: string): string {
+export function renderFooter(f: FooterInhalt, nav: NavInhalt, hell: boolean, firma: string, rechtstextePfad?: string | null): string {
   const links = f.links
     .map((l) => `<a href="${escAttr(l.anker)}">${esc(l.label)}</a>`)
     .join('\n      ')
+  const rechtliches = rechtstextePfad != null
+    ? `© ${new Date().getFullYear()} ${esc(firma)} · <a href="${escAttr(`${rechtstextePfad}/impressum`)}">Impressum</a> &middot; <a href="${escAttr(`${rechtstextePfad}/datenschutz`)}">Datenschutz</a>`
+    : `© ${new Date().getFullYear()} ${esc(firma)} · Impressum &amp; Datenschutz werden vom System generiert`
   return `<!-- sektion:footer -->
 <footer>
   <div class="wrap">
@@ -554,7 +557,7 @@ export function renderFooter(f: FooterInhalt, nav: NavInhalt, hell: boolean, fir
     <div class="fl">
       ${links}
     </div>
-    <small id="rechtliches">© ${new Date().getFullYear()} ${esc(firma)} · Impressum &amp; Datenschutz werden vom System generiert</small>
+    <small id="rechtliches">${rechtliches}</small>
   </div>
 </footer>`
 }

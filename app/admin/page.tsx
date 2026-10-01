@@ -71,6 +71,13 @@ export default async function AdminDashboard() {
     return end <= sixMonths && end >= now
   })
 
+  // Kündigungen
+  const { data: kuendigungen } = await supabase
+    .from('contracts')
+    .select('*, customers!inner(company_name, contact_email)')
+    .eq('status', 'GEKUENDIGT')
+    .order('gekuendigt_am', { ascending: false })
+
   const { data: recentSites } = await supabase
     .from('sites')
     .select('*, customers!inner(company_name)')
@@ -226,6 +233,74 @@ export default async function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Kündigungen */}
+      {(kuendigungen || []).length > 0 && (
+        <div className="panel fade-up" style={{ animationDelay: '580ms', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '18px' }}>
+            <div>
+              <span className="panel-eyebrow" style={{ color: 'var(--za-danger)' }}>Kündigungen</span>
+              <div className="panel-title">Eingereichte Kündigungen ({(kuendigungen || []).length})</div>
+            </div>
+            <Link href="/admin/vertraege" style={{ fontSize: '10px', color: 'var(--za-gold)', letterSpacing: '0.2em', textTransform: 'uppercase' as const, textDecoration: 'none' }}>Verträge →</Link>
+          </div>
+          <div style={{ borderRadius: '10px', overflow: 'hidden' }}>
+            <table className="glass-table">
+              <thead>
+                <tr>
+                  <th>Kunde</th>
+                  <th>Paket</th>
+                  <th>MRR</th>
+                  <th>Gekündigt am</th>
+                  <th>Wirksam zum</th>
+                  <th>Restlaufzeit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(kuendigungen || []).map((k) => {
+                  const kundigungZum = k.kuendigung_zum ? new Date(k.kuendigung_zum) : null
+                  const restTage = kundigungZum ? Math.max(0, Math.ceil((kundigungZum.getTime() - now.getTime()) / 86400000)) : null
+                  const restMonate = restTage !== null ? Math.floor(restTage / 30) : null
+                  const kundenName = (k.customers as { company_name?: string })?.company_name || '—'
+                  return (
+                    <tr key={k.id}>
+                      <td>
+                        <Link href={`/admin/customers/${k.customer_id}`} style={{ color: 'var(--za-fg)', fontWeight: 500, textDecoration: 'none' }}>
+                          {kundenName}
+                        </Link>
+                      </td>
+                      <td style={{ fontSize: '11px', textTransform: 'uppercase' as const }}>{k.paket || '—'}</td>
+                      <td style={{ fontFamily: 'var(--za-font-display)', fontWeight: 600 }}>
+                        {k.monatsrate_cent ? `${(k.monatsrate_cent / 100).toFixed(0)} €` : '—'}
+                      </td>
+                      <td style={{ fontSize: '11px' }}>
+                        {k.gekuendigt_am ? new Date(k.gekuendigt_am).toLocaleDateString('de-DE') : '—'}
+                      </td>
+                      <td style={{ fontSize: '11px', color: 'var(--za-danger)', fontWeight: 600 }}>
+                        {kundigungZum ? kundigungZum.toLocaleDateString('de-DE') : '—'}
+                      </td>
+                      <td style={{ fontSize: '11px' }}>
+                        {restMonate !== null ? (
+                          <span style={{
+                            background: restMonate <= 1 ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
+                            color: restMonate <= 1 ? '#ef4444' : '#f59e0b',
+                            fontWeight: 600,
+                            fontSize: '10px',
+                            padding: '3px 8px',
+                            borderRadius: '999px',
+                          }}>
+                            {restMonate > 0 ? `${restMonate} Mon` : `${restTage} Tage`}
+                          </span>
+                        ) : '—'}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Customer Table */}
       <div className="panel fade-up" style={{ animationDelay: '600ms' }}>

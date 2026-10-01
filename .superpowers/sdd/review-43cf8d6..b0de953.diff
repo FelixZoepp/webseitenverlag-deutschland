@@ -1,0 +1,190 @@
+# Review package: 43cf8d6..HEAD
+
+## Commits
+b0de953 feat(upsells): Upsell-Verträge an Restlaufzeit des Hauptvertrags gekoppelt
+
+## Files changed
+ WARTELISTE.md                    | 12 ++++++------
+ app/api/webhooks/stripe/route.ts | 27 ++++++++++++++++++++++++---
+ config/upsells.ts                |  8 ++++++--
+ 3 files changed, 36 insertions(+), 11 deletions(-)
+
+## Diff
+diff --git a/WARTELISTE.md b/WARTELISTE.md
+index c4f6eec..71b86bf 100644
+--- a/WARTELISTE.md
++++ b/WARTELISTE.md
+@@ -1,25 +1,25 @@
+ # WARTELISTE — Dinge, die Felix erledigen/entscheiden muss
+ 
+ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
+ 
+ ## Sofort (für aktuellen Stand)
+ - [x] **Migrationen 013–020 in Supabase ausführen** (erledigt 2026-07-15 via Supabase MCP) (`013_demos.sql`, `014_stripe.sql`, `015_leads.sql`, `016_template_library.sql`, `017_demos_engine.sql`, `018_contracts.sql`, `019_portal.sql`, `020_phase_g.sql` — 017 nötig für Library-Demos, 018 für Verträge/Dunning, 019 für Wizard + Upsell-Käufe, 020 für Domains/SEO-Plan/GBP/Ads)
+ - [x] **Library seeden** (erledigt 2026-07-15: 40 Sektionen, 8 Kompositionen, 15 Assets)
+-- [ ] **Vercel Env-Vars setzen**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `LEAD_NOTIFY_EMAIL` (fehlen noch; `SUPABASE_SERVICE_ROLE_KEY` ist bereits gesetzt)
++- [ ] **Vercel Env-Vars setzen**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (fehlen noch; `SUPABASE_SERVICE_ROLE_KEY` ist bereits gesetzt)
+ - [ ] **Stripe-Webhook-Endpoint anlegen**: Dashboard → Webhooks → `https://<domain>/api/webhooks/stripe`, Events: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted` (alle 5 nötig für Verträge + Dunning, Phase E)
+ - [ ] **Resend-Domain verifizieren** (für Zugangs-/Lead-Mails von eigener Domain; ohne `RESEND_API_KEY` laufen Magic-Link-/Mahn-Mails als Log-Stub — Phase 5 DoD ist damit lokal nachweisbar, echte Mails erst nach Verifizierung)
+ - [ ] **Phase-5-Testmode-Durchlauf ausführen** (DoD §6): braucht Stripe-**Test**-Keys + `STRIPE_WEBHOOK_SECRET` (siehe oben) + `stripe listen --forward-to localhost:3000/api/webhooks/stripe`. Kette: Checkout (card/sepa) → Webhook (idempotent via `processed_webhook_events`, Migration 032 ist bereits auf Prod) → Magic-Link-Mail (Log-Stub) → Login → Site live. Fehlzahlung simulieren: `invoice.payment_failed` triggern → Mahnstufe 1; Dunning-Cron (`/api/cron/dunning`, täglich 8:00, `CRON_SECRET`) eskaliert Tag 3/7 und sperrt ab Tag 14
+ - [x] **Migration 021 ausführen** (erledigt 2026-07-15 via Supabase MCP)
+ - [ ] **Slack-Webhooks anlegen** (optional, sonst Log-Stub): `SLACK_WEBHOOK_ERRORS` (#errors, Job-Fails) + `SLACK_WEBHOOK_MONEY` (#money, tägliche Kosten-Summary 6:30 Uhr)
+ - [ ] **Sentry entscheiden**: bewusst NICHT eingebunden solange kein DSN existiert — Slack #errors + Vercel-Logs decken den Start ab. Wenn gewünscht: Sentry-Projekt anlegen, DSN liefern, dann bauen wir es ein
+-- [ ] **Git-Remote anlegen + pushen**: Das Repo hat aktuell KEIN Remote. Der CI-Workflow (`.github/workflows/ci.yml` — Lint, Typecheck, Golden-Set, Lighthouse-Budgets) greift erst nach dem ersten Push zu GitHub. Bis dahin lokal: `npm run ci:golden-set` + `npm run ci:lighthouse`
++- [x] **Git-Remote** ✅ erledigt 2026-07-22: github.com/FelixZoepp/webseitenverlag-deutschland, CI-Workflow aktiv
+ - [ ] **E2E-Lauf freischalten** (Playwright, `e2e/journey.spec.ts`): braucht (a) Stripe-**Test**-Keys in `.env.local` (`STRIPE_SECRET_KEY=sk_test_...` + `STRIPE_WEBHOOK_SECRET` — fehlen aktuell komplett), (b) eine Supabase-Instanz mit Migrationen 001–021 + Library-Seeds. Achtung: Der Test legt echte Zeilen an (leads/demos/customers/sites/contracts/auth-User) und räumt sie am Ende auf — am besten gegen ein separates Test-Projekt laufen lassen, nicht gegen die Produktions-DB. Start: `E2E_ENABLED=1 npm run test:e2e` (einmalig vorher `npx playwright install chromium`). Live-Keys verweigert der Test hart
+ 
+ ## QA-Gate (Browser-QA, Baustein A)
+ - [ ] **`BROWSER_QA_WS_ENDPOINT` setzen (Produktion)**: Auf Vercel gibt es kein lokal installiertes Chromium — der Browser-QA-Lauf (Demo-Gate, Publish-Check, Nacht-Scan `/api/cron/qa-scan`) braucht dort einen Remote-Browser via WebSocket (z. B. Browserless.io: `wss://chrome.browserless.io?token=…`). Lokal läuft alles ohne die Var über das installierte Playwright-Chromium (`npx playwright install chromium`). Ohne Endpoint in Prod: QA-Läufe enden `failed` mit klarer Meldung, Sites bleiben unberührt
+ 
+ ## Multi-Tenant-Hosting (MVP-Finish §1)
+ - [ ] **`VERCEL_TOKEN` + `VERCEL_PROJECT_ID` setzen** (optional `VERCEL_TEAM_ID`): nötig, damit `attachCustomDomain` Custom Domains wirklich am Vercel-Projekt anmeldet (Vercel Dashboard → Settings → Tokens; Projekt-ID unter Project Settings → General). Ohne Token läuft der Stub: domains-Zeile + DNS-Anleitung entstehen trotzdem, nur die Vercel-API-Anmeldung fehlt — dann Domain manuell im Vercel-Dashboard hinzufügen
+ - [ ] **Wildcard-Domain am Vercel-Projekt einrichten**: `*.<PRODUKTDOMAIN>` als Domain im Vercel-Projekt + Wildcard-DNS (`*` CNAME auf `cname.vercel-dns.com`), damit `{slug}.<PRODUKTDOMAIN>` für alle Kundenseiten auflöst (hängt an „Produktdomain festlegen" unter Entscheidungen)
+ - [ ] **`NEXT_PUBLIC_MARKETING_HOST` + `NEXT_PUBLIC_APP_HOST` setzen** (Vercel Env): aktiviert das Host-Routing in der Middleware (Marketing/App/Subdomain-Kundenseiten). Ohne die Vars ist das Routing ein No-op — lokal testbar mit `?__host=` (dev-only bzw. `ALLOW_HOST_OVERRIDE=1`)
+ 
+@@ -52,25 +52,25 @@ Blockiert nicht die Entwicklung, aber nötig für Go-Live.
+ 
+ ## Branchen-Fabrik (F3–F5)
+ - [ ] **16 Branchen freigeben** (`/admin/branchen`): Seeding legt alles als `draft` an — Mensch-Gate nach BF §4.6. Je Branche Preview prüfen (`/branchen-preview/<key>`), dann Freigeben oder Feedback (mit „Feedback & neu generieren" läuft sofort eine Regenerier-Runde mit deinem Feedback im Prompt)
+ - [ ] **Slack `#library`-Webhook anlegen** (`SLACK_WEBHOOK_LIBRARY`): Pings für „neue Branche wartet auf Freigabe" + Regenerier-Ergebnisse; ohne Env-Var nur Log-Stub
+ - [ ] **Higgsfield-Key + Re-Seeding der Assets**: aktuelle Branchen-Assets kommen vom Mock-Provider (Platzhalter, 0 Cent). Mit echtem Key je Branche neu generieren (z. B. `npx tsx scripts/seed-branchen.ts --nur <keys>` oder Regenerier-Runde) — erst dann sind Previews/Demos mit echten Bildern
+ - [ ] **Subdomain-Preview** `preview-<branche>.DOMAIN` (BF §4.5): aktuell Pfad-Route `/branchen-preview/<key>` — Host-Routing-Erweiterung erst sinnvoll, wenn Produktdomain feststeht
+ - [ ] **Inngest (o. ä.) für Seeding-Jobs**: Auto-Seeding läuft synchron im Request (maxDuration 800 → braucht Vercel Pro + Fluid; falls Deploy meckert, auf 300 senken). Sauber wäre ein Hintergrund-Job mit Status-Polling
+ - [ ] **Demo-Kosten kalibrieren**: `kosten_cent` an der Demo basiert auf `HIGGSFIELD_KOSTEN_CENT`/`FAL_KOSTEN_CENT`-Schätzwerten — nach ersten echten Läufen gegen Provider-Dashboard prüfen (DoD ≤ 1,50 €/Demo)
+ 
+ ## Entscheidungen
+-- [ ] **`LEAD_NOTIFY_EMAIL` festlegen**: Lead-Benachrichtigungen gehen jetzt in die leads-Tabelle + Mail an diese Adresse (das hartcodierte `hendrik@hoffmann-wd.de` aus dem Alt-Repo ist raus). Ohne Env-Var: Fallback FROM_EMAIL
+-- [ ] **Produktdomain festlegen** (für Host-Routing: PRODUKTDOMAIN.de = Marketing, app. = Portal, *. = Kundenseiten)
++- [x] **Lead-Benachrichtigung** ✅ Felix 2026-07-22: Mails gehen an felix@zoeppmedia.de + hendrik@hoffmann-wd.de (hardcoded in app/api/public/lead/route.ts) + CRM-Kanban /admin/crm — LEAD_NOTIFY_EMAIL-Env-Var obsolet
++- [x] **Produktdomain** ✅ Felix 2026-07-22: webseitenverlag-deutschland.de (Marketing = www, Portal = app., Kundenseiten = {slug}.)
+ - [ ] **Stripe Live-Keys**: Wechsel von Test auf Live erst nach deiner Freigabe (Stop-Condition laut Masterprompt)
+-- [ ] **Upsell-Preise & Laufzeiten bestätigen** (`config/upsells.ts`): aktuelle Platzhalter — SEO-Abo 49 €/M, Stadtteil-Seiten 299 € einmalig, Bewertungs-System 149 € + 19 €/M, Konkurrenz-Radar 29 €/M, Saison-Kampagnen 39 €/M, GBP-Einrichtung 199 €, Google Ads Starter 99 €/M (Betreuung; Werbebudget zahlt der Kunde immer direkt an Google). Laufzeiten aktuell 1/1/1 (monatlich kündbar) — bewusst kundenfreundlich, kannst du auf z. B. 12/12/1 ändern
+-- [ ] **KICKOFF_MODE entscheiden** (`auto` oder `call`, Env-Var): steuert, ob der Kickoff-Touchpoint automatisch läuft oder du persönlich anrufst. Ohne Env-Var: `auto`
++- [x] **Upsell-Preise & Laufzeiten** ✅ Felix 2026-07-22: Preise bestätigt (49/299/149+19/29/39/199/99). Laufzeit: an Hauptvertrag gekoppelt (Restlaufzeit + 12/3 gespiegelt, lib/contracts.ts → gekoppelteUpsellKonditionen); Config-Werte 1/1/1 nur noch Fallback ohne Hauptvertrag
++- [x] **KICKOFF_MODE** ✅ Felix 2026-07-22: auto (= Default, keine Env-Var nötig)
+ 
+ ## Später (vor Kunden-Go-Live)
+ - [ ] **Rechtstexte-Vorlagen vom Anwalt prüfen lassen** (Phase 4 §5.4): Impressum- und Datenschutz-Bausteine liegen in `config/rechtstexte-vorlagen.ts` (Generator: `lib/rechtstexte.ts`). Nach Review nur die Config-Datei anpassen — der Generator setzt ausschließlich Pflichtangaben ein. Bis zum Review gelten die Texte als Vorlage ohne Rechtsgewähr
+ - [ ] **AGB erstellen (Anwalt)**: Werte 24/12/3 absegnen + Vertrag als Dauerschuldverhältnis (laufende Leistung: Hosting, Pflege, Editor, Updates) ausgestalten, nicht als Werkvertrag. Hintergrund: 24-Monats-VERLÄNGERUNG per AGB ist im B2B nach § 307 BGB angreifbar, 12 Monate gelten als robust — deshalb Standard seit 2026-07-15 auf 24/12/3 (`config/vertraege.ts`)
+ - [ ] **Stripe-Consent-Checkbox aktivieren** (`STRIPE_TOS_CONSENT=1`): Sobald die AGB stehen, AGB-URL in den Stripe-Settings (Dashboard → Einstellungen → Zahlungsseite) hinterlegen und dann die Env-Var setzen — erst dann verlangt der Checkout den AGB-Haken (`consent_collection`). Ohne hinterlegte URL lehnt die Stripe-API die Session ab, deshalb ist die Checkbox bis dahin deaktiviert; der Konditionen-Wortlaut steht aber immer unter dem Kaufen-Button (`custom_text.submit`)
+ - [ ] Golden-Set: 10 echte Firmen in `test/golden_set.json` eintragen (5 mit Website, 3 nur Google-Eintrag, 2 ohne alles — aktuell Platzhalter mit `"platzhalter": true`; Check läuft mit `npm run ci:golden-set`)
+ - [ ] Registrar-Zugang (Domains für Kunden), Google Business Profile API, Ads-Konto-Zugang — bis dahin läuft der Mock-Registrar (`REGISTRAR_PROVIDER=mock`, Neuregistrierungen werden simuliert)
+ - [ ] DataForSEO-Zugang (`DATAFORSEO_LOGIN` + `DATAFORSEO_PASSWORD`) für echte Rank-Reports im SEO-Abo; ohne Keys liefert der technische SEO-Check einen Stub statt Sichtbarkeitsdaten
+ - [ ] Firecrawl-API-Key (`FIRECRAWL_API_KEY`) — alternativ bleibt eigener Scraper
+ - [ ] Google-Places-API-Key (`GOOGLE_PLACES_API_KEY`, Places API New) — liefert Adresse, Telefon, Öffnungszeiten + echte Bewertungen für Library-Demos; ohne Key läuft die Pipeline ohne diese Daten
+diff --git a/app/api/webhooks/stripe/route.ts b/app/api/webhooks/stripe/route.ts
+index 8132ba6..c5ec728 100644
+--- a/app/api/webhooks/stripe/route.ts
++++ b/app/api/webhooks/stripe/route.ts
+@@ -14,21 +14,23 @@
+ import { NextResponse } from 'next/server'
+ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+ import { randomBytes } from 'crypto'
+ import Stripe from 'stripe'
+ import { getStripe } from '@/lib/stripe'
+ import { sendDunningEmail, sendInvitationEmail, sendMagicLinkEmail } from '@/lib/email'
+ import { stufeFuerTage, tageUeberfaellig } from '@/lib/dunning'
+ import { getPackage, type PackageTier } from '@/lib/packages'
+ import {
+   createManualTask,
++  gekoppelteUpsellKonditionen,
+   heuteIso,
++  type HauptvertragKonditionen,
+   STANDARD_KONDITIONEN,
+   vertragsende,
+   wirksamesKuendigungsdatum,
+ } from '@/lib/contracts'
+ import { getUpsellProduct, istPlanUpgrade, planUpgradeTier } from '@/config/upsells'
+ import { revalidateSite } from '@/lib/hosting/site-cache'
+ import { ADS_PRODUCT_KEY, generiereAdsEntwuerfe } from '@/lib/ads-starter'
+ 
+ export const maxDuration = 60
+ 
+@@ -491,32 +493,51 @@ async function handleUpsellCheckout(supabase: SupabaseClient, session: Stripe.Ch
+     const { data: existingContract } = stripeSubscriptionId
+       ? await supabase
+           .from('contracts')
+           .select('id')
+           .eq('stripe_subscription_id', stripeSubscriptionId)
+           .maybeSingle()
+       : { data: null }
+ 
+     if (!existingContract) {
+       const beginn = heuteIso()
++      // Kopplung (2026-07-22): Upsell übernimmt Restlaufzeit + Konditionen
++      // des aktiven Hauptvertrags — ein Kündigungstermin für alles.
++      const { data: hauptVertrag } = await supabase
++        .from('contracts')
++        .select('ende, verlaengerung_monate, kuendigungsfrist_monate')
++        .eq('customer_id', customerId)
++        .eq('status', 'AKTIV')
++        .not('paket', 'like', 'upsell:%')
++        .order('created_at', { ascending: false })
++        .limit(1)
++        .maybeSingle()
++      if (!hauptVertrag) {
++        console.warn('[STRIPE] Kein aktiver Hauptvertrag für Upsell-Kopplung — Fallback auf Config-Konditionen')
++      }
++      const konditionen = gekoppelteUpsellKonditionen(
++        (hauptVertrag as HauptvertragKonditionen | null),
++        produkt,
++        beginn
++      )
+       const { data: contract, error: contractError } = await supabase
+         .from('contracts')
+         .insert({
+           customer_id: customerId,
+           site_id: (order.site_id as string) || null,
+           paket: `upsell:${productKey}`,
+           monatsrate_cent: monatCent,
+           laufzeit_monate: produkt.laufzeitMonate,
+-          verlaengerung_monate: produkt.verlaengerungMonate,
+-          kuendigungsfrist_monate: produkt.kuendigungsfristMonate,
++          verlaengerung_monate: konditionen.verlaengerung_monate,
++          kuendigungsfrist_monate: konditionen.kuendigungsfrist_monate,
+           beginn,
+-          ende: vertragsende(beginn, Math.max(1, produkt.laufzeitMonate)),
++          ende: konditionen.ende,
+           status: 'AKTIV',
+           stripe_customer_id: stripeCustomerId,
+           stripe_subscription_id: stripeSubscriptionId,
+           letzte_zahlung_am: beginn,
+         })
+         .select('id')
+         .single()
+ 
+       if (contractError) {
+         console.error(`[STRIPE] Upsell-Vertrag fehlgeschlagen: ${contractError.message}`)
+diff --git a/config/upsells.ts b/config/upsells.ts
+index 5b82026..2f84c88 100644
+--- a/config/upsells.ts
++++ b/config/upsells.ts
+@@ -1,22 +1,26 @@
+ /**
+  * Upsell-Leiter & Produktkatalog (§10.4 / §10.5).
+  *
+  * Jeder Upsell hat GENAU:
+  *   - zwei Kauf-Wege: 1-Klick-Zahlungslink (Ops-Dashboard) + Buchen-Button (Portal)
+  *   - einen Fulfillment-Typ: 'auto' (Webhook startet Provisioning sofort)
+  *     oder 'va_manual' (Webhook erzeugt manual_task)
+  *   - vier Bausteine: Stripe-Checkout (price_data aus dieser Datei),
+  *     Provisioning-Job, Portal-Kachel, diese Zeile hier.
+  *
+- * Jede Buchung mit monatlichem Anteil erzeugt einen EIGENEN contracts-Eintrag
+- * mit eigener Laufzeit (laufzeit/verlaengerung/kuendigungsfrist unten).
++ * Jede Buchung mit monatlichem Anteil erzeugt einen EIGENEN contracts-Eintrag.
++ * Kopplung (2026-07-22): Der Upsell-Vertrag übernimmt Restlaufzeit, Verlängerung
++ * und Kündigungsfrist des aktiven Hauptvertrags (lib/contracts.ts →
++ * gekoppelteUpsellKonditionen) — ein Kündigungstermin für alles. Die Felder
++ * laufzeit/verlaengerung/kuendigungsfrist unten sind nur noch der FALLBACK,
++ * wenn beim Kauf kein aktiver Hauptvertrag existiert.
+  *
+  * Bewusst verworfen (NICHT bauen): Anruf-Tracking, Lead-Alarm-SMS,
+  * Rechtstexte-Abo, Profi-E-Mail-Adresse, Anfrage-Konfigurator, Foto-Veredelung.
+  */
+ 
+ export type UpsellFulfillment = 'auto' | 'va_manual'
+ export type UpsellTouchpoint = 'wizard' | 'kickoff' | 'editor-gate' | 'portal' | 'cron-14' | 'cron-60'
+ 
+ export interface UpsellProduct {
+   key: string

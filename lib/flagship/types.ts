@@ -313,6 +313,8 @@ export interface FlagshipConfig {
   scroll_animationen?: boolean
   /** Multipage: Sektionen auf eigene Unterseiten verteilen (Business/Growth) */
   seiten_modus?: 'onepager' | 'multipage'
+  /** Rechtstexte — werden unter /impressum und /datenschutz ausgespielt (Demo + Live) */
+  rechtstexte?: { impressum: string; datenschutz: string }
   /** Multi-Video-Scroll-Scrub: Szenen-Definitionen (Texte, Gewichtung, Alignment) */
   scrub_szenen?: ScrubMultiSzene[]
   /** Multi-Video-Scroll-Scrub: Asset-URLs (Clips, Poster, Entry-Still) */

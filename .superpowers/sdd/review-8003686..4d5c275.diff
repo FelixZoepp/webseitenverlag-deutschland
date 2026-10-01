@@ -1,0 +1,385 @@
+# Review package: 8003686..4d5c275
+
+## Commits
+4d5c275 feat(demos): Scroll-Animationen-Checkbox — Starter gesperrt, Label präzisiert
+b8bc98d feat(demos): Video-Route generiert Scrub-Video bei scroll_animationen
+b0b81e1 feat(demos): Config-Flag scroll_animationen — Override bündelt Scrub + Signature-Story
+
+## Files changed
+ app/admin/demos/page.tsx                    |  8 +++----
+ app/api/admin/demos/[demoId]/video/route.ts | 11 ++++++++--
+ app/api/admin/demos/route.ts                |  1 +
+ lib/flagship/types.ts                       |  2 ++
+ lib/pipeline/generate-flagship-demo.ts      | 14 +++++++++---
+ scripts/test-flagship.ts                    | 33 +++++++++++++++++++++++++++++
+ 6 files changed, 60 insertions(+), 9 deletions(-)
+
+## Diff
+diff --git a/app/admin/demos/page.tsx b/app/admin/demos/page.tsx
+index 6feb10c..cbec56c 100644
+--- a/app/admin/demos/page.tsx
++++ b/app/admin/demos/page.tsx
+@@ -441,21 +441,21 @@ export default function DemosPage() {
+ 
+           {templateId.startsWith('flagship:') && (<>
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+               <div>
+                 <label style={labelStyle}>Paket</label>
+                 <div style={{ display: 'flex', gap: '6px' }}>
+                   {(['starter', 'business', 'growth'] as const).map((p) => {
+                     const info = { starter: { emoji: '🥉', label: 'Starter', preis: '99' }, business: { emoji: '🥈', label: 'Business', preis: '149' }, growth: { emoji: '🥇', label: 'Growth', preis: '249' } }[p]
+                     const aktiv = paket === p
+                     return (
+-                      <button key={p} type="button" onClick={() => setPaket(p)} disabled={generating}
++                      <button key={p} type="button" onClick={() => { setPaket(p); if (p === 'starter') setScrollAnimationen(false) }} disabled={generating}
+                         style={{ flex: 1, padding: '8px 4px', background: aktiv ? 'var(--za-gold-grad)' : 'rgba(255,255,255,0.7)', color: aktiv ? '#fff' : 'var(--za-fg-2)', border: aktiv ? 'none' : '1px solid var(--za-border)', borderRadius: '8px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', lineHeight: '1.3' }}>
+                         {info.emoji}<br />{info.label}<br /><span style={{ fontSize: '10px', opacity: 0.8 }}>{info.preis} €</span>
+                       </button>
+                     )
+                   })}
+                 </div>
+               </div>
+               <div>
+                 <label style={labelStyle}>Design-Stil</label>
+                 <select value={typoModus} onChange={(e) => setTypoModus(e.target.value as typeof typoModus)}
+@@ -510,24 +510,24 @@ export default function DemosPage() {
+               <div>
+                 <label style={labelStyle}>Video-Header</label>
+                 <select value={paket === 'starter' ? 'nein' : 'ja'} disabled
+                   style={{ ...inputStyle, cursor: 'default', opacity: 0.7 }}>
+                   <option value="ja">Ja (Business/Growth)</option>
+                   <option value="nein">Nein (Starter)</option>
+                 </select>
+               </div>
+               <div>
+                 <label style={labelStyle}>Extras</label>
+-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: scrollAnimationen ? 'rgba(212,168,40,0.08)' : 'rgba(255,255,255,0.7)', border: `1px solid ${scrollAnimationen ? 'var(--za-gold)' : 'var(--za-border)'}`, borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: 'var(--za-fg-2)', transition: '.15s' }}>
++                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: scrollAnimationen ? 'rgba(212,168,40,0.08)' : 'rgba(255,255,255,0.7)', border: `1px solid ${scrollAnimationen ? 'var(--za-gold)' : 'var(--za-border)'}`, borderRadius: '8px', cursor: paket === 'starter' ? 'not-allowed' : 'pointer', opacity: paket === 'starter' ? 0.5 : 1, fontSize: '12px', fontWeight: 600, color: 'var(--za-fg-2)', transition: '.15s' }}>
+                   <input type="checkbox" checked={scrollAnimationen} onChange={(e) => setScrollAnimationen(e.target.checked)}
+-                    style={{ width: '16px', height: '16px', accentColor: 'var(--za-gold)' }} disabled={generating} />
+-                  Scroll-Animationen (Premium)
++                    style={{ width: '16px', height: '16px', accentColor: 'var(--za-gold)' }} disabled={generating || paket === 'starter'} />
++                  {paket === 'starter' ? 'Scroll-Animationen — ab Business' : 'Scroll-Animationen (Scroll-Video + Effekte)'}
+                 </label>
+               </div>
+             </div>
+           </>)}
+ 
+           <div style={{ marginBottom: '16px' }}>
+             <label style={labelStyle}>Notizen aus dem Quali-Call (optional)</label>
+             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
+               placeholder="z.B. Inhaber heißt Marco, 15 Jahre am Standort, will mehr Online-Termine..."
+               style={{ ...inputStyle, resize: 'vertical' }} disabled={generating} />
+diff --git a/app/api/admin/demos/[demoId]/video/route.ts b/app/api/admin/demos/[demoId]/video/route.ts
+index 6cade38..df625c2 100644
+--- a/app/api/admin/demos/[demoId]/video/route.ts
++++ b/app/api/admin/demos/[demoId]/video/route.ts
+@@ -1,15 +1,16 @@
+ import { NextResponse } from 'next/server'
+ import { requireAdmin } from '@/lib/auth-helpers'
+ import { generiereVideo } from '@/lib/assets/pipeline'
+ import { createAdminClient } from '@/lib/supabase/admin'
+ import type { FlagshipConfig } from '@/lib/flagship/types'
++import { FLAGSHIP_VIDEO_PROMPTS } from '@/lib/pipeline/generate-flagship-demo'
+ 
+ export const maxDuration = 300
+ 
+ const VIDEO_PROMPTS: Record<string, string> = {
+   reinigung: 'Extreme close-up of a grimy glass surface — an invisible force wipes across from left to right, revealing crystal-clear sparkling glass with bright daylight streaming through. Water droplets bead and roll off the clean surface. Static camera, no person visible, no text, no logos.',
+   restaurant_italienisch: 'Overhead static shot of an empty white ceramic plate on a rustic wooden table — steam rises as fresh handmade pasta with rich tomato sauce materializes on the plate, finished with torn basil leaves and shaved parmesan. Warm candlelight flickers. No hands visible, no text, no logos.',
+   maler: 'Close-up of a paint roller pressing against a wall — fresh white paint spreads smoothly across a patchy grey surface, leaving a perfect even finish. Paint glistens wet under bright work lighting. Static camera, only roller and wall visible, no face, no text, no logos.',
+   dachdecker: 'Close-up of weathered broken roof tiles — new slate tiles slide into place one by one, clicking together perfectly. Morning sunlight catches the clean dark surfaces. Static camera from above, only tiles and hands in work gloves visible, no face, no text, no logos.',
+   umzugsunternehmen: 'Close-up of moving blankets gently settling over furniture — bubble wrap catches light, a dolly wheel rolls smoothly across hardwood floor. Morning light streams through an empty apartment window. Static camera, no face visible, no text, no logos.',
+   friseur: 'Extreme close-up of professional scissors making precise cuts through hair strands in slow motion — cut hair falls catching salon spotlight, each strand detailed and sharp. Warm salon lighting. Static camera, only scissors and hair visible, no face, no text, no logos.',
+@@ -64,36 +65,42 @@ export async function POST(
+   if (!heroUrl) {
+     return NextResponse.json({ error: 'Kein Hero-Bild vorhanden nach 3 Min Warten — Asset-Generierung evtl. fehlgeschlagen' }, { status: 400 })
+   }
+ 
+   // Bereits ein Video vorhanden?
+   if (config.inhalte?.hero?.video?.src) {
+     return NextResponse.json({ ok: true, demo, message: 'Video bereits vorhanden' })
+   }
+ 
+   const brancheKey = demo.branche || config.branche_key || ''
+-  const videoPrompt = VIDEO_PROMPTS[brancheKey]
++  // Scroll-Animationen-Extra: Scrub-Video (Verwandlung an Scroll gekoppelt) statt Loop.
++  // Branchen ohne Scrub-Prompt fallen still auf Loop zurück (Spec 2026-07-22).
++  const scrubPrompt = config.scroll_animationen === true
++    ? FLAGSHIP_VIDEO_PROMPTS[brancheKey]?.scrub
++    : undefined
++  const videoPrompt = scrubPrompt
++    || VIDEO_PROMPTS[brancheKey]
+     || `Cinematic 4K, static camera. Close-up scene related to ${brancheKey}. Subtle ambient motion, gentle material movement. Seamless 5-second loop. No face, no text, no logos.`
+ 
+   try {
+     const video = await generiereVideo({
+       imageUrl: heroUrl,
+       prompt: videoPrompt,
+       durationSeconds: 6,
+       kontext: `video:demo:${brancheKey}:${params.demoId}`,
+     })
+ 
+     if (!video.videoUrl) {
+       return NextResponse.json({ error: 'Video-Generierung lieferte keine URL' }, { status: 500 })
+     }
+ 
+-    config.inhalte.hero.video = { src: video.videoUrl, poster: heroUrl, modus: 'loop' }
++    config.inhalte.hero.video = { src: video.videoUrl, poster: heroUrl, modus: scrubPrompt ? 'scrub' : 'loop' }
+ 
+     const assetMeta = (demo.asset_meta || {}) as Record<string, unknown>
+     assetMeta.video = { job_id: video.jobId, quelle: 'frisch' }
+ 
+     const { data: updated, error: updateErr } = await admin
+       .from('demos')
+       .update({
+         config,
+         asset_meta: assetMeta,
+         kosten_cent: (demo.kosten_cent ?? 0) + video.kostenCent,
+diff --git a/app/api/admin/demos/route.ts b/app/api/admin/demos/route.ts
+index a8ceeb1..b371d9e 100644
+--- a/app/api/admin/demos/route.ts
++++ b/app/api/admin/demos/route.ts
+@@ -71,20 +71,21 @@ export async function POST(request: Request) {
+     // Design-Overrides: Stil (hell/dunkel) + Brandfarbe aus der UI
+     const designOverrides: DesignOverrides = {}
+     if (body?.typoModus === 'sans_bold_hell' || body?.typoModus === 'serif_warm_dunkel') {
+       designOverrides.typo_modus = body.typoModus
+     }
+     if (typeof body?.brandfarbe === 'string' && /^#[0-9a-fA-F]{6}$/.test(body.brandfarbe)) {
+       designOverrides.brandfarbe = body.brandfarbe
+     }
+     if (body?.scrollAnimationen === true) {
+       designOverrides.premium_animationen = true
++      designOverrides.scroll_animationen = true
+     }
+ 
+     // Phase 1: Nur Personalisierung (OHNE Asset-Generierung) — sofort zurück
+     let config
+     try {
+       const result = await personalisiereFlagshipConfig(prospect, branche, Object.keys(designOverrides).length > 0 ? designOverrides : undefined)
+       config = result.config
+     } catch (err) {
+       return NextResponse.json(
+         { error: err instanceof Error ? err.message : 'Flagship-Demo fehlgeschlagen' },
+diff --git a/lib/flagship/types.ts b/lib/flagship/types.ts
+index aabd665..db8675a 100644
+--- a/lib/flagship/types.ts
++++ b/lib/flagship/types.ts
+@@ -279,20 +279,22 @@ export interface FlagshipConfig {
+   engine: 'flagship'
+   branche_key: string
+   meta_kategorie?: string
+   meta: FlagshipMeta
+   design: FlagshipDesign
+   inhalte: FlagshipInhalte
+   funnel: FunnelKonfig
+   herkunft?: { quellen?: string[]; generator?: string }
+   /** Premium-Animationen: parallax auf Bildern, staggered reveals, smoothere Übergänge */
+   premium_animationen?: boolean
++  /** Scroll-Animationen-Extra: Scroll-Video-Header (Scrub) + Signature-Story (Demo-Formular) */
++  scroll_animationen?: boolean
+   /** Multipage: Sektionen auf eigene Unterseiten verteilen (Business/Growth) */
+   seiten_modus?: 'onepager' | 'multipage'
+ }
+ 
+ /** Verfügbare Unterseiten im Multipage-Modus */
+ export type UnterseitenSlug = 'leistungen' | 'ergebnisse' | 'ueber-uns' | 'kontakt'
+ 
+ export const UNTERSEITEN: { slug: UnterseitenSlug; label: string }[] = [
+   { slug: 'leistungen', label: 'Leistungen' },
+   { slug: 'ergebnisse', label: 'Ergebnisse' },
+diff --git a/lib/pipeline/generate-flagship-demo.ts b/lib/pipeline/generate-flagship-demo.ts
+index 6bef266..4c047d9 100644
+--- a/lib/pipeline/generate-flagship-demo.ts
++++ b/lib/pipeline/generate-flagship-demo.ts
+@@ -9,26 +9,27 @@
+  * (BF §2.3) — DoD: ≤ 150 Cent pro Demo, sonst Warnung.
+  */
+ 
+ import type { SupabaseClient } from '@supabase/supabase-js'
+ import { createAdminClient } from '@/lib/supabase/admin'
+ import { generiereAsset, makePair } from '@/lib/assets/pipeline'
+ import { getApprovedAssets } from '@/lib/assets/repository'
+ import { baueAssetPrompt, baueVideoPrompt } from '@/lib/seeding/seed-branche'
+ import type { BranchenProfil } from '@/lib/seeding/schema'
+ import type { FlagshipConfig, FlagshipDesign } from '@/lib/flagship/types'
++import { istMalerKomposition } from '@/lib/flagship/maler/types'
+ import type { ProspectData } from './prospect-data'
+ 
+ const BUCKET = 'asset-bank'
+ 
+ /** M5: Branchen-spezifische Video-Bewegungs-Prompts für Flagships ohne style_prompts */
+-const VIDEO_PROMPTS: Record<string, { loop: string; scrub: string }> = {
++export const FLAGSHIP_VIDEO_PROMPTS: Record<string, { loop: string; scrub: string }> = {
+   reinigung: {
+     loop: 'Extreme close-up of a grimy glass surface — an invisible force wipes across from left to right, revealing crystal-clear sparkling glass with bright daylight streaming through. Water droplets bead and roll off the clean surface. Static camera, no person visible, no text, no logos.',
+     scrub: 'Wide shot of a neglected dusty office space transforming into an immaculate clean room — dust disappears from surfaces, floors begin to gleam, windows clear up, everything shines. Static camera, no person, smooth continuous transformation, no text, no logos.',
+   },
+   restaurant_italienisch: {
+     loop: 'Overhead static shot of an empty white ceramic plate on a rustic wooden table — steam rises as fresh handmade pasta with rich tomato sauce materializes on the plate, finished with torn basil leaves and shaved parmesan. Warm candlelight flickers. No hands visible, no text, no logos.',
+     scrub: 'A bare dark restaurant table transforms into a fully set Italian dinner scene — white tablecloth appears, plates materialize, wine slowly fills crystal glasses, candles light themselves, napkins fold. Static camera, warm evening light, no person, no text, no logos.',
+   },
+   maler: {
+     loop: 'Close-up of a paint roller pressing against a wall — fresh white paint spreads smoothly across a patchy grey surface, leaving a perfect even finish. Paint glistens wet under bright work lighting. Static camera, only roller and wall visible, no face, no text, no logos.',
+@@ -93,20 +94,22 @@ const VIDEO_PROMPTS: Record<string, { loop: string; scrub: string }> = {
+ }
+ 
+ /** Design-Overrides für die Demo-Generierung (UI → API → Pipeline) */
+ export interface DesignOverrides {
+   /** Hell (sans_bold_hell) oder Dunkel (serif_warm_dunkel) */
+   typo_modus?: 'sans_bold_hell' | 'serif_warm_dunkel'
+   /** Eigene Brandfarbe (#hex) — ersetzt akzent1, akzent1_tief wird abgeleitet */
+   brandfarbe?: string
+   /** Premium-Animationen aktivieren (Parallax, staggered reveals) */
+   premium_animationen?: boolean
++  /** Scroll-Animationen-Extra: Scrub-Video-Header + Signature-Story (gebündelt) */
++  scroll_animationen?: boolean
+ }
+ 
+ /** Dunkelt eine Hex-Farbe um ~25% ab (für akzent1_tief) */
+ function dunklereVariante(hex: string): string {
+   const m = /^#?([0-9a-fA-F]{6})$/.exec(hex.trim())
+   if (!m) return hex
+   const n = parseInt(m[1], 16)
+   const r = Math.max(0, Math.round(((n >> 16) & 255) * 0.72))
+   const g = Math.max(0, Math.round(((n >> 8) & 255) * 0.72))
+   const b = Math.max(0, Math.round((n & 255) * 0.72))
+@@ -117,36 +120,41 @@ function dunklereVariante(hex: string): string {
+ const HELL_TOKENS: Partial<FlagshipDesign['tokens']> = {
+   basis: '#F5F3ED', panel: '#FFFFFF', text: '#1A1A19', text_soft: 'rgba(26,26,25,.62)',
+   line: 'rgba(26,26,25,.10)',
+ }
+ const DUNKEL_TOKENS: Partial<FlagshipDesign['tokens']> = {
+   basis: '#1B1612', panel: '#2A2420', text: '#F2ECE0', text_soft: 'rgba(242,236,224,.62)',
+   line: 'rgba(242,236,224,.12)',
+ }
+ 
+ /** Wendet Design-Overrides auf die geklonte Config an */
+-function wendeDesignOverridesAn(config: FlagshipConfig, overrides: DesignOverrides): void {
++export function wendeDesignOverridesAn(config: FlagshipConfig, overrides: DesignOverrides): void {
+   if (overrides.typo_modus && overrides.typo_modus !== config.design.typo_modus) {
+     const hell = overrides.typo_modus === 'sans_bold_hell'
+     config.design.typo_modus = overrides.typo_modus
+     config.design.typo_signature = hell ? 'wisch_highlight' : 'gold_unterstrich'
+     // Basis-Tokens tauschen (Hintergrund, Text, Panel, Linien)
+     const tokens = hell ? HELL_TOKENS : DUNKEL_TOKENS
+     Object.assign(config.design.tokens, tokens)
+   }
+   if (overrides.brandfarbe && /^#[0-9a-fA-F]{6}$/.test(overrides.brandfarbe)) {
+     config.design.tokens.akzent1 = overrides.brandfarbe
+     config.design.tokens.akzent1_tief = dunklereVariante(overrides.brandfarbe)
+   }
+   if (overrides.premium_animationen) {
+     config.premium_animationen = true
+   }
++  if (overrides.scroll_animationen) {
++    config.scroll_animationen = true
++    // Kompositionen mit Signature-Story (aktuell maler-landing-v1): Story einschalten
++    if (istMalerKomposition(config)) config.signature_story = 'on'
++  }
+ }
+ /** DoD-Grenze (BF §6): Kosten pro Demo in Cent */
+ const DEMO_KOSTEN_LIMIT_CENT = 150
+ 
+ const MAX_ASSET_DURCHLAEUFE = 2
+ 
+ /**
+  * Prüft ob alle Pflicht-Asset-Slots in der Config befüllt sind.
+  * Gibt die Namen fehlender Slots zurück (leer = alles ok).
+  */
+@@ -652,21 +660,21 @@ export async function generiereFlagshipDemo(
+ 
+   // Video-Job Info zusammenbauen (wird async NACH dem Response generiert)
+   let videoJob: VideoJobInfo | undefined
+   if (config.inhalte.hero.media.datei) {
+     let videoPrompt: string | undefined
+     if (styleProfil?.header_animation?.higgsfield_prompt) {
+       videoPrompt = styleProfil.header_animation.higgsfield_prompt
+     } else if (styleProfil?.style_prompts) {
+       videoPrompt = baueVideoPrompt(styleProfil)
+     } else {
+-      const branchenVideo = VIDEO_PROMPTS[brancheKey]
++      const branchenVideo = FLAGSHIP_VIDEO_PROMPTS[brancheKey]
+       if (branchenVideo) {
+         videoPrompt = branchenVideo.loop
+       } else {
+         const heroLabel = config.inhalte.hero.media.label || config.inhalte.hero.eyebrow
+         const brancheName = row.name || brancheKey
+         videoPrompt = `Cinematic 4K, completely static tripod camera, zero camera movement. Close-up scene: ${heroLabel}. ${brancheName} environment. Subtle ambient motion, gentle material movement, dust particles in light. Seamless 5-second loop, calm and premium. No face visible, no person looking at camera. No text, no logos.`
+       }
+     }
+     if (videoPrompt) {
+       videoJob = {
+diff --git a/scripts/test-flagship.ts b/scripts/test-flagship.ts
+index 1fdea44..7985be3 100644
+--- a/scripts/test-flagship.ts
++++ b/scripts/test-flagship.ts
+@@ -9,20 +9,21 @@
+  *  - Escaping: <script>-Injektion in Inhalten landet nie roh im HTML
+  *  - Funnel-Seite (anfrage/reservierung) rendert Quali-Fragen bzw. Reservierungsfelder
+  *
+  * Aufruf: npm run test:flagship
+  */
+ import { FLAGSHIP_SEEDS } from '../lib/flagship/seeds'
+ import { renderFlagshipPage, renderUnterseite } from '../lib/flagship/render'
+ import { renderAnfrageSeite } from '../lib/flagship/anfrage'
+ import type { FlagshipConfig, UnterseitenSlug } from '../lib/flagship/types'
+ import { UNTERSEITEN } from '../lib/flagship/types'
++import { wendeDesignOverridesAn } from '../lib/pipeline/generate-flagship-demo'
+ 
+ let fehler = 0
+ let geprueft = 0
+ 
+ function assert(bedingung: boolean, name: string, meldung: string) {
+   geprueft++
+   if (!bedingung) {
+     fehler++
+     console.error(`  ✗ [${name}] ${meldung}`)
+   }
+@@ -226,13 +227,45 @@ for (const [key, seed] of Object.entries(FLAGSHIP_SEEDS)) {
+ 
+ // Onepager-Modus: seiten_modus 'onepager' oder undefined → alle Sektionen auf Startseite
+ const onepager = klon(Object.values(FLAGSHIP_SEEDS)[0])
+ onepager.seiten_modus = 'onepager'
+ const onepagerHtml = renderFlagshipPage(onepager, { demo: true, basisPfad: '/demo/test' })
+ for (const m of PFLICHT_MARKER) {
+   assert(onepagerHtml.includes(`<!-- sektion:${m} -->`), 'onepager', `Sektionsmarker "${m}" fehlt im Onepager`)
+ }
+ console.log('  onepager: ok (alle Sektionen vorhanden)')
+ 
++// ------------------------------------------------------------
++// Scroll-Animationen-Extra (Spec 2026-07-22)
++// ------------------------------------------------------------
++{
++  const basis = klon(Object.values(FLAGSHIP_SEEDS)[0])
++
++  // Override setzt beide Flags
++  const mitFlag = klon(basis)
++  wendeDesignOverridesAn(mitFlag, { scroll_animationen: true, premium_animationen: true })
++  assert(mitFlag.scroll_animationen === true, 'scroll-extra', 'Override setzt scroll_animationen nicht')
++  assert(mitFlag.premium_animationen === true, 'scroll-extra', 'Override setzt premium_animationen nicht')
++
++  // Ohne Override bleibt das Flag aus
++  const ohneFlag = klon(basis)
++  wendeDesignOverridesAn(ohneFlag, {})
++  assert(ohneFlag.scroll_animationen === undefined, 'scroll-extra', 'Flag darf ohne Override nicht gesetzt sein')
++
++  // Render: Scrub-Modus am Hero
++  const scrubConfig = klon(basis)
++  scrubConfig.scroll_animationen = true
++  scrubConfig.inhalte.hero.video = { src: '/media/test.mp4', poster: '/media/test.jpg', modus: 'scrub' }
++  const scrubHtml = renderFlagshipPage(scrubConfig, { demo: true, basisPfad: '/demo/test' })
++  assert(scrubHtml.includes('data-modus="scrub"'), 'scroll-extra', 'Hero rendert nicht data-modus="scrub"')
++  assert(scrubHtml.includes('class="vhero scrub"'), 'scroll-extra', 'Hero hat keine .scrub-Klasse')
++
++  // Render: Loop bleibt Default
++  const loopConfig = klon(basis)
++  loopConfig.inhalte.hero.video = { src: '/media/test.mp4', poster: '/media/test.jpg', modus: 'loop' }
++  const loopHtml = renderFlagshipPage(loopConfig, { demo: true, basisPfad: '/demo/test' })
++  assert(loopHtml.includes('data-modus="loop"'), 'scroll-extra', 'Hero rendert nicht data-modus="loop"')
++}
++
+ console.log(`\n${geprueft} Prüfungen, ${fehler} Fehler`)
+ if (fehler > 0) process.exit(1)
+ console.log('Alle Prüfungen bestanden.')

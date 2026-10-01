@@ -1,0 +1,112 @@
+# Review package: b1f6cef..HEAD
+
+## Commits
+69dad21 feat(crm): Notiz-Autor im Detail-Panel und auf den Karten anzeigen
+
+## Files changed
+ app/admin/crm/page.tsx | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+## Diff
+diff --git a/app/admin/crm/page.tsx b/app/admin/crm/page.tsx
+index 71f125f..a9bc52f 100644
+--- a/app/admin/crm/page.tsx
++++ b/app/admin/crm/page.tsx
+@@ -1,46 +1,49 @@
+ 'use client'
+ 
+ /**
+  * Admin-CRM: Vertriebs-Pipeline als Kanban-Board.
+  * Stages: Neuer Lead → Erstgespräch → Closing Terminiert → Closing No Show → Closed | Verloren.
+  * Karte anklicken → Detail-Panel mit allen Daten, Stage-Wechsel und Notizen-Log.
+  */
+ 
+ import { useCallback, useEffect, useState } from 'react'
+ import { RefreshCw, X, Loader2, Phone, Mail, Globe, StickyNote } from 'lucide-react'
++import { anzeigeName } from '@/lib/crm/anzeige-name'
+ 
+ type CrmStage = 'neuer_lead' | 'erstgespraech' | 'closing_terminiert' | 'closing_no_show' | 'closed' | 'verloren'
+ 
+ interface CrmLead {
+   id: string
+   name: string | null
+   firma: string | null
+   email: string | null
+   telefon: string | null
+   website: string | null
+   branche: string | null
+   nachricht: string | null
+   quelle: string | null
+   utm_source: string | null
+   utm_campaign: string | null
+   crm_stage: CrmStage
+   demo_id: string | null
+   created_at: string
+   notizen_anzahl: number
+   letzte_notiz: string | null
++  letzte_notiz_autor: string | null
+ }
+ 
+ interface Notiz {
+   id: string
+   text: string
+   created_at: string
++  autor: string | null
+ }
+ 
+ const STAGES: { key: CrmStage; label: string; accent: string }[] = [
+   { key: 'neuer_lead', label: 'Neuer Lead', accent: '#2563eb' },
+   { key: 'erstgespraech', label: 'Erstgespräch', accent: '#a8821e' },
+   { key: 'closing_terminiert', label: 'Closing Terminiert', accent: '#7c3aed' },
+   { key: 'closing_no_show', label: 'Closing No Show', accent: '#b45309' },
+   { key: 'closed', label: 'Closed', accent: '#1e8a70' },
+   { key: 'verloren', label: 'Verloren', accent: '#B3261E' },
+ ]
+@@ -231,21 +234,21 @@ export default function CrmPage() {
+                           </span>
+                         )}
+                         {lead.notizen_anzahl > 0 && (
+                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '10px', color: 'var(--za-fg-3)' }}>
+                             <StickyNote size={10} /> {lead.notizen_anzahl}
+                           </span>
+                         )}
+                       </div>
+                       {lead.letzte_notiz && (
+                         <div style={{ fontSize: '10px', color: 'var(--za-fg-3)', marginTop: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
+-                          „{lead.letzte_notiz}“
++                          {anzeigeName(lead.letzte_notiz_autor) ? `${anzeigeName(lead.letzte_notiz_autor)}: ` : ''}„{lead.letzte_notiz}”
+                         </div>
+                       )}
+                     </button>
+                   ))}
+                 </div>
+               </div>
+             )
+           })}
+         </div>
+       )}
+@@ -340,21 +343,23 @@ export default function CrmPage() {
+               </div>
+               {notizenLaden ? (
+                 <div style={{ fontSize: '11px', color: 'var(--za-fg-3)' }}>Lade Notizen…</div>
+               ) : notizen.length === 0 ? (
+                 <div style={{ fontSize: '11px', color: 'var(--za-fg-4)' }}>Noch keine Notizen.</div>
+               ) : (
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                   {notizen.map((n) => (
+                     <div key={n.id} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '8px', padding: '10px 12px' }}>
+                       <div style={{ fontSize: '12px', color: 'var(--za-fg)', whiteSpace: 'pre-wrap' }}>{n.text}</div>
+-                      <div style={{ fontSize: '10px', color: 'var(--za-fg-3)', marginTop: '4px' }}>{formatDate(n.created_at)}</div>
++                      <div style={{ fontSize: '10px', color: 'var(--za-fg-3)', marginTop: '4px' }}>
++                        {[anzeigeName(n.autor), formatDate(n.created_at)].filter(Boolean).join(' · ')}
++                      </div>
+                     </div>
+                   ))}
+                 </div>
+               )}
+             </div>
+           </div>
+         </div>
+       )}
+     </div>
+   )

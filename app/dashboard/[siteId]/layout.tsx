@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import CustomerSidebar from '@/components/customer-sidebar'
+import SupportWidget from '@/components/support-widget'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,6 +63,7 @@ export default async function SiteLayout({
       <main style={{ minWidth: 0, overflow: 'auto' }}>
         {children}
       </main>
+      <SupportWidget siteId={params.siteId} />
     </div>
   )
 }

@@ -1,0 +1,150 @@
+# Review package: 583adc2..43cf8d6
+
+## Commits
+43cf8d6 feat(contracts): gekoppelteUpsellKonditionen — Upsell übernimmt Restlaufzeit des Hauptvertrags
+
+## Files changed
+ lib/contracts.ts           | 39 +++++++++++++++++++++++++++++++++++++++
+ scripts/test-kuendigung.ts | 34 ++++++++++++++++++++++++++++++++--
+ 2 files changed, 71 insertions(+), 2 deletions(-)
+
+## Diff
+diff --git a/lib/contracts.ts b/lib/contracts.ts
+index c541b94..73cd9e1 100644
+--- a/lib/contracts.ts
++++ b/lib/contracts.ts
+@@ -66,20 +66,59 @@ export function wirksamesKuendigungsdatum(
+   let ende = vertrag.ende
+   // Schutz gegen Endlosschleife bei kaputten Daten
+   for (let i = 0; i < 100; i++) {
+     const spaetesterEingang = addiereMonate(ende, -vertrag.kuendigungsfrist_monate)
+     if (kuendigungsDatum <= spaetesterEingang) return ende
+     ende = addiereMonate(ende, Math.max(1, vertrag.verlaengerung_monate))
+   }
+   return ende
+ }
+ 
++// ------------------------------------------------------------
++// Upsell-Kopplung (§10.4 + Entscheidung 2026-07-22)
++// ------------------------------------------------------------
++
++export interface HauptvertragKonditionen {
++  ende: string
++  verlaengerung_monate: number
++  kuendigungsfrist_monate: number
++}
++
++/**
++ * Konditionen für einen neuen Upsell-Vertrag: Upsell-Abos übernehmen
++ * Restlaufzeit (`ende`), Verlängerung und Kündigungsfrist des aktiven
++ * Hauptvertrags — ein Kündigungstermin für alles. Da beide Verträge
++ * dasselbe `ende` und dieselbe Verlängerung haben, bleiben sie über
++ * `wirksamesKuendigungsdatum` dauerhaft synchron.
++ *
++ * Ohne aktiven Hauptvertrag: Fallback auf die Config-Werte des Produkts
++ * (config/upsells.ts, heutiges Verhalten — monatlich kündbar).
++ */
++export function gekoppelteUpsellKonditionen(
++  hauptVertrag: HauptvertragKonditionen | null,
++  produkt: { laufzeitMonate: number; verlaengerungMonate: number; kuendigungsfristMonate: number },
++  beginn: string
++): { ende: string; verlaengerung_monate: number; kuendigungsfrist_monate: number } {
++  if (hauptVertrag) {
++    return {
++      ende: hauptVertrag.ende,
++      verlaengerung_monate: hauptVertrag.verlaengerung_monate,
++      kuendigungsfrist_monate: hauptVertrag.kuendigungsfrist_monate,
++    }
++  }
++  return {
++    ende: vertragsende(beginn, Math.max(1, produkt.laufzeitMonate)),
++    verlaengerung_monate: produkt.verlaengerungMonate,
++    kuendigungsfrist_monate: produkt.kuendigungsfristMonate,
++  }
++}
++
+ // ------------------------------------------------------------
+ // Manuelle Aufgaben (Zero-Fulfillment-Ausnahmen)
+ // ------------------------------------------------------------
+ 
+ export type ManualTaskTyp =
+   | 'MAIL_FEHLGESCHLAGEN'
+   | 'DUNNING_ESKALIERT'
+   | 'KUENDIGUNG'
+   | 'PROVISIONING_LUECKE'
+   | 'SONSTIGES'
+diff --git a/scripts/test-kuendigung.ts b/scripts/test-kuendigung.ts
+index ecff290..fd9a17e 100644
+--- a/scripts/test-kuendigung.ts
++++ b/scripts/test-kuendigung.ts
+@@ -3,21 +3,21 @@
+  * Referenz: Kauf 01.08.2026 → Erstlaufzeit endet 31.07.2028.
+  *
+  *   Kündigung 15.03.2027 → wirksam 31.07.2028 (Erstlaufzeit läuft aus)
+  *   Kündigung 30.04.2028 → wirksam 31.07.2028 (letzter fristgerechter Tag)
+  *   Kündigung 15.05.2028 → wirksam 31.07.2029 (Frist verpasst → +12 Monate)
+  *
+  * Lauf: npm run test:kuendigung — Exit 1 bei Abweichung.
+  */
+ 
+ import { HAUPTPRODUKT_KONDITIONEN } from '../config/vertraege'
+-import { vertragsende, wirksamesKuendigungsdatum, addiereMonate } from '../lib/contracts'
++import { vertragsende, wirksamesKuendigungsdatum, addiereMonate, gekoppelteUpsellKonditionen } from '../lib/contracts'
+ 
+ let fehler = 0
+ 
+ function pruefe(name: string, ist: string, soll: string) {
+   const ok = ist === soll
+   if (!ok) fehler++
+   console.log(`${ok ? '✅' : '❌'} ${name}: ${ist}${ok ? '' : ` (erwartet ${soll})`}`)
+ }
+ 
+ const beginn = '2026-08-01'
+@@ -40,16 +40,46 @@ const vertrag = { ...konditionen, ende }
+ 
+ // Szenario 1: Kündigung weit vor Fristende
+ pruefe('Szenario 1 — Kündigung 15.03.2027', wirksamesKuendigungsdatum(vertrag, '2027-03-15'), '2028-07-31')
+ 
+ // Szenario 2: letzter fristgerechter Tag
+ pruefe('Szenario 2 — Kündigung 30.04.2028', wirksamesKuendigungsdatum(vertrag, '2028-04-30'), '2028-07-31')
+ 
+ // Szenario 3: Frist verpasst → Verlängerung um 12 Monate
+ pruefe('Szenario 3 — Kündigung 15.05.2028', wirksamesKuendigungsdatum(vertrag, '2028-05-15'), '2029-07-31')
+ 
++// ------------------------------------------------------------
++// Upsell-Kopplung (2026-07-22): Upsell übernimmt Restlaufzeit
++// + Konditionen des Hauptvertrags — ein Kündigungstermin.
++// ------------------------------------------------------------
++console.log('')
++
++const upsellProdukt = { laufzeitMonate: 1, verlaengerungMonate: 1, kuendigungsfristMonate: 1 }
++const haupt = { ende, verlaengerung_monate: konditionen.verlaengerung_monate, kuendigungsfrist_monate: konditionen.kuendigungsfrist_monate }
++
++// Szenario 4: Upsell-Kauf 15.03.2027 → Ende + Konditionen des Hauptvertrags gespiegelt
++const gekoppelt = gekoppelteUpsellKonditionen(haupt, upsellProdukt, '2027-03-15')
++pruefe('Szenario 4 — Upsell-Ende = Haupt-Ende', gekoppelt.ende, '2028-07-31')
++pruefe('Szenario 4 — Verlängerung gespiegelt', String(gekoppelt.verlaengerung_monate), String(konditionen.verlaengerung_monate))
++pruefe('Szenario 4 — Frist gespiegelt', String(gekoppelt.kuendigungsfrist_monate), String(konditionen.kuendigungsfrist_monate))
++
++// Szenario 5: Frist verpasst → Haupt UND Upsell verlängern synchron auf 31.07.2029
++const upsellVertrag = { laufzeit_monate: upsellProdukt.laufzeitMonate, verlaengerung_monate: gekoppelt.verlaengerung_monate, kuendigungsfrist_monate: gekoppelt.kuendigungsfrist_monate, ende: gekoppelt.ende }
++pruefe('Szenario 5 — Upsell-Kündigung 15.05.2028 (Frist verpasst)', wirksamesKuendigungsdatum(upsellVertrag, '2028-05-15'), '2029-07-31')
++pruefe('Szenario 5 — synchron mit Hauptvertrag', wirksamesKuendigungsdatum(vertrag, '2028-05-15'), wirksamesKuendigungsdatum(upsellVertrag, '2028-05-15'))
++
++// Szenario 6: Fallback ohne Hauptvertrag → heutiges Verhalten (1 Monat, 1/1)
++const fallback = gekoppelteUpsellKonditionen(null, upsellProdukt, '2027-03-15')
++pruefe('Szenario 6 — Fallback-Ende (1 Monat)', fallback.ende, '2027-04-14')
++pruefe('Szenario 6 — Fallback-Verlängerung', String(fallback.verlaengerung_monate), '1')
++pruefe('Szenario 6 — Fallback-Frist', String(fallback.kuendigungsfrist_monate), '1')
++
++// Szenario 7: Einmal-Produkt (laufzeitMonate 0) im Fallback → Math.max(1, 0) = 1 Monat
++const fallbackEinmal = gekoppelteUpsellKonditionen(null, { laufzeitMonate: 0, verlaengerungMonate: 0, kuendigungsfristMonate: 0 }, '2027-03-15')
++pruefe('Szenario 7 — Fallback laufzeit 0 → 1 Monat', fallbackEinmal.ende, '2027-04-14')
++
+ console.log('')
+ if (fehler > 0) {
+   console.error(`${fehler} Szenario(s) fehlgeschlagen`)
+   process.exit(1)
+ }
+-console.log('Alle Kündigungsszenarien grün (24/12/3)')
++console.log('Alle Kündigungs- und Kopplungs-Szenarien grün (24/12/3)')

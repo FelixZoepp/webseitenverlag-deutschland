@@ -7,7 +7,6 @@
 import Stripe from 'stripe'
 import { getPackage, PackageTier } from './packages'
 import { vertragsKonditionenText } from '@/config/vertraege'
-import { getStripePriceId } from '@/config/stripe-produkte'
 
 /** AGB-Version, die beim Checkout akzeptiert wird. Bei Änderung hier erhöhen. */
 export const AGB_VERSION = '1.1'

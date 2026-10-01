@@ -1,0 +1,137 @@
+# Review package: 1c1b76c..HEAD
+
+## Commits
+914ea68 feat: validate Premium demo image URLs, remove unreachable ones
+
+## Files changed
+ app/api/admin/demos/route.ts |  9 ++++++-
+ lib/generate-demo.ts         | 60 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 68 insertions(+), 1 deletion(-)
+
+## Diff
+diff --git a/app/api/admin/demos/route.ts b/app/api/admin/demos/route.ts
+index 436755b..561ca59 100644
+--- a/app/api/admin/demos/route.ts
++++ b/app/api/admin/demos/route.ts
+@@ -1,17 +1,17 @@
+ import { NextResponse } from 'next/server'
+ import { randomBytes } from 'crypto'
+ import { requireAdmin } from '@/lib/auth-helpers'
+ import { generierungGesperrt } from '@/lib/monitoring'
+ import { isPremiumTemplate } from '@/lib/templates'
+ import { scrapeProspectWebsite } from '@/lib/scrape-prospect'
+-import { generateDemoConfig } from '@/lib/generate-demo'
++import { generateDemoConfig, validateImageUrls } from '@/lib/generate-demo'
+ import { collectProspectData } from '@/lib/pipeline/prospect-data'
+ import { generateLibraryDemoConfig } from '@/lib/pipeline/generate-library-content'
+ import { generiereFlagshipDemo, type DesignOverrides } from '@/lib/pipeline/generate-flagship-demo'
+ import { libraryPageKey, loadLibraryPage } from '@/lib/library/load'
+ import { SEED_BRANCHEN, STILE, type Stil } from '@/lib/library/types'
+ 
+ // F5: Flagship-Demos generieren Assets frisch (Hero + Paar, je ~30–90s)
+ export const maxDuration = 300
+ 
+ export async function GET() {
+@@ -195,20 +195,27 @@ export async function POST(request: Request) {
+   let config: Record<string, unknown>
+   try {
+     config = await generateDemoConfig(prospectName, templateId, scraped, branche, notes)
+   } catch (err) {
+     return NextResponse.json(
+       { error: err instanceof Error ? err.message : 'Demo-Generierung fehlgeschlagen' },
+       { status: 500 }
+     )
+   }
+ 
++  // 2b. Bild-URLs validieren (externe URLs vom Prospect können offline sein)
++  const { entfernt } = await validateImageUrls(config)
++  if (entfernt.length > 0) {
++    const urlWarning = `${entfernt.length} Bild-URL(s) nicht erreichbar und entfernt.`
++    scrapeWarning = scrapeWarning ? `${scrapeWarning} ${urlWarning}` : urlWarning
++  }
++
+   // 3. Demo speichern
+   const shareToken = randomBytes(24).toString('base64url')
+   const { data: demo, error } = await auth.data.supabase
+     .from('demos')
+     .insert({
+       prospect_name: prospectName,
+       prospect_website: websiteUrl || null,
+       branche,
+       template_id: templateId,
+       config,
+diff --git a/lib/generate-demo.ts b/lib/generate-demo.ts
+index c9aa718..f9159a6 100644
+--- a/lib/generate-demo.ts
++++ b/lib/generate-demo.ts
+@@ -130,10 +130,70 @@ export async function generateDemoConfig(
+     const text = response.content[0].type === 'text' ? response.content[0].text : ''
+     try {
+       return parseJsonResponse(text)
+     } catch (err) {
+       lastError = err
+     }
+   }
+ 
+   throw new Error(`Demo-Config konnte nicht generiert werden (ungültiges JSON): ${lastError}`)
+ }
++
++const URL_CHECK_TIMEOUT_MS = 5000
++const IMAGE_KEY_PATTERN = /(?:image|img|logo|hero|gallery|photo|src).*url$/i
++
++/**
++ * Prüft alle Bild-URLs in der Config per HEAD-Request.
++ * Unerreichbare URLs werden auf null gesetzt.
++ */
++export async function validateImageUrls(
++  config: Record<string, unknown>
++): Promise<{ config: Record<string, unknown>; entfernt: string[] }> {
++  const urls = new Map<string, { obj: Record<string, unknown>; key: string }>()
++
++  function sammle(obj: unknown, pfad: string): void {
++    if (!obj || typeof obj !== 'object') return
++    if (Array.isArray(obj)) {
++      obj.forEach((v, i) => sammle(v, `${pfad}[${i}]`))
++      return
++    }
++    for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
++      if (
++        typeof val === 'string' &&
++        val.startsWith('http') &&
++        IMAGE_KEY_PATTERN.test(key)
++      ) {
++        urls.set(`${pfad}.${key}`, { obj: obj as Record<string, unknown>, key })
++      } else {
++        sammle(val, `${pfad}.${key}`)
++      }
++    }
++  }
++
++  sammle(config, 'config')
++
++  const entfernt: string[] = []
++  await Promise.all(
++    Array.from(urls.entries()).map(async ([pfad, { obj, key }]) => {
++      const url = obj[key] as string
++      try {
++        const controller = new AbortController()
++        const timeout = setTimeout(() => controller.abort(), URL_CHECK_TIMEOUT_MS)
++        const res = await fetch(url, {
++          method: 'HEAD',
++          signal: controller.signal,
++          redirect: 'follow',
++        })
++        clearTimeout(timeout)
++        if (!res.ok) {
++          obj[key] = null
++          entfernt.push(url)
++        }
++      } catch {
++        obj[key] = null
++        entfernt.push(url)
++      }
++    })
++  )
++
++  return { config, entfernt }
++}

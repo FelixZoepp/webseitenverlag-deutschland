@@ -1,0 +1,112 @@
+# Review package: 3a63733..HEAD
+
+## Commits
+cedccc6 feat(crm): Notiz-Autor — Migration 034 + Autor in Notizen- und CRM-API
+
+## Files changed
+ app/api/admin/crm/route.ts                    | 12 ++++++++----
+ app/api/admin/leads/[leadId]/notizen/route.ts |  6 +++---
+ supabase/migrations/034_notiz_autor.sql       |  3 +++
+ 3 files changed, 14 insertions(+), 7 deletions(-)
+
+## Diff
+diff --git a/app/api/admin/crm/route.ts b/app/api/admin/crm/route.ts
+index f790ce0..226fd86 100644
+--- a/app/api/admin/crm/route.ts
++++ b/app/api/admin/crm/route.ts
+@@ -18,31 +18,35 @@ export async function GET() {
+     .from('leads')
+     .select('id, name, firma, email, telefon, website, branche, nachricht, quelle, utm_source, utm_campaign, crm_stage, demo_id, created_at')
+     .order('created_at', { ascending: false })
+     .limit(500)
+   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+ 
+   const leadIds = (leads ?? []).map((l) => l.id)
+   const { data: notes } = leadIds.length
+     ? await admin
+         .from('lead_notes')
+-        .select('id, lead_id, text, created_at')
++        .select('id, lead_id, text, autor, created_at')
+         .in('lead_id', leadIds)
+         .order('created_at', { ascending: false })
+     : { data: [] as never[] }
+ 
+-  const notizenProLead = new Map<string, { anzahl: number; letzte: string | null }>()
++  const notizenProLead = new Map<string, { anzahl: number; letzte: string | null; letzterAutor: string | null }>()
+   for (const note of notes ?? []) {
+-    const eintrag = notizenProLead.get(note.lead_id) ?? { anzahl: 0, letzte: null }
++    const eintrag = notizenProLead.get(note.lead_id) ?? { anzahl: 0, letzte: null, letzterAutor: null }
+     eintrag.anzahl += 1
+-    if (!eintrag.letzte) eintrag.letzte = note.text
++    if (!eintrag.letzte) {
++      eintrag.letzte = note.text
++      eintrag.letzterAutor = note.autor ?? null
++    }
+     notizenProLead.set(note.lead_id, eintrag)
+   }
+ 
+   return NextResponse.json({
+     leads: (leads ?? []).map((lead) => ({
+       ...lead,
+       notizen_anzahl: notizenProLead.get(lead.id)?.anzahl ?? 0,
+       letzte_notiz: notizenProLead.get(lead.id)?.letzte ?? null,
++      letzte_notiz_autor: notizenProLead.get(lead.id)?.letzterAutor ?? null,
+     })),
+   })
+ }
+diff --git a/app/api/admin/leads/[leadId]/notizen/route.ts b/app/api/admin/leads/[leadId]/notizen/route.ts
+index 0df5235..8b07fe0 100644
+--- a/app/api/admin/leads/[leadId]/notizen/route.ts
++++ b/app/api/admin/leads/[leadId]/notizen/route.ts
+@@ -11,21 +11,21 @@ import { createAdminClient } from '@/lib/supabase/admin'
+ export const dynamic = 'force-dynamic'
+ 
+ export async function GET(_request: NextRequest, { params }: { params: Promise<{ leadId: string }> }) {
+   const auth = await requireAdmin()
+   if (!auth.ok) return auth.response
+ 
+   const { leadId } = await params
+   const admin = createAdminClient()
+   const { data, error } = await admin
+     .from('lead_notes')
+-    .select('id, text, created_at')
++    .select('id, text, autor, created_at')
+     .eq('lead_id', leadId)
+     .order('created_at', { ascending: false })
+   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+ 
+   return NextResponse.json({ notizen: data ?? [] })
+ }
+ 
+ const postSchema = z.object({ text: z.string().trim().min(1, 'Notiz darf nicht leer sein').max(4000) })
+ 
+ export async function POST(request: NextRequest, { params }: { params: Promise<{ leadId: string }> }) {
+@@ -35,17 +35,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
+   const { leadId } = await params
+   const body = await request.json().catch(() => null)
+   const parsed = postSchema.safeParse(body)
+   if (!parsed.success) {
+     return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Ungültige Notiz.' }, { status: 400 })
+   }
+ 
+   const admin = createAdminClient()
+   const { data, error } = await admin
+     .from('lead_notes')
+-    .insert({ lead_id: leadId, text: parsed.data.text })
+-    .select('id, text, created_at')
++    .insert({ lead_id: leadId, text: parsed.data.text, autor: auth.data.user.email ?? null })
++    .select('id, text, autor, created_at')
+     .single()
+   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+ 
+   return NextResponse.json({ notiz: data })
+ }
+diff --git a/supabase/migrations/034_notiz_autor.sql b/supabase/migrations/034_notiz_autor.sql
+new file mode 100644
+index 0000000..5e0f71a
+--- /dev/null
++++ b/supabase/migrations/034_notiz_autor.sql
+@@ -0,0 +1,3 @@
++-- Notiz-Autor: E-Mail des eingeloggten Admins, serverseitig gesetzt.
++-- Nullable — Alt-Notizen haben keinen Autor.
++alter table lead_notes add column autor text;

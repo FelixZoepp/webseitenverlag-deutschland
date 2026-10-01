@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projekt anfragen — Livara Service GmbH</title>
+  <meta name="description" content="Stellen Sie in 4 Schritten eine unverbindliche Projektanfrage bei der Livara Service GmbH — Komplettsanierung und Neubau in NRW und Bayern. Antwort innerhalb von 24 Stunden." />
+  <link rel="canonical" href="https://livaraservice-gmbh.de/livara-anfrage.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Livara Service GmbH" />
+  <meta property="og:locale" content="de_DE" />
+  <meta property="og:url" content="https://livaraservice-gmbh.de/livara-anfrage.html" />
+  <meta property="og:title" content="Projekt anfragen — Livara Service GmbH" />
+  <meta property="og:description" content="Stellen Sie in 4 Schritten eine unverbindliche Projektanfrage bei der Livara Service GmbH — Komplettsanierung und Neubau in NRW und Bayern. Antwort innerhalb von 24 Stunden." />
+  <meta property="og:image" content="https://livaraservice-gmbh.de/livara-hero.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Startseite", "item": "https://livaraservice-gmbh.de/" },
+      { "@type": "ListItem", "position": 2, "name": "Projekt anfragen", "item": "https://livaraservice-gmbh.de/livara-anfrage.html" }
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600&family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-dark: #040D21;
+      --bg-panel: #0d1b2e;
+      --text: #ffffff;
+      --text-soft: #8899aa;
+      --accent: #3b82f6;
+      --accent-deep: #2563eb;
+      --accent-light: #60a5fa;
+      --border: rgba(59,130,246,0.18);
+      --radius: 16px;
+      --font-head: 'Poppins', sans-serif;
+      --font-body: 'Montserrat', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 500;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(4,13,33,0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: all .3s;
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .nav-logo {
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent-light); font-weight: 500; }
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-head);
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: #fff; }
+
+    /* ─── MAIN ─── */
+    .page-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 24px 60px;
+    }
+
+    .form-page {
+      max-width: 620px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .form-page-title {
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .form-page-sub {
+      font-size: 1.05rem;
+      color: var(--text-soft);
+      max-width: 480px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    /* ─── FORM ─── */
+    .form-wrapper {
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%;
+      text-align: left;
+    }
+    .form-progress {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .form-progress-bar {
+      flex: 1;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.15);
+      transition: background .3s;
+    }
+    .form-progress-bar.active {
+      background: #60a5fa;
+    }
+    .form-step {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .form-step.active {
+      display: flex;
+    }
+    .form-step-title {
+      font-family: var(--font-head);
+      font-weight: 600;
+      font-size: 1.15rem;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .form-step-sub {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 8px;
+    }
+    .form-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .form-option {
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: #fff;
+      cursor: pointer;
+      transition: all .2s;
+      text-align: center;
+    }
+    .form-option:hover {
+      border-color: var(--accent-light);
+      background: rgba(96,165,250,0.1);
+    }
+    .form-option.selected {
+      border-color: var(--accent-light);
+      background: rgba(96,165,250,0.15);
+      box-shadow: 0 0 0 1px var(--accent-light);
+    }
+    .form-input {
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: #fff;
+      outline: none;
+      transition: border-color .2s;
+      width: 100%;
+    }
+    .form-input::placeholder { color: rgba(255,255,255,0.35); }
+    .form-input:focus { border-color: var(--accent-light); }
+    textarea.form-input { min-height: 90px; resize: vertical; }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .form-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .form-btn-back {
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-family: var(--font-head);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .form-btn-back:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+    .form-btn-next {
+      background: #fff;
+      color: var(--accent-deep);
+      padding: 12px 28px;
+      border-radius: 10px;
+      border: none;
+      font-family: var(--font-head);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .form-btn-next:hover { background: #e8f0fe; transform: translateY(-1px); }
+    .form-btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+    .form-success-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+    .form-success-title {
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .form-success-text {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.6;
+    }
+
+    /* ─── TRUST ─── */
+    .trust-chips {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 28px;
+    }
+    .trust-chip {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      padding: 8px 18px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .trust-chip::before { content: '\2713'; color: #93c5fd; font-weight: 700; margin-right: 6px; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .footer-copy {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.3);
+    }
+    .footer-copy a {
+      color: rgba(255,255,255,0.45);
+      text-decoration: none;
+    }
+    .footer-copy a:hover { color: #fff; }
+
+    @media (max-width: 600px) {
+      .form-wrapper { padding: 28px 20px; }
+      .form-options { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <div class="nav-inner">
+    <a href="livara.html" class="nav-logo">Livara Service <span>GmbH</span></a>
+    <a href="livara.html" class="nav-back">← Zurück zur Startseite</a>
+  </div>
+</nav>
+
+<!-- ─── MAIN ─── -->
+<main class="page-main">
+  <div class="form-page">
+    <h1 class="form-page-title">Projekt <span style="color:var(--accent-light)">anfragen</span></h1>
+    <p class="form-page-sub">Beantworten Sie 4 kurze Fragen — Sie erhalten zeitnah eine unverbindliche Einschätzung.</p>
+
+    <div class="form-wrapper" id="inquiry-form">
+      <!-- Progress -->
+      <div class="form-progress">
+        <div class="form-progress-bar active" id="prog-1"></div>
+        <div class="form-progress-bar" id="prog-2"></div>
+        <div class="form-progress-bar" id="prog-3"></div>
+        <div class="form-progress-bar" id="prog-4"></div>
+      </div>
+
+      <!-- Step 1: Projektart -->
+      <div class="form-step active" id="step-1">
+        <div class="form-step-title">Was für ein Projekt planen Sie?</div>
+        <div class="form-step-sub">Wählen Sie eine Option.</div>
+        <div class="form-options" data-field="projektart">
+          <div class="form-option" data-value="Komplettsanierung">🏗️ Komplettsanierung</div>
+          <div class="form-option" data-value="Teilsanierung">🔧 Teilsanierung</div>
+          <div class="form-option" data-value="Neubau / Ausbau">🏠 Neubau / Ausbau</div>
+          <div class="form-option" data-value="Sonstiges">📋 Sonstiges</div>
+        </div>
+        <div class="form-nav">
+          <div></div>
+          <button class="form-btn-next" disabled onclick="nextStep(1)">Weiter →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Objektdetails -->
+      <div class="form-step" id="step-2">
+        <div class="form-step-title">Erzählen Sie uns mehr zum Objekt.</div>
+        <div class="form-step-sub">Damit wir den Umfang einschätzen können.</div>
+        <div class="form-options" data-field="objekttyp">
+          <div class="form-option" data-value="Eigentumswohnung">🏢 Eigentumswohnung</div>
+          <div class="form-option" data-value="Einfamilienhaus">🏡 Einfamilienhaus</div>
+          <div class="form-option" data-value="Mehrfamilienhaus">🏘️ Mehrfamilienhaus</div>
+          <div class="form-option" data-value="Gewerbe">🏬 Gewerbeimmobilie</div>
+        </div>
+        <div class="form-row" style="margin-top:4px;">
+          <input type="text" class="form-input" id="field-plz" placeholder="PLZ / Ort" />
+          <input type="text" class="form-input" id="field-flaeche" placeholder="ca. Fläche in m²" />
+        </div>
+        <div class="form-nav">
+          <button class="form-btn-back" onclick="prevStep(2)">← Zurück</button>
+          <button class="form-btn-next" disabled onclick="nextStep(2)">Weiter →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Zeitrahmen & Budget -->
+      <div class="form-step" id="step-3">
+        <div class="form-step-title">Wann soll es losgehen?</div>
+        <div class="form-step-sub">Ungefährer Zeitrahmen und Budget.</div>
+        <div class="form-options" data-field="zeitrahmen">
+          <div class="form-option" data-value="Sofort / < 4 Wochen">⚡ Sofort / &lt; 4 Wochen</div>
+          <div class="form-option" data-value="1–3 Monate">📅 1–3 Monate</div>
+          <div class="form-option" data-value="3–6 Monate">🗓️ 3–6 Monate</div>
+          <div class="form-option" data-value="Noch unklar">🤔 Noch unklar</div>
+        </div>
+        <div class="form-options" data-field="budget" style="margin-top:4px;">
+          <div class="form-option" data-value="< 50.000 €">Bis 50.000 €</div>
+          <div class="form-option" data-value="50.000 – 150.000 €">50k – 150k €</div>
+          <div class="form-option" data-value="150.000 – 500.000 €">150k – 500k €</div>
+          <div class="form-option" data-value="> 500.000 €">Über 500k €</div>
+        </div>
+        <div class="form-nav">
+          <button class="form-btn-back" onclick="prevStep(3)">← Zurück</button>
+          <button class="form-btn-next" disabled onclick="nextStep(3)">Weiter →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Kontaktdaten -->
+      <div class="form-step" id="step-4">
+        <div class="form-step-title">Fast geschafft — wie erreichen wir Sie?</div>
+        <div class="form-step-sub">Wir melden uns innerhalb von 24 Stunden.</div>
+        <div class="form-row">
+          <input type="text" class="form-input" id="field-name" placeholder="Ihr Name *" required />
+          <input type="tel" class="form-input" id="field-telefon" placeholder="Telefon *" required />
+        </div>
+        <input type="email" class="form-input" id="field-email" placeholder="E-Mail-Adresse *" required />
+        <textarea class="form-input" id="field-nachricht" placeholder="Kurze Projektbeschreibung (optional)"></textarea>
+        <div class="form-nav">
+          <button class="form-btn-back" onclick="prevStep(4)">← Zurück</button>
+          <button class="form-btn-next" onclick="submitForm()">Anfrage senden ✓</button>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div class="form-success" id="form-success">
+        <div class="form-success-icon">✅</div>
+        <div class="form-success-title">Anfrage gesendet!</div>
+        <div class="form-success-text">Vielen Dank — wir melden uns innerhalb von 24 Stunden bei Ihnen mit einer ersten Einschätzung.</div>
+      </div>
+    </div>
+
+    <div class="trust-chips">
+      <div class="trust-chip">Kostenlose Ersteinschätzung</div>
+      <div class="trust-chip">Festpreis-Garantie</div>
+      <div class="trust-chip">Start in 1–2 Wochen</div>
+    </div>
+  </div>
+</main>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-copy">
+    © 2026 Livara Service GmbH. Alle Rechte vorbehalten. · <a href="livara.html">Startseite</a> · <a href="https://www.instagram.com/livara.service_gmbh/" target="_blank" rel="noopener">Instagram</a>
+  </div>
+</footer>
+
+<script>
+  const formData = {};
+  const totalSteps = 4;
+
+  document.querySelectorAll('.form-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const parent = opt.closest('.form-options');
+      parent.querySelectorAll('.form-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      formData[parent.dataset.field] = opt.dataset.value;
+      validateStep(getCurrentStep());
+    });
+  });
+
+  ['field-plz','field-flaeche'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => validateStep(2));
+  });
+
+  ['field-name','field-telefon','field-email'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => validateStep(4));
+  });
+
+  function getCurrentStep() {
+    const active = document.querySelector('.form-step.active');
+    return active ? parseInt(active.id.split('-')[1]) : 1;
+  }
+
+  function validateStep(step) {
+    const stepEl = document.getElementById('step-' + step);
+    if (!stepEl) return;
+    const btn = stepEl.querySelector('.form-btn-next');
+    if (!btn) return;
+
+    let valid = false;
+    if (step === 1) {
+      valid = !!stepEl.querySelector('.form-option.selected');
+    } else if (step === 2) {
+      valid = !!stepEl.querySelector('.form-option.selected');
+    } else if (step === 3) {
+      const opts = stepEl.querySelectorAll('.form-options');
+      valid = opts[0].querySelector('.form-option.selected') && opts[1].querySelector('.form-option.selected');
+    } else if (step === 4) {
+      const name = document.getElementById('field-name').value.trim();
+      const tel = document.getElementById('field-telefon').value.trim();
+      const email = document.getElementById('field-email').value.trim();
+      valid = name && tel && email;
+    }
+    btn.disabled = !valid;
+  }
+
+  function nextStep(current) {
+    document.getElementById('step-' + current).classList.remove('active');
+    document.getElementById('step-' + (current + 1)).classList.add('active');
+    for (let i = 1; i <= totalSteps; i++) {
+      document.getElementById('prog-' + i).classList.toggle('active', i <= current + 1);
+    }
+    validateStep(current + 1);
+  }
+
+  function prevStep(current) {
+    document.getElementById('step-' + current).classList.remove('active');
+    document.getElementById('step-' + (current - 1)).classList.add('active');
+    for (let i = 1; i <= totalSteps; i++) {
+      document.getElementById('prog-' + i).classList.toggle('active', i <= current - 1);
+    }
+  }
+
+  function submitForm() {
+    formData.plz = document.getElementById('field-plz').value.trim();
+    formData.flaeche = document.getElementById('field-flaeche').value.trim();
+    formData.name = document.getElementById('field-name').value.trim();
+    formData.telefon = document.getElementById('field-telefon').value.trim();
+    formData.email = document.getElementById('field-email').value.trim();
+    formData.nachricht = document.getElementById('field-nachricht').value.trim();
+
+    const subject = encodeURIComponent('Projektanfrage — ' + (formData.projektart || 'Neues Projekt'));
+    const body = encodeURIComponent(
+      'Projektart: ' + (formData.projektart || '-') + '\n' +
+      'Objekttyp: ' + (formData.objekttyp || '-') + '\n' +
+      'PLZ/Ort: ' + (formData.plz || '-') + '\n' +
+      'Fläche: ' + (formData.flaeche || '-') + ' m²\n' +
+      'Zeitrahmen: ' + (formData.zeitrahmen || '-') + '\n' +
+      'Budget: ' + (formData.budget || '-') + '\n' +
+      'Name: ' + formData.name + '\n' +
+      'Telefon: ' + formData.telefon + '\n' +
+      'E-Mail: ' + formData.email + '\n' +
+      'Nachricht: ' + (formData.nachricht || '-')
+    );
+    window.location.href = 'mailto:ca@livaraservice-gmbh.de?subject=' + subject + '&body=' + body;
+
+    document.querySelectorAll('.form-step').forEach(s => s.style.display = 'none');
+    document.querySelector('.form-progress').style.display = 'none';
+    document.getElementById('form-success').style.display = 'block';
+  }
+</script>
+</body>
+</html>

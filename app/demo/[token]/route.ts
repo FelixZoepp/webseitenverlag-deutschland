@@ -13,9 +13,11 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 // RLS erlaubt nur Admins — die öffentliche Demo-Ansicht läuft über den Service-Role-Key
+// cache:'no-store' verhindert, dass Nexts Data Cache die PostgREST-GETs einfriert (Next 14)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  { global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }) } }
 )
 
 function escapeHtml(s: string): string {

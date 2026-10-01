@@ -16,7 +16,8 @@
  * wenn beim Kauf kein aktiver Hauptvertrag existiert.
  *
  * Bewusst verworfen (NICHT bauen): Anruf-Tracking, Lead-Alarm-SMS,
- * Rechtstexte-Abo, Profi-E-Mail-Adresse, Anfrage-Konfigurator, Foto-Veredelung.
+ * Rechtstexte-Abo, Profi-E-Mail-Adresse, Anfrage-Konfigurator, Foto-Veredelung,
+ * Google Ads Starter (zu aufwendig, schwer skalierbar).
  */
 
 export type UpsellFulfillment = 'auto' | 'va_manual'
@@ -76,21 +77,21 @@ export const UPSELL_PRODUCTS: UpsellProduct[] = [
     provisioning: 'Einmal-Job generiert 10 Umkreis-Seiten (Phase G)',
   },
   {
-    key: 'bewertungs-system',
-    name: 'Bewertungs-System',
+    key: 'bewertungs-autopilot',
+    name: 'Bewertungs-Autopilot',
     nutzen: [
-      'QR-Code + Funnel für mehr echte Google-Bewertungen',
-      'Bewertungs-Mails nur mit Einwilligung, ohne Review-Gating',
-      'Einrichtung einmalig, danach kleiner Monatsbeitrag',
+      'Automatische E-Mail an Ihre Kunden nach Auftrag: „Waren Sie zufrieden?"',
+      'Bei Ja → direkter Link zu Ihrer Google-Rezensionsseite',
+      'Bei Nein → internes Feedback an Sie, keine öffentliche Bewertung',
     ],
-    einmalCent: 14900,
-    monatCent: 1900,
+    einmalCent: 9900,
+    monatCent: 2900,
     fulfillment: 'auto',
-    touchpoints: ['portal', 'cron-60'],
+    touchpoints: ['kickoff', 'portal', 'cron-14'],
     laufzeitMonate: 1,
     verlaengerungMonate: 1,
     kuendigungsfristMonate: 1,
-    provisioning: 'QR-Code + Bewertungs-Funnel-Seite (Phase G)',
+    provisioning: 'Resend-Sequenz: Tag X nach Kontakt → Zufriedenheits-Mail → Ja: Google-Review-Link, Nein: internes Feedback-Formular. GBP Place-ID bei Einrichtung hinterlegen.',
   },
   {
     key: 'konkurrenz-radar',
@@ -142,23 +143,6 @@ export const UPSELL_PRODUCTS: UpsellProduct[] = [
     verlaengerungMonate: 0,
     kuendigungsfristMonate: 0,
     provisioning: 'manual_task GBP_EINRICHTUNG für VA',
-  },
-  {
-    key: 'google-ads-starter',
-    name: 'Google Ads Starter',
-    nutzen: [
-      'Fertiges Kampagnen-Setup (Suche + Performance Max) aus Ihrer Website',
-      'Werbebudget zahlen Sie immer direkt an Google — volle Kontrolle',
-      'Wöchentliche Checks und Monatsreport inklusive, monatlich kündbar',
-    ],
-    einmalCent: 0,
-    monatCent: 9900,
-    fulfillment: 'auto',
-    touchpoints: ['portal', 'cron-60'],
-    laufzeitMonate: 1,
-    verlaengerungMonate: 1,
-    kuendigungsfristMonate: 1,
-    provisioning: 'Kampagnen-Entwurf (Test-Modus) automatisch, MCC-Einladung als manual_task (Phase G)',
   },
 ]
 

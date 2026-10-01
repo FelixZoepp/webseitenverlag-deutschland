@@ -1,0 +1,89 @@
+# Review package: cbb1b3d..HEAD
+
+## Commits
+3a63733 feat(crm): anzeigeName-Helper für Notiz-Autoren (+ test:crm)
+
+## Files changed
+ lib/crm/anzeige-name.ts | 10 ++++++++++
+ package.json            |  1 +
+ scripts/test-crm.ts     | 29 +++++++++++++++++++++++++++++
+ 3 files changed, 40 insertions(+)
+
+## Diff
+diff --git a/lib/crm/anzeige-name.ts b/lib/crm/anzeige-name.ts
+new file mode 100644
+index 0000000..0314943
+--- /dev/null
++++ b/lib/crm/anzeige-name.ts
+@@ -0,0 +1,10 @@
++/**
++ * Anzeigename für Notiz-Autoren im Admin-CRM:
++ * E-Mail-Lokalteil, erster Buchstabe groß (felix@… → „Felix").
++ */
++export function anzeigeName(email: string | null): string | null {
++  if (!email) return null
++  const lokalteil = email.split('@')[0]
++  if (!lokalteil) return null
++  return lokalteil.charAt(0).toUpperCase() + lokalteil.slice(1)
++}
+diff --git a/package.json b/package.json
+index d57f3b5..06b7305 100644
+--- a/package.json
++++ b/package.json
+@@ -18,20 +18,21 @@
+     "test:assets": "npx tsx scripts/test-assets.ts",
+     "test:phase3": "npx tsx scripts/test-phase3.ts",
+     "test:qa-gate": "npx tsx scripts/test-qa-gate.ts",
+     "test:phase4": "npx tsx scripts/test-phase4.ts",
+     "test:baustein-c": "npx tsx scripts/test-baustein-c.ts",
+     "test:phase5": "npx tsx scripts/test-phase5.ts",
+     "test:phase6": "npx tsx scripts/test-phase6.ts",
+     "test:galabau": "npx tsx scripts/test-galabau.ts",
+     "test:maler": "npx tsx scripts/test-maler.ts",
+     "test:scrub": "npx tsx scripts/test-scrub.ts",
++    "test:crm": "npx tsx scripts/test-crm.ts",
+     "seed:assets": "npx tsx scripts/seed-assets.ts",
+     "seed:branchen": "npx tsx scripts/seed-branchen.ts"
+   },
+   "dependencies": {
+     "@anthropic-ai/sdk": "^0.95.1",
+     "@supabase/ssr": "^0.10.3",
+     "@supabase/supabase-js": "^2.105.3",
+     "@types/pdfkit": "^0.17.6",
+     "framer-motion": "^12.42.2",
+     "lucide-react": "^1.14.0",
+diff --git a/scripts/test-crm.ts b/scripts/test-crm.ts
+new file mode 100644
+index 0000000..ede2377
+--- /dev/null
++++ b/scripts/test-crm.ts
+@@ -0,0 +1,29 @@
++/**
++ * Test CRM — Anzeigename für Notiz-Autoren.
++ * Läuft komplett offline (keine API-/DB-Aufrufe).
++ * Aufruf: npm run test:crm
++ */
++import { anzeigeName } from '../lib/crm/anzeige-name'
++
++let fehler = 0
++let geprueft = 0
++
++function assert(bedingung: boolean, name: string, meldung: string) {
++  geprueft++
++  if (!bedingung) {
++    fehler++
++    console.error(`  ✗ [${name}] ${meldung}`)
++  }
++}
++
++console.log('Teil A: anzeigeName')
++
++assert(anzeigeName('felix@zoeppmedia.de') === 'Felix', 'name-felix', 'felix@… muss „Felix" ergeben')
++assert(anzeigeName('hendrik@hoffmann-wd.de') === 'Hendrik', 'name-hendrik', 'hendrik@… muss „Hendrik" ergeben')
++assert(anzeigeName(null) === null, 'name-null', 'null muss null bleiben')
++assert(anzeigeName('') === null, 'name-leer', 'Leerstring muss null ergeben')
++assert(anzeigeName('@zoeppmedia.de') === null, 'name-ohne-lokalteil', 'E-Mail ohne Lokalteil muss null ergeben')
++assert(anzeigeName('max.mustermann@firma.de') === 'Max.mustermann', 'name-punkt', 'Nur erster Buchstabe wird großgeschrieben')
++
++console.log(`\n${geprueft} Prüfungen, ${fehler} Fehler`)
++if (fehler > 0) process.exit(1)

@@ -18,6 +18,7 @@ import type { BranchenProfil } from '@/lib/seeding/schema'
 import type { FlagshipConfig, FlagshipDesign } from '@/lib/flagship/types'
 import { istMalerKomposition } from '@/lib/flagship/maler/types'
 import type { ProspectData } from './prospect-data'
+import { BRANCHEN_BILDER, bankBildUrl } from '@/config/bilderbank-prompts'
 
 const BUCKET = 'asset-bank'
 
@@ -438,6 +439,22 @@ export async function personalisiereFlagshipConfig(
     }))
   }
 
+  // Bilderbank: Wenn Branche vorab-generierte Bilder hat → direkt zuweisen (€0 Kosten, sofort fertig)
+  const bankSet = BRANCHEN_BILDER.find(b => b.branche_key === brancheKey)
+  if (bankSet) {
+    const url = (slot: string) => bankBildUrl(brancheKey, slot, 1)
+    if (!config.inhalte.hero.media.datei) config.inhalte.hero.media.datei = url('hero')
+    if (!config.inhalte.signature.vorher.datei) config.inhalte.signature.vorher.datei = url('signature_vor')
+    if (!config.inhalte.signature.nachher.datei) config.inhalte.signature.nachher.datei = url('signature_nach')
+    if (config.inhalte.ergebnisse?.bilder) {
+      for (let i = 0; i < Math.min(config.inhalte.ergebnisse.bilder.length, 2); i++) {
+        if (!config.inhalte.ergebnisse.bilder[i].media.datei) {
+          config.inhalte.ergebnisse.bilder[i].media.datei = url(`ergebnis_${i + 1}`)
+        }
+      }
+    }
+  }
+
   return { config }
 }
 
@@ -540,6 +557,22 @@ export async function generiereFlagshipDemo(
       name: b.name,
       meta: `Google-Bewertung · ${'★'.repeat(Math.max(1, Math.min(5, Math.round(b.rating))))}`,
     }))
+  }
+
+  // Bilderbank-Shortcut: Wenn Bank-Bilder vorhanden → direkt zuweisen, Generierung skippen
+  const bankSet = BRANCHEN_BILDER.find(b => b.branche_key === brancheKey)
+  if (bankSet) {
+    const url = (slot: string) => bankBildUrl(brancheKey, slot, 1)
+    if (!config.inhalte.hero.media.datei) config.inhalte.hero.media.datei = url('hero')
+    if (!config.inhalte.signature.vorher.datei) config.inhalte.signature.vorher.datei = url('signature_vor')
+    if (!config.inhalte.signature.nachher.datei) config.inhalte.signature.nachher.datei = url('signature_nach')
+    if (config.inhalte.ergebnisse?.bilder) {
+      for (let i = 0; i < Math.min(config.inhalte.ergebnisse.bilder.length, 2); i++) {
+        if (!config.inhalte.ergebnisse.bilder[i].media.datei) {
+          config.inhalte.ergebnisse.bilder[i].media.datei = url(`ergebnis_${i + 1}`)
+        }
+      }
+    }
   }
 
   // 2) Schlüssel-Assets: Retry-Schleife → Bank-Fallback → Pflicht-Validierung

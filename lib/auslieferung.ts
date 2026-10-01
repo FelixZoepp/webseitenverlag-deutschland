@@ -65,7 +65,8 @@ function textZuHtml(text: string): string {
 export function renderRechtstextSeite(
   art: 'impressum' | 'datenschutz',
   text: string,
-  firma: string
+  firma: string,
+  basisPfad = ''
 ): string {
   const titel = art === 'impressum' ? 'Impressum' : 'Datenschutzerklärung'
   return `<!DOCTYPE html>
@@ -88,10 +89,10 @@ footer a{color:#6b7280}
 </head>
 <body>
 <div class="wrap">
-<a class="zurueck" href="/">&larr; Zurück zur Startseite</a>
+<a class="zurueck" href="${esc(basisPfad || '/')}">&larr; Zurück zur Startseite</a>
 <h1>${esc(titel)}</h1>
 ${textZuHtml(text)}
-<footer><a href="/impressum">Impressum</a> &middot; <a href="/datenschutz">Datenschutz</a></footer>
+<footer><a href="${esc(basisPfad)}/impressum">Impressum</a> &middot; <a href="${esc(basisPfad)}/datenschutz">Datenschutz</a></footer>
 </div>
 </body>
 </html>`
@@ -213,6 +214,15 @@ async function renderEngineSeite(
   slug: string,
   hatRechtstexte: boolean
 ): Promise<string | null> {
+  // Custom-Engine (fertiges HTML, wie in den Demo-Routen):
+  // config.html = Startseite, config.pages[slug] = Unterseiten
+  if ((config as { engine?: string }).engine === 'custom') {
+    const custom = config as { html?: unknown; pages?: Record<string, unknown> }
+    if (slug === '') return typeof custom.html === 'string' ? custom.html : null
+    const seite = custom.pages?.[slug]
+    return typeof seite === 'string' ? seite : null
+  }
+
   if ((config as { engine?: string }).engine === 'flagship') {
     const fsConfig = config as unknown as FlagshipConfig
     // Live-Sites indexieren (noindex steuert der Aufrufer über site.noindex)

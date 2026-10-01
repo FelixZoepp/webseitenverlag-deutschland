@@ -1,0 +1,172 @@
+# Review package: cedccc6..HEAD
+
+## Commits
+b1f6cef fix(crm): Drag während laufendem Stage-Wechsel sperren
+55b2755 feat(crm): Kanban-Drag-and-Drop mit optimistischem Update und Rollback
+
+## Files changed
+ app/admin/crm/page.tsx | 48 ++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 40 insertions(+), 8 deletions(-)
+
+## Diff
+diff --git a/app/admin/crm/page.tsx b/app/admin/crm/page.tsx
+index 73818da..71f125f 100644
+--- a/app/admin/crm/page.tsx
++++ b/app/admin/crm/page.tsx
+@@ -51,20 +51,22 @@ function formatDate(iso: string): string {
+ 
+ export default function CrmPage() {
+   const [leads, setLeads] = useState<CrmLead[]>([])
+   const [loading, setLoading] = useState(true)
+   const [error, setError] = useState<string | null>(null)
+   const [aktiv, setAktiv] = useState<CrmLead | null>(null)
+   const [notizen, setNotizen] = useState<Notiz[]>([])
+   const [notizenLaden, setNotizenLaden] = useState(false)
+   const [neueNotiz, setNeueNotiz] = useState('')
+   const [busy, setBusy] = useState(false)
++  const [dragLeadId, setDragLeadId] = useState<string | null>(null)
++  const [dropStage, setDropStage] = useState<CrmStage | null>(null)
+ 
+   const laden = useCallback(async () => {
+     const res = await fetch('/api/admin/crm')
+     if (res.ok) {
+       const data = await res.json()
+       setLeads(data.leads ?? [])
+     } else {
+       setError('Leads konnten nicht geladen werden.')
+     }
+     setLoading(false)
+@@ -83,37 +85,41 @@ export default function CrmPage() {
+   }, [])
+ 
+   function oeffnen(lead: CrmLead) {
+     setAktiv(lead)
+     setNotizen([])
+     setNeueNotiz('')
+     notizenLadenFn(lead.id)
+   }
+ 
+   async function stageWechseln(lead: CrmLead, stage: CrmStage) {
++    if (lead.crm_stage === stage) return
++    const vorher = lead.crm_stage
+     setBusy(true)
+     setError(null)
++    // Optimistisch: Karte wechselt sofort die Spalte, bei Fehler Rollback.
++    setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, crm_stage: stage } : l)))
++    setAktiv((prev) => (prev && prev.id === lead.id ? { ...prev, crm_stage: stage } : prev))
+     try {
+       const res = await fetch(`/api/admin/leads/${lead.id}`, {
+         method: 'PATCH',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ crm_stage: stage }),
+       })
+       if (!res.ok) {
+         const data = await res.json().catch(() => null)
+-        setError(data?.error || 'Stage-Wechsel fehlgeschlagen.')
+-        return
++        throw new Error(data?.error || 'Stage-Wechsel fehlgeschlagen.')
+       }
+-      setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, crm_stage: stage } : l)))
+-      setAktiv((prev) => (prev && prev.id === lead.id ? { ...prev, crm_stage: stage } : prev))
+-    } catch {
+-      setError('Netzwerkfehler beim Stage-Wechsel.')
++    } catch (e) {
++      setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, crm_stage: vorher } : l)))
++      setAktiv((prev) => (prev && prev.id === lead.id ? { ...prev, crm_stage: vorher } : prev))
++      setError(e instanceof Error ? e.message : 'Netzwerkfehler beim Stage-Wechsel.')
+     } finally {
+       setBusy(false)
+     }
+   }
+ 
+   async function notizSpeichern() {
+     if (!aktiv || !neueNotiz.trim()) return
+     setBusy(true)
+     setError(null)
+     try {
+@@ -132,20 +138,31 @@ export default function CrmPage() {
+         setLeads((prev) => prev.map((l) => (l.id === aktiv.id ? { ...l, notizen_anzahl: l.notizen_anzahl + 1, letzte_notiz: data.notiz.text } : l)))
+       }
+       setNeueNotiz('')
+     } catch {
+       setError('Netzwerkfehler beim Speichern der Notiz.')
+     } finally {
+       setBusy(false)
+     }
+   }
+ 
++  function handleDrop(stageKey: CrmStage) {
++    const id = dragLeadId
++    setDragLeadId(null)
++    setDropStage(null)
++    if (!id) return
++    if (busy) return
++    const lead = leads.find((l) => l.id === id)
++    if (!lead || lead.crm_stage === stageKey) return
++    stageWechseln(lead, stageKey)
++  }
++
+   return (
+     <div className="fade-up">
+       <div className="topbar">
+         <div>
+           <div className="tb-eyebrow">Closer</div>
+           <div className="tb-heading">CRM-Pipeline</div>
+         </div>
+         <div style={{ marginLeft: 'auto', display: 'flex', gap: '10px' }}>
+           <button onClick={() => { setLoading(true); laden() }} className="sb-item" style={{ cursor: 'pointer', background: 'transparent' }}>
+             <RefreshCw size={14} /> Aktualisieren
+@@ -159,36 +176,51 @@ export default function CrmPage() {
+         </div>
+       )}
+ 
+       {loading ? (
+         <div className="panel" style={{ padding: '32px', textAlign: 'center', color: 'var(--za-fg-3)', fontSize: '12px' }}>Lade Pipeline…</div>
+       ) : (
+         <div style={{ display: 'flex', gap: '14px', overflowX: 'auto', paddingBottom: '12px', alignItems: 'flex-start' }}>
+           {STAGES.map((stage) => {
+             const spalte = leads.filter((l) => l.crm_stage === stage.key)
+             return (
+-              <div key={stage.key} style={{ minWidth: '250px', width: '250px', flexShrink: 0 }}>
++              <div
++                key={stage.key}
++                onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (dropStage !== stage.key) setDropStage(stage.key) }}
++                onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDropStage((prev) => (prev === stage.key ? null : prev)) }}
++                onDrop={(e) => { e.preventDefault(); handleDrop(stage.key) }}
++                style={{
++                  minWidth: '250px', width: '250px', flexShrink: 0,
++                  borderRadius: '10px',
++                  outline: dropStage === stage.key ? `2px dashed ${stage.accent}` : 'none',
++                  outlineOffset: '2px',
++                  transition: 'outline-color 120ms',
++                }}
++              >
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 4px 10px' }}>
+                   <span style={{ width: '8px', height: '8px', borderRadius: '999px', background: stage.accent }} />
+                   <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--za-fg-2)' }}>{stage.label}</span>
+                   <span style={{ marginLeft: 'auto', fontSize: '11px', color: 'var(--za-fg-3)' }}>{spalte.length}</span>
+                 </div>
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                   {spalte.length === 0 && (
+                     <div className="panel" style={{ padding: '14px', fontSize: '11px', color: 'var(--za-fg-4)', textAlign: 'center' }}>Leer</div>
+                   )}
+                   {spalte.map((lead) => (
+                     <button
+                       key={lead.id}
+                       onClick={() => oeffnen(lead)}
++                      draggable={!busy}
++                      onDragStart={(e) => { e.dataTransfer.setData('text/plain', lead.id); e.dataTransfer.effectAllowed = 'move'; setDragLeadId(lead.id) }}
++                      onDragEnd={() => { setDragLeadId(null); setDropStage(null) }}
+                       className="panel"
+-                      style={{ padding: '12px 14px', textAlign: 'left', cursor: 'pointer', width: '100%', borderLeft: `3px solid ${stage.accent}` }}
++                      style={{ padding: '12px 14px', textAlign: 'left', cursor: busy ? 'default' : 'grab', width: '100%', borderLeft: `3px solid ${stage.accent}`, opacity: dragLeadId === lead.id ? 0.4 : 1 }}
+                     >
+                       <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--za-fg)' }}>{lead.firma || lead.name || 'Ohne Namen'}</div>
+                       {lead.firma && lead.name && (
+                         <div style={{ fontSize: '11px', color: 'var(--za-fg-2)', marginTop: '2px' }}>{lead.name}</div>
+                       )}
+                       <div style={{ fontSize: '11px', color: 'var(--za-fg-3)', marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                         {lead.branche && <span>{lead.branche}</span>}
+                         {lead.telefon && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Phone size={10} /> {lead.telefon}</span>}
+                         <span>{formatDate(lead.created_at)}</span>
+                       </div>
