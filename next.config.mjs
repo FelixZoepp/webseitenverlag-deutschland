@@ -12,6 +12,15 @@ const nextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
+      {
+        // Dashboard-Vorschau (Editor + Fertig-Seite) wird per iframe im eigenen
+        // Dashboard eingebettet — nur same-origin erlauben (überschreibt DENY oben).
+        source: '/api/sites/:siteId/preview',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
+        ],
+      },
     ]
   },
 }
