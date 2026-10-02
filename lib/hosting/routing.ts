@@ -28,10 +28,18 @@ export type RoutingDecision =
  * "/" wird auf die Datei rewritten, alle anderen Pfade laufen durch
  * (die livara-*.html-Unterseiten liegen als echte Dateien in /public).
  */
-export const STATIC_SITE_HOSTS: Record<string, string> = {
-  'livaraservice-gmbh.de': '/livara.html',
-  'www.livaraservice-gmbh.de': '/livara.html',
-}
+export const STATIC_SITE_HOSTS: Record<string, string> = {}
+
+/**
+ * Kundendomains, die immer aus der DB ausgeliefert werden (Rewrite auf
+ * /kundenseite/<host>) — unabhängig davon, ob MARKETING_HOST gesetzt ist.
+ * livaraservice-gmbh.de lief bis 10/2026 statisch aus /public/livara*.html
+ * (bleibt als Rückfall liegen) und ist jetzt im Kundenkonto bearbeitbar.
+ */
+export const KUNDEN_HOSTS = new Set<string>([
+  'livaraservice-gmbh.de',
+  'www.livaraservice-gmbh.de',
+])
 
 /** Pfade, die auf dem App-Host erlaubt sind */
 export const APP_PATH_PREFIXES = ['/dashboard', '/login', '/register', '/api', '/willkommen']
@@ -65,7 +73,15 @@ export function entscheideRouting(
     host = stripPort(overrideHost)
   }
 
-  // Statische Kundenseite (z. B. livaraservice-gmbh.de → /public/livara.html)
+  // Fest zugeordnete Kundendomain → Auslieferung aus der DB
+  if (KUNDEN_HOSTS.has(host) && !pathname.startsWith('/api') && !pathname.startsWith('/kundenseite')) {
+    // Alte statische Adressen (/livara.html, /livara-anfrage.html) auf die neuen umleiten
+    const alt = pathname.match(/^\/livara(?:-([a-z0-9-]+))?\.html$/)
+    if (alt) return { type: 'redirect', hostname: host, pathname: alt[1] ? `/${alt[1]}` : '/' }
+    return { type: 'rewrite', pathname: `/kundenseite/${host}${pathname === '/' ? '' : pathname}` }
+  }
+
+  // Statische Kundenseite (Host → HTML in /public)
   const staticSite = STATIC_SITE_HOSTS[host]
   if (staticSite) {
     if (pathname === '/') return { type: 'rewrite', pathname: staticSite }
