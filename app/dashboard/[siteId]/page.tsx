@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SiteEditor from '@/components/site-editor'
+import { istCustomConfig } from '@/lib/custom-html-editor'
 import CustomerOnboardingFlow from '@/components/customer-onboarding-flow'
 import KundenStatusDashboard from '@/components/kunden-status-dashboard'
 import ErsteSchritteDashboard from '@/components/erste-schritte-dashboard'
@@ -53,6 +54,9 @@ export default async function SiteEditorPage({
     .eq('customer_id', customer.id)
     .eq('site_id', params.siteId)
 
+  // Individuell gebaute Seiten (engine 'custom') bringen ihre Bilder bereits mit
+  const hatBilder = (bilderCount || 0) > 0 || istCustomConfig(site.config)
+
   // ──── Phase 1: Bilder-Upload (vor Onboarding-Call) ────
   if (!isAdmin && !onboardingDone && buildStatus === 'WARTEND') {
     // Prüfe ob Bilder da sind aber noch kein Call → Onboarding-Flow
@@ -76,7 +80,7 @@ export default async function SiteEditorPage({
         onboardingStatus={onboardingStatus}
         buildStatus={buildStatus}
         onboardingTermin={customer.onboarding_termin_am as string | null}
-        hasBilder={(bilderCount || 0) > 0}
+        hasBilder={hatBilder}
         previewAvailable={false}
       />
     )
@@ -92,7 +96,7 @@ export default async function SiteEditorPage({
         onboardingStatus={onboardingStatus}
         buildStatus={buildStatus}
         onboardingTermin={customer.onboarding_termin_am as string | null}
-        hasBilder={(bilderCount || 0) > 0}
+        hasBilder={hatBilder}
         previewAvailable={true}
         feedbackRunde={(site.feedback_runde as number) || 0}
         feedbackMaxRunden={(site.feedback_max_runden as number) || 3}
@@ -136,7 +140,7 @@ export default async function SiteEditorPage({
         domainHostname={aktiveDomain?.hostname || wartendeDomain?.hostname || null}
         seoFreigegeben={seoFreigegebenCount || 0}
         seoOffen={seoOffenCount || 0}
-        hasBilder={(bilderCount || 0) > 0}
+        hasBilder={hatBilder}
         wizardBearbeitet={startFortschritt.bearbeitet}
         wizardGesamt={startFortschritt.gesamt}
         wizardFertig={Boolean(site.fertiggestellt_am) || startFortschritt.bearbeitet >= startFortschritt.gesamt}

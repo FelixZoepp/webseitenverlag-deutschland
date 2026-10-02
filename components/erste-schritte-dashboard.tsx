@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react'
-import { Check, Globe, Image as ImageIcon, Newspaper, ClipboardList, Pencil, ExternalLink, Rocket, Monitor, Smartphone } from 'lucide-react'
+import { Check, Globe, Image as ImageIcon, ClipboardList, Pencil, ExternalLink, Rocket, Monitor, Smartphone } from 'lucide-react'
 
 interface Props {
   siteId: string
@@ -26,7 +26,7 @@ interface Props {
 
 export default function ErsteSchritteDashboard({
   siteId, siteName, customerName, domainStatus, domainHostname,
-  seoFreigegeben, seoOffen, hasBilder, wizardBearbeitet, wizardGesamt, wizardFertig,
+  hasBilder, wizardBearbeitet, wizardGesamt, wizardFertig,
 }: Props) {
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
   const firstName = customerName.split(' ')[0] || customerName
@@ -64,19 +64,6 @@ export default function ErsteSchritteDashboard({
       href: `/dashboard/${siteId}/domain`,
       ctaText: domainStatus === 'AUSSTEHEND' ? 'Status prüfen' : 'Domain einrichten',
       icon: Globe,
-    },
-    {
-      key: 'blog',
-      titel: 'Ersten Blog-Beitrag freigeben',
-      beschreibung: seoFreigegeben > 0
-        ? `${seoFreigegeben} ${seoFreigegeben === 1 ? 'Beitrag' : 'Beiträge'} veröffentlicht.`
-        : seoOffen > 0
-        ? `${seoOffen} ${seoOffen === 1 ? 'Entwurf wartet' : 'Entwürfe warten'} auf Ihre Freigabe.`
-        : 'Jeden Monat schreiben wir einen SEO-Beitrag — Sie geben ihn nur frei.',
-      done: seoFreigegeben > 0,
-      href: `/dashboard/${siteId}/seo`,
-      ctaText: seoOffen > 0 ? 'Jetzt freigeben' : 'Beiträge ansehen',
-      icon: Newspaper,
     },
     {
       key: 'angaben',
