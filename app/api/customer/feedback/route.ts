@@ -10,6 +10,7 @@ import { chatWithClaude, type CustomerContext } from '@/lib/claude'
 import { pruefeLlmSchranke } from '@/lib/llm-schranke'
 import { getPackage, type PackageTier } from '@/lib/packages'
 import { PatchSchema, applyPatch, formatiereBildListe, type AufgeloestesBild } from '@/lib/editor-ops'
+import { istCustomConfig, applyCustomPatch } from '@/lib/custom-html-editor'
 import { getEditorAssets, type EditorAsset } from '@/lib/assets/repository'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
@@ -122,7 +123,9 @@ export async function POST(request: Request) {
         const bildMap = new Map<string, AufgeloestesBild>(
           editorAssets.map((a) => [a.id, { url: a.url, szeneTyp: a.szene_typ, quelle: a.quelle }])
         )
-        const patchResult = applyPatch(currentConfig, opsParsed.data, bildMap, paket)
+        const patchResult = istCustomConfig(currentConfig)
+          ? applyCustomPatch(currentConfig, opsParsed.data, bildMap, paket)
+          : applyPatch(currentConfig, opsParsed.data, bildMap, paket)
         if (patchResult.ok) {
           await adminSupabase
             .from('sites')
