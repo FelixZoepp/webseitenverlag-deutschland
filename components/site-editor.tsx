@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Site, ChatMessage, SiteConfig, ConfigVersion, PageMeta, isMultiPageConfig } from '@/types'
 import { MessageSquare, Settings, History, Send, Loader2, Upload, RotateCcw, Eye, AlertCircle, Check, FileText, Home, Info, Briefcase, Phone, Scale, Plus, MoreVertical, Trash2, Globe, Palette, Zap, Clock, Monitor, Smartphone } from 'lucide-react'
 import { configsEqual } from '@/lib/config-utils'
+import { istCustomConfig, extrahiereFelder, applyCustomPatch } from '@/lib/custom-html-editor'
 
 type Tab = 'chat' | 'manual' | 'history'
 
@@ -270,7 +271,7 @@ export default function SiteEditor({ site: initialSite, messages: initialMessage
             {isGlobalSettings ? <GlobalSettingsEditor config={config} onChange={updateConfig} /> :
              isLegalPage ? <LegalEditor siteConfig={config} pageKey={currentPage} onSave={(pc) => { if (isMultiPageConfig(config)) updateConfig({ ...config, pages: { ...config.pages, [currentPage]: { ...config.pages[currentPage], config: pc } } }) }} /> :
              activeTab === 'chat' ? <ChatTab messages={messages} input={input} setInput={setInput} sending={sending} onSend={sendMessage} chatEndRef={chatEndRef} currentPageTitle={currentPageTitle} pendingUpsell={pendingUpsell} upsellResponding={upsellResponding} onUpsellResponse={handleUpsellResponse} /> :
-             activeTab === 'manual' ? <ManualEditor config={config} currentPage={currentPage} onChange={updateConfig} isMultiPage={isMultiPage} /> :
+             activeTab === 'manual' ? (istCustomConfig(config) ? <CustomFieldsEditor config={config} onChange={updateConfig} /> : <ManualEditor config={config} currentPage={currentPage} onChange={updateConfig} isMultiPage={isMultiPage} />) :
              <HistoryTab versions={versions} onRollback={handleRollback} />}
           </div>
         </div>
@@ -401,6 +402,39 @@ function ChatTab({ messages, input, setInput, sending, onSend, chatEndRef, curre
         </button>
       </form>
     </>
+  )
+}
+
+// --- Custom-HTML: markierte Textfelder direkt bearbeiten ---
+function CustomFieldsEditor({ config, onChange }: { config: SiteConfig; onChange: (c: Partial<SiteConfig>) => void }) {
+  const custom = istCustomConfig(config) ? config : null
+  const felder = custom ? extrahiereFelder(custom).texte : {}
+  const [werte, setWerte] = useState<Record<string, string>>(felder)
+  const [fehler, setFehler] = useState<string | null>(null)
+  if (!custom) return null
+  const eintraege = Object.entries(felder)
+  if (eintraege.length === 0) {
+    return <div style={{ padding: '16px', color: 'var(--za-fg-4)', fontSize: '13px' }}>Diese Seite hat keine direkt bearbeitbaren Textfelder. Nutzen Sie den Chatbot oder schreiben Sie dem Support.</div>
+  }
+  const speichern = (k: string) => {
+    const r = applyCustomPatch(custom, [{ op: 'update_text', pfad: `texte.${k}`, wert: werte[k] ?? '' }])
+    if (!r.ok) { setFehler(r.fehler.join(' ')); return }
+    setFehler(null)
+    onChange({ html: r.config.html, ...(r.config.pages ? { pages: r.config.pages } : {}) } as unknown as Partial<SiteConfig>)
+  }
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {fehler && <div style={{ fontSize: '12px', color: '#b42318' }}>{fehler}</div>}
+      {eintraege.map(([k, v]) => (
+        <div key={k}>
+          <label style={{ display: 'block', fontSize: '10px', color: 'var(--za-fg-3)', marginBottom: '4px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{k.replace(/[_-]/g, ' ')}</label>
+          <textarea value={werte[k] ?? v} rows={Math.min(6, Math.max(1, Math.ceil((werte[k] ?? v).length / 45)))}
+            onChange={(e) => setWerte((p) => ({ ...p, [k]: e.target.value }))}
+            onBlur={() => { if ((werte[k] ?? v) !== v) speichern(k) }}
+            className="glass-input" style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+        </div>
+      ))}
+    </div>
   )
 }
 

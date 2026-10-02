@@ -5,6 +5,7 @@ import { getPackage, type PackageTier } from '@/lib/packages'
 import { PatchSchema, applyPatch, formatiereBildListe, type AufgeloestesBild } from '@/lib/editor-ops'
 import { getEditorAssets, type EditorAsset } from '@/lib/assets/repository'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { istCustomConfig, applyCustomPatch } from '@/lib/custom-html-editor'
 import { NERV_SCHUTZ_TAGE } from '@/config/upsells'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -141,7 +142,9 @@ export async function POST(
           editorAssets.map((a) => [a.id, { url: a.url, szeneTyp: a.szene_typ, quelle: a.quelle }])
         )
         // Baustein C §C.2: Plan-Gate serverseitig — nie nur UI.
-        const ergebnis = applyPatch(currentConfig, opsParsed.data, bildMap, customerContext.paket)
+        const ergebnis = istCustomConfig(currentConfig)
+          ? applyCustomPatch(currentConfig, opsParsed.data, bildMap, customerContext.paket)
+          : applyPatch(currentConfig, opsParsed.data, bildMap, customerContext.paket)
         if (!ergebnis.ok) {
           antwort = `${response}\n\n(Die Änderung wurde NICHT übernommen: ${ergebnis.fehler.join(' ')})`
         } else {

@@ -5,6 +5,7 @@ import { getPackage, type PackageTier } from './packages'
 import { getLeitplankenPrompt } from './editor-leitplanken'
 import { getOpsPrompt } from './editor-ops'
 import { erfasseNutzung } from './nutzung'
+import { istCustomConfig, getCustomEditorPrompt } from './custom-html-editor'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -76,7 +77,9 @@ function buildEditorPrompt(
   ctx: CustomerContext,
   currentPage: string | undefined,
   isMultiPage: boolean,
-  bildListe?: string
+  bildListe?: string,
+  /** Ersetzt den Editor-Felder-Abschnitt (z. B. für Custom-HTML-Sites). */
+  editorSektion?: string
 ): string {
   const pkg = getPackage(ctx.paket)
   const branchenTipp = buildBranchenTipps(ctx.branche)
@@ -184,7 +187,7 @@ Ich kann den gewünschten Inhalt als neue Sektion auf eine bestehende Seite einb
 ❌ Niemals Preise erfinden oder verhandeln
 ❌ Niemals technische Fehler ignorieren oder beschönigen
 
-${isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage, bildListe, ctx.paket) : buildSinglePageEditorSection(bildListe, ctx.paket)}
+${editorSektion ?? (isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage, bildListe, ctx.paket) : buildSinglePageEditorSection(bildListe, ctx.paket))}
 `
 }
 
@@ -257,13 +260,15 @@ export async function chatWithClaude(
   upsellSuggestion: { upsellId: string; action: string } | null
 }> {
   const isMultiPage = isMultiPageConfig(currentConfig)
+  // Custom-HTML-Sites: Felder-Liste statt Config-JSON (das HTML selbst sieht das Modell nie)
+  const customSektion = istCustomConfig(currentConfig) ? getCustomEditorPrompt(currentConfig, bildListe) : undefined
 
   // Fallback: wenn kein Kunden-Kontext, nutze einfachen Prompt
   const systemPrompt = customerContext
-    ? buildEditorPrompt(customerContext, currentPage, isMultiPage, bildListe)
-    : (isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage, bildListe) : buildSinglePageEditorSection(bildListe))
+    ? buildEditorPrompt(customerContext, currentPage, isMultiPage, bildListe, customSektion)
+    : customSektion ?? (isMultiPage && currentPage ? buildMultiPageEditorSection(currentPage, bildListe) : buildSinglePageEditorSection(bildListe))
 
-  const configContext = `\n\nAktuelle Website-Konfiguration:\n${JSON.stringify(currentConfig, null, 2)}`
+  const configContext = customSektion ? '' : `\n\nAktuelle Website-Konfiguration:\n${JSON.stringify(currentConfig, null, 2)}`
 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',

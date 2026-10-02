@@ -7,6 +7,7 @@ import { istScrubKomposition, SCRUB_UNTERSEITEN, type ScrubUnterseitenSlug } fro
 import { renderScrubUnterseite } from '@/lib/flagship/scrub/render'
 import type { FlagshipConfig } from '@/lib/flagship/types'
 import { NextResponse } from 'next/server'
+import { istCustomConfig } from '@/lib/custom-html-editor'
 import { SiteConfig, isMultiPageConfig } from '@/types'
 
 export async function GET(
@@ -25,6 +26,15 @@ export async function GET(
     const pageKey = searchParams.get('page') || 'home'
 
     let html: string
+
+    // Custom-HTML (individuell gestaltete Seite): Entwurf direkt ausliefern
+    if (istCustomConfig(config)) {
+      const slug = pageKey === 'home' ? '' : pageKey
+      const seite = slug === '' ? config.html : config.pages?.[slug]
+      return new NextResponse(typeof seite === 'string' ? seite : config.html, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      })
+    }
 
     // Scrub-Story: Homepage + Unterseiten
     if ((config as Record<string, unknown>).engine === 'flagship' && istScrubKomposition(config)) {
