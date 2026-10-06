@@ -39,6 +39,8 @@ export const STATIC_SITE_HOSTS: Record<string, string> = {}
 export const KUNDEN_HOSTS = new Set<string>([
   'livaraservice-gmbh.de',
   'www.livaraservice-gmbh.de',
+  'bc-directsales.de',
+  'www.bc-directsales.de',
 ])
 
 /** Pfade, die auf dem App-Host erlaubt sind */
