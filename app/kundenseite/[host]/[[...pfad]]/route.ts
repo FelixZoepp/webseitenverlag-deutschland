@@ -32,7 +32,7 @@ function htmlAntwort(html: string, status: number, noindex: boolean): NextRespon
 }
 
 /** Sitemap-XML für eine Live-Site generieren */
-async function sitemapAntwort(siteId: string): Promise<NextResponse | null> {
+async function sitemapAntwort(siteId: string, host: string): Promise<NextResponse | null> {
   const supabase = createAdminClient()
 
   // Site laden: nur published + nicht gesperrt + nicht noindex
@@ -44,13 +44,18 @@ async function sitemapAntwort(siteId: string): Promise<NextResponse | null> {
 
   if (!site || site.status !== 'published' || site.gesperrt || site.noindex) return null
 
-  // Kanonische Basis-URL ermitteln: Custom Domain (AKTIV) hat Vorrang
-  const { data: domain } = await supabase
+  // Kanonische Basis-URL ermitteln: Custom Domain (AKTIV) hat Vorrang. Eine
+  // Site hat oft mehrere aktive Domains (apex + www) — dann die angefragte
+  // nehmen (maybeSingle() lieferte bei 2 Zeilen null → "null.<marketing>").
+  const { data: domains } = await supabase
     .from('domains')
     .select('hostname')
     .eq('site_id', siteId)
     .eq('status', 'AKTIV')
-    .maybeSingle()
+  const hostnamen = (domains || []).map((d) => d.hostname as string)
+  const domain = hostnamen.length
+    ? { hostname: hostnamen.includes(host) ? host : hostnamen[0] }
+    : null
 
   const marketingHost =
     (process.env.NEXT_PUBLIC_MARKETING_HOST || 'webseitenverlag-deutschland.de')
@@ -106,6 +111,20 @@ ${urls.join('\n')}
   })
 }
 
+/** robots.txt für Kundendomains — sonst landet /robots.txt auf der 404-Seite */
+function robotsAntwort(host: string, indexierbar: boolean): NextResponse {
+  const txt = indexierbar
+    ? `User-agent: *\nAllow: /\n\nSitemap: https://${host}/sitemap.xml\n`
+    : `User-agent: *\nDisallow: /\n`
+  return new NextResponse(txt, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
+    },
+  })
+}
+
 function nichtGefunden(): NextResponse {
   const html = `<!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -131,8 +150,13 @@ export async function GET(
 
     // Sitemap für live Sites (noindex=false, published, nicht gesperrt)
     if (pfad === 'sitemap.xml') {
-      const sitemap = await sitemapAntwort(siteId)
+      const sitemap = await sitemapAntwort(siteId, host)
       return sitemap ?? nichtGefunden()
+    }
+
+    if (pfad === 'robots.txt') {
+      const start = await renderSiteCached(siteId, '')
+      return robotsAntwort(host, start.ergebnis === 'ok' && !start.noindex)
     }
 
     const auslieferung = await renderSiteCached(siteId, pfad)
