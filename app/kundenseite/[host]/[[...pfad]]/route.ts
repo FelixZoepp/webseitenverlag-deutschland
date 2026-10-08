@@ -22,6 +22,13 @@ import { isMultiPageConfig } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
+/** Canonical-Link setzen (falls das HTML keinen hat) — Google soll die Kundendomain als Original führen */
+function mitCanonical(html: string, url: string): string {
+  if (/<link[^>]+rel=["']canonical["']/i.test(html)) return html
+  const tag = `<link rel="canonical" href="${url}">`
+  return /<\/head>/i.test(html) ? html.replace(/<\/head>/i, `${tag}\n</head>`) : html
+}
+
 function htmlAntwort(html: string, status: number, noindex: boolean): NextResponse {
   const headers: Record<string, string> = {
     'Content-Type': 'text/html; charset=utf-8',
@@ -70,7 +77,13 @@ async function sitemapAntwort(siteId: string, host: string): Promise<NextRespons
   const config = (site.config || {}) as Record<string, unknown>
   const slugs: string[] = []
 
-  if ((config as { engine?: string }).engine === 'flagship') {
+  if ((config as { engine?: string }).engine === 'custom') {
+    // Custom-HTML: config.pages[slug] = Unterseiten (Rechtstexte ausgenommen)
+    const pages = (config as { pages?: Record<string, unknown> }).pages || {}
+    for (const [slug, html] of Object.entries(pages)) {
+      if (typeof html === 'string' && !['impressum', 'datenschutz'].includes(slug)) slugs.push(slug)
+    }
+  } else if ((config as { engine?: string }).engine === 'flagship') {
     const fsConfig = config as unknown as FlagshipConfig
     if (fsConfig.seiten_modus === 'multipage') {
       for (const { slug } of UNTERSEITEN) slugs.push(slug)
@@ -175,6 +188,10 @@ export async function GET(
     if (!host.includes('.')) {
       const prefix = `/kundenseite/${host}`
       html = html.replace(/href="\//g, `href="${prefix}/`)
+    }
+
+    if (!auslieferung.noindex && host.includes('.')) {
+      html = mitCanonical(html, `https://${host}/${pfad}`)
     }
 
     return htmlAntwort(html, 200, auslieferung.noindex)
