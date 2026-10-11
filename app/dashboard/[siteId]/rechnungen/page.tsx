@@ -22,11 +22,30 @@ interface KundenDokument {
   created_at: string
 }
 
+interface StripeRechnung {
+  id: string
+  nummer: string | null
+  datum: string
+  betrag_cent: number
+  waehrung: string
+  status: string | null
+  pdf_url: string | null
+  online_url: string | null
+}
+
+const RECHNUNG_STATUS: Record<string, { text: string; bg: string; color: string }> = {
+  paid: { text: 'Bezahlt', bg: '#F0FDF4', color: '#16A34A' },
+  open: { text: 'Offen', bg: '#FFFBEB', color: '#B45309' },
+  uncollectible: { text: 'Uneinbringlich', bg: '#FEF2F2', color: '#B91C1C' },
+  void: { text: 'Storniert', bg: '#F3F4F6', color: '#6B7280' },
+}
+
 export default function RechnungenPage() {
   const params = useParams()
   const siteId = params.siteId as string
   const [posten, setPosten] = useState<RechnungsPosten[]>([])
   const [dokumente, setDokumente] = useState<KundenDokument[]>([])
+  const [rechnungen, setRechnungen] = useState<StripeRechnung[]>([])
   const [loading, setLoading] = useState(true)
   const [customerInfo, setCustomerInfo] = useState<{ monatsrate: number; paket: string; vertragsende: string } | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
@@ -56,6 +75,7 @@ export default function RechnungenPage() {
           const data = await r.json()
           setPosten(data.posten || [])
           setDokumente(data.dokumente || [])
+          setRechnungen(data.rechnungen || [])
           setCustomerInfo(data.info || null)
         }
         setLoading(false)
@@ -129,6 +149,52 @@ export default function RechnungenPage() {
             {customerInfo?.vertragsende ? new Date(customerInfo.vertragsende).toLocaleDateString('de-DE') : '—'}
           </p>
         </div>
+      </div>
+
+      {/* Rechnungen (live aus Stripe) */}
+      <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '12px' }}>
+        Rechnungen
+      </h2>
+      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden', marginBottom: '32px' }}>
+        {rechnungen.length === 0 ? (
+          <p style={{ padding: '24px', textAlign: 'center', color: '#9CA3AF', fontSize: '14px' }}>Noch keine Rechnungen vorhanden</p>
+        ) : (
+          <div>
+            {rechnungen.map((r) => {
+              const status = RECHNUNG_STATUS[r.status || ''] || { text: r.status || '—', bg: '#F3F4F6', color: '#6B7280' }
+              return (
+                <div key={r.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '14px 16px', borderBottom: '1px solid #F3F4F6' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <FileText style={{ width: '16px', height: '16px', color: '#1D4ED8' }} />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontSize: '14px', fontWeight: 500, color: '#111827' }}>{r.nummer ? `Rechnung ${r.nummer}` : 'Rechnung'}</p>
+                      <p style={{ fontSize: '12px', color: '#6B7280' }}>{new Date(r.datum).toLocaleDateString('de-DE')}</p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '999px', background: status.bg, color: status.color }}>{status.text}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
+                      {(r.betrag_cent / 100).toLocaleString('de-DE', { style: 'currency', currency: r.waehrung.toUpperCase() })}
+                    </span>
+                    {r.pdf_url ? (
+                      <a href={r.pdf_url} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: '#1D4ED8', textDecoration: 'none' }}>
+                        <Download style={{ width: '14px', height: '14px' }} /> PDF
+                      </a>
+                    ) : r.online_url ? (
+                      <a href={r.online_url} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: '#1D4ED8', textDecoration: 'none' }}>
+                        <ExternalLink style={{ width: '14px', height: '14px' }} /> Ansehen
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Aktive Posten */}
