@@ -41,6 +41,8 @@ export const KUNDEN_HOSTS = new Set<string>([
   'www.livaraservice-gmbh.de',
   'bc-directsales.de',
   'www.bc-directsales.de',
+  'pflegeservicesabinehirche.de',
+  'www.pflegeservicesabinehirche.de',
 ])
 
 /** Pfade, die auf dem App-Host erlaubt sind */
