@@ -64,7 +64,7 @@ export default async function SiteEditorPage({
       <CustomerOnboardingFlow
         siteId={params.siteId}
         templateId={(site.template_id as string) || 'business-basic'}
-        customerName={(customer.company_name as string) || (customer.contact_email as string) || 'Kunde'}
+        customerName={(customer.ansprechpartner as string) || (customer.company_name as string) || (customer.contact_email as string) || 'Kunde'}
         siteName={(site.name as string) || 'Ihre Webseite'}
       />
     )
@@ -76,7 +76,7 @@ export default async function SiteEditorPage({
       <KundenStatusDashboard
         siteId={params.siteId}
         siteName={(site.name as string) || 'Ihre Webseite'}
-        customerName={(customer.company_name as string) || (customer.contact_email as string) || 'Kunde'}
+        customerName={(customer.ansprechpartner as string) || (customer.company_name as string) || (customer.contact_email as string) || 'Kunde'}
         onboardingStatus={onboardingStatus}
         buildStatus={buildStatus}
         onboardingTermin={customer.onboarding_termin_am as string | null}
@@ -92,7 +92,7 @@ export default async function SiteEditorPage({
       <KundenStatusDashboard
         siteId={params.siteId}
         siteName={(site.name as string) || 'Ihre Webseite'}
-        customerName={(customer.company_name as string) || (customer.contact_email as string) || 'Kunde'}
+        customerName={(customer.ansprechpartner as string) || (customer.company_name as string) || (customer.contact_email as string) || 'Kunde'}
         onboardingStatus={onboardingStatus}
         buildStatus={buildStatus}
         onboardingTermin={customer.onboarding_termin_am as string | null}
@@ -135,7 +135,7 @@ export default async function SiteEditorPage({
       <ErsteSchritteDashboard
         siteId={params.siteId}
         siteName={(site.name as string) || 'Ihre Webseite'}
-        customerName={(customer.company_name as string) || (customer.contact_email as string) || 'Kunde'}
+        customerName={(customer.ansprechpartner as string) || (customer.company_name as string) || (customer.contact_email as string) || 'Kunde'}
         domainStatus={aktiveDomain ? 'AKTIV' : wartendeDomain ? 'AUSSTEHEND' : 'KEINE'}
         domainHostname={aktiveDomain?.hostname || wartendeDomain?.hostname || null}
         seoFreigegeben={seoFreigegebenCount || 0}
