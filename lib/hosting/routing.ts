@@ -43,6 +43,8 @@ export const KUNDEN_HOSTS = new Set<string>([
   'www.bc-directsales.de',
   'pflegeservicesabinehirche.de',
   'www.pflegeservicesabinehirche.de',
+  'industriesparring.de',
+  'www.industriesparring.de',
 ])
 
 /** Pfade, die auf dem App-Host erlaubt sind */
